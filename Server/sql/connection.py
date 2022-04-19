@@ -1,4 +1,16 @@
-import sqlite3
+import json
 
-DATABASE_CONNECTION = sqlite3.connect("data//database.db", check_same_thread=False, isolation_level=None)
+import mysql.connector
+
+
+with open("db_config.json") as file:
+    mysql_connect_data = json.load(file)
+
+DATABASE_CONNECTION = mysql.connector.connect(
+    host=mysql_connect_data["host"],
+    user=mysql_connect_data["user"],
+    password=mysql_connect_data["password"],
+    database=mysql_connect_data["database"]
+)
+
 database_cursor = DATABASE_CONNECTION.cursor()
