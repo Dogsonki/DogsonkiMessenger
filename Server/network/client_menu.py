@@ -1,4 +1,4 @@
-from server.sql import handling_sql
+from Server.sql import handling_sql
 from .connection import Connection, current_connections
 
 INSERT_INTO_DB = handling_sql.InsertIntoDatabase()

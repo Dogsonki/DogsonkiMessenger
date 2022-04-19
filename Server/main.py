@@ -1,5 +1,8 @@
+import os
+os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # fix "no module named Server"
 import socket
 import threading
+
 from network import client_menu
 from network.connection import Connection, LoginUser
 
@@ -22,5 +25,5 @@ def on_new_connection(connection):
 if __name__ == '__main__':
     print("\nMADE BY DOGSON\n")
     SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    SERVER.bind(("localhost", 12345))
+    SERVER.bind(("localhost", 10234))
     listen_for_connections()
