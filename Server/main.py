@@ -1,5 +1,6 @@
 import os
 os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # fix "no module named Server"
+import json
 import socket
 import threading
 
@@ -25,5 +26,7 @@ def on_new_connection(connection):
 if __name__ == '__main__':
     print("\nMADE BY DOGSON\n")
     SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    SERVER.bind(("localhost", 10234))
+    with open("config.json") as file:
+        server_config = json.load(file)
+    SERVER.bind((server_config["ip"], server_config["port"]))
     listen_for_connections()
