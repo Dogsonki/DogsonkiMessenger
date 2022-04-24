@@ -8,7 +8,7 @@ class GetInfoFromDatabase:
             return False
 
         database_cursor.execute("""SELECT content, sender, receiver FROM messages
-                                   WHERE (sender = ? and receiver = ?) OR (sender = ? AND receiver = ?)
+                                   WHERE (sender = %s and receiver = %s) OR (sender = %s AND receiver = %s)
                                    ORDER BY ID DESC LIMIT 30;""", (sender, receiver, receiver, sender))
         sql_data = database_cursor.fetchall()
         return sql_data
@@ -16,7 +16,7 @@ class GetInfoFromDatabase:
     @staticmethod
     def login_user(login, password):
         database_cursor.execute("""SELECT login, password FROM users
-                                   WHERE login = ? and password = ?;""", (login, password))
+                                   WHERE login = %s and password = %s;""", (login, password))
         sql_data = database_cursor.fetchone()
         if sql_data is None:
             return False
@@ -28,17 +28,17 @@ class InsertIntoDatabase:
     @staticmethod
     def save_message(content, sender, receiver):
         database_cursor.execute("""INSERT INTO messages(content, sender, receiver)
-                                   VALUES (?, ?, ?);""", (content, sender, receiver))
+                                   VALUES (%s, %s, %s);""", (content, sender, receiver))
 
     @staticmethod
     def register_user(login, password):
         database_cursor.execute("""INSERT INTO users(login, password, warnings, banned)
-                                   VALUES (?, ?, 0, 0);""", (login, password))
+                                   VALUES (%s, %s, 0, 0);""", (login, password))
 
 
 def check_if_login_exist(login):
     database_cursor.execute("""SELECT login FROM users
-                               WHERE login = ?;""", (login, ))
+                               WHERE login = %s;""", (login, ))
     sql_data = database_cursor.fetchone()
     return sql_data
 
