@@ -6,6 +6,7 @@ import threading
 
 from network import client_menu
 from network.connection import Connection, LoginUser
+from sql.create_databse import CreateDatabase
 
 
 def listen_for_connections():
@@ -25,6 +26,7 @@ def on_new_connection(connection):
 
 if __name__ == '__main__':
     print("\nMADE BY DOGSON\n")
+    CreateDatabase().create_all_tables()
     SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     with open("config.json") as file:
         server_config = json.load(file)

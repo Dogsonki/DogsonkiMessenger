@@ -2,7 +2,7 @@ from .connection import database_cursor
 
 
 class CreateDatabase:
-    def create_all_databases(self):
+    def create_all_tables(self):
         self.create_users_table()
         self.create_messages_table()
 
@@ -24,6 +24,3 @@ class CreateDatabase:
                                    sender VARCHAR(50) NOT NULL,
                                    receiver VARCHAR(50) NOT NULL
                                    );""")
-
-
-CreateDatabase().create_all_databases()
