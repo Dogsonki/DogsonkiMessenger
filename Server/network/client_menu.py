@@ -22,28 +22,25 @@ class ClientMenu:
 class Chatroom:
     def __init__(self, connection: Connection):
         self.connection = connection
+        self.chatroom_code = "0003"
 
     def init_chatroom(self, receiver):
         messages_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver)
         if messages_history is False:
-            self.connection.send_message("0")
-        else:
-            self.connection.send_message("1")
             self.send_last_messages(messages_history)
             self.receive_messages(receiver)
 
     def send_last_messages(self, message_history):
         message_history.reverse()
         for i in message_history:
-            message = f"{i[1]} {i[0]}\0"
-            print(message)
+            message = f"{self.chatroom_code}-{i[1]} {i[0]}\0"
             self.connection.send_message(message)
 
     def receive_messages(self, receiver):
         while True:
             message = self.connection.receive_message()
             if message == "Q":
-                self.connection.send_message("\0")
+                self.connection.send_message(f"{self.chatroom_code}-\0")
                 break
 
             try:
