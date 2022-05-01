@@ -25,29 +25,47 @@ class Connection:
 class LoginUser:
     def __init__(self, connection: Connection):
         self.connection = connection
+        self.login_app_code = "0001"
+        self.registering_app_code = "0002"
 
     def login_user(self):
-        actions = {"logging": SELECT_SQL.login_user, "registering": INSERT_SQL.register_user}
         while True:
             action_info = self.connection.receive_message()
             self.connection.login, self.connection.password = self.get_login_data()
             if self.validate_login_data():
-                if not actions[action_info](self.connection.login, self.connection.password):
-                    self.connection.send_message("0")
-                else:
-                    self.connection.send_message(self.connection.login)
+                if action_info == "logging":
+                    login, password = self.get_login_data()
+                    if SELECT_SQL.login_user(login, password):
+                        self.connection.send_message(f"{self.login_app_code}-Logged as {login}")
+                        break
+                    else:
+                        self.connection.send_message(f"{self.login_app_code}-{'Wrong login/password'}")
+                elif action_info == "registering":
+                    login, password = self.get_register_data()
+                    self.connection.send_message(f"{self.registering_app_code}-Registered {login}")
                     break
+                else:
+                    self.connection.send_message(f"Error - should receive 'logging' or 'registering'")
             else:
-                self.connection.send_message("0")
+                self.connection.send_message(f"Incorrect password")
 
     def get_login_data(self):
         login_data = []
-        for i in range(2):
+        for _ in range(2):
             data_from_user = self.connection.receive_message()
             if data_from_user == "Q":
                 return "", ""
             login_data.append(data_from_user)
         return login_data
+
+    def get_register_data(self):
+        registering_data = []
+        for _ in range(2):
+            data_from_user = self.connection.receive_message()
+            if data_from_user == "Q":
+                return "", ""
+            registering_data.append(data_from_user)
+        return registering_data
 
     def validate_login_data(self):
         if 2 <= len(self.connection.login) <= 50 and 2 <= len(self.connection.password) <= 50:
