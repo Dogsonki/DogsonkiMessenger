@@ -31,23 +31,23 @@ class LoginUser:
     def login_user(self):
         while True:
             action_info = self.connection.receive_message()
-            self.connection.login, self.connection.password = self.get_login_data()
-            if self.validate_login_data():
-                if action_info == "logging":
-                    login, password = self.get_login_data()
-                    if SELECT_SQL.login_user(login, password):
-                        self.connection.send_message(f"{self.login_app_code}-Logged as {login}")
-                        break
-                    else:
-                        self.connection.send_message(f"{self.login_app_code}-{'Wrong login/password'}")
-                elif action_info == "registering":
-                    login, password = self.get_register_data()
-                    self.connection.send_message(f"{self.registering_app_code}-Registered {login}")
+            if action_info == "logging":
+                self.connection.login, self.connection.password = self.get_login_data()
+                if SELECT_SQL.login_user(self.connection.login, self.connection.password):
+                    self.connection.send_message(f"{self.login_app_code}-Logged as {self.connection.login}")
                     break
                 else:
-                    self.connection.send_message(f"Error - should receive 'logging' or 'registering'")
+                    self.connection.send_message(f"{self.login_app_code}-{'Wrong login/password'}")
+            elif action_info == "registering":
+                self.connection.login, self.connection.password = self.get_register_data()
+                if self.validate_login_data():
+                    INSERT_SQL.register_user(self.connection.login, self.connection.password)
+                    self.connection.send_message(f"{self.registering_app_code}-Registered {self.connection.login}")
+                    break
+                else:
+                    self.connection.send_message(f"{self.registering_app_code}-Error: wrong password")
             else:
-                self.connection.send_message(f"Incorrect password")
+                self.connection.send_message(f"Error - should receive 'logging' or 'registering'")
 
     def get_login_data(self):
         login_data = []
