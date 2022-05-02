@@ -132,3 +132,4 @@ dmypy.json
 /Client/Client.Android/obj/
 /Client/Client.Android/obj/
 /Client/Client.iOS/obj/
+/Client/Client.Android/bin/
