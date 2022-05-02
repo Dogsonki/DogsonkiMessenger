@@ -153,8 +153,9 @@ namespace Client.Networking
 #region Connect
             try
             {
-                int port; //Add port from config
+                int port; //Add port from configd awd aw daw dawd 
                 string ip; //Add ip from config 
+                return;
                 Client = new TcpClient(ip, port);
                 Stream = Client.GetStream();
             }
