@@ -129,3 +129,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/Client/Client.Android/obj/
+/Client/Client.Android/obj/
+/Client/Client.iOS/obj/
