@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.AppEntry">
+    <ContentPage.Content>
+		<StackLayout>
+			<Grid HorizontalOptions="Center" VerticalOptions="Center">
+				<StackLayout Spacing="20" Grid.Row="2" VerticalOptions="CenterAndExpand"  Padding="6">
+					<Button Clicked="LoginOptionClicked" CornerRadius="20" Text="Login"></Button>
+					<Button Clicked="RegisterOptionClicked" x:Name="RegisterOption" CornerRadius="20" Text="Register"></Button>
+				</StackLayout>
+			</Grid>
+
+		</StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -2,10 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+#test
+.vs/
+./Client/Client.Android/bin
+./Client/Client.Android/obj
 # C extensions
 *.so
-
 # Distribution / packaging
 .Python
 build/

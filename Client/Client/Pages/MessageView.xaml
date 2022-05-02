@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+			 xmlns:local="clr-namespace:Client.Views"
+             x:Class="Client.MessageView"
+			 BackgroundColor="AntiqueWhite">
+	<ContentPage.BindingContext>
+		<local:MessageViewModel></local:MessageViewModel>
+	</ContentPage.BindingContext>
+	<StackLayout>
+		<ListView ItemSelected="MessageList_ItemSelected" x:Name="MessageList" ItemsSource="{Binding Messages}">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<ViewCell>
+						<StackLayout VerticalOptions="Center" Orientation="Horizontal">
+							<Grid RowSpacing="0" VerticalOptions="Center">
+								<Frame Grid.Column="0" HeightRequest="25" WidthRequest="25" HasShadow="false" Margin="0" VerticalOptions="Center" HorizontalOptions="Start" CornerRadius="10" Padding="0">
+									<Image Aspect="AspectFill" Source="tempavatar.jpg"></Image>
+								</Frame>
+								<StackLayout VerticalOptions="FillAndExpand" Grid.Column="1">
+									<Label VerticalOptions="FillAndExpand" VerticalTextAlignment="Center" Grid.Column="1"  Text="{Binding Username}"></Label>
+									<Label Grid.Column="2" Grid.Row="1" Text="{Binding MessageContent}"></Label>
+								</StackLayout>
+							</Grid>
+						</StackLayout>
+					</ViewCell>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+		<Entry Completed="Entry_Completed" Placeholder="Message @"></Entry>
+	</StackLayout>
+</ContentPage>
