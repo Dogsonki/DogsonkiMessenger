@@ -19,7 +19,6 @@ namespace Client
             string username = Input_Username.Text;
             string password = Input_Password.Text;
             MainUser.Username = username;
-
             SocketCore.SendRaw("registering");
             SocketCore.SendRaw(username);
             SocketCore.SendR(RegisterCallback, password,0002,0002);

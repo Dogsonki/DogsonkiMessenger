@@ -1,7 +1,7 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-
+using Client.Networking;
 namespace Client.Pages
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]

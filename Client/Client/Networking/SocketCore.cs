@@ -3,39 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Client.Utility;
 using Newtonsoft.Json;
 using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration;
-
-public class SocketConfig
-{
-    [JsonProperty("Socket_IP")]
-    public string Ip;
-    [JsonProperty("Socket_PORT")]
-    public int Port;
-
-    public static SocketConfig ReadConfig()
-    {
-        string config = File.ReadAllText(Path.Combine(FileService.GetRootDir(), "SocketConfig.json"));
-        Console.WriteLine(config);
-        return JsonConvert.DeserializeObject<SocketConfig>(config);
-    }
-
-    public static void SaveConfig(SocketConfig sc)
-    {
-        DependencyService.Get<IFileService>().CreateFile("SocketConfig.json", JsonConvert.SerializeObject(sc));
-    }
-}
 
 //For now only works with booleans and numbers
 public class RequestedCallback 
 {
     public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
-
+    
     protected Action<string> Callback;
     public string ContentSend;
     public string ContentRecived;
@@ -137,26 +117,64 @@ public class RequestedCallback
 
 namespace Client.Networking
 {
+    public class SocketConfig
+    {
+        [JsonProperty("Socket_IP")]
+        public string Ip;
+        [JsonProperty("Socket_PORT")]
+        public int Port;
+
+        public static SocketConfig ReadConfig()
+        {
+            string config = "";
+            try
+            {
+                var assembly = IntrospectionExtensions.GetTypeInfo(typeof(SocketConfig)).Assembly;
+                Stream stream = assembly.GetManifestResourceStream("Client.Networking.SocketConfig.json");
+               
+                using (var reader = new StreamReader(stream))
+                {
+                    config = reader.ReadToEnd();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                return JsonConvert.DeserializeObject<SocketConfig>(config);
+            }
+            return null;
+        }
+
+        public static void SaveConfig(SocketConfig sc)
+        {
+            DependencyService.Get<IFileService>().CreateFile("SocketConfig.json", JsonConvert.SerializeObject(sc));
+        }
+    }
+
+
     public class SocketCore
     {
         protected static TcpClient Client { get; set; }
         protected static NetworkStream Stream { get; set; }
-        protected static bool IsConnected { get; set; }
+        protected static SocketConfig Config { get; set; }
         protected static Thread ReciveThread { get; set; }
+        protected static bool IsConnected { get; set; }
         private const int MaxBuffer = 254;
 
         public static void Init() //Todo set stopwatch 
         {
+            Config = SocketConfig.ReadConfig();
 
             Stopwatch ConnectTime = new Stopwatch();
             ConnectTime.Start();
 #region Connect
             try
             {
-                int port; //Add port from configd awd aw daw dawd 
-                string ip; //Add ip from config 
-                return;
-                Client = new TcpClient(ip, port);
+                Client = new TcpClient(Config.Ip, Config.Port);
                 Stream = Client.GetStream();
             }
             catch(SocketException ex)
@@ -212,7 +230,7 @@ namespace Client.Networking
                     if(_WillReadRaw)
                        ReadRawBuffer(Encoding.UTF8.GetString(buffer));
                 } 
-                Thread.Sleep(1);
+                Thread.Sleep(10);
             }
         }
 
