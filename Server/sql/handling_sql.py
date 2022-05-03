@@ -1,3 +1,5 @@
+from mysql.connector.errors import IntegrityError
+
 from .connection import database_cursor
 
 
@@ -32,8 +34,12 @@ class InsertIntoDatabase:
 
     @staticmethod
     def register_user(login, password):
-        database_cursor.execute("""INSERT INTO users(login, password, warnings, banned)
-                                   VALUES (%s, %s, 0, 0);""", (login, password))
+        try:
+            database_cursor.execute("""INSERT INTO users(login, password, warnings, banned)
+                                       VALUES (%s, %s, 0, 0);""", (login, password))
+            return True
+        except IntegrityError:
+            return False
 
 
 def check_if_login_exist(login):

@@ -34,18 +34,20 @@ class LoginUser:
             if action_info == "logging":
                 self.connection.login, self.connection.password = self.get_login_data()
                 if SELECT_SQL.login_user(self.connection.login, self.connection.password):
-                    self.connection.send_message(f"{self.login_app_code}-Logged as {self.connection.login}")
+                    self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
                     break
                 else:
-                    self.connection.send_message(f"{self.login_app_code}-{'Wrong login/password'}")
+                    self.connection.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password
             elif action_info == "registering":
                 self.connection.login, self.connection.password = self.get_register_data()
                 if self.validate_login_data():
-                    INSERT_SQL.register_user(self.connection.login, self.connection.password)
-                    self.connection.send_message(f"{self.registering_app_code}-Registered {self.connection.login}")
-                    break
+                    if INSERT_SQL.register_user(self.connection.login, self.connection.password):
+                        self.connection.send_message(f"{self.registering_app_code}-1")  # 1 --> user has been registered
+                        break
+                    else:
+                        self.connection.send_message(f"{self.registering_app_code}-01")  # 01 --> user with given login exists
                 else:
-                    self.connection.send_message(f"{self.registering_app_code}-Error: wrong password")
+                    self.connection.send_message(f"{self.registering_app_code}-00")  # 00 --> incorrect password
             else:
                 self.connection.send_message(f"Error - should receive 'logging' or 'registering'")
 

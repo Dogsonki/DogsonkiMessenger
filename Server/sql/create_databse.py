@@ -10,7 +10,7 @@ class CreateDatabase:
     def create_users_table():
         database_cursor.execute("""CREATE TABLE IF NOT EXISTS users (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                                   login VARCHAR(50) NOT NULL,
+                                   login VARCHAR(50) NOT NULL UNIQUE,
                                    password VARCHAR(50) NOT NULL,
                                    warnings INTEGER NOT NULL,
                                    banned BIT NOT NULL
