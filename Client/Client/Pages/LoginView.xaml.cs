@@ -12,6 +12,11 @@ namespace Client.Pages
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
+#if LOGINAUTOTEST
+            SocketCore.SendRaw("logging");
+            SocketCore.SendRaw("aaa");
+            SocketCore.SendR(LoginCallback, "aaa", 0001, 0001);
+#endif
         }
 
         private void LoginDone(object sender, EventArgs e)
@@ -23,12 +28,26 @@ namespace Client.Pages
             SocketCore.SendRaw("logging");
             SocketCore.SendRaw(username);
             SocketCore.SendR(LoginCallback, password, 0001, 0001);
+            //1 == logged 
+            //0 == samething wrong 
         }
 
-        private void LoginCallback(string msg)
+
+        private void LoginCallback(string rev)
         {
-            Navigation.PopAsync();
-            Navigation.PushAsync(new MessageView());
+            switch (rev[0])
+            {
+                case '1':
+                    Console.WriteLine("Logging....");
+                    Device.BeginInvokeOnMainThread(async () => { await Navigation.PushAsync(new PeopleFinder()); });
+                    break;
+                case '0':
+                    Console.WriteLine("Password is wrong");
+                    break;
+                default:
+                    Console.WriteLine("Samething went wrong: " + rev);
+                    break;
+            }
         }
     }
 }

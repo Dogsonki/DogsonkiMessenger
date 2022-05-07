@@ -12,6 +12,14 @@ using Newtonsoft.Json;
 using Xamarin.Forms;
 
 //For now only works with booleans and numbers
+
+public struct SocketMessageModel
+{
+    public string Data;
+    public int UpdatedIndex;
+    public int InSendIndex;
+}
+
 public class RequestedCallback 
 {
     public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
@@ -101,7 +109,7 @@ public class RequestedCallback
         {
             try
             {
-                Callback.Invoke(Recived);
+                Device.BeginInvokeOnMainThread(() => Callback.Invoke(Recived));
             }
            catch(Exception ex)
             {
@@ -109,7 +117,7 @@ public class RequestedCallback
             }
             _r = true;
         }
-        Callbacks[Callbacks.FindIndex(x => x == this)] = null;
+       // Callbacks[Callbacks.FindIndex(x => x == this)] = null;
         //Callbacks.Remove(this); //Hope it won't crash app 
         return _r;
     }
@@ -162,6 +170,7 @@ namespace Client.Networking
         protected static NetworkStream Stream { get; set; }
         protected static SocketConfig Config { get; set; }
         protected static Thread ReciveThread { get; set; }
+        protected static Thread ManageSendingQueue { get; set; }
         protected static bool IsConnected { get; set; }
         private const int MaxBuffer = 254;
 
@@ -184,8 +193,10 @@ namespace Client.Networking
 
             IsConnected = true;
             ReciveThread = new Thread(Recive);
-            ReciveThread.Start();
+            ManageSendingQueue = new Thread(MenageQueue);
 
+            ReciveThread.Start();
+            ManageSendingQueue.Start();
 #endregion
         }
 
@@ -211,8 +222,11 @@ namespace Client.Networking
                             {
                                 if(tk == req.GetToken())
                                 {
+                                    //Bug: if we take length of rev it will return 254 for same reason 
+                                    //this could be by convering byte
                                     Console.WriteLine("Callback found: " + tk);
-                                    req.Invoke(rev.Substring(5));//dont send token as parameter
+                                    Console.WriteLine("Calling callback with: " + rev.Substring(5));
+                                    req.Invoke(rev.Substring(5));
                                     _WillReadRaw = false;
                                 }
                             }
@@ -234,18 +248,14 @@ namespace Client.Networking
             }
         }
 
-        protected string Destination;
         private static void ReadRawBuffer(string RecivedMessage)
         {
             Console.WriteLine("Reading raw buffer: " + RecivedMessage);
-            if(RecivedMessage == MainUser.Username)
-            {
-                
-            }
         }
 
         private static bool GetToken(string req, out int tk)
         {
+            //Token has max 4 len
             StringBuilder br = new StringBuilder();
             br.Append(req[0]);
             br.Append(req[1]);
@@ -265,54 +275,78 @@ namespace Client.Networking
             SendRaw(data);
         }
 
+        /// <summary>
+        /// TODO: Make async happen
+        /// </summary>
         public static void SendR(Action<string> callback, string data, object expected, int Token, bool isAync = true)
         {
             RequestedCallback.Callbacks.Add(new RequestedCallback(callback, data, expected,Token));
             SendRaw(data);//Write idcallback too !
         }
 
+        protected static List<SocketMessageModel> SendingQueue = new List<SocketMessageModel>();
+        protected static List<SocketMessageModel> UpdatedQueue = new List<SocketMessageModel>();
+
+        public static void MenageQueue()
+        {
+            while (true)
+            {
+                for (int i = 0;i<SendingQueue.Count;i++)
+                {
+                    SocketMessageModel model = SendingQueue[i];
+                    try
+                    {
+                        Byte[] _buf = Encoding.UTF8.GetBytes(model.Data);
+                        try
+                        {
+                            Console.WriteLine(model.Data);
+                            Stream.Write(_buf, 0, _buf.Length);      
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Unregistred exception: " + ex);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                    UpdatedQueue.RemoveAt(model.UpdatedIndex);
+                    Thread.Sleep(100);
+                }
+                SendingQueue = new List<SocketMessageModel>(UpdatedQueue);
+                Thread.Sleep(100);
+            }
+        }
+
         public static void SendRaw(string data, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
-            try
+            if (data is null)
             {
-                if (data is null)
-                {
-                    Console.WriteLine($"Data is null {path} line: {lineNumber}");
-                    return;
-                }
-
-                if (Client == null || Stream == null)
-                {
-                    Console.WriteLine("Client is null");
-                    return;
-                }
-
-                if (!IsConnected)
-                {
-                    Console.WriteLine("Client is not connected to server");
-                    return;
-                }
-
-                if (!Client.Connected)
-                {
-                    Console.WriteLine("Client disconnected form server");
-                    return;
-                }
-
-                Byte[] _buf = Encoding.UTF8.GetBytes(data);
-                try
-                {
-                    Stream.Write(_buf, 0, _buf.Length);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("Unregistred exception: " + ex);
-                }
+                Console.WriteLine($"Data is null {path} line: {lineNumber}");
+                return;
             }
-            catch(Exception ex)
+
+            if (Client == null || Stream == null)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine("Client is null");
+                return; 
             }
+
+            if (!IsConnected)
+            {
+                Console.WriteLine("Client is not connected to server");
+                return;
+            }
+
+            if (!Client.Connected)
+            {
+                Console.WriteLine("Client disconnected form server");
+                return;
+            }
+            SocketMessageModel model = new SocketMessageModel() { Data= data };
+            UpdatedQueue.Add(model);
+            model.UpdatedIndex = UpdatedQueue.IndexOf(model);
         }
     }
 }

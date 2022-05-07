@@ -1,7 +1,7 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Client.Networking;
+
 namespace Client.Pages
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
@@ -15,11 +15,13 @@ namespace Client.Pages
 
         private void LoginOptionClicked(object sender, EventArgs e)
         {
+            Navigation.PopAsync();
             Navigation.PushAsync(new LoginView());
         }
 
         private void RegisterOptionClicked(object sender, EventArgs e)
         {
+            Navigation.PopAsync();
             Navigation.PushAsync(new RegisterView());
         }
     }

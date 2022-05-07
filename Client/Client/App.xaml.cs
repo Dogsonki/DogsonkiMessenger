@@ -7,15 +7,14 @@ namespace Client
     public partial class App : Application
     {
         public static App app; //It's instance
+
         public App()
         {
             InitializeComponent();
 
-            MainPage = new NavigationPage(new AppEntry());
-            SocketCore.Init();
+            MainPage = new NavigationPage(new MainAfterLoginPage());
+           // SocketCore.Init();
         }
-
-        public static void ChangePage(Page page) => app.MainPage = page;
 
         protected override void OnStart()
         {
@@ -28,6 +27,7 @@ namespace Client
 
         protected override void OnResume()
         {
+
         }
     }
 }

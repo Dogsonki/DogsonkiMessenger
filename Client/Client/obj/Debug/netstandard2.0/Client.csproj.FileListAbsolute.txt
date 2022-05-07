@@ -17,3 +17,5 @@ C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\bin\Debug\net
 C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\bin\Debug\netstandard2.0\Client.pdb
 C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\obj\Debug\netstandard2.0\XamlC.stamp
 C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\obj\Debug\netstandard2.0\ref\Client.dll
+C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\obj\Debug\netstandard2.0\Pages\PeopleFinder.xaml.g.cs
+C:\Users\Puzonn\Desktop\App\DogsonkiMessenger\Client\Client\Client\obj\Debug\netstandard2.0\Pages\MainAfterLoginPage.xaml.g.cs
