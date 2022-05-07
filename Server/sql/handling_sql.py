@@ -24,6 +24,16 @@ class GetInfoFromDatabase:
             return False
         else:
             return True
+        
+    @staticmethod
+    def search_by_login(login):
+        database_cursor.execute("""SELECT login FROM users
+                                   WHERE login LIKE %s;""", ("%" + login,))
+        logins = database_cursor.fetchall()
+        if logins is None:
+            return False
+        else:
+            return [i for i, in logins]
 
 
 class InsertIntoDatabase:

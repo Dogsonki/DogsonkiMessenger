@@ -7,16 +7,31 @@ GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
 
 class ClientMenu:
     def __init__(self, connection: Connection):
+        self.search_code = "0004"
         self.connection = connection
         self.chatroom = Chatroom(self.connection)
 
     def listening(self):
+        # 0 --> go to chatroom with given login
+        # 1 --> search people
         while True:
-            receiver = self.connection.receive_message()
-            if receiver == "Q":
-                self.connection.send_message("\0")
-                break
-            self.chatroom.init_chatroom(receiver)
+            message = self.connection.receive_message()
+            code = message.split("-")[0]
+            arg = " ".join(message.split("-")[1:])
+            if code == "0":
+                self.chatroom.init_chatroom(arg)
+            elif code == "1":
+                logins_all = GET_INFO_FROM_DB.search_by_login(arg)
+                first_logins = []
+                # can send only 1024 bytes, 1024/8 ~ 120
+                logins_len = 0
+                for i in logins_all:
+                    logins_len += len(i)+2
+                    if logins_len >= 120:
+                        break
+                    else:
+                        first_logins.append(i)
+                self.connection.send_message(f"{self.search_code}-{str(first_logins)}")
 
 
 class Chatroom:
