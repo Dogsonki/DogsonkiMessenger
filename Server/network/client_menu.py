@@ -38,15 +38,16 @@ class Chatroom:
     def __init__(self, connection: Connection):
         self.connection = connection
         self.chatroom_code = "0003"
+        self.number_of_sent_last_messages = 0
 
     def init_chatroom(self, receiver):
-        messages_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver)
-        if messages_history is False:
-            self.send_last_messages(messages_history)
-            self.receive_messages(receiver)
+        self.connection.send_message(self.chatroom_code)
+        self.send_last_messages(receiver)
+        self.receive_messages(receiver)
 
-    def send_last_messages(self, message_history):
-        message_history.reverse()
+    def send_last_messages(self, receiver):
+        message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver, self.number_of_sent_last_messages)
+        self.number_of_sent_last_messages += 30
         for i in message_history:
             message = f"{self.chatroom_code}-{i[1]} {i[0]}\0"
             self.connection.send_message(message)
@@ -54,15 +55,9 @@ class Chatroom:
     def receive_messages(self, receiver):
         while True:
             message = self.connection.receive_message()
-            if message == "Q":
+            if not message:
                 self.connection.send_message(f"{self.chatroom_code}-\0")
                 break
-
-            try:
-                # send notification to receiver if receiver is online
-                current_connections[receiver].send(bytes("2", "UTF-8"))
-            except KeyError:
-                pass
             self.save_message_in_database(message, receiver)
 
     def save_message_in_database(self, message, receiver):

@@ -5,13 +5,13 @@ from .connection import database_cursor
 
 class GetInfoFromDatabase:
     @staticmethod
-    def get_last_30_messages_from_chatroom(sender, receiver):
+    def get_last_30_messages_from_chatroom(sender, receiver, number_of_sent_last_messages):
         if check_if_login_exist(receiver) is None:
             return False
 
         database_cursor.execute("""SELECT content, sender, receiver FROM messages
                                    WHERE (sender = %s and receiver = %s) OR (sender = %s AND receiver = %s)
-                                   ORDER BY ID DESC LIMIT 30;""", (sender, receiver, receiver, sender))
+                                   ORDER BY ID LIMIT %s,30;""", (sender, receiver, receiver, sender, number_of_sent_last_messages))
         sql_data = database_cursor.fetchall()
         return sql_data
 
