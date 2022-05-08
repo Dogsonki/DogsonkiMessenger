@@ -1,3 +1,5 @@
+import socket
+
 from Server.sql import handling_sql
 
 current_connections = {}
@@ -6,20 +8,40 @@ SELECT_SQL = handling_sql.GetInfoFromDatabase()
 
 
 class Connection:
-    def __init__(self, connection):
+    def __init__(self, connection, address):
         self.connection = connection
-        self.login = ""
-        self.password = ""
+        self.address = address
+        self.login = False
+        self.password = False
+        self.closed = False
 
     def send_message(self, message):
-        self.connection.send(bytes(message, "UTF-8"))
+        print(f"sent: {message}")
+        try:
+            self.connection.send(bytes(message, "UTF-8"))
+        except socket.error:
+            self.close_connection()
 
     def receive_message(self):
         try:
-            return self.connection.recv(1024).decode("UTF-8")
-        except (ConnectionAbortedError, ConnectionResetError):
-            del current_connections[self.login]
+            received_message = self.connection.recv(1024).decode("UTF-8")
+            print(f"recv: {received_message}")
+            if not received_message:
+                self.close_connection()
+                return False
+            return received_message
+        except socket.error:
+            self.close_connection()
             return False
+
+    def close_connection(self):
+        print(current_connections)
+        if not self.closed:
+            self.closed = True
+            if self.login:
+                del current_connections[self.login]
+            print(f"Closing connection with {self.connection}")
+            self.connection.shutdown(socket.SHUT_RDWR)
 
 
 class LoginUser:
@@ -35,6 +57,7 @@ class LoginUser:
                 self.connection.login, self.connection.password = self.get_login_data()
                 if SELECT_SQL.login_user(self.connection.login, self.connection.password):
                     self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
+                    current_connections[self.connection.login] = self.connection.address
                     break
                 else:
                     self.connection.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password
