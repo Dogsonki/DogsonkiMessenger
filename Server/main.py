@@ -20,7 +20,7 @@ def listen_for_connections():
 
 def on_new_connection(connection, address):
     connection = Connection(connection, address)
-    LoginUser(connection).login_user()
+    LoginUser(connection).get_action()
     client_menu.ClientMenu(connection).listening()
 
 

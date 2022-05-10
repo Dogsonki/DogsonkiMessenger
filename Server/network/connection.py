@@ -50,29 +50,41 @@ class LoginUser:
         self.login_app_code = "0001"
         self.registering_app_code = "0002"
 
-    def login_user(self):
+    def get_action(self):
         while True:
             action_info = self.connection.receive_message()
             if action_info == "logging":
-                self.connection.login, self.connection.password = self.get_login_data()
-                if SELECT_SQL.login_user(self.connection.login, self.connection.password):
-                    self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
-                    current_connections[self.connection.login] = self.connection.address
+                is_logged_correctly = self.login_user()
+                if is_logged_correctly:
                     break
-                else:
-                    self.connection.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password
             elif action_info == "registering":
-                self.connection.login, self.connection.password = self.get_register_data()
-                if self.validate_login_data():
-                    if INSERT_SQL.register_user(self.connection.login, self.connection.password):
-                        self.connection.send_message(f"{self.registering_app_code}-1")  # 1 --> user has been registered
-                        break
-                    else:
-                        self.connection.send_message(f"{self.registering_app_code}-01")  # 01 --> user with given login exists
-                else:
-                    self.connection.send_message(f"{self.registering_app_code}-00")  # 00 --> incorrect password
+                is_registered_correctly = self.register_user()
+                if is_registered_correctly:
+                    break
             else:
                 self.connection.send_message(f"Error - should receive 'logging' or 'registering'")
+
+    def login_user(self):
+        self.connection.login, self.connection.password = self.get_login_data()
+        if SELECT_SQL.login_user(self.connection.login, self.connection.password):
+            self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
+            current_connections[self.connection.login] = self.connection.address
+            return True
+        else:
+            self.connection.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password
+        return False
+
+    def register_user(self):
+        self.connection.login, self.connection.password = self.get_register_data()
+        if self.validate_login_data():
+            if INSERT_SQL.register_user(self.connection.login, self.connection.password):
+                self.connection.send_message(f"{self.registering_app_code}-1")  # 1 --> user has been registered
+                return True
+            else:
+                self.connection.send_message(f"{self.registering_app_code}-01")  # 01 --> user with given login exists
+        else:
+            self.connection.send_message(f"{self.registering_app_code}-00")  # 00 --> incorrect password
+        return False
 
     def get_login_data(self):
         login_data = []
