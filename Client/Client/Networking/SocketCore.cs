@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
@@ -10,118 +9,10 @@ using System.Threading;
 using Client.Utility;
 using Newtonsoft.Json;
 using Xamarin.Forms;
+using Client.Pages;
+using Client.Views;
 
 //For now only works with booleans and numbers
-
-public struct SocketMessageModel
-{
-    public string Data;
-    public int UpdatedIndex;
-    public int InSendIndex;
-}
-
-public class RequestedCallback 
-{
-    public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
-    
-    protected Action<string> Callback;
-    public string ContentSend;
-    public string ContentRecived;
-    public object ContentExpected;
-    protected int CallbackID;
-
-    public RequestedCallback(Action<string> callback, string contentsend,object expected)
-    {
-        Callback = callback;
-        ContentExpected = expected;
-        ContentRecived = null;
-        CallbackID = GetNewCallbackID();
-        ContentSend = GetToken() + contentsend;
-    }
-
-    public RequestedCallback(Action<string> callback, string contentsend, object expected, int PreToken)
-    {
-        Callback = callback;
-        ContentExpected = expected;
-        ContentRecived = null;
-        CallbackID = PreToken;
-        ContentSend = GetToken() + contentsend;
-    }
-
-    public int GetToken() => CallbackID;
-
-    public static void InvokeByToken(int token,string rev)
-    {
-        for (int i = 0; i < Callbacks.Count; i++)
-        {
-            if(Callbacks[i] != null)
-            {
-                if(Callbacks[i].GetToken() == token)
-                {
-                    Callbacks[i].Invoke(rev);
-                    return;
-                }
-            }
-        }
-        Console.WriteLine("Cannot find RequestedCallback with token: " + token + " With recived: " + rev);
-    }
-
-    int GetNewCallbackID()
-    {
-        for (int i = 0; i < Callbacks.Count; i++)
-        {
-            if (Callbacks[i] == null)
-            {
-                return i;
-            }
-        }
-        return Callbacks.Count;
-#if usebettersystem
-        Random rnd = new Random();
-
-        bool _new = false;
-        int _gen = rnd.Next(1, 9999);
-        int _itr = 0;
-
-        while (!_new)
-        {
-            foreach(var _ in Callbacks)
-            {
-                if(_.CallbackID == _gen)
-                {
-                    _new = false;
-                }
-            }
-            _itr++;
-            if(_itr == 9999)
-            {
-                throw new Exception($"Cannot generate new Callback id {Callbacks.Count} {ContentSend}");
-            }
-        }
-        return _gen;
-#endif
-    }
-
-    public bool Invoke(string Recived)
-    {
-        bool _r = false;
-        if(Callback != null)
-        {
-            try
-            {
-                Device.BeginInvokeOnMainThread(() => Callback.Invoke(Recived));
-            }
-           catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            _r = true;
-        }
-       // Callbacks[Callbacks.FindIndex(x => x == this)] = null;
-        //Callbacks.Remove(this); //Hope it won't crash app 
-        return _r;
-    }
-}
 
 namespace Client.Networking
 {
@@ -172,14 +63,11 @@ namespace Client.Networking
         protected static Thread ReciveThread { get; set; }
         protected static Thread ManageSendingQueue { get; set; }
         protected static bool IsConnected { get; set; }
-        private const int MaxBuffer = 254;
+        private const int MaxBuffer = 1024;
 
         public static void Init() //Todo set stopwatch 
         {
             Config = SocketConfig.ReadConfig();
-
-            Stopwatch ConnectTime = new Stopwatch();
-            ConnectTime.Start();
 #region Connect
             try
             {
@@ -211,7 +99,7 @@ namespace Client.Networking
                 {
                     bool _WillReadRaw = true;
                     string rev = Encoding.UTF8.GetString(buffer);
-                    Console.WriteLine("Recived: "+rev);
+                    Console.WriteLine("Recived raw: " + rev);
                     for (int i = 0; i<RequestedCallback.Callbacks.Count;i++)
                     {
                         try
@@ -240,22 +128,53 @@ namespace Client.Networking
                             Console.WriteLine(ex);
                         }
                     }
-
                     if(_WillReadRaw)
                        ReadRawBuffer(Encoding.UTF8.GetString(buffer));
-                } 
+
+                    Stream.Flush();
+                    buffer = new byte[MaxBuffer];
+                    rev = String.Empty;
+                }
+       
                 Thread.Sleep(10);
             }
         }
 
         private static void ReadRawBuffer(string RecivedMessage)
         {
-            Console.WriteLine("Reading raw buffer: " + RecivedMessage);
+            Console.WriteLine("Reading raw: " + RecivedMessage);
+            int token;
+            if (!GetToken(RecivedMessage, out token))
+                return;
+            switch (token)
+            {
+                case 0003:
+                    Console.WriteLine("Navigating to MessageView");
+                    StaticNavigator.PopAndPush(new MessageView());
+                    break;
+                case 0005:
+                    MessageViewModel.AddMessage(RemoveToken(RecivedMessage),LocalUser.ActualChatWith);
+                    break;
+                case 0004:
+                    PeopleFinder.ParseQuery(RemoveToken(RecivedMessage));
+                    break;
+                default:
+                    Console.WriteLine("Reading raw buffer: " + RecivedMessage);
+                    break;
+            }
         }
 
+        private static string RemoveToken(string req) => req.Substring(5);
         private static bool GetToken(string req, out int tk)
         {
-            //Token has max 4 len
+            if (req.Length == 0)
+            {
+                tk = -1;
+                return false;
+            }
+
+            //Token has max 4 len and -
+            //ex. 0003-
             StringBuilder br = new StringBuilder();
             br.Append(req[0]);
             br.Append(req[1]);
@@ -281,7 +200,7 @@ namespace Client.Networking
         public static void SendR(Action<string> callback, string data, object expected, int Token, bool isAync = true)
         {
             RequestedCallback.Callbacks.Add(new RequestedCallback(callback, data, expected,Token));
-            SendRaw(data);//Write idcallback too !
+            SendRaw(data);//Write IDcallback too !
         }
 
         protected static List<SocketMessageModel> SendingQueue = new List<SocketMessageModel>();
@@ -291,37 +210,45 @@ namespace Client.Networking
         {
             while (true)
             {
-                for (int i = 0;i<SendingQueue.Count;i++)
+                if (SendingQueue.Count > 0)
                 {
-                    SocketMessageModel model = SendingQueue[i];
-                    try
+                    for (int i = 0; i < SendingQueue.Count; i++)
                     {
-                        Byte[] _buf = Encoding.UTF8.GetBytes(model.Data);
+                        SocketMessageModel model = SendingQueue[i];
                         try
                         {
-                            Console.WriteLine(model.Data);
-                            Stream.Write(_buf, 0, _buf.Length);      
+                            Byte[] _buf = Encoding.UTF8.GetBytes(model.Data);
+                            try
+                            {
+                                Console.WriteLine($"Sending .. {model.Data}");
+                                Stream.Write(_buf, 0, _buf.Length);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine("Unregistred exception: " + ex);
+                            }
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("Unregistred exception: " + ex);
+                            Console.WriteLine(ex);
                         }
+                        Thread.Sleep(100);
+                        SendingQueue.Remove(model);
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex);
-                    }
-                    UpdatedQueue.RemoveAt(model.UpdatedIndex);
-                    Thread.Sleep(100);
                 }
-                SendingQueue = new List<SocketMessageModel>(UpdatedQueue);
+                if(UpdatedQueue.Count > 0)
+                {
+                    SendingQueue = new List<SocketMessageModel>(UpdatedQueue);
+                    UpdatedQueue.Clear();
+                }
+
                 Thread.Sleep(100);
             }
         }
 
         public static void SendRaw(string data, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
-            if (data is null)
+            if (data is null || string.IsNullOrEmpty(data))
             {
                 Console.WriteLine($"Data is null {path} line: {lineNumber}");
                 return;
@@ -344,6 +271,7 @@ namespace Client.Networking
                 Console.WriteLine("Client disconnected form server");
                 return;
             }
+            Console.WriteLine("Adding to queue" + data);
             SocketMessageModel model = new SocketMessageModel() { Data= data };
             UpdatedQueue.Add(model);
             model.UpdatedIndex = UpdatedQueue.IndexOf(model);

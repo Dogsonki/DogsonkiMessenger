@@ -1,11 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Client.Pages.PeopleFinder">
-    <ContentPage.Content>
-        <StackLayout>
-			<Entry x:Name="UsernameFind" Placeholder="@Username"></Entry>
-			<Button Clicked="FindClicked" Text="Find"></Button>
-        </StackLayout>
-    </ContentPage.Content>
+             x:Class="Client.Pages.PeopleFinder"
+			 xmlns:local="clr-namespace:Client.Views"
+			 BackgroundColor="#1d1f1d">
+	
+	<ContentPage.BindingContext>
+		<local:PeopleFinderViewModel></local:PeopleFinderViewModel>
+	</ContentPage.BindingContext>
+	
+	<ContentPage.Content>
+		<StackLayout>
+			<StackLayout>
+				<Entry x:Name="UsernameFind" Placeholder="@Find Person By Username"></Entry>
+				<Button Clicked="FindClicked" Text="Find"></Button>
+			</StackLayout>
+			<StackLayout>
+				<ListView x:Name="ViewOfPeople" ItemSelected="PeopleFound_ItemSelected" ItemsSource="{Binding Source={x:Static local:PeopleFinderViewModel.PeopleFound}}">
+					<ListView.ItemTemplate>
+						<DataTemplate>
+							<ViewCell>
+								<StackLayout>
+									<Grid>
+										<ImageButton  Command="{Binding OpenChatCommand}" Grid.Row="0" Grid.Column="0" Source="findpeopleadd.png" HorizontalOptions="End"/>
+										<Label Grid.Row="0" Grid.Column="0" Text="{Binding Username}"  TextColor="White" />
+									</Grid>
+								</StackLayout>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>					
+				</ListView>
+			</StackLayout>
+		</StackLayout>
+		
+	</ContentPage.Content>
 </ContentPage>

@@ -1,15 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Client.Pages.MainAfterLoginPage">
+             x:Class="Client.Pages.MainAfterLoginPage"
+			 BackgroundColor="#1d1f1d">
     <ContentPage.Content>
+		<!-- Find People -->
         <StackLayout>
-			<Frame CornerRadius="10" HorizontalOptions="Start">
-				
+			<StackLayout.GestureRecognizers>
+				<TapGestureRecognizer Tapped="FindPeople_Clicked"></TapGestureRecognizer>
+			</StackLayout.GestureRecognizers>
+			<Frame CornerRadius="10" BackgroundColor="Gray" HorizontalOptions="Start">
+				<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
+					<StackLayout>
+						<Image WidthRequest="35" HeightRequest="35" Source="findpeoplemagnifer.png"></Image>
+					</StackLayout>
+					<StackLayout>
+						<Label TextColor="White" Text="Find People!"></Label>
+						<Label FontSize="10" Text="Find and add people to friend list!"></Label>
+					</StackLayout>
+				</StackLayout>
 			</Frame>
-
+			<!-- Friend List -->
 			<StackLayout>
-				
+				<StackLayout.GestureRecognizers>
+					<TapGestureRecognizer Tapped="FriendList_Clicked"></TapGestureRecognizer>
+				</StackLayout.GestureRecognizers>
+				<Frame CornerRadius="10" BackgroundColor="Gray" HorizontalOptions="Start">
+					<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
+						<StackLayout>
+							<Image WidthRequest="35" HeightRequest="35" Source="friendlisticoN.png"></Image>
+						</StackLayout>
+						<StackLayout>
+							<Label x:Name="_Option" TextColor="White" Text="Friend List!"></Label>
+							<Label x:Name="Description" FontSize="10" Text="All of your friend here!"></Label>
+						</StackLayout>
+					</StackLayout>
+				</Frame>
 			</StackLayout>
 		</StackLayout>
     </ContentPage.Content>

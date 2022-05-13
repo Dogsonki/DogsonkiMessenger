@@ -2,6 +2,8 @@
 using Xamarin.Forms.Xaml;
 using Client.Networking;
 using System;
+using Newtonsoft.Json.Linq;
+using Client.Views;
 
 namespace Client.Pages
 {
@@ -10,19 +12,31 @@ namespace Client.Pages
     {
         public PeopleFinder()
         {
-            InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, false);
-
-        }
-
-        private void PeopleFindCallback(string rev)
-        {
-            Console.WriteLine("Callback::"+rev);
+            InitializeComponent();
         }
 
         private void FindClicked(object sender, EventArgs e)
         {
-            SocketCore.SendR(PeopleFindCallback, $"1-{UsernameFind.Text}", null);
+            PeopleFinderViewModel.ClearList();
+            LocalUser.ActualChatWith = UsernameFind.Text;
+            SocketCore.SendR(ParseQuery, $"1-{UsernameFind.Text}", $"0004");
+        }
+
+        public static void ParseQuery(string req)
+        {
+            JArray users = JArray.Parse(req);
+
+            foreach (var a in users)
+            {
+                PeopleFinderViewModel.AddFound(a.ToString());
+            }
+        }
+
+        private void PeopleFound_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            var _temp = (ListView)sender;
+            _temp.SelectedItem = null;
         }
     }
 }

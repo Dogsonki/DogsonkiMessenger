@@ -1,6 +1,7 @@
-﻿using DogsonkiMessenger.Models;
+﻿using Client.Models;
 using Client.Networking;
 using System.Collections.ObjectModel;
+using Xamarin.Forms;
 
 namespace Client.Views
 {

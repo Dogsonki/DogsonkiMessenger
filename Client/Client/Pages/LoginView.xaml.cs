@@ -1,4 +1,5 @@
 ﻿using Client.Networking;
+using Client.Utility;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -12,19 +13,13 @@ namespace Client.Pages
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
-#if LOGINAUTOTEST
-            SocketCore.SendRaw("logging");
-            SocketCore.SendRaw("aaa");
-            SocketCore.SendR(LoginCallback, "aaa", 0001, 0001);
-#endif
         }
 
         private void LoginDone(object sender, EventArgs e)
         {
             string username = Input_Username.Text;
             string password = Input_Password.Text;
-            MainUser.Username = username;
-
+            LocalUser.Username = username;
             SocketCore.SendRaw("logging");
             SocketCore.SendRaw(username);
             SocketCore.SendR(LoginCallback, password, 0001, 0001);
@@ -38,8 +33,8 @@ namespace Client.Pages
             switch (rev[0])
             {
                 case '1':
-                    Console.WriteLine("Logging....");
-                    Device.BeginInvokeOnMainThread(async () => { await Navigation.PushAsync(new PeopleFinder()); });
+                    StaticNavigator.Push(new MainAfterLoginPage());
+                    LocalUser.Username = Input_Username.Text;
                     break;
                 case '0':
                     Console.WriteLine("Password is wrong");

@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			 xmlns:local="clr-namespace:Client.Views"
              x:Class="Client.MessageView"
-			 BackgroundColor="AntiqueWhite">
+			 BackgroundColor="#1d1f1d">
+	
 	<ContentPage.BindingContext>
 		<local:MessageViewModel></local:MessageViewModel>
 	</ContentPage.BindingContext>
@@ -12,13 +13,13 @@
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
-						<StackLayout VerticalOptions="Center" Orientation="Horizontal">
-							<Grid RowSpacing="0" VerticalOptions="Center">
-								<Frame Grid.Column="0" HeightRequest="25" WidthRequest="25" HasShadow="false" Margin="0" VerticalOptions="Center" HorizontalOptions="Start" CornerRadius="10" Padding="0">
+						<StackLayout Orientation="Horizontal">
+							<Grid VerticalOptions="Center">
+								<Frame Grid.Column="0" HeightRequest="40" WidthRequest="40" HasShadow="false" Margin="0" VerticalOptions="Center" HorizontalOptions="Start" CornerRadius="20" Padding="0">
 									<Image Aspect="AspectFill" Source="tempavatar.jpg"></Image>
 								</Frame>
 								<StackLayout VerticalOptions="FillAndExpand" Grid.Column="1">
-									<Label VerticalOptions="FillAndExpand" VerticalTextAlignment="Center" Grid.Column="1"  Text="{Binding Username}"></Label>
+									<Label FontSize="17" VerticalOptions="FillAndExpand" VerticalTextAlignment="Center" Grid.Column="1"  Text="{Binding Username}"></Label>
 									<Label Grid.Column="2" Grid.Row="1" Text="{Binding MessageContent}"></Label>
 								</StackLayout>
 							</Grid>

@@ -1,4 +1,7 @@
-﻿using Client.Views;
+﻿using Client.Networking;
+using Client.Views;
+using Newtonsoft.Json.Linq;
+using System.Collections;
 using Xamarin.Forms;
 
 namespace Client
@@ -6,7 +9,14 @@ namespace Client
     public partial class MessageView : ContentPage
     {
 
-        public MessageView()
+        public MessageView() //Chat with only one person
+        {
+            NavigationPage.SetHasNavigationBar(this, false);
+
+            InitializeComponent();
+        }
+
+        public MessageView(IEnumerable ChatWith) //Initialize group chat 
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();

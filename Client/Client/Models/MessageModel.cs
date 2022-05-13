@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DogsonkiMessenger.Models
+namespace Client.Models
 {
     public class MessageModel
     {
@@ -11,6 +11,7 @@ namespace DogsonkiMessenger.Models
         public string MessageContent { get; set; }
         public string Username { get; set; }
         public string AvatarImage { get; set; }
+
         public MessageModel(string msg, string user)
         {
             MessageContent = msg;

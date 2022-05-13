@@ -3,6 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Client.Networking;
 using Client.Pages;
+using System.Text;
 
 namespace Client
 {
@@ -32,18 +33,19 @@ namespace Client
 
         private void RegisterCallback(string rev)
         {
-            if (rev[0] == '1')
+            StringBuilder token = new StringBuilder();
+            token.Append(rev[0]);
+            token.Append(rev[1]);
+            if (token.ToString() == "01")
             {
                 Console.WriteLine("Registred");//Check if this function have to be invoked in main thread
-                Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new MessageView()); });
+                Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginView()); });
             }
             else
             {
                 //Samething went wrong !
 
                 //01 => already registred
-
-                //00 => incorrect password
             }
         }
     }
