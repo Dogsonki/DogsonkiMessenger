@@ -37,11 +37,12 @@ class ClientMenu:
 class Chatroom:
     def __init__(self, connection: Connection):
         self.connection = connection
-        self.chatroom_code = "0003"
+        self.init_chatroom_code = "0003"
+        self.message_chatroom_code = "0005"
         self.number_of_sent_last_messages = 0
 
     def init_chatroom(self, receiver):
-        self.connection.send_message(self.chatroom_code)
+        self.connection.send_message(self.init_chatroom_code)
         self.send_last_messages(receiver)
         self.receive_messages(receiver)
 
@@ -49,14 +50,14 @@ class Chatroom:
         message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver, self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         for i in message_history:
-            message = f"{self.chatroom_code}-{i[1]} {i[0]}\0"
+            message = f"{self.message_chatroom_code}-{i[1]} {i[0]}\0"
             self.connection.send_message(message)
 
     def receive_messages(self, receiver):
         while True:
             message = self.connection.receive_message()
             if not message:
-                self.connection.send_message(f"{self.chatroom_code}-\0")
+                self.connection.send_message(f"{self.message_chatroom_code}-\0")
                 break
             self.save_message_in_database(message, receiver)
 

@@ -40,8 +40,9 @@ class Connection:
             self.closed = True
             if self.login:
                 del current_connections[self.login]
-            print(f"Closing connection with {self.connection}")
-            self.connection.shutdown(socket.SHUT_RDWR)
+            #print(f"Closing connection with {self.connection}")
+            #self.connection.shutdown(socket.SHUT_RDWR)
+            raise Exception(f"Closing connection with {self.connection}")   # todo better idea
 
 
 class LoginUser:
