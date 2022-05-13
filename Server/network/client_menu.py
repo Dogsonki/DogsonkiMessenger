@@ -50,14 +50,13 @@ class Chatroom:
         message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver, self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         for i in message_history:
-            message = f"{self.message_chatroom_code}-{i[1]} {i[0]}\0"
+            message = self.message_chatroom_code + "-" + "{" + i[1] + "}" + "{" + i[0] + "}"
             self.connection.send_message(message)
 
     def receive_messages(self, receiver):
         while True:
             message = self.connection.receive_message()
             if not message:
-                self.connection.send_message(f"{self.message_chatroom_code}-\0")
                 break
             self.save_message_in_database(message, receiver)
 
