@@ -11,8 +11,7 @@ using Newtonsoft.Json;
 using Xamarin.Forms;
 using Client.Pages;
 using Client.Views;
-
-//For now only works with booleans and numbers
+using Client.Models;
 
 namespace Client.Networking
 {
@@ -150,13 +149,13 @@ namespace Client.Networking
             {
                 case 0003:
                     Console.WriteLine("Navigating to MessageView");
-                    StaticNavigator.PopAndPush(new MessageView());
-                    break;
-                case 0005:
-                    MessageViewModel.AddMessage(RemoveToken(RecivedMessage),LocalUser.ActualChatWith);
+                    Device.BeginInvokeOnMainThread(() => Application.Current.MainPage.Navigation.PushAsync(new MessageView()));
                     break;
                 case 0004:
                     PeopleFinder.ParseQuery(RemoveToken(RecivedMessage));
+                    break;
+                case 0005:
+                    MessageViewModel.AddMessage(JsonConvert.DeserializeObject<MessageModel>(RemoveToken(RecivedMessage)));  
                     break;
                 default:
                     Console.WriteLine("Reading raw buffer: " + RecivedMessage);

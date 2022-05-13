@@ -1,33 +1,30 @@
 ﻿using Client.Models;
 using Client.Networking;
+using System;
 using System.Collections.ObjectModel;
-using Xamarin.Forms;
 
 namespace Client.Views
 {
     public class MessageViewModel
     {
-        public ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
-        public static ObservableCollection<MessageModel> InstanceMessages;
+        public static ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
 
         public MessageViewModel()
         {
-            InstanceMessages = Messages;
         }
 
-        public static void AddMessage(string message,string username)
+        public static void AddMessage(string rev)
         {
-            if (message == null || username == null)
+            if (rev == null || rev == null)
                 return;
-                //Asster
-            InstanceMessages.Add(new MessageModel(message, username));
+            SocketCore.SendRaw(rev);
+                //Assert
+            Messages.Add(new MessageModel(LocalUser.Username, rev,DateTime.Now));
         }
 
-        private static void SendMessage(string message,string username)
+        public static void AddMessage(MessageModel model)
         {
-            SocketCore.SendRaw("SendingMessage");
-            SocketCore.SendRaw(username);
-            SocketCore.SendR(null, message, 0004, 0004);
+            Messages.Add(model);
         }
     }
 }

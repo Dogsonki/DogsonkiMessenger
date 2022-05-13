@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Client.Models
 {
@@ -11,11 +10,22 @@ namespace Client.Models
         public string MessageContent { get; set; }
         public string Username { get; set; }
         public string AvatarImage { get; set; }
+        public DateTime Time { get; set; }
 
-        public MessageModel(string msg, string user)
+        [JsonConstructor]
+        public MessageModel(string user, string message,string time)
         {
-            MessageContent = msg;
+            Username = user;    
+            MessageContent = message;
+            Time = DateTime.Parse(time);
+            Console.WriteLine(Time);
+        }   
+
+        public MessageModel(string user, string message, DateTime time)
+        {
             Username = user;
+            MessageContent = message;
+            Time = time;
         }
     }
 }

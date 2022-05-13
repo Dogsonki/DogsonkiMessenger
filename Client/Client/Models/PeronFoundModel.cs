@@ -17,7 +17,7 @@ namespace Client.Models
 
         private void OpenChat()
         {
-            SocketCore.SendR((string _) => StaticNavigator.Push(new MessageView(Username)), $"0-{Username}", "0003");
+            SocketCore.SendR((string _) => StaticNavigator.PopAndPush(new MessageView()), $"0-{Username}", "0003");
         }
     }
 }
