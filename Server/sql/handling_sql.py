@@ -9,7 +9,7 @@ class GetInfoFromDatabase:
         if check_if_login_exist(receiver) is None:
             return False
 
-        database_cursor.execute("""SELECT content, sender, receiver FROM messages
+        database_cursor.execute("""SELECT content, sender, receiver, time FROM messages
                                    WHERE (sender = %s and receiver = %s) OR (sender = %s AND receiver = %s)
                                    ORDER BY ID LIMIT %s,30;""", (sender, receiver, receiver, sender, number_of_sent_last_messages))
         sql_data = database_cursor.fetchall()

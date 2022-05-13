@@ -22,5 +22,6 @@ class CreateDatabase:
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    content TEXT NOT NULL,
                                    sender VARCHAR(50) NOT NULL,
-                                   receiver VARCHAR(50) NOT NULL
+                                   receiver VARCHAR(50) NOT NULL,
+                                   time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                                    );""")

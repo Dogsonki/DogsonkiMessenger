@@ -1,3 +1,6 @@
+import json
+import time
+
 from Server.sql import handling_sql
 from .connection import Connection, current_connections
 
@@ -50,8 +53,10 @@ class Chatroom:
         message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver, self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         for i in message_history:
-            message = self.message_chatroom_code + "-" + "{" + i[1] + "}" + "{" + i[0] + "}"
+            data = json.dumps({"user": i[1], "message": i[0], "time": str(i[3])})
+            message = f"{self.message_chatroom_code}-{data}"
             self.connection.send_message(message)
+            time.sleep(0.1)  # without sleep app is broken
 
     def receive_messages(self, receiver):
         while True:
