@@ -24,22 +24,18 @@ class Connection:
             self.close_connection()
 
     def receive_message(self):
-        while True:
-            try:
-                received_message = self.client.recv(1024).decode("UTF-8")
-                print(f"recv: {received_message}")
-                if not received_message:
-                    self.close_connection()
-                    return False
-                if received_message.startswith == "0005":
-                    continue
-                return received_message
-            except socket.error:
+        try:
+            received_message = self.client.recv(1024).decode("UTF-8")
+            print(f"recv: {received_message}")
+            if not received_message:
                 self.close_connection()
                 return False
+            return received_message
+        except socket.error:
+            self.close_connection()
+            return False
 
     def close_connection(self):
-        print(current_connections)
         if not self.closed:
             self.closed = True
             if self.login:
@@ -74,7 +70,7 @@ class Client(Connection):
         self.login, self.password = self.get_login_data()
         if SELECT_SQL.login_user(self.login, self.password):
             self.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
-            time.sleep(0.2)
+            time.sleep(0.2)  # if not, client app crashes
             user_chats = SELECT_SQL.get_user_chats(self.login)
             self.send_message(f"{self.last_user_chats}-{user_chats}")
             current_connections[self.login] = self.client
