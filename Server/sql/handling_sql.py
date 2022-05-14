@@ -32,8 +32,7 @@ class GetInfoFromDatabase:
         logins = database_cursor.fetchall()
         if logins is None:
             return False
-        else:
-            return [i for i, in logins]
+        return [i for i, in logins]
 
     @staticmethod
     def get_user_chats(login):
@@ -42,6 +41,8 @@ class GetInfoFromDatabase:
                                    GROUP BY receiver
                                    ORDER BY time DESC;""", (login, login))
         chats = database_cursor.fetchall()
+        if chats is None:
+            return False
         return [i for i, in chats]
 
 

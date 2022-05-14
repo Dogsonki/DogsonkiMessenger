@@ -2,14 +2,14 @@ import json
 import time
 
 from Server.sql import handling_sql
-from .connection import Connection, current_connections
+from .connection import Client, current_connections
 
 INSERT_INTO_DB = handling_sql.InsertIntoDatabase()
 GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
 
 
 class ClientMenu:
-    def __init__(self, connection: Connection):
+    def __init__(self, connection: Client):
         self.search_code = "0004"
         self.connection = connection
 
@@ -37,7 +37,7 @@ class ClientMenu:
 
 
 class Chatroom:
-    def __init__(self, connection: Connection, receiver):
+    def __init__(self, connection: Client, receiver):
         self.connection = connection
         self.receiver = receiver
         self.init_chatroom_code = "0003"

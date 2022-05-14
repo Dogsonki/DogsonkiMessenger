@@ -4,8 +4,8 @@ import json
 import socket
 import threading
 
-from network import client_menu
-from network.connection import Connection, LoginUser
+from network.client_menu import ClientMenu
+from network.connection import Client
 from sql.create_databse import CreateDatabase
 
 
@@ -19,9 +19,9 @@ def listen_for_connections():
 
 
 def on_new_connection(connection, address):
-    connection = Connection(connection, address)
-    LoginUser(connection).get_action()
-    client_menu.ClientMenu(connection).listening()
+    client = Client(connection, address)
+    client.get_login_action()
+    ClientMenu(client).listening()
 
 
 if __name__ == '__main__':
