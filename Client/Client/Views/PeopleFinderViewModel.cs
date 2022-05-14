@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using Client.Models;
-using Xamarin.Forms;
 
 namespace Client.Views
 {
@@ -14,10 +12,6 @@ namespace Client.Views
         {
         }//TODO: Fix buttons that opens chat room
 
-        private void OpenChat(string req)
-        {
-            Console.WriteLine(req);
-        }
 
         public static void AddFound(string username)
         {

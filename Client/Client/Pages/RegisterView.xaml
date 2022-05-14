@@ -12,10 +12,10 @@
 				<Entry Focused="Input_Focused" Placeholder="Username" WidthRequest="200"  x:Name="Input_Username"></Entry>
 				<Entry Focused="Input_Focused" IsPassword="true" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
 				<StackLayout x:Name="ErrorLevel">
-					
 				</StackLayout>
+				<Button BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
 			</StackLayout>
-			<Button BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
+		
 		</StackLayout>
 
     </ContentPage.Content>

@@ -3,6 +3,7 @@ using Client.Networking;
 using System;
 using System.Collections.ObjectModel;
 
+
 namespace Client.Views
 {
     public class MessageViewModel
@@ -11,10 +12,15 @@ namespace Client.Views
 
         public MessageViewModel()
         { 
-            for(int i = 0; i < 10; i++)
-            {
-                AddMessage(new MessageModel("Test", "hii", DateTime.Now));
-            }
+        }
+
+        /// <summary>
+        /// AddMessage only by Client
+        /// </summary>
+        /// <param name="rev"></param>
+        public static void Test_AddMessage(string rev)
+        {
+            Messages.Add(new MessageModel(LocalUser.Username, rev, DateTime.Now));
         }
 
         /// <summary>

@@ -1,13 +1,10 @@
-﻿using Xamarin.Forms;
-using Client.Pages;
-using Client.Networking;
+﻿using Client.Pages;
+using Xamarin.Forms;
 
 namespace Client
 {
     public partial class App : Application
     {
-        public static App app; 
-
         public App()
         {
             InitializeComponent();
