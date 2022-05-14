@@ -59,12 +59,12 @@ class Chatroom:
     def send_message(self, message_data):
         message = f"{self.message_chatroom_code}-{message_data}"
         self.connection.send_message(message)
-        time.sleep(0.1)  # without sleep app is broken
+        time.sleep(0.2)  # without sleep app is broken
 
     def receive_messages(self):
         while True:
             message = self.connection.receive_message()
-            if not message:
+            if message == "$:}{#@$#@%":  # todo find better exit code
                 break
 
             receiver_connection = current_connections.get(self.receiver)

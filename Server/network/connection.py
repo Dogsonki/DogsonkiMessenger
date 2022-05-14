@@ -1,4 +1,5 @@
 import socket
+import time
 
 from Server.sql import handling_sql
 
@@ -53,6 +54,7 @@ class LoginUser:
         self.connection = connection
         self.login_app_code = "0001"
         self.registering_app_code = "0002"
+        self.last_user_chats = "0006"
 
     def get_action(self):
         while True:
@@ -72,6 +74,9 @@ class LoginUser:
         self.connection.login, self.connection.password = self.get_login_data()
         if SELECT_SQL.login_user(self.connection.login, self.connection.password):
             self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
+            time.sleep(0.2)
+            user_chats = SELECT_SQL.get_user_chats(self.connection.login)
+            self.connection.send_message(f"{self.last_user_chats}-{user_chats}")
             current_connections[self.connection.login] = self.connection
             return True
         else:
