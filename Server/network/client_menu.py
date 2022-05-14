@@ -12,7 +12,6 @@ class ClientMenu:
     def __init__(self, connection: Connection):
         self.search_code = "0004"
         self.connection = connection
-        self.chatroom = Chatroom(self.connection)
 
     def listening(self):
         # 0 --> go to chatroom with given login
@@ -22,7 +21,7 @@ class ClientMenu:
             code = message.split("-")[0]
             arg = " ".join(message.split("-")[1:])
             if code == "0":
-                self.chatroom.init_chatroom(arg)
+                Chatroom(self.connection, arg).init_chatroom()
             elif code == "1":
                 logins_all = GET_INFO_FROM_DB.search_by_login(arg)
                 first_logins = []
@@ -38,32 +37,43 @@ class ClientMenu:
 
 
 class Chatroom:
-    def __init__(self, connection: Connection):
+    def __init__(self, connection: Connection, receiver):
         self.connection = connection
+        self.receiver = receiver
         self.init_chatroom_code = "0003"
         self.message_chatroom_code = "0005"
         self.number_of_sent_last_messages = 0
 
-    def init_chatroom(self, receiver):
+    def init_chatroom(self):
         self.connection.send_message(self.init_chatroom_code)
-        self.send_last_messages(receiver)
-        self.receive_messages(receiver)
+        self.send_last_messages()
+        self.receive_messages()
 
-    def send_last_messages(self, receiver):
-        message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, receiver, self.number_of_sent_last_messages)
+    def send_last_messages(self):
+        message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, self.receiver, self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         for i in message_history:
             data = json.dumps({"user": i[1], "message": i[0], "time": str(i[3])})
-            message = f"{self.message_chatroom_code}-{data}"
-            self.connection.send_message(message)
-            time.sleep(0.1)  # without sleep app is broken
+            self.send_message(data)
 
-    def receive_messages(self, receiver):
+    def send_message(self, message_data):
+        message = f"{self.message_chatroom_code}-{message_data}"
+        self.connection.send_message(message)
+        time.sleep(0.1)  # without sleep app is broken
+
+    def receive_messages(self):
         while True:
             message = self.connection.receive_message()
             if not message:
                 break
-            self.save_message_in_database(message, receiver)
 
-    def save_message_in_database(self, message, receiver):
-        INSERT_INTO_DB.save_message(message, self.connection.login, receiver)
+            receiver_connection = current_connections.get(self.receiver)
+            if receiver_connection:
+                data = json.dumps({"user": self.receiver, "message": message, "time": time.time()})
+                message_data = f"{self.message_chatroom_code}-{data}"
+                receiver_connection.send_message(message_data)
+
+            self.save_message_in_database(message)
+
+    def save_message_in_database(self, message):
+        INSERT_INTO_DB.save_message(message, self.connection.login, self.receiver)
