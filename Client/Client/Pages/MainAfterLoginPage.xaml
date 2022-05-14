@@ -2,41 +2,84 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MainAfterLoginPage"
+			 xmlns:local="clr-namespace:Client.Views"
 			 BackgroundColor="#1d1f1d">
-    <ContentPage.Content>
-		<!-- Find People -->
-        <StackLayout>
-			<StackLayout.GestureRecognizers>
-				<TapGestureRecognizer Tapped="FindPeople_Clicked"></TapGestureRecognizer>
-			</StackLayout.GestureRecognizers>
-			<Frame CornerRadius="10" BackgroundColor="Gray" HorizontalOptions="Start">
-				<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
-					<StackLayout>
-						<Image WidthRequest="35" HeightRequest="35" Source="findpeoplemagnifer.png"></Image>
+
+	<ContentPage.BindingContext>
+		<local:MainAfterLoginViewModel></local:MainAfterLoginViewModel>
+	</ContentPage.BindingContext>
+
+	<ContentPage.Content>
+		<StackLayout>
+			<StackLayout Padding="20" Spacing="20" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand">
+
+				<!-- Find People -->
+				<StackLayout  Spacing="20">
+					<StackLayout.GestureRecognizers>
+						<TapGestureRecognizer Tapped="FindPeople_Clicked"></TapGestureRecognizer>
+					</StackLayout.GestureRecognizers>
+					<Frame CornerRadius="10" BackgroundColor="#706f6d" HorizontalOptions="Start">
+						<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
+							<StackLayout>
+								<Image WidthRequest="35" HeightRequest="35" Source="findpeoplemagnifer.png"></Image>
+							</StackLayout>
+							<StackLayout>
+								<Label TextColor="White" Text="Find People!"></Label>
+								<Label FontSize="10" Text="Find and add people to friend list!"></Label>
+							</StackLayout>
+						</StackLayout>
+					</Frame>
+
+					<!-- Friend List -->
+
+					<StackLayout HorizontalOptions="CenterAndExpand">
+						<StackLayout.GestureRecognizers>
+							<TapGestureRecognizer Tapped="FriendList_Clicked"></TapGestureRecognizer>
+						</StackLayout.GestureRecognizers>
+						<Frame CornerRadius="10" BackgroundColor="#706f6d" HorizontalOptions="Start">
+							<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
+								<StackLayout>
+									<Image WidthRequest="35" HeightRequest="35" Source="friendlisticoN.png"></Image>
+								</StackLayout>
+								<StackLayout>
+									<Label x:Name="_Option" TextColor="White" Text="Friend List!"></Label>
+									<Label x:Name="Description" FontSize="10" Text="All of your friend here!"></Label>
+								</StackLayout>
+							</StackLayout>
+						</Frame>
 					</StackLayout>
-					<StackLayout>
-						<Label TextColor="White" Text="Find People!"></Label>
-						<Label FontSize="10" Text="Find and add people to friend list!"></Label>
-					</StackLayout>
+
+				
 				</StackLayout>
-			</Frame>
-			<!-- Friend List -->
+			</StackLayout>
+
+			<!-- Last Chats List -->
 			<StackLayout>
-				<StackLayout.GestureRecognizers>
-					<TapGestureRecognizer Tapped="FriendList_Clicked"></TapGestureRecognizer>
-				</StackLayout.GestureRecognizers>
-				<Frame CornerRadius="10" BackgroundColor="Gray" HorizontalOptions="Start">
-					<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
-						<StackLayout>
-							<Image WidthRequest="35" HeightRequest="35" Source="friendlisticoN.png"></Image>
-						</StackLayout>
-						<StackLayout>
-							<Label x:Name="_Option" TextColor="White" Text="Friend List!"></Label>
-							<Label x:Name="Description" FontSize="10" Text="All of your friend here!"></Label>
-						</StackLayout>
-					</StackLayout>
-				</Frame>
+				<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="20" Text="Last Chats"></Label>
+			</StackLayout>
+			<StackLayout>
+				<ListView CachingStrategy="RetainElement"  SeparatorColor="#0000" 
+				  ItemSelected="LastChatsOpened_ItemSelected"
+				  ItemsSource="{Binding Source={x:Static local:MainAfterLoginViewModel.LastChats}}">
+					<ListView.ItemTemplate>
+						<DataTemplate>
+							<ViewCell>
+								<StackLayout>
+									<Grid>
+										<Image HorizontalOptions="End" Source="openchat.png">
+											<Image.GestureRecognizers>
+												<TapGestureRecognizer Command="{Binding OpenChatCommand}"/>
+											</Image.GestureRecognizers>
+										</Image>
+										<Label Grid.Row="0" Grid.Column="0" Text="{Binding Username}"  TextColor="White" />
+									</Grid>
+								</StackLayout>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
 			</StackLayout>
 		</StackLayout>
-    </ContentPage.Content>
+		
+	</ContentPage.Content>
 </ContentPage>

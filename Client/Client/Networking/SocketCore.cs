@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -12,48 +10,11 @@ using Xamarin.Forms;
 using Client.Pages;
 using Client.Views;
 using Client.Models;
+using System.Threading.Tasks;
+using Client.Networking.Config;
 
 namespace Client.Networking
 {
-    public class SocketConfig
-    {
-        [JsonProperty("Socket_IP")]
-        public string Ip;
-        [JsonProperty("Socket_PORT")]
-        public int Port;
-
-        public static SocketConfig ReadConfig()
-        {
-            string config = "";
-            try
-            {
-                var assembly = IntrospectionExtensions.GetTypeInfo(typeof(SocketConfig)).Assembly;
-                Stream stream = assembly.GetManifestResourceStream("Client.Networking.SocketConfig.json");
-               
-                using (var reader = new StreamReader(stream))
-                {
-                    config = reader.ReadToEnd();
-                }
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            if (!string.IsNullOrEmpty(config))
-            {
-                return JsonConvert.DeserializeObject<SocketConfig>(config);
-            }
-            return null;
-        }
-
-        public static void SaveConfig(SocketConfig sc)
-        {
-            DependencyService.Get<IFileService>().CreateFile("SocketConfig.json", JsonConvert.SerializeObject(sc));
-        }
-    }
-
-
     public class SocketCore
     {
         protected static TcpClient Client { get; set; }
@@ -64,7 +25,7 @@ namespace Client.Networking
         protected static bool IsConnected { get; set; }
         private const int MaxBuffer = 1024;
 
-        public static void Init() //Todo set stopwatch 
+        public static void Init()
         {
             Config = SocketConfig.ReadConfig();
 #region Connect
@@ -101,7 +62,7 @@ namespace Client.Networking
                     {
                         bool _WillReadRaw = true;
                         string rev = Encoding.UTF8.GetString(buffer);
-                        Console.WriteLine("Recived raw: " + rev);
+                        Console.WriteLine($"Got buffer {rev}");
                         for (int i = 0; i < RequestedCallback.Callbacks.Count; i++)
                         {
                             try
@@ -114,8 +75,6 @@ namespace Client.Networking
                                     {
                                         //Bug: if we take length of rev it will return 254 for same reason 
                                         //this could be by convering byte
-                                        Console.WriteLine("Callback found: " + tk);
-                                        Console.WriteLine("Calling callback with: " + rev.Substring(5));
                                         req.Invoke(rev.Substring(5));
                                         _WillReadRaw = false;
                                     }
@@ -151,21 +110,32 @@ namespace Client.Networking
 
         private static void ReadRawBuffer(string RecivedMessage)
         {
-            Console.WriteLine("Reading raw: " + RecivedMessage);
             int token;
             if (!GetToken(RecivedMessage, out token))
                 return;
             switch (token)
             {
                 case 0003:
-                    Console.WriteLine("Navigating to MessageView");
                     Device.BeginInvokeOnMainThread(() => Application.Current.MainPage.Navigation.PushAsync(new MessageView()));
                     break;
                 case 0004:
                     PeopleFinder.ParseQuery(RemoveToken(RecivedMessage));
                     break;
                 case 0005:
-                    MessageViewModel.AddMessage(JsonConvert.DeserializeObject<MessageModel>(RemoveToken(RecivedMessage)));  
+                    try
+                    {
+                        Device.InvokeOnMainThreadAsync(()=>
+                            MessageViewModel.AddMessage(JsonConvert.DeserializeObject<MessageModel>(RemoveToken(RecivedMessage)))
+                        );
+                       
+                    }
+                    catch (Exception ex) 
+                    {
+                        Console.WriteLine($"Cannot parse MessageModel {RecivedMessage} {ex}");
+                    }
+                    break;
+                case 0006:
+                    MainAfterLoginViewModel.ParseQuery(RemoveToken(RecivedMessage));    
                     break;
                 default:
                     Console.WriteLine("Cannot find raw definition");
@@ -182,15 +152,9 @@ namespace Client.Networking
                 tk = -1;
                 return false;
             }
-
             //Token has max 4 len and -
             //ex. 0003-
-            StringBuilder br = new StringBuilder();
-            br.Append(req[0]);
-            br.Append(req[1]);
-            br.Append(req[2]);
-            br.Append(req[3]);
-            Console.WriteLine("Parsed Recived Token: " +br.ToString());
+            string br = req.Substring(0, 4);
             if (int.TryParse(br.ToString(), out tk))
             {
                 return true;
@@ -198,18 +162,18 @@ namespace Client.Networking
             return false;
         }
 
-        public static void SendR(Action<string> callback, string data,object expected,bool isAync = true)
+        public static void SendR(Action<string> Callback, string SendingData,int Token)
         {
-            RequestedCallback.Callbacks.Add(new RequestedCallback(callback, data, expected));
-            SendRaw(data);
+            RequestedCallback.Callbacks.Add(new RequestedCallback(Callback,SendingData,Token));
+            SendRaw(SendingData);
         }
 
         /// <summary>
         /// TODO: Make async happen
         /// </summary>
-        public static void SendR(Action<string> callback, string data, object expected, int Token, bool isAync = true)
+        public static void SendR(Task<string> callback, string data, int Token)
         {
-            RequestedCallback.Callbacks.Add(new RequestedCallback(callback, data, expected,Token));
+            RequestedCallback.Callbacks.Add(new RequestedCallback(callback,data,Token));
             SendRaw(data);//Write IDcallback too !
         }
 
@@ -230,7 +194,7 @@ namespace Client.Networking
                             Byte[] _buf = Encoding.UTF8.GetBytes(model.Data);
                             try
                             {
-                                Console.WriteLine($"Sending .. {model.Data}");
+                                Console.WriteLine($"Sending: [{model.Data}]");
                                 Stream.Write(_buf, 0, _buf.Length);
                             }
                             catch (Exception ex)
@@ -258,12 +222,6 @@ namespace Client.Networking
 
         public static bool SendRaw(string data, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
-            if (data is null || string.IsNullOrEmpty(data))
-            {
-                Console.WriteLine($"Data is null {path} line: {lineNumber}");
-                return false;
-            }
-
             if (Client == null || Stream == null)
             {
                 Console.WriteLine("Client is null");
@@ -281,11 +239,17 @@ namespace Client.Networking
                 Console.WriteLine("Client disconnected form server");
                 return false;
             }
-            Console.WriteLine("Adding to queue" + data);
-            SocketMessageModel model = new SocketMessageModel() { Data= data };
+
+            AddToQueue(data);
+            
+            return true;
+        }
+
+        private static void AddToQueue(string data)
+        {
+            SocketMessageModel model = new SocketMessageModel() { Data = data };
             UpdatedQueue.Add(model);
             model.UpdatedIndex = UpdatedQueue.IndexOf(model);
-            return true;
         }
     }
 }

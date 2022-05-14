@@ -38,12 +38,13 @@ namespace Client
                 return;
             }
 
-            if (SocketCore.SendRaw("registering"))
+            if (!SocketCore.SendRaw("registering"))
             {
                 ShowError("Samething went wrong, probably on server side ... ");
             }
+
             SocketCore.SendRaw(username);
-            SocketCore.SendR(RegisterCallback, password,0002,0002);
+            SocketCore.SendR(RegisterCallback, password,0002);
         }
 
         protected Label _ErrorText = new Label();
@@ -69,19 +70,15 @@ namespace Client
 
         private void RegisterCallback(string rev)
         {
-            StringBuilder token = new StringBuilder();
-            token.Append(rev[0]);
-            token.Append(rev[1]);
+            string token = rev.Substring(0, 2);
             if (token.ToString() == "01")
             {
-                Console.WriteLine("Registred");//Check if this function have to be invoked in main thread
+                //Check if this function have to be invoked in main thread
                 Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginView()); });
             }
             else
             {
-                //Samething went wrong !
-
-                //01 => already registred
+                ShowError("This username is already registred");
             }
         }
 

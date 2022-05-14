@@ -1,0 +1,21 @@
+﻿0001 - LoginView - Login 
+{
+	1 - Correct
+	0 - Incorrect
+}
+
+0002 - RegisterView - Register
+{
+	1 - Correct
+	0 - Incorrect
+}
+
+$:}{#@$#@% - Closes chat
+
+0003 - MessageView - Opens chat/Init chatroom
+
+0004 - PeopleFinder - Parsing array of usernames
+
+0005 - MessageViewModel - Deserializing Json message
+
+0006 - Last opened chats - Parsing array of usernames

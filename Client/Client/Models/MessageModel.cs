@@ -9,6 +9,12 @@ namespace Client.Models
         public List<MessageModel> m_Cache { get; set; }
         protected string[] Cached;
 
+        #region STYLE
+
+        public int m_Row { get; set; } = 0;
+
+        #endregion
+
         public string MessageContent { get; set; }
         public string Username { get; set; }
         public string AvatarImage { get; set; }
@@ -20,7 +26,17 @@ namespace Client.Models
         {
             Username = user;    
             MessageContent = message;
-            Time = DateTime.Parse(time);
+            time = time.Replace(".", "");
+            //Python sends %%%%%%.%%%%% for same reason ...
+
+            try
+            {
+                Time = DateTime.Parse(time);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Cannot parse time {time}" +ex);
+            }
         }   
 
         //Used by local

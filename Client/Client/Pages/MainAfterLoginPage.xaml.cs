@@ -19,7 +19,14 @@ namespace Client.Pages
 
         private void FriendList_Clicked(object sender, System.EventArgs e)
         {
+            return;
             Navigation.PushAsync(null); //TODO: Friend list ....
+        }
+
+        private void LastChatsOpened_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        {
+            var _temp = (ListView)sender;
+            _temp.SelectedItem = null;
         }
     }
 }

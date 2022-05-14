@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Client.Networking
@@ -16,45 +17,30 @@ namespace Client.Networking
         public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
          
         protected Action<string> Callback;
+        protected Task<string> AsyncCallback;
+
         public string ContentSend;
         public string ContentRecived;
-        public object ContentExpected;
         protected int CallbackID;
+        private bool isAsync = false; 
 
-        public RequestedCallback(Action<string> callback, string contentsend, object expected)
+        public RequestedCallback(Action<string> callback, string contentsend, int pretoken)
         {
+            CallbackID = pretoken;
             Callback = callback;
-            ContentExpected = expected;
             ContentRecived = null;
             ContentSend = GetToken() + contentsend;
         }
 
-        public RequestedCallback(Action<string> callback, string contentsend, object expected, int PreToken)
+        public RequestedCallback(Task<string> callback, string contentsend, int pretoken)
         {
-            Callback = callback;
-            ContentExpected = expected;
+            AsyncCallback = callback;
             ContentRecived = null;
-            CallbackID = PreToken;
             ContentSend = GetToken() + contentsend;
+            CallbackID = pretoken;
         }
 
         public int GetToken() => CallbackID;
-
-        public static void InvokeByToken(int token, string rev)
-        {
-            for (int i = 0; i < Callbacks.Count; i++)
-            {
-                if (Callbacks[i] != null)
-                {
-                    if (Callbacks[i].GetToken() == token)
-                    {
-                        Callbacks[i].Invoke(rev);
-                        return;
-                    }
-                }
-            }
-            Console.WriteLine("Cannot find RequestedCallback with token: " + token + " With recived: " + rev);
-        }
 
         public bool Invoke(string Recived)
         {

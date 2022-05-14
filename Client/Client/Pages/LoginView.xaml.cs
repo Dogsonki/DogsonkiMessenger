@@ -26,14 +26,14 @@ namespace Client.Pages
                 return;
             }    
 
-            if (SocketCore.SendRaw("logging"))
+            if (!SocketCore.SendRaw("logging"))
             {
                 ShowError("Samething went wrong, probably on server side ... ");
                 return;
             }
 
             SocketCore.SendRaw(username);
-            SocketCore.SendR(LoginCallback, password, 0001, 0001);
+            SocketCore.SendR(LoginCallback, password, 0001);
             //1 == logged 
             //0 == samething wrong 
         }
@@ -67,7 +67,7 @@ namespace Client.Pages
                     //Login is correct, setting up profile and redirecting to MainAfterLoginPage
 
                     LocalUser.Username = Input_Username.Text;
-
+                    LocalUser.IsLoggedIn = true;
                     StaticNavigator.Push(new MainAfterLoginPage());
 
                     break;

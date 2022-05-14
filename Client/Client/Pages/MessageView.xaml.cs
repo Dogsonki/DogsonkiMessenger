@@ -1,5 +1,7 @@
-﻿using Client.Views;
+﻿using Client.Networking;
+using Client.Views;
 using Xamarin.Forms;
+using Client.Utility.Services;
 
 namespace Client
 {
@@ -18,9 +20,32 @@ namespace Client
             _temp.SelectedItem = null;
         }
 
+        protected override bool OnBackButtonPressed()
+        {
+            bool IsVisible = false;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                IKeyboardService keyboardService = DependencyService.Get<IKeyboardService>();
+                IsVisible = keyboardService.IsKeyboardVisible();
+            });
+
+            if (IsVisible)
+                return base.OnBackButtonPressed();
+
+            SocketCore.SendRaw("$:}{#@$#@%"); //Close chat 
+
+            return base.OnBackButtonPressed();
+        }
+
         private void Entry_Completed(object sender, System.EventArgs e)
         {
-            MessageViewModel.AddMessage(((Entry)sender).Text);
+            Entry input = (Entry)sender;
+            if (input.Text == "" || input.Text == "$:}{#@$#@%") 
+            {
+                return;
+            }
+            MessageViewModel.AddMessage(input.Text);
+            input.Text = "";
         }
     }
 }
