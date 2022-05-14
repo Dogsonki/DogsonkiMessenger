@@ -1,4 +1,5 @@
 import socket
+import time
 
 from Server.sql import handling_sql
 
@@ -23,16 +24,19 @@ class Connection:
             self.close_connection()
 
     def receive_message(self):
-        try:
-            received_message = self.connection.recv(1024).decode("UTF-8")
-            print(f"recv: {received_message}")
-            if not received_message:
+        while True:
+            try:
+                received_message = self.connection.recv(1024).decode("UTF-8")
+                print(f"recv: {received_message}")
+                if not received_message:
+                    self.close_connection()
+                    return False
+                if received_message.startswith == "0005":
+                    continue
+                return received_message
+            except socket.error:
                 self.close_connection()
                 return False
-            return received_message
-        except socket.error:
-            self.close_connection()
-            return False
 
     def close_connection(self):
         print(current_connections)
@@ -42,7 +46,7 @@ class Connection:
                 del current_connections[self.login]
             #print(f"Closing connection with {self.connection}")
             #self.connection.shutdown(socket.SHUT_RDWR)
-            raise Exception(f"Closing connection with {self.connection}")   # todo better idea
+            raise Exception(f"Closing connection with {self.connection}")   # todo find better way to close connection
 
 
 class LoginUser:
@@ -50,6 +54,7 @@ class LoginUser:
         self.connection = connection
         self.login_app_code = "0001"
         self.registering_app_code = "0002"
+        self.last_user_chats = "0006"
 
     def get_action(self):
         while True:
@@ -69,7 +74,10 @@ class LoginUser:
         self.connection.login, self.connection.password = self.get_login_data()
         if SELECT_SQL.login_user(self.connection.login, self.connection.password):
             self.connection.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
-            current_connections[self.connection.login] = self.connection.address
+            time.sleep(0.2)
+            user_chats = SELECT_SQL.get_user_chats(self.connection.login)
+            self.connection.send_message(f"{self.last_user_chats}-{user_chats}")
+            current_connections[self.connection.login] = self.connection
             return True
         else:
             self.connection.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password

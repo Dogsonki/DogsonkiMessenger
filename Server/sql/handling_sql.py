@@ -35,6 +35,15 @@ class GetInfoFromDatabase:
         else:
             return [i for i, in logins]
 
+    @staticmethod
+    def get_user_chats(login):
+        database_cursor.execute("""SELECT receiver FROM messages  
+                                   WHERE sender=%s OR receiver=%s
+                                   GROUP BY receiver
+                                   ORDER BY time DESC;""", (login, login))
+        chats = database_cursor.fetchall()
+        return [i for i, in chats]
+
 
 class InsertIntoDatabase:
     @staticmethod
