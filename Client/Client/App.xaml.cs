@@ -13,7 +13,6 @@ namespace Client
             InitializeComponent();
 
             MainPage = new NavigationPage(new AppEntry());
-            SocketCore.Init();
         }
 
         protected override void OnStart()

@@ -4,6 +4,7 @@ using Xamarin.Forms.Xaml;
 using Client.Networking;
 using Client.Pages;
 using System.Text;
+using System.Linq;
 
 namespace Client
 {
@@ -16,19 +17,54 @@ namespace Client
             InitializeComponent();
         }
 
+        protected char[] IllegalCharacters = { '*', '{', '}', '#', '@' };
+
         private void RegisterDone(object sender, EventArgs e)
         {
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
-            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            int IllegalCharIndex;
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
+                ShowError("Username or password is empty");
                 return;
             }
 
-            SocketCore.SendRaw("registering");
+            if ((IllegalCharIndex = username.IndexOfAny(IllegalCharacters)) > 0)
+            {
+                ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
+                return;
+            }
+
+            if (SocketCore.SendRaw("registering"))
+            {
+                ShowError("Samething went wrong, probably on server side ... ");
+            }
             SocketCore.SendRaw(username);
             SocketCore.SendR(RegisterCallback, password,0002,0002);
+        }
+
+        protected Label _ErrorText = new Label();
+        protected bool _AlreadyShowed = false;
+
+        private void ClearError()
+        {
+            _ErrorText.Text = "";
+            ErrorLevel.Children.Remove(_ErrorText);
+            _AlreadyShowed = false;
+        }
+
+        private void ShowError(string text)
+        {
+            if (!_AlreadyShowed)
+            {
+                _ErrorText.TextColor = Color.Red;
+                ErrorLevel.Children.Add(_ErrorText);
+                _AlreadyShowed = true;
+            }
+            _ErrorText.Text = text;
         }
 
         private void RegisterCallback(string rev)
@@ -47,6 +83,11 @@ namespace Client
 
                 //01 => already registred
             }
+        }
+
+        private void Input_Focused(object sender, FocusEventArgs e)
+        {
+            ClearError();
         }
     }
 }

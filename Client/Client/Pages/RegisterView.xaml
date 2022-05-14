@@ -4,15 +4,18 @@
              x:Class="Client.RegisterView"
 			 BackgroundColor="#1d1f1d">
     <ContentPage.Content>
-		<StackLayout>
+		<StackLayout Padding="20">
 			<StackLayout HorizontalOptions="Center" Padding="10">
-				<Label Text="Provide us informations to register your account."></Label>
+				<Label Text="Provide us informations to create your account."></Label>
 			</StackLayout>
 			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
-				<Entry Placeholder="Username" WidthRequest="200"  x:Name="Input_Username"></Entry>
-				<Entry Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
-				<Button BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
+				<Entry Focused="Input_Focused" Placeholder="Username" WidthRequest="200"  x:Name="Input_Username"></Entry>
+				<Entry Focused="Input_Focused" IsPassword="true" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
+				<StackLayout x:Name="ErrorLevel">
+					
+				</StackLayout>
 			</StackLayout>
+			<Button BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
 		</StackLayout>
 
     </ContentPage.Content>

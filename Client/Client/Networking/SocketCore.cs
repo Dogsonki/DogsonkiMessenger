@@ -76,6 +76,7 @@ namespace Client.Networking
             catch(SocketException ex)
             {
                 Console.WriteLine("Couldn't connect: " + ex);
+                return;
             }
 
             IsConnected = true;
@@ -92,50 +93,59 @@ namespace Client.Networking
             byte[] buffer = new byte[MaxBuffer];
             int LenBuffer;
 
-            while (IsConnected)
+            try
             {
-                while((LenBuffer = Stream.Read(buffer,0,buffer.Length)) != 0)
+                while (IsConnected)
                 {
-                    bool _WillReadRaw = true;
-                    string rev = Encoding.UTF8.GetString(buffer);
-                    Console.WriteLine("Recived raw: " + rev);
-                    for (int i = 0; i<RequestedCallback.Callbacks.Count;i++)
+                    while ((LenBuffer = Stream.Read(buffer, 0, buffer.Length)) != 0)
                     {
-                        try
+                        bool _WillReadRaw = true;
+                        string rev = Encoding.UTF8.GetString(buffer);
+                        Console.WriteLine("Recived raw: " + rev);
+                        for (int i = 0; i < RequestedCallback.Callbacks.Count; i++)
                         {
-                            int tk;
-                            RequestedCallback req = RequestedCallback.Callbacks[i];
-                            if (GetToken(rev,out tk))
+                            try
                             {
-                                if(tk == req.GetToken())
+                                int tk;
+                                RequestedCallback req = RequestedCallback.Callbacks[i];
+                                if (GetToken(rev, out tk))
                                 {
-                                    //Bug: if we take length of rev it will return 254 for same reason 
-                                    //this could be by convering byte
-                                    Console.WriteLine("Callback found: " + tk);
-                                    Console.WriteLine("Calling callback with: " + rev.Substring(5));
-                                    req.Invoke(rev.Substring(5));
-                                    _WillReadRaw = false;
+                                    if (tk == req.GetToken())
+                                    {
+                                        //Bug: if we take length of rev it will return 254 for same reason 
+                                        //this could be by convering byte
+                                        Console.WriteLine("Callback found: " + tk);
+                                        Console.WriteLine("Calling callback with: " + rev.Substring(5));
+                                        req.Invoke(rev.Substring(5));
+                                        _WillReadRaw = false;
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Cannot get token from recived message:" + rev);
                                 }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                Console.WriteLine("Cannot get token from recived message:" + rev);
+                                Console.WriteLine(ex);
                             }
                         }
-                        catch(Exception ex)
-                        {
-                            Console.WriteLine(ex);
-                        }
-                    }
-                    if(_WillReadRaw)
-                       ReadRawBuffer(Encoding.UTF8.GetString(buffer));
+                        if (_WillReadRaw)
+                            ReadRawBuffer(Encoding.UTF8.GetString(buffer));
 
-                    Stream.Flush();
-                    buffer = new byte[MaxBuffer];
-                    rev = String.Empty;
+                        //idk if i should do that but it works 
+                        Stream.Flush();
+                        buffer = new byte[MaxBuffer];
+                        rev = String.Empty;
+                    }
                 }
-       
+
                 Thread.Sleep(10);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                StaticNavigator.PopAndPush(new AppEntry());
             }
         }
 
@@ -158,12 +168,13 @@ namespace Client.Networking
                     MessageViewModel.AddMessage(JsonConvert.DeserializeObject<MessageModel>(RemoveToken(RecivedMessage)));  
                     break;
                 default:
-                    Console.WriteLine("Reading raw buffer: " + RecivedMessage);
+                    Console.WriteLine("Cannot find raw definition");
                     break;
             }
         }
 
         private static string RemoveToken(string req) => req.Substring(5);
+
         private static bool GetToken(string req, out int tk)
         {
             if (req.Length == 0)
@@ -245,35 +256,36 @@ namespace Client.Networking
             }
         }
 
-        public static void SendRaw(string data, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+        public static bool SendRaw(string data, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
             if (data is null || string.IsNullOrEmpty(data))
             {
                 Console.WriteLine($"Data is null {path} line: {lineNumber}");
-                return;
+                return false;
             }
 
             if (Client == null || Stream == null)
             {
                 Console.WriteLine("Client is null");
-                return; 
+                return false;
             }
 
             if (!IsConnected)
             {
                 Console.WriteLine("Client is not connected to server");
-                return;
+                return false;
             }
 
             if (!Client.Connected)
             {
                 Console.WriteLine("Client disconnected form server");
-                return;
+                return false;
             }
             Console.WriteLine("Adding to queue" + data);
             SocketMessageModel model = new SocketMessageModel() { Data= data };
             UpdatedQueue.Add(model);
             model.UpdatedIndex = UpdatedQueue.IndexOf(model);
+            return true;
         }
     }
 }

@@ -19,30 +19,70 @@ namespace Client.Pages
         {
             string username = Input_Username.Text;
             string password = Input_Password.Text;
-            LocalUser.Username = username;
-            SocketCore.SendRaw("logging");
+
+            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                ShowError("Username or password is empty");
+                return;
+            }    
+
+            if (SocketCore.SendRaw("logging"))
+            {
+                ShowError("Samething went wrong, probably on server side ... ");
+                return;
+            }
+
             SocketCore.SendRaw(username);
             SocketCore.SendR(LoginCallback, password, 0001, 0001);
             //1 == logged 
             //0 == samething wrong 
         }
 
+        protected Label _ErrorText = new Label();
+        protected bool _AlreadyShowed = false;  
+
+        private void ClearError()
+        {
+            _ErrorText.Text = "";
+            ErrorLevel.Children.Remove(_ErrorText);
+            _AlreadyShowed = false;
+        }
+
+        private void ShowError(string text)
+        {
+            if (!_AlreadyShowed)
+            {
+                _ErrorText.TextColor = Color.Red;
+                ErrorLevel.Children.Add(_ErrorText);
+                _AlreadyShowed = true;
+            }
+            _ErrorText.Text = text;
+        }
 
         private void LoginCallback(string rev)
         {
             switch (rev[0])
             {
                 case '1':
-                    StaticNavigator.Push(new MainAfterLoginPage());
+                    //Login is correct, setting up profile and redirecting to MainAfterLoginPage
+
                     LocalUser.Username = Input_Username.Text;
+
+                    StaticNavigator.Push(new MainAfterLoginPage());
+
                     break;
                 case '0':
-                    Console.WriteLine("Password is wrong");
+                    ShowError("Password or username is incorrect");
                     break;
                 default:
-                    Console.WriteLine("Samething went wrong: " + rev);
+                    ShowError("Samething went wrong, probably on server side ... ");
                     break;
             }
+        }
+
+        private void Input_Focused(object sender, FocusEventArgs e)
+        {
+            ClearError();
         }
     }
 }

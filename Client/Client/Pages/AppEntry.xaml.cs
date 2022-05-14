@@ -11,6 +11,24 @@ namespace Client.Pages
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
+
+            //SocketCore.Init();
+
+            ReadCache();
+        }
+
+        private void ReadCache()
+        {
+            //Read cache to auto login 
+            //Need to do token 
+            if(Device.RuntimePlatform == Device.Android)
+            {
+
+            }
+            else
+            {
+
+            }
         }
 
         private void LoginOptionClicked(object sender, EventArgs e)
