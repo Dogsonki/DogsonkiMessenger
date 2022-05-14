@@ -95,6 +95,12 @@ class Client(Connection):
             self.send_message(f"{self.registering_app_code}-00")  # 00 --> incorrect password
         return False
 
+    def logout(self):
+        del current_connections[self.login]
+        self.login = False
+        self.password = False
+        self.get_login_action()
+
     def get_login_data(self):
         login_data = []
         for _ in range(2):

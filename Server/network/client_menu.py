@@ -9,19 +9,20 @@ GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
 
 
 class ClientMenu:
-    def __init__(self, connection: Client):
+    def __init__(self, client: Client):
         self.search_code = "0004"
-        self.connection = connection
+        self.client = client
 
     def listening(self):
         # 0 --> go to chatroom with given login
         # 1 --> search people
+        # 2 --> logout
         while True:
-            message = self.connection.receive_message()
+            message = self.client.receive_message()
             code = message.split("-")[0]
             arg = " ".join(message.split("-")[1:])
             if code == "0":
-                Chatroom(self.connection, arg).init_chatroom()
+                Chatroom(self.client, arg).init_chatroom()
             elif code == "1":
                 logins_all = GET_INFO_FROM_DB.search_by_login(arg)
                 first_logins = []
@@ -33,7 +34,9 @@ class ClientMenu:
                         break
                     else:
                         first_logins.append(i)
-                self.connection.send_message(f"{self.search_code}-{str(first_logins)}")
+                self.client.send_message(f"{self.search_code}-{str(first_logins)}")
+            elif code == "2":
+                self.client.logout()
 
 
 class Chatroom:
