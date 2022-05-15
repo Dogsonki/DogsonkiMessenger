@@ -1,15 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Client.Networking
 {
-    public struct SocketMessageModel
+    public class SocketMessageModel
     {
-        public string Data;
+        public byte[] m_Data;
+
+        public byte[] Data
+        {
+            get
+            {
+                return m_Data;
+            }
+            set
+            {
+                m_Data = value;
+            }
+        }
+
         public int UpdatedIndex;
-        public int InSendIndex;
+
+        public bool isImage = false;
+
+        public SocketMessageModel() { }
+
+        public SocketMessageModel(Byte[] bytes) 
+        {
+            isImage = true;
+        }
     }
 
     public class RequestedCallback
@@ -22,7 +44,6 @@ namespace Client.Networking
         public string ContentSend;
         public string ContentRecived;
         protected int CallbackID;
-        private bool isAsync = false; 
 
         public RequestedCallback(Action<string> callback, string contentsend, int pretoken)
         {
@@ -60,6 +81,7 @@ namespace Client.Networking
             }
             // Callbacks[Callbacks.FindIndex(x => x == this)] = null;
             //Callbacks.Remove(this); //Hope it won't crash app 
+            Callbacks.Remove(this);
             return _r;
         }
     }

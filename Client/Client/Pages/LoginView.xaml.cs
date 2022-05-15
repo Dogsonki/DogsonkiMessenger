@@ -1,5 +1,6 @@
 ﻿using Client.Networking;
 using Client.Utility;
+using Client.Views;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -68,8 +69,7 @@ namespace Client.Pages
 
                     LocalUser.Username = Input_Username.Text;
                     LocalUser.IsLoggedIn = true;
-                    StaticNavigator.Push(new MainAfterLoginPage());
-
+                    StaticNavigator.Push(new MainAfterLoginPage(true));
                     break;
                 case '0':
                     ShowError("Password or username is incorrect");
