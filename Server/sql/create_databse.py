@@ -13,7 +13,8 @@ class CreateDatabase:
                                    login VARCHAR(50) NOT NULL UNIQUE,
                                    password VARCHAR(50) NOT NULL,
                                    warnings INTEGER NOT NULL,
-                                   banned BIT NOT NULL
+                                   banned BIT NOT NULL,
+                                   avatar BLOB
                                    );""")
 
     @staticmethod

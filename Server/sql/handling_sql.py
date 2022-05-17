@@ -45,6 +45,13 @@ class GetInfoFromDatabase:
             return False
         return [i for i, in chats]
 
+    @staticmethod
+    def get_user_avatar(login):
+        database_cursor.execute("""SELECT avatar FROM users
+                                   WHERE login=%s""", (login, ))
+        avatar = database_cursor.fetchone()
+        return avatar
+
 
 class InsertIntoDatabase:
     @staticmethod
@@ -60,6 +67,12 @@ class InsertIntoDatabase:
             return True
         except IntegrityError:
             return False
+
+    @staticmethod
+    def set_user_avatar(login, avatar):
+        database_cursor.execute("""UPDATE users 
+                                   SET avatar = %s 
+                                   WHERE login = %s;""", (avatar, login))
 
 
 def check_if_login_exist(login):

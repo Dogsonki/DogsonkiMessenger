@@ -25,7 +25,7 @@ class Connection:
 
     def receive_message(self):
         try:
-            received_message = self.client.recv(1024).decode("UTF-8")
+            received_message = self.client.recv(1024).decode("UTF-8", "ignore")
             print(f"recv: {received_message}")
             if not received_message:
                 self.close_connection()
@@ -34,6 +34,22 @@ class Connection:
         except socket.error:
             self.close_connection()
             return False
+
+    def send_image(self, image_raw):
+        try:
+            print(f"sent {image_raw}")
+            self.client.sendall(bytes(image_raw, "UTF-8"))
+        except socket.error:
+            self.close_connection()
+
+    def receive_image(self):
+        image_data = ""
+        while True:
+            data = self.receive_message()
+            if data == "ENDFILE":
+                break
+            image_data += data
+        return image_data
 
     def close_connection(self):
         if not self.closed:
@@ -51,6 +67,7 @@ class Client(Connection):
         self.login_app_code = "0001"
         self.registering_app_code = "0002"
         self.last_user_chats = "0006"
+        self.avatar_code = "0007"
 
     def get_login_action(self):
         while True:
@@ -73,6 +90,13 @@ class Client(Connection):
             time.sleep(0.2)  # if not, client app crashes
             user_chats = SELECT_SQL.get_user_chats(self.login)
             self.send_message(f"{self.last_user_chats}-{user_chats}")
+            time.sleep(0.1)
+            avatar, = SELECT_SQL.get_user_avatar(self.login)
+            self.send_message(self.avatar_code)
+            time.sleep(0.1)
+            self.send_image(str(avatar))
+            time.sleep(2)
+            self.send_message(self.avatar_code)
             current_connections[self.login] = self.client
             return True
         else:
@@ -96,13 +120,15 @@ class Client(Connection):
         self.login = False
         self.password = False
         self.get_login_action()
+        
+    def set_avatar(self):
+        avatar = self.receive_image()
+        INSERT_SQL.set_user_avatar(self.login, avatar)
 
     def get_login_data(self):
         login_data = []
         for _ in range(2):
             data_from_user = self.receive_message()
-            if data_from_user == "Q":
-                return "", ""
             login_data.append(data_from_user)
         return login_data
 
@@ -110,8 +136,6 @@ class Client(Connection):
         registering_data = []
         for _ in range(2):
             data_from_user = self.receive_message()
-            if data_from_user == "Q":
-                return "", ""
             registering_data.append(data_from_user)
         return registering_data
 

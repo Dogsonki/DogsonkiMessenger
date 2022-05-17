@@ -17,6 +17,7 @@ class ClientMenu:
         # 0 --> go to chatroom with given login
         # 1 --> search people
         # 2 --> logout
+        # 3 --> change avatar
         while True:
             message = self.client.receive_message()
             code = message.split("-")[0]
@@ -24,19 +25,12 @@ class ClientMenu:
             if code == "0":
                 Chatroom(self.client, arg).init_chatroom()
             elif code == "1":
-                logins_all = GET_INFO_FROM_DB.search_by_login(arg)
-                first_logins = []
-                # can send only 1024 bytes, 1024/8 ~ 120
-                logins_len = 0
-                for i in logins_all:
-                    logins_len += len(i)+2
-                    if logins_len >= 120:
-                        break
-                    else:
-                        first_logins.append(i)
+                first_logins = search_users(arg)
                 self.client.send_message(f"{self.search_code}-{str(first_logins)}")
             elif code == "2":
                 self.client.logout()
+            elif code == "3":
+                self.client.set_avatar()
 
 
 class Chatroom:
@@ -80,3 +74,17 @@ class Chatroom:
 
     def save_message_in_database(self, message):
         INSERT_INTO_DB.save_message(message, self.connection.login, self.receiver)
+
+
+def search_users(query):
+    logins_all = GET_INFO_FROM_DB.search_by_login(query)
+    first_logins = []
+    # can send only 1024 bytes, 1024/8 ~ 120
+    logins_len = 0
+    for i in logins_all:
+        logins_len += len(i) + 2
+        if logins_len >= 120:
+            break
+        else:
+            first_logins.append(i)
+    return first_logins
