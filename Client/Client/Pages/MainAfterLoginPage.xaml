@@ -12,7 +12,7 @@
 	<ContentPage.Content>
 		<StackLayout>
 			<StackLayout Padding="20" Spacing="20" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand">
-
+				<Image  x:Name="here"></Image>
 				<!-- Find People -->
 				<StackLayout  Spacing="20">
 					<StackLayout.GestureRecognizers>
@@ -54,6 +54,7 @@
 			</StackLayout>
 
 			<!-- Last Chats List -->
+			<Image x:Name="dd" WidthRequest="50" HeightRequest="50"></Image>
 			<StackLayout>
 				<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="20" Text="Last Chats"></Label>
 			</StackLayout>

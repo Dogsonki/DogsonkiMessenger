@@ -8,8 +8,7 @@ namespace Client
         public App()
         {
             InitializeComponent();
-
-            MainPage = new NavigationPage(new AppEntry());
+            MainPage = new NavigationPage(new MainAfterLoginPage());
         }
 
         protected override void OnStart()
