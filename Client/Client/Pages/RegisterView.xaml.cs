@@ -70,8 +70,7 @@ namespace Client
 
         private void RegisterCallback(string rev)
         {
-            string token = rev.Substring(0, 2);
-            if (token.ToString() == "1")
+            if (rev[0] == '1')
             {
                 //Check if this function have to be invoked in main thread
                 Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginView()); });

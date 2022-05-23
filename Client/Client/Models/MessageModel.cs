@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 
 namespace Client.Models
 {
     public class MessageModel
     {
-        public List<MessageModel> m_Cache { get; set; }
         protected string[] Cached;
 
         #region STYLE
@@ -27,8 +25,6 @@ namespace Client.Models
             Username = user;    
             MessageContent = message;
             time = time.Replace(".", "");
-            //Python sends %%%%%%.%%%%% for same reason ...
-
             try
             {
                 Time = DateTime.Parse(time);
@@ -39,17 +35,12 @@ namespace Client.Models
             }
         }   
 
-        //Used by local
+        //Used by client
         public MessageModel(string user, string message, DateTime time)
         {
             Username = user;
             MessageContent = message;
             Time = time;
-        }
-
-        public void AddToCache() 
-        {
-            m_Cache.Add(this);
         }
     }
 }

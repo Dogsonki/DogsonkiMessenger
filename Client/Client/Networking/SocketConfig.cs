@@ -38,10 +38,5 @@ namespace Client.Networking.Config
             }
             return null;
         }
-
-        public static void SaveConfig(SocketConfig sc)
-        {
-            DependencyService.Get<IFileService>().CreateFile("SocketConfig.json", JsonConvert.SerializeObject(sc));
-        }
     }
 }

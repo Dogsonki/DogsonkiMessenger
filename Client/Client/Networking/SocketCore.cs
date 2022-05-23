@@ -7,13 +7,14 @@ using System.Threading;
 using Client.Utility;
 using Newtonsoft.Json;
 using Client.Pages;
+using System.Linq;
 using Client.Views;
 using Client.Models;
 using System.Threading.Tasks;
 using Client.Networking.Config;
 using System.IO;
 using Xamarin.Forms;
-using System.Reflection;
+using Client.Utility.Services;
 
 namespace Client.Networking
 {
@@ -21,6 +22,7 @@ namespace Client.Networking
     {
         UFT8,
         BASE64,
+        IMAGE
     }
 
     public class SocketCore
@@ -32,34 +34,50 @@ namespace Client.Networking
         protected static Thread ManageSendingQueue { get; set; }
         protected static bool IsConnected { get; set; }
         protected static EncodingOption ActualDecoding { get; set; }
+        protected static List<byte[]> m_ReadingImage = new List<byte[]>();
 
         private const int MaxBuffer = 1024 * 8;
 
         public static void Init()
         {
             Config = SocketConfig.ReadConfig();
-#region Connect
+
             try
             {
                 Client = new TcpClient(Config.Ip, Config.Port);
                 Stream = Client.GetStream();
             }
-            catch(SocketException ex)
+            catch (SocketException ex)
             {
                 Console.WriteLine("Couldn't connect: " + ex);
-                return;
             }
 
             Client.ReceiveBufferSize = MaxBuffer;
             Client.SendBufferSize = MaxBuffer;
-
+            Client.NoDelay = false;
             IsConnected = true;
             ReciveThread = new Thread(Recive);
             ManageSendingQueue = new Thread(MenageQueue);
 
             ReciveThread.Start();
             ManageSendingQueue.Start();
-#endregion
+        }   
+
+
+        public static bool TryReconnect()
+        {
+            return true;
+            try
+            {
+                Client = new TcpClient(Config.Ip, Config.Port);
+                Stream = Client.GetStream();
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine("Couldn't connect: " + ex);
+                return false;
+            }
+            return true;
         }
 
         private static bool m_ReadNextImage = false;   
@@ -78,51 +96,56 @@ namespace Client.Networking
                         bool _WillReadRaw = true;
 
                         string DecodedString = string.Empty;
-
                         switch (ActualDecoding)
                         {
                             //When server starts sending image client have to decode this by BASE64 
                             //otherwise image will be corrupted
                             //Token 0007 
-                            
+
+                            case EncodingOption.IMAGE:
+                                m_ReadingImage.Add(buffer);
+                                break;
+
                             case EncodingOption.UFT8:
-                                DecodedString = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                                DecodedString = Encoding.UTF8.GetString(buffer, 0,LenBuffer);
                                 break;
 
                             case EncodingOption.BASE64:
-                                 DecodedString = Convert.ToBase64String(buffer);
+                                DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
+                                ActualDecoding = EncodingOption.UFT8;
                                 break;
                         }
+                        Console.WriteLine($"[Socket Recived] {DecodedString}");
 
-                        for (int i = 0; i < RequestedCallback.Callbacks.Count; i++)
-                            try
+                        string[] Buffers = DecodedString.Split('$');
+                        for(int i = 0; i < Buffers.Length; i++)
+                        {
+                            _WillReadRaw = true;
+                            if (Buffers[i].Length == 0)
+                                continue;
+                            Console.WriteLine($"[Socket Decoded] {Buffers[i]}");
+                            for(int j= 0; j < RequestedCallback.GetCount(); j++)
                             {
                                 int tk;
                                 RequestedCallback req = RequestedCallback.Callbacks[i];
-                                if (GetToken(DecodedString, out tk))
+                                if (GetToken(Buffers[i], out tk))
                                 {
                                     if (tk == req.GetToken())
                                     {
-                                        //Bug: if we take length of rev it will return 254 for same reason 
-                                        //this could be by convering byte
-                                        req.Invoke(DecodedString.Substring(5));
+                                        req.Invoke(RemoveToken(Buffers[i]));
                                         _WillReadRaw = false;
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Cannot get token from recived message:" + DecodedString);
+                                    Console.WriteLine("Cannot get token from recived message:" + Buffers[i]);
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine(ex);
-                            }
+                                Console.WriteLine($"Token rev {tk} to {req.GetToken()}");
+                                if (_WillReadRaw)
+                                    ReadRawBuffer(Encoding.UTF8.GetString(buffer));
 
-                        if (_WillReadRaw)
-                            ReadRawBuffer(Encoding.UTF8.GetString(buffer));
-
-                        //idk if i should do that but it works 
+                            }
+                        }
                         Stream.Flush();
                         buffer = new byte[MaxBuffer];
                         DecodedString = string.Empty;
@@ -138,23 +161,18 @@ namespace Client.Networking
             }
         }
 
-        protected static List<string> m_ReadingImage = new List<string>();
         private static void ReadRawBuffer(string RecivedMessage)
         {
             int token;
             if (!GetToken(RecivedMessage, out token))//TODO: Still can write sametimes to reading image
             {
-                if (m_ReadNextImage)
-                {
-                    m_ReadingImage.Add(RecivedMessage);
-                }
                 return;
             }
 
             switch (token)
             {
                 case 0003:
-                    Device.BeginInvokeOnMainThread(() => Application.Current.MainPage.Navigation.PushAsync(new MessageView()));
+                    Device.BeginInvokeOnMainThread(() => StaticNavigator.Push(new MessageView()));
                     break;
                 case 0004:
                     PeopleFinder.ParseQuery(RemoveToken(RecivedMessage));
@@ -162,7 +180,9 @@ namespace Client.Networking
                 case 0005:
                     try
                     {
+                        Console.WriteLine(RemoveToken(RecivedMessage));
                         Device.InvokeOnMainThreadAsync(()=>
+                      
                             MessageViewModel.AddMessage(JsonConvert.DeserializeObject<MessageModel>(RemoveToken(RecivedMessage)))
                         );
                        
@@ -178,21 +198,30 @@ namespace Client.Networking
                 case 0007:
                     if (m_ReadNextImage)
                     {
-                        m_ReadNextImage = false;
-                        StringBuilder br = new StringBuilder();
-                        
-                        foreach(var b in m_ReadingImage)
-                        {
-                            br.Append(b);
-                        }
+                        Console.WriteLine("<Ending image>");
+                        Console.WriteLine($"Image len: {m_ReadingImage[0].Length+m_ReadingImage[1].Length}");
 
-                        SendRaw(br.ToString());
-                        Device.BeginInvokeOnMainThread(() => MainAfterLoginPage.h.Source = ImageSource.FromStream(
-                            () => new MemoryStream(Encoding.UTF8.GetBytes(br.ToString()))));
+                        List<byte> image = new List<byte>();
+                        foreach(var a in m_ReadingImage)
+                        {
+                            Console.WriteLine("byte: " + $@"{Encoding.UTF8.GetString(a)}");
+                            foreach (var r in a)
+                            {
+                                image.Add(r);
+                            }
+                        }
+                        ImageSource d = ImageSource.FromStream(() => new MemoryStream(image.ToArray()));
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            MainAfterLoginPage.f.Source = d;
+                        });
+                        Console.WriteLine("is image readed? ");
+                        ActualDecoding = EncodingOption.UFT8; 
                     }   
                     else
                     {
-                        ActualDecoding = EncodingOption.BASE64;
+                        Console.WriteLine("<Starting image> ");
+                        ActualDecoding = EncodingOption.IMAGE;
                         m_ReadNextImage = true;
                     }
                     break;
@@ -201,39 +230,53 @@ namespace Client.Networking
                     break;
             }
         }
-
-        private static string RemoveToken(string req) => req.Substring(5);
-
-        public static void SendImage(Type type, string resourceName)
+    
+        private static string RemoveToken(string req)
         {
-            byte[] bytes;
-
-            using (Stream sr = IntrospectionExtensions.GetTypeInfo(type.GetType()).Assembly.GetManifestResourceStream($"Client.Pages.{resourceName}"))
-            {
-                if (sr == null)
-                {
-                    Console.WriteLine("Stream of image is null");
-                    return;
-                }
-                
-                bytes = new byte[sr.Length];
-                sr.Read(bytes, 0, bytes.Length);
-            }
-
-            if (bytes.Length < 0)
-            {
-                Console.WriteLine("Stream have 0 bytes"); //idk if it's possible just to be sure to not send 0 bytes
-                return;
-            }
-              
-
-            SendRaw("3");
-            SendRaw(bytes);
-            SendRaw("ENDFILE");
-
-            bytes = null;
+            if (req.Length < 5)
+                return "";
+            return req.Substring(5);
         }
 
+        public static void SendFile(byte[] stream)
+        {
+            Console.WriteLine($"Len of sending image: {stream.Length}");
+            ImageSource d = ImageSource.FromStream(() => new MemoryStream(stream)); 
+
+            SlicedBuffer sb = new SlicedBuffer(stream, 1024);
+
+            SendRaw("3");
+
+            sb.GetSlicedBuffer().ForEach((buff) =>
+            {
+                SendRaw(buff);
+            });
+            SendRaw("ENDFILE");
+        }
+
+        public static void SendFile(string resourceName, string location = "temp")
+        {
+            /* 
+             Buffer cannot be encoded into UTF8 or BASE64 
+             have to be send just a raw byte[] 
+             */
+            IFileService sr = DependencyService.Get<IFileService>();
+            byte[] buffer = sr.ReadFileFromStorage(resourceName, location);
+
+            if (buffer.Length < 200)
+                Console.WriteLine("Buffer was null");
+
+            SlicedBuffer sb = new SlicedBuffer(buffer, MaxBuffer);
+            SendRaw("3");
+
+            sb.GetSlicedBuffer().ForEach((buff) =>
+            {
+                SendRaw(buff);
+            });
+
+            SendRaw("ENDFILE");
+        }
+         
         private static bool GetToken(string req, out int tk)
         {
             if (req.Length == 0)
@@ -241,8 +284,7 @@ namespace Client.Networking
                 tk = -1;
                 return false;
             }
-            //Token has max 4 len and -
-            //ex. 0003-
+
             string br = req.Substring(0, 4);
             if (int.TryParse(br.ToString(), out tk))
             {
@@ -257,13 +299,10 @@ namespace Client.Networking
             SendRaw(SendingData);
         }
 
-        /// <summary>
-        /// TODO: Make async happen
-        /// </summary>
         public static void SendR(Task<string> callback, string data, int Token)
         {
             RequestedCallback.Callbacks.Add(new RequestedCallback(callback,data,Token));
-            SendRaw(data);//Write IDcallback too !
+            SendRaw(data);
         }
 
         protected static List<SocketMessageModel> SendingQueue = new List<SocketMessageModel>();
@@ -280,33 +319,30 @@ namespace Client.Networking
                         SocketMessageModel model = SendingQueue[i];
                         try
                         {
-                            Byte[] _buf;
+                            byte[] _buf;
                             try
                             {
-                                _buf = model.Data; 
-
+                                _buf = model.Data;
                                 Stream.Write(_buf, 0, _buf.Length);
                             }
                             catch (Exception ex)
                             {
                                 Console.WriteLine("Unregistred exception: " + ex);
                             }
+                            _buf = null;
                         }
                         catch (Exception ex)
                         {
                             Console.WriteLine(ex);
                         }
-                        Thread.Sleep(100);
                         SendingQueue.Remove(model);
                     }
                 }
                 if(UpdatedQueue.Count > 0)
                 {
-                    //Check if there is no memory leak from infinite adding Packages to UpdatedQueue
                     SendingQueue = new List<SocketMessageModel>(UpdatedQueue);
                     UpdatedQueue.Clear();
                 }
-
                 Thread.Sleep(100);
             }
         }
@@ -336,8 +372,6 @@ namespace Client.Networking
             return true;
         }
 
-        //For now it works only for JPG, and default raw variables 
-
         /// <summary>
         /// Packs package and preparing how to send it 
         /// </summary>
@@ -347,7 +381,9 @@ namespace Client.Networking
             SocketMessageModel model = null;
             if (data.GetType() == typeof(byte[]))
             {
-                if (((byte[])data).Length == 0)
+                byte[] _Data = (byte[])data;
+
+                if (_Data.Length == 0)
                     return;
 
                 model = new SocketMessageModel()
@@ -366,7 +402,10 @@ namespace Client.Networking
                 switch (option)
                 {
                     case EncodingOption.UFT8:
-                        model.Data = Encoding.UTF8.GetBytes((string)data);
+                        model.Data = Encoding.UTF8.GetBytes((string)data+"$");
+                        break;
+                    case EncodingOption.BASE64:
+                        model.Data = Convert.FromBase64String((string)data + "$");
                         break;
                 }
             }

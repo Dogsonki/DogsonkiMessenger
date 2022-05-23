@@ -33,29 +33,33 @@ namespace Client.Pages
                 return;
             }
 
-            SocketCore.SendRaw(username);
+            if (!SocketCore.SendRaw(username))
+            {
+                SocketCore.TryReconnect();
+                return;
+            }
             SocketCore.SendR(LoginCallback, password, 0001);
             //1 == logged 
             //0 == samething wrong 
         }
 
         protected Label _ErrorText = new Label();
-        protected bool _AlreadyShowed = false;  
+        protected bool _AlreadyShowen = false;  
 
         private void ClearError()
         {
             _ErrorText.Text = "";
             ErrorLevel.Children.Remove(_ErrorText);
-            _AlreadyShowed = false;
+            _AlreadyShowen = false;
         }
 
         private void ShowError(string text)
         {
-            if (!_AlreadyShowed)
+            if (!_AlreadyShowen)
             {
                 _ErrorText.TextColor = Color.Red;
                 ErrorLevel.Children.Add(_ErrorText);
-                _AlreadyShowed = true;
+                _AlreadyShowen = true;
             }
             _ErrorText.Text = text;
         }
