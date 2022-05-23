@@ -56,13 +56,14 @@ class Buffer:
 
 
 class Connection:
+    delimiter = b"\0"
     connection: socket.socket
     buffer: Buffer
     
     def __init__(self, connection: socket.socket, address):
         self.client = connection
         self.address = address
-        self.buffer = Buffer(connection)
+        self.buffer = Buffer(connection, Connection.delimiter)
 
         self.login = False
         self.password = False
@@ -71,7 +72,7 @@ class Connection:
     def send_message(self, message: Message):
         print(f"sent: {message}")
         try:
-            self.client.send(json.dumps(message).encode("UTF-8"))
+            self.client.send(json.dumps(message).encode("UTF-8") + Connection.delimiter)
         except socket.error:
             self.close_connection()
 
