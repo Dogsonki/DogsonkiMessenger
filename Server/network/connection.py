@@ -1,42 +1,98 @@
-import socket
+import json
 import time
+import socket
+from dataclasses import dataclass
+from enum import Enum
+
+from typing import Any, Optional
 
 from Server.sql import handling_sql
+
 
 current_connections = {}
 INSERT_SQL = handling_sql.InsertIntoDatabase()
 SELECT_SQL = handling_sql.GetInfoFromDatabase()
 
 
+class MessageType(Enum):
+    LOGIN = 0
+    CONTINUE = 5
+
+
+@dataclass
+class Message:
+    type: MessageType
+    data: dict[str, Any]
+
+    @classmethod
+    def deserialize(cls, message: dict[str, Any]):
+        return cls(
+            MessageType(message["type"]),
+            message["data"]
+        )
+
+
+class Buffer:
+    socket: socket.socket
+    buffer: bytes
+    delimiter: bytes
+
+    def __init__(self, sock, delimiter=b"\0"):
+        self.socket = sock
+        self.buffer = b""
+        self.delimiter = delimiter
+
+    def read(self) -> Optional[str]:
+        while b'\0' not in self.buffer:
+            data = self.socket.recv(1024)
+            if not data:
+                return None
+
+            self.buffer += data
+
+        line, _, self.buffer = self.buffer.partition(b'\r\n')
+
+        return line.decode("UTF-8")
+
+
 class Connection:
-    def __init__(self, connection, address):
+    connection: socket.socket
+    buffer: Buffer
+    
+    def __init__(self, connection: socket.socket, address):
         self.client = connection
         self.address = address
+        self.buffer = Buffer(connection)
+
         self.login = False
         self.password = False
         self.closed = False
 
-    def send_message(self, message):
+    def send_message(self, message: Message):
         print(f"sent: {message}")
         try:
-            self.client.send(bytes(message, "UTF-8"))
+            self.client.send(json.dumps(message).encode("UTF-8"))
         except socket.error:
             self.close_connection()
 
-    def receive_message(self):
+    def receive_message(self) -> Optional[Message]:
         while True:
             try:
-                received_message = self.client.recv(1024).decode("UTF-8")
-                print(f"recv: {received_message}")
+                received_message = self.buffer.read()
+                print(f"buffer.read: {received_message}")
                 if not received_message:
                     self.close_connection()
-                    return False
-                if received_message.startswith == "0005":
+                    return None
+
+                message = json.loads(received_message, object_hook=Message.deserialize)  # FIXME: handle incorrect data
+
+                if message.type == MessageType.CONTINUE:
                     continue
-                return received_message
+
+                return message
             except socket.error:
                 self.close_connection()
-                return False
+                return None
 
     def close_connection(self):
         print(current_connections)
