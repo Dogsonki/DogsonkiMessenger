@@ -14,7 +14,7 @@ class CreateDatabase:
                                    password VARCHAR(50) NOT NULL,
                                    warnings INTEGER NOT NULL,
                                    banned BIT NOT NULL,
-                                   avatar BLOB
+                                   avatar MEDIUMBLOB
                                    );""")
 
     @staticmethod

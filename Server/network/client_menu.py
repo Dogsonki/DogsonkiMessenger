@@ -1,5 +1,4 @@
 import json
-import time
 
 from Server.sql import handling_sql
 from .connection import Client, current_connections
@@ -19,13 +18,13 @@ class ClientMenu:
         # 2 --> logout
         # 3 --> change avatar
         while True:
-            message = self.client.receive_message()
+            message, = self.client.receive_message()
             code = message.split("-")[0]
             arg = " ".join(message.split("-")[1:])
             if code == "0":
                 Chatroom(self.client, arg).init_chatroom()
             elif code == "1":
-                first_logins = search_users(arg)
+                first_logins = GET_INFO_FROM_DB.search_by_login(arg)
                 self.client.send_message(f"{self.search_code}-{str(first_logins)}")
             elif code == "2":
                 self.client.logout()
@@ -56,35 +55,21 @@ class Chatroom:
     def send_message(self, message_data):
         message = f"{self.message_chatroom_code}-{message_data}"
         self.connection.send_message(message)
-        time.sleep(0.2)  # without sleep app is broken
 
     def receive_messages(self):
-        while True:
+        in_chat = True
+        while in_chat:
             message = self.connection.receive_message()
-            if message == "$:}{#@$#@%":  # todo find better exit code
-                break
-
-            receiver_connection = current_connections.get(self.receiver)
-            if receiver_connection:
-                data = json.dumps({"user": self.receiver, "message": message, "time": time.time()})
-                message_data = f"{self.message_chatroom_code}-{data}"
-                receiver_connection.send_message(message_data)
-
-            self.save_message_in_database(message)
+            for i in message:
+                if i == "ENDCHAT":  # todo find better exit code
+                    in_chat = False
+                    break
+                #receiver_connection = current_connections.get(self.receiver)
+                #if receiver_connection:
+                #    data = json.dumps({"user": self.receiver, "message": i, "time": time.time()})
+                #    message_data = f"{self.message_chatroom_code}-{data}"
+                #    receiver_connection.send(bytes(message_data, "UTF-8"))
+                self.save_message_in_database(i)
 
     def save_message_in_database(self, message):
         INSERT_INTO_DB.save_message(message, self.connection.login, self.receiver)
-
-
-def search_users(query):
-    logins_all = GET_INFO_FROM_DB.search_by_login(query)
-    first_logins = []
-    # can send only 1024 bytes, 1024/8 ~ 120
-    logins_len = 0
-    for i in logins_all:
-        logins_len += len(i) + 2
-        if logins_len >= 120:
-            break
-        else:
-            first_logins.append(i)
-    return first_logins
