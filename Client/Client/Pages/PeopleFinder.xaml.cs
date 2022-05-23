@@ -13,6 +13,7 @@ namespace Client.Pages
         public PeopleFinder()
         {
             NavigationPage.SetHasNavigationBar(this, false);
+            PeopleFinderViewModel.PeopleFound.Clear();
             InitializeComponent();
         }
 

@@ -32,7 +32,7 @@ namespace Client
             if (IsVisible)
                 return base.OnBackButtonPressed();
 
-            SocketCore.SendRaw("$:}{#@$#@%"); //Close chat 
+            SocketCore.SendRaw("ENDCHAT"); //Close chat 
 
             return base.OnBackButtonPressed();
         }
@@ -40,7 +40,7 @@ namespace Client
         private void Entry_Completed(object sender, System.EventArgs e)
         {
             Entry input = (Entry)sender;
-            if (input.Text == "" || input.Text == "$:}{#@$#@%") 
+            if (input.Text == "" || input.Text == "ENDCHAT") 
             {
                 return;
             }

@@ -1,28 +1,67 @@
 ﻿#define l
 using Client.Networking;
+using Client.Utility.Services;
 using Client.Views;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+using System;
 using System.IO;
 using System.Reflection;
-using System;
+using System.Text;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
 namespace Client.Pages
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainAfterLoginPage : ContentPage
     {
-        public static Image h;
         public static MainAfterLoginPage MainInstance { get; set; }
-
+        public static Image f;
         public MainAfterLoginPage(bool redirectedFormLogin = false)
         {
-            NavigationPage.SetHasNavigationBar(this,false); 
+            NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
+            f = here;
+
+          
             MainInstance = this;
-            h = here;
                 if (redirectedFormLogin)
                     MainAfterLoginViewModel.Clear();
+            return;
+            #region test png buffer
+
+            if (false)
+            {
+                var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
+                byte[] b;
+                using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
+                {
+
+                    byte[] bf = new byte[16 * 1024];
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        int read;
+                        while ((read = stream.Read(bf, 0, bf.Length)) > 0)
+                        {
+                            ms.Write(bf, 0, read);
+                        }
+                        b = ms.ToArray();
+                    }
+                }
+            }
+
+            return;
+            IFileService aa = DependencyService.Get<IFileService>();
+            byte[] buffer = aa.ReadFileFromStorage("B.png");
+
+            using (MemoryStream s = new MemoryStream(buffer))
+            {
+                if (s == null)
+                {
+                    Console.WriteLine("Buffer was null");
+                }
+                SocketCore.SendFile(s.ToArray());
+            }
+            #endregion
         }
 
         private void FindPeople_Clicked(object sender, System.EventArgs e)

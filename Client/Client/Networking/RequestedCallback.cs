@@ -62,7 +62,7 @@ namespace Client.Networking
         }
 
         public int GetToken() => CallbackID;
-
+        public static int GetCount() => Callbacks.Count;
         public bool Invoke(string Recived)
         {
             bool _r = false;

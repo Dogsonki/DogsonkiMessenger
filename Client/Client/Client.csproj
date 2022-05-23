@@ -12,12 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Pages\A.jpg" />
+    <None Remove="Pages\B.png" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Networking\SocketConfig.json" />
-    <EmbeddedResource Include="Pages\A.jpg" />
+    <EmbeddedResource Include="Pages\B.png" />
   </ItemGroup>
 
   <ItemGroup>
