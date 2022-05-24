@@ -18,6 +18,10 @@ namespace Client.Pages
 
         private void LoginDone(object sender, EventArgs e)
         {
+            if (!SocketCore.TryConnect())
+            {
+                ShowError("Unable to connect to server");
+            }
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
@@ -35,7 +39,6 @@ namespace Client.Pages
 
             if (!SocketCore.SendRaw(username))
             {
-                SocketCore.TryReconnect();
                 return;
             }
             SocketCore.SendR(LoginCallback, password, 0001);

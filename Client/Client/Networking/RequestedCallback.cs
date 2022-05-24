@@ -1,41 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using Client.Utility;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace Client.Networking
 {
-    public class SocketMessageModel
-    {
-        public byte[] m_Data;
-
-        public byte[] Data
-        {
-            get
-            {
-                return m_Data;
-            }
-            set
-            {
-                m_Data = value;
-            }
-        }
-
-        public int UpdatedIndex;
-
-        public bool isImage = false;
-
-        public SocketMessageModel() { }
-
-        public SocketMessageModel(Byte[] bytes) 
-        {
-            isImage = true;
-        }
-    }
 
     public class RequestedCallback
     {
+        //Callbacks might break sametimes when recive packet in wrong time
         public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
          
         protected Action<string> Callback;
@@ -53,16 +27,14 @@ namespace Client.Networking
             ContentSend = GetToken() + contentsend;
         }
 
-        public RequestedCallback(Task<string> callback, string contentsend, int pretoken)
-        {
-            AsyncCallback = callback;
-            ContentRecived = null;
-            ContentSend = GetToken() + contentsend;
-            CallbackID = pretoken;
-        }
-
         public int GetToken() => CallbackID;
         public static int GetCount() => Callbacks.Count;
+
+        /// <summary>
+        /// Invokes function and removes itself from list of callbacks
+        /// </summary>
+        /// <param name="Recived"></param>
+        /// <returns></returns>
         public bool Invoke(string Recived)
         {
             bool _r = false;
@@ -70,7 +42,7 @@ namespace Client.Networking
             {
                 try
                 {
-                    Console.WriteLine("Calling Action += "+Callback.Method.Name);
+                    Debug.Write("Invoking Action += "+Callback.Method.Name);
                     Device.BeginInvokeOnMainThread(() => Callback.Invoke(Recived));
                 }
                 catch (Exception ex)
@@ -79,8 +51,6 @@ namespace Client.Networking
                 }
                 _r = true;
             }
-            // Callbacks[Callbacks.FindIndex(x => x == this)] = null;
-            //Callbacks.Remove(this); //Hope it won't crash app 
             Callbacks.Remove(this);
             return _r;
         }

@@ -13,7 +13,6 @@ namespace Client.Views
 
         public static void ParseQuery(string rev)
         {
-            return;
             JArray ar = JArray.Parse(rev);
 
             foreach(var user in ar)

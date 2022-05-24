@@ -7,12 +7,11 @@ using System.Threading;
 using Client.Utility;
 using Newtonsoft.Json;
 using Client.Pages;
-using System.Linq;
 using Client.Views;
 using Client.Models;
-using System.Threading.Tasks;
 using Client.Networking.Config;
 using System.IO;
+using Client.Networking.Model;
 using Xamarin.Forms;
 using Client.Utility.Services;
 
@@ -35,10 +34,11 @@ namespace Client.Networking
         protected static bool IsConnected { get; set; }
         protected static EncodingOption ActualDecoding { get; set; }
         protected static List<byte[]> m_ReadingImage = new List<byte[]>();
+        protected static bool Initialized = false;
 
         private const int MaxBuffer = 1024 * 8;
 
-        public static void Init()
+        public static bool Init()
         {
             Config = SocketConfig.ReadConfig();
 
@@ -47,26 +47,40 @@ namespace Client.Networking
                 Client = new TcpClient(Config.Ip, Config.Port);
                 Stream = Client.GetStream();
             }
-            catch (SocketException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine("Couldn't connect: " + ex);
+                Debug.Error("Unable connect: " + ex);
+                return false;   
             }
+
+            if (Client == null)
+            {
+                Debug.Error("Unable connect, client was null");
+                return false;
+            }
+               
 
             Client.ReceiveBufferSize = MaxBuffer;
             Client.SendBufferSize = MaxBuffer;
-            Client.NoDelay = false;
             IsConnected = true;
+
             ReciveThread = new Thread(Recive);
             ManageSendingQueue = new Thread(MenageQueue);
 
             ReciveThread.Start();
             ManageSendingQueue.Start();
+            return true;
         }   
 
-
-        public static bool TryReconnect()
+        public static bool TryConnect()
         {
-            return true;
+            if (IsConnected)
+                return true;
+            if (!Initialized)
+            {
+                return Init();
+            }
+
             try
             {
                 Client = new TcpClient(Config.Ip, Config.Port);
@@ -74,7 +88,7 @@ namespace Client.Networking
             }
             catch (SocketException ex)
             {
-                Console.WriteLine("Couldn't connect: " + ex);
+                Console.WriteLine("Unable connect: " + ex);
                 return false;
             }
             return true;
@@ -115,7 +129,6 @@ namespace Client.Networking
                                 ActualDecoding = EncodingOption.UFT8;
                                 break;
                         }
-                        Console.WriteLine($"[Socket Recived] {DecodedString}");
 
                         string[] Buffers = DecodedString.Split('$');
                         for(int i = 0; i < Buffers.Length; i++)
@@ -123,10 +136,9 @@ namespace Client.Networking
                             _WillReadRaw = true;
                             if (Buffers[i].Length == 0)
                                 continue;
-                            Console.WriteLine($"[Socket Decoded] {Buffers[i]}");
                             for(int j= 0; j < RequestedCallback.GetCount(); j++)
                             {
-                                int tk;
+                                int tk = -1;
                                 RequestedCallback req = RequestedCallback.Callbacks[i];
                                 if (GetToken(Buffers[i], out tk))
                                 {
@@ -138,9 +150,9 @@ namespace Client.Networking
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Cannot get token from recived message:" + Buffers[i]);
+                                    Debug.Error("Cannot get token from recived message:" + Buffers[i]);
                                 }
-                                Console.WriteLine($"Token rev {tk} to {req.GetToken()}");
+                                Debug.Error($"Token rev {tk} to {req.GetToken()}");
                                 if (_WillReadRaw)
                                     ReadRawBuffer(Encoding.UTF8.GetString(buffer));
 
@@ -163,7 +175,7 @@ namespace Client.Networking
 
         private static void ReadRawBuffer(string RecivedMessage)
         {
-            int token;
+            int token=-1;
             if (!GetToken(RecivedMessage, out token))//TODO: Still can write sametimes to reading image
             {
                 return;
@@ -235,7 +247,7 @@ namespace Client.Networking
         {
             if (req.Length < 5)
                 return "";
-            return req.Substring(5);
+            return req[5..];
         }
 
         public static void SendFile(byte[] stream)
@@ -285,7 +297,7 @@ namespace Client.Networking
                 return false;
             }
 
-            string br = req.Substring(0, 4);
+            string br = req[..4];
             if (int.TryParse(br.ToString(), out tk))
             {
                 return true;
@@ -299,49 +311,25 @@ namespace Client.Networking
             SendRaw(SendingData);
         }
 
-        public static void SendR(Task<string> callback, string data, int Token)
-        {
-            RequestedCallback.Callbacks.Add(new RequestedCallback(callback,data,Token));
-            SendRaw(data);
-        }
-
-        protected static List<SocketMessageModel> SendingQueue = new List<SocketMessageModel>();
-        protected static List<SocketMessageModel> UpdatedQueue = new List<SocketMessageModel>();
-
         public static void MenageQueue()
         {
             while (true)
             {
-                if (SendingQueue.Count > 0)
+                if (SocketQueue.AbleToSend())
                 {
-                    for (int i = 0; i < SendingQueue.Count; i++)
+                    foreach(SocketPacketModel packet in SocketQueue.GetSendingPackets)
                     {
-                        SocketMessageModel model = SendingQueue[i];
+                        byte[] Buffer = packet.Data;
                         try
                         {
-                            byte[] _buf;
-                            try
-                            {
-                                _buf = model.Data;
-                                Stream.Write(_buf, 0, _buf.Length);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Unregistred exception: " + ex);
-                            }
-                            _buf = null;
+                            Stream.Write(Buffer, 0, Buffer.Length);
                         }
-                        catch (Exception ex)
+                        catch (Exception arg)
                         {
-                            Console.WriteLine(ex);
+                            Debug.Error($"Exception when sending buffer Length: {Buffer?.Length} IsImage: {packet?.IsImage} {arg}");
                         }
-                        SendingQueue.Remove(model);
                     }
-                }
-                if(UpdatedQueue.Count > 0)
-                {
-                    SendingQueue = new List<SocketMessageModel>(UpdatedQueue);
-                    UpdatedQueue.Clear();
+                    SocketQueue.Renew();
                 }
                 Thread.Sleep(100);
             }
@@ -351,19 +339,19 @@ namespace Client.Networking
         {
             if (Client == null || Stream == null)
             {
-                Console.WriteLine("Client is null");
+                Debug.Error("Client is null");
                 return false;
             }
 
             if (!IsConnected)
             {
-                Console.WriteLine("Client is not connected to server");
+                Debug.Error("Client is not connected to server");
                 return false;
             }
 
             if (!Client.Connected)
             {
-                Console.WriteLine("Client disconnected form server");
+                Debug.Error("Client disconnected form server");
                 return false;
             }
 
@@ -376,9 +364,9 @@ namespace Client.Networking
         /// Packs package and preparing how to send it 
         /// </summary>
         /// <param name="data"></param>
-        private static void AddToQueue(object data, EncodingOption option = EncodingOption.UFT8)
+        private static void AddToQueue(object data, EncodingOption option = EncodingOption.UFT8,bool isImage=false)
         {
-            SocketMessageModel model = null;
+            SocketPacketModel model = null;
             if (data.GetType() == typeof(byte[]))
             {
                 byte[] _Data = (byte[])data;
@@ -386,9 +374,9 @@ namespace Client.Networking
                 if (_Data.Length == 0)
                     return;
 
-                model = new SocketMessageModel()
+                model = new SocketPacketModel()
                 {
-                    isImage = true,
+                    IsImage = isImage,
                     Data = (byte[])data
                 };
                 
@@ -398,7 +386,7 @@ namespace Client.Networking
                 if (string.IsNullOrEmpty((string)data))
                     return;
 
-                model = new SocketMessageModel();
+                model = new SocketPacketModel();
                 switch (option)
                 {
                     case EncodingOption.UFT8:
@@ -411,11 +399,9 @@ namespace Client.Networking
             }
             else
             {
-                Console.WriteLine("Cannot pack package => wrong data type");
+                Debug.Error("Cannot pack package => wrong data type");
             }
-
-            UpdatedQueue.Add(model);
-            model.UpdatedIndex = UpdatedQueue.IndexOf(model);
+            SocketQueue.Add(model);
         }
     }
 }

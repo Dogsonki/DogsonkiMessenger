@@ -1,5 +1,4 @@
-﻿using Client.Networking;
-using System;
+﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -12,7 +11,6 @@ namespace Client.Pages
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
-            SocketCore.Init();
             ReadCache();
         }
 
