@@ -9,7 +9,7 @@ GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
 
 class ClientMenu:
     def __init__(self, client: Client):
-        self.search_code = "0004"
+        self.search_token = 4
         self.client = client
 
     def listening(self):
@@ -18,14 +18,14 @@ class ClientMenu:
         # 2 --> logout
         # 3 --> change avatar
         while True:
-            message, = self.client.receive_message()
+            message, _ = self.client.receive_message()
             code = message.split("-")[0]
             arg = " ".join(message.split("-")[1:])
             if code == "0":
                 Chatroom(self.client, arg).init_chatroom()
             elif code == "1":
                 first_logins = GET_INFO_FROM_DB.search_by_login(arg)
-                self.client.send_message(f"{self.search_code}-{str(first_logins)}")
+                self.client.send_message(str(first_logins), self.search_token)
             elif code == "2":
                 self.client.logout()
             elif code == "3":
@@ -36,12 +36,12 @@ class Chatroom:
     def __init__(self, connection: Client, receiver):
         self.connection = connection
         self.receiver = receiver
-        self.init_chatroom_code = "0003"
-        self.message_chatroom_code = "0005"
+        self.init_chatroom_token = 3
+        self.message_chatroom_token = 5
         self.number_of_sent_last_messages = 0
 
     def init_chatroom(self):
-        self.connection.send_message(self.init_chatroom_code)
+        self.connection.send_message("0", self.init_chatroom_token)
         self.send_last_messages()
         self.receive_messages()
 
@@ -49,12 +49,11 @@ class Chatroom:
         message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.login, self.receiver, self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         for i in message_history:
-            data = json.dumps({"user": i[1], "message": i[0], "time": str(i[3])})
+            data = {"user": i[1], "message": i[0], "time": str(i[3])}
             self.send_message(data)
 
     def send_message(self, message_data):
-        message = f"{self.message_chatroom_code}-{message_data}"
-        self.connection.send_message(message)
+        self.connection.send_message(message_data, self.message_chatroom_token)
 
     def receive_messages(self):
         in_chat = True

@@ -23,9 +23,11 @@ class Message:
     data: dict[str, Any]
 
     @classmethod
-    def deserialize(cls, message: dict[str, Any]):
+    def deserialize(cls, message: str):
+        message = json.loads(message)
         return cls(
-            MessageType(message["type"]),
+            MessageType.LOGIN,  # todo
+            #MessageType(message["token"]),
             message["data"]
         )
 
@@ -35,24 +37,23 @@ class Buffer:
     buffer: bytes
     delimiter: bytes
 
-    def __init__(self, sock, delimiter=b"\0"):
+    def __init__(self, sock, delimiter=b"$"):
         self.socket = sock
         self.buffer = b""
         self.delimiter = delimiter
 
     def read(self) -> Optional[str]:
-        while b'\0' not in self.buffer:
+        while self.delimiter not in self.buffer:
             data = self.socket.recv(1024)
             if not data:
                 return None
             self.buffer += data
-
         line, _, self.buffer = self.buffer.partition(b'\r\n')
         return line.decode("UTF-8")
 
 
 class Connection:
-    delimiter = b"\0"
+    delimiter = b"$"
     connection: socket.socket
     buffer: Buffer
     
@@ -65,10 +66,11 @@ class Connection:
         self.password = False
         self.closed = False
 
-    def send_message(self, message: Message):
+    def send_message(self, message: Message, token: int):
+        message = json.dumps({"data": message, "token": token}).encode("UTF-8") + Connection.delimiter
         print(f"sent: {message}")
         try:
-            self.client.send(json.dumps(message).encode("UTF-8") + Connection.delimiter)
+            self.client.send(message)
         except socket.error:
             self.close_connection()
 
@@ -76,14 +78,21 @@ class Connection:
         while True:
             try:
                 received_message = self.buffer.read()
-                print(f"buffer.read: {received_message}")
+                print(f"recv: {received_message}")
                 if not received_message:
                     self.close_connection()
                     return None
-                message = json.loads(received_message, object_hook=Message.deserialize)  # FIXME: handle incorrect data
-                if message.type == MessageType.CONTINUE:
-                    continue
-                return message
+                received_message = received_message.split("$")
+                data = []
+                for i in received_message:
+                    if not i:
+                        data.append("")
+                        break
+                    message = Message.deserialize(i)  # FIXME: handle incorrect data
+                    data.append(message.data)
+                #if message.type == MessageType.CONTINUE:
+                #    continue
+                return data
             except socket.error:
                 self.close_connection()
                 return None
@@ -119,14 +128,14 @@ class Connection:
 class Client(Connection):
     def __init__(self, connection, address):
         super().__init__(connection, address)
-        self.login_app_code = "0001"
-        self.registering_app_code = "0002"
-        self.last_user_chats = "0006"
-        self.avatar_code = "0007"
+        self.error_token = -1
+        self.login_app_token = 1
+        self.registering_token = 2
+        self.last_user_chats_token = 6
 
     def get_login_action(self):
         while True:
-            action_info, = self.receive_message()
+            action_info, _ = self.receive_message()
             if action_info == "logging":
                 is_logged_correctly = self.login_user()
                 if is_logged_correctly:
@@ -134,33 +143,35 @@ class Client(Connection):
             elif action_info == "registering":
                 self.register_user()
             else:
-                self.send_message(f"Error - should receive 'logging' or 'registering'")
+                self.send_message(f"Error - should receive 'logging' or 'registering'", self.error_token)
 
     def login_user(self):
-        self.login, self.password = self.get_login_data()
+        login_data = self.get_login_data()
+        self.login = login_data["login"]
+        self.password = login_data["password"]
         if SELECT_SQL.login_user(self.login, self.password):
-            self.send_message(f"{self.login_app_code}-1")  # 1 --> user has been logged
+            self.send_message("1", self.login_app_token)  # 1 --> user has been logged
             user_chats = SELECT_SQL.get_user_chats(self.login)
-            self.send_message(f"{self.last_user_chats}-{user_chats}")
+            self.send_message(user_chats, self.last_user_chats_token)
             avatar, = SELECT_SQL.get_user_avatar(self.login)
-            #self.send_message(self.avatar_code)
             #self.send_image(str(avatar))
-            #self.send_message(self.avatar_code)
             current_connections[self.login] = self.client
             return True
         else:
-            self.send_message(f"{self.login_app_code}-0")  # 0 --> wrong login or password
+            self.send_message("0", self.login_app_token)  # 0 --> wrong login or password
         return False
 
     def register_user(self):
-        self.login, self.password = self.get_register_data()
+        register_data = self.get_login_data()
+        self.login = register_data["login"]
+        self.password = register_data["password"]
         if self.validate_login_data():
             if INSERT_SQL.register_user(self.login, self.password):
-                self.send_message(f"{self.registering_app_code}-1")  # 1 --> user has been registered
+                self.send_message("1", self.registering_token)  # 1 --> user has been registered
             else:
-                self.send_message(f"{self.registering_app_code}-01")  # 01 --> user with given login exists
+                self.send_message("01", self.registering_token)  # 01 --> user with given login exists
         else:
-            self.send_message(f"{self.registering_app_code}-00")  # 00 --> incorrect password
+            self.send_message(f"00", self.registering_token)  # 00 --> incorrect password
 
     def logout(self):
         del current_connections[self.login]
@@ -173,18 +184,8 @@ class Client(Connection):
         INSERT_SQL.set_user_avatar(self.login, avatar)
 
     def get_login_data(self):
-        login_data = []
-        while len(login_data) != 2:
-            data_from_user = self.receive_message()
-            login_data.extend(data_from_user)
-        return login_data
-
-    def get_register_data(self):
-        registering_data = []
-        while len(registering_data) != 2:
-            data_from_user = self.receive_message()
-            registering_data.extend(data_from_user)
-        return registering_data
+        data_from_user, _ = self.receive_message()
+        return data_from_user
 
     def validate_login_data(self):
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:

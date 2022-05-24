@@ -1,12 +1,10 @@
 import json
 import socket
 import threading
-import sys
-
+import os
 from dataclasses import dataclass
-from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent))  # fix "no module named Server"
+os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # fix "no module named Server"
 
 from network.client_menu import ClientMenu
 from network.connection import Client
