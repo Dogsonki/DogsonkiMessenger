@@ -26,15 +26,15 @@ namespace Client.Pages
 
             PeopleFinderViewModel.ClearList();
             LocalUser.ActualChatWith = UsernameFind.Text;
-            SocketCore.SendR(ParseQuery, $"1-{UsernameFind.Text}", 0004);
+            SocketCore.SendR(ParseQuery, $"{UsernameFind.Text}", 4);
         }
 
-        public static void ParseQuery(string req)
+        public static void ParseQuery(object req)
         {
             JArray users;
             try
             {
-                 users= JArray.Parse(req);
+                users= (JArray)req;
             }
             catch(Exception ex)
             {

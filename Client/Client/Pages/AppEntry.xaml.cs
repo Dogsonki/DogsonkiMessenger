@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Client.IO;
+using Client.Networking;
+using Client.Model.Session;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -11,16 +14,21 @@ namespace Client.Pages
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
-            ReadCache();
+            SocketCore.Init();
+            ReadStorage();
         }
 
-        private void ReadCache()
+        private void ReadStorage()
         {
             //Read cache to auto login 
             //Need to do token 
             if(Device.RuntimePlatform == Device.Android)
             {
-
+                var r = StorageIO.ReadStorage<Session>("session", new Session("",""));
+                if (!string.IsNullOrEmpty(r.SessionKey))
+                {
+                    SocketCore.SendRaw(r,9);
+                }
             }
             else
             {

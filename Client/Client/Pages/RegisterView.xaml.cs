@@ -3,8 +3,6 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Client.Networking;
 using Client.Pages;
-using System.Text;
-using System.Linq;
 
 namespace Client
 {
@@ -17,10 +15,11 @@ namespace Client
             InitializeComponent();
         }
 
-        protected char[] IllegalCharacters = { '*', '{', '}', '#', '@' };
+        protected char[] IllegalCharacters = { '$','*', '{', '}', '#', '@' };
 
         private void RegisterDone(object sender, EventArgs e)
         {
+            SocketCore.TryConnect();
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
@@ -44,7 +43,7 @@ namespace Client
             }
 
             SocketCore.SendRaw(username);
-            SocketCore.SendR(RegisterCallback, password,0002);
+            SocketCore.SendR(RegisterCallback, password, 2);
         }
 
         protected Label _ErrorText = new Label();
@@ -68,9 +67,10 @@ namespace Client
             _ErrorText.Text = text;
         }
 
-        private void RegisterCallback(string rev)
+        private void RegisterCallback(object rev)
         {
-            if (rev[0] == '1')
+            string recived = (string)rev;
+            if (recived[0] == '1')
             {
                 //Check if this function have to be invoked in main thread
                 Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginView()); });

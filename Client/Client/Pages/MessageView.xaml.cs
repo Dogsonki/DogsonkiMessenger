@@ -8,10 +8,11 @@ namespace Client
     public partial class MessageView : ContentPage
     {
 
-        public MessageView() //Chat with only one person
+        public MessageView(string Username) //Chat with only one person
         {
             InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, false);
+            ChatUsername.Text = $"Chatting with @{Username}";
         }
 
         private void MessageList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
@@ -32,7 +33,7 @@ namespace Client
             if (IsVisible)
                 return base.OnBackButtonPressed();
 
-            SocketCore.SendRaw("ENDCHAT"); //Close chat 
+            SocketCore.SendRaw(" ",7); //Close chat 
 
             return base.OnBackButtonPressed();
         }
@@ -40,10 +41,13 @@ namespace Client
         private void Entry_Completed(object sender, System.EventArgs e)
         {
             Entry input = (Entry)sender;
-            if (input.Text == "" || input.Text == "ENDCHAT") 
+            string InputText = input.Text;
+            if (InputText == "" || InputText == "ENDCHAT") 
             {
                 return;
             }
+            InputText.Replace("$", "69420"); //Temporary replacment cuz it will break server
+
             MessageViewModel.AddMessage(input.Text);
             input.Text = "";
         }

@@ -5,25 +5,22 @@ namespace Client.Networking
 {
     public class SocketQueue
     {
-        protected static List<SocketPacketModel> SendingPackets = new List<SocketPacketModel>();
-        protected static List<SocketPacketModel> WaitingPackets = new List<SocketPacketModel>();
+        public static List<SocketPacket> SendingPackets = new List<SocketPacket>();
+        public static List<SocketPacket> WaitingPackets = new List<SocketPacket>();
 
         /// <summary>
         /// Adds packet to WaitingPackets 
         /// </summary>
         /// <param name="packet"></param>
-        public static void Add(SocketPacketModel packet) => WaitingPackets.Add(packet);
+        public static void Add(SocketPacket packet) => WaitingPackets.Add(packet);
 
         /// <summary>
         /// Called every time when SendingPakcets got looped
         /// </summary>
         public static void Renew()
         {
-            if(WaitingPackets.Count > 0)
-            {
-                SendingPackets = new List<SocketPacketModel>(WaitingPackets);
-                WaitingPackets.Clear();
-            }  
+            SendingPackets = new List<SocketPacket>(WaitingPackets);
+            WaitingPackets.Clear();
         }
 
         /// <summary>
@@ -34,6 +31,6 @@ namespace Client.Networking
 
         public static int SendingCount => SendingPackets.Count;
         
-        public static List<SocketPacketModel> GetSendingPackets => SendingPackets;
+        public static List<SocketPacket> GetSendingPackets => SendingPackets;
     }
 }

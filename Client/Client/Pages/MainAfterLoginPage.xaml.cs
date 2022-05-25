@@ -1,11 +1,10 @@
 ﻿#define l
 using Client.Networking;
-using Client.Utility.Services;
 using Client.Views;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text;
+using Client.IO;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -77,7 +76,7 @@ namespace Client.Pages
 
         protected override bool OnBackButtonPressed()
         {
-            SocketCore.SendRaw("2");
+            SocketCore.SendRaw(" ",0);
             LogOut("");
             return base.OnBackButtonPressed();
         }

@@ -1,4 +1,5 @@
-﻿using Client.Networking;
+﻿using Client.Models;
+using Client.Networking;
 using Client.Utility;
 using Client.Views;
 using System;
@@ -18,10 +19,6 @@ namespace Client.Pages
 
         private void LoginDone(object sender, EventArgs e)
         {
-            if (!SocketCore.TryConnect())
-            {
-                ShowError("Unable to connect to server");
-            }
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
@@ -31,19 +28,11 @@ namespace Client.Pages
                 return;
             }    
 
-            if (!SocketCore.SendRaw("logging"))
+            if(!SocketCore.SendR(LoginCallback, new LoginModel(username,password,CheckRemember.IsChecked), 1))
             {
-                ShowError("Samething went wrong, probably on server side ... ");
+                ShowError("Unable to connect");
                 return;
             }
-
-            if (!SocketCore.SendRaw(username))
-            {
-                return;
-            }
-            SocketCore.SendR(LoginCallback, password, 0001);
-            //1 == logged 
-            //0 == samething wrong 
         }
 
         protected Label _ErrorText = new Label();
@@ -67,9 +56,10 @@ namespace Client.Pages
             _ErrorText.Text = text;
         }
 
-        private void LoginCallback(string rev)
+        private void LoginCallback(object rev)
         {
-            switch (rev[0])
+            string recived = (string)rev; 
+            switch (recived[0])
             {
                 case '1':
                     //Login is correct, setting up profile and redirecting to MainAfterLoginPage

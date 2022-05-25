@@ -11,9 +11,9 @@ namespace Client.Views
 
         public static void Clear() => Device.BeginInvokeOnMainThread(() => LastChats.Clear());  
 
-        public static void ParseQuery(string rev)
+        public static void ParseQuery(JArray array)
         {
-            JArray ar = JArray.Parse(rev);
+            JArray ar = array;
 
             foreach(var user in ar)
             {

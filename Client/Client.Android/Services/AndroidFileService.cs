@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
-using Client.Utility.Services;
+using System.Threading.Tasks;
+using Client.IO;
+using Xamarin.Essentials;
+using Xamarin.Forms;
 
 [assembly: Xamarin.Forms.Dependency(typeof(Client.Droid.AndroidFileService))]
 namespace Client.Droid
@@ -13,18 +16,36 @@ namespace Client.Droid
             documentsPath = Path.Combine(documentsPath, "Orders", location);
             return documentsPath;
         }
-
+        public bool FileExist(string name,string location = "temp") => File.Exists(Path.Combine(GetPersonalDir(location), name));
+        public bool DirectoryExist(string name,string location = "temp") => Directory.Exists(Path.Combine(GetPersonalDir(location), name));
+        public void CreateFile(string name,string location) => File.Create(Path.Combine(GetPersonalDir(location), name));
         public byte[] ReadFileFromStorage(string name, string location = "temp")
         {
-            var documentsPath = GetPersonalDir(location);
-            string filePath = Path.Combine(documentsPath, name);
+            Device.InvokeOnMainThreadAsync(async () => await RequestPermissionAsync());
+
+            string filePath = Path.Combine(GetPersonalDir(location), name);
 
             byte[] buffer = File.ReadAllBytes(filePath);
 
             return buffer;
         }
 
-        public void SaveFileToStorage(MemoryStream stream, string name, string location = "temp")
+        private static async Task RequestPermissionAsync()//TODO: make it async and ask before appEntry
+        {
+            var write = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
+            if (write != PermissionStatus.Granted)
+            {
+                write = await Permissions.RequestAsync<Permissions.StorageWrite>();
+            }
+
+            var read = await Permissions.CheckStatusAsync<Permissions.StorageRead>();
+            if (read != PermissionStatus.Granted)
+            {
+                read = await Permissions.RequestAsync<Permissions.StorageRead>();
+            }
+        }
+
+        public void WriteToFile(MemoryStream stream, string name, string location = "temp")
         {
             var documentsPath = GetPersonalDir(location);
 
@@ -44,5 +65,7 @@ namespace Client.Droid
                 fs.Write(bArray, 0, length);
             }
         }
+        public void CreateDirectory(string name,string location="temp") => Directory.CreateDirectory(Path.Combine(GetPersonalDir(location),name));
+        public string GetPersonalDir() => GetPersonalDir();
     }
 }

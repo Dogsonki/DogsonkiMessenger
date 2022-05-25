@@ -12,19 +12,18 @@ namespace Client.Networking
         //Callbacks might break sametimes when recive packet in wrong time
         public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
          
-        protected Action<string> Callback;
+        protected Action<object> Callback;
         protected Task<string> AsyncCallback;
 
-        public string ContentSend;
+        public object ContentSend;
         public string ContentRecived;
         protected int CallbackID;
 
-        public RequestedCallback(Action<string> callback, string contentsend, int pretoken)
+        public RequestedCallback(Action<object> callback, object contentsend, int pretoken)
         {
             CallbackID = pretoken;
             Callback = callback;
             ContentRecived = null;
-            ContentSend = GetToken() + contentsend;
         }
 
         public int GetToken() => CallbackID;
@@ -35,7 +34,7 @@ namespace Client.Networking
         /// </summary>
         /// <param name="Recived"></param>
         /// <returns></returns>
-        public bool Invoke(string Recived)
+        public bool Invoke(object Recived)
         {
             bool _r = false;
             if (Callback != null)

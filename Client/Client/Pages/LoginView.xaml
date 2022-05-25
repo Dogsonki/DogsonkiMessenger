@@ -12,7 +12,7 @@
 
 				</StackLayout>
 				<StackLayout Orientation="Horizontal" Spacing="2">
-					<CheckBox Color="#706f6d" ></CheckBox>
+					<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
 					<Label Padding="5" Text="Remember me ?"></Label>
 				</StackLayout>
 				<Button HeightRequest="50" BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" WidthRequest="20" Clicked="LoginDone" Text="Login"></Button>
