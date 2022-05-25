@@ -1,3 +1,6 @@
+import os
+import binascii
+
 from mysql.connector.errors import IntegrityError
 
 from .connection import database_cursor
@@ -17,13 +20,23 @@ class GetInfoFromDatabase:
 
     @staticmethod
     def login_user(login, password):
-        database_cursor.execute("""SELECT login, password FROM users
+        database_cursor.execute("""SELECT id FROM users
                                    WHERE login = %s and password = %s;""", (login, password))
         sql_data = database_cursor.fetchone()
         if sql_data is None:
             return False
         else:
-            return True
+            return sql_data[0]
+
+    @staticmethod
+    def check_session(login_id, session_key):
+        database_cursor.execute("""SELECT login_id FROM sessions
+                                   WHERE login_id=%s AND session_key=%s;""", (login_id, session_key))
+        sql_data = database_cursor.fetchone()
+        if sql_data is None:
+            return 0
+        else:
+            return sql_data[0]
         
     @staticmethod
     def search_by_login(login):
@@ -52,6 +65,13 @@ class GetInfoFromDatabase:
         avatar = database_cursor.fetchone()
         return avatar
 
+    @staticmethod
+    def get_user(login_id):
+        database_cursor.execute("""SELECT login, password FROM users
+                                   WHERE id=%s;""", (login_id,))
+        sql_data = database_cursor.fetchone()
+        return sql_data
+
 
 class InsertIntoDatabase:
     @staticmethod
@@ -73,6 +93,18 @@ class InsertIntoDatabase:
         database_cursor.execute("""UPDATE users 
                                    SET avatar = %s 
                                    WHERE login = %s;""", (avatar, login))
+
+    @staticmethod
+    def create_session(login_id: int) -> str:
+        session_key = str(binascii.hexlify(os.urandom(20)).decode("UTF-8"))
+        database_cursor.execute("""INSERT INTO sessions(login_id, session_key)
+                                   VALUES (%s, %s);""", (login_id, session_key))
+        return session_key
+
+    @staticmethod
+    def delete_session(login_id: int):
+        database_cursor.execute("""DELETE FROM SESSIONS
+                                   WHERE login_id=%s;""", (login_id,))
 
 
 def check_if_login_exist(login):
