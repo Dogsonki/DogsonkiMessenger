@@ -1,5 +1,7 @@
+import time
+
 from Server.sql import handling_sql
-from .connection import Client, MessageType
+from .connection import Client, MessageType, current_connections
 
 INSERT_INTO_DB = handling_sql.InsertIntoDatabase()
 GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
@@ -19,7 +21,7 @@ class ClientMenu:
                 self.client.send_message(first_logins, MessageType.SEARCH_USERS)
             elif message.token == MessageType.LOGOUT:
                 self.client.logout()
-            elif message.code == MessageType.CHANGE_AVATAR:
+            elif message.token == MessageType.CHANGE_AVATAR:
                 self.client.set_avatar()
 
 
@@ -51,12 +53,12 @@ class Chatroom:
                 if i.token == MessageType.END_CHAT:
                     in_chat = False
                     break
-                #receiver_connection = current_connections.get(self.receiver)
-                #if receiver_connection:
-                #    data = json.dumps({"user": self.receiver, "message": i, "time": time.time()})
-                #    message_data = f"{self.message_chatroom_code}-{data}"
-                #    receiver_connection.send(bytes(message_data, "UTF-8"))
+
                 if i.data:
+                    receiver_connection = current_connections.get(self.receiver)
+                    if receiver_connection:
+                        data = {"user": self.receiver, "message": i.data, "time": time.time()}
+                        receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
                     self.save_message_in_database(i.data)
 
     def save_message_in_database(self, message):

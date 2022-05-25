@@ -103,7 +103,7 @@ class InsertIntoDatabase:
 
     @staticmethod
     def delete_session(login_id: int):
-        database_cursor.execute("""DELETE FROM SESSIONS
+        database_cursor.execute("""DELETE FROM sessions
                                    WHERE login_id=%s;""", (login_id,))
 
 

@@ -169,7 +169,7 @@ class Client(Connection):
             return False
         self.login, self.password = SELECT_SQL.get_user(self.login_id)
         self.send_message(self.login, MessageType.AUTOMATICALLY_LOGGED)
-        current_connections[self.login] = self.client
+        current_connections[self.login] = self
         return True
 
     def login_user(self, login_data):
@@ -186,7 +186,7 @@ class Client(Connection):
             self.send_message(user_chats, MessageType.SEARCH_USERS)
             avatar, = SELECT_SQL.get_user_avatar(self.login)
             # self.send_image(str(avatar))
-            current_connections[self.login] = self.client
+            current_connections[self.login] = self
             return True
         else:
             self.send_message("0", MessageType.LOGIN)  # 0 --> wrong login or password
