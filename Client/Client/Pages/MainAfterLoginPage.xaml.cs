@@ -1,10 +1,7 @@
-﻿#define l
-using Client.Networking;
+﻿using Client.Networking;
 using Client.Views;
-using System;
 using System.IO;
 using System.Reflection;
-using Client.IO;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,17 +11,15 @@ namespace Client.Pages
     public partial class MainAfterLoginPage : ContentPage
     {
         public static MainAfterLoginPage MainInstance { get; set; }
-        public static Image f;
+
         public MainAfterLoginPage(bool redirectedFormLogin = false)
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
-            f = here;
 
-          
             MainInstance = this;
-                if (redirectedFormLogin)
-                    MainAfterLoginViewModel.Clear();
+            if (redirectedFormLogin)
+                MainAfterLoginViewModel.Clear();
             return;
             #region test png buffer
 
@@ -47,19 +42,6 @@ namespace Client.Pages
                     }
                 }
             }
-
-            return;
-            IFileService aa = DependencyService.Get<IFileService>();
-            byte[] buffer = aa.ReadFileFromStorage("B.png");
-
-            using (MemoryStream s = new MemoryStream(buffer))
-            {
-                if (s == null)
-                {
-                    Console.WriteLine("Buffer was null");
-                }
-                SocketCore.SendFile(s.ToArray());
-            }
             #endregion
         }
 
@@ -76,16 +58,9 @@ namespace Client.Pages
 
         protected override bool OnBackButtonPressed()
         {
-            SocketCore.SendRaw(" ",0);
-            LogOut("");
-            return base.OnBackButtonPressed();
-        }
-
-        private void LogOut(string rev)
-        {
-            LocalUser.IsLoggedIn = false;
-            LocalUser.ActualChatWith = "";
-            LocalUser.Username = "";
+            SocketCore.SendRaw(" ", 0);
+            LocalUser.Logout();
+            return true;
         }
 
         private void LastChatsOpened_ItemSelected(object sender, SelectedItemChangedEventArgs e)

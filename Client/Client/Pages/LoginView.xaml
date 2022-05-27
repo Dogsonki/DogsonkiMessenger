@@ -5,9 +5,10 @@
 			 BackgroundColor="#1d1f1d">
     <ContentPage.Content>
 		<StackLayout Padding="20" Spacing="20">
+			<StackLayout Padding="10"></StackLayout>
 			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
 				<Entry TextColor="White" Focused="Input_Focused" Placeholder="Username" WidthRequest="250" x:Name="Input_Username"></Entry>
-				<Entry TextColor="White" Focused="Input_Focused" IsPassword="True" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
+				<Entry TextColor="White" Focused="Input_Focused" IsPassword="True" Placeholder="Password" WidthRequest="250" x:Name="Input_Password"></Entry>
 				<StackLayout x:Name="ErrorLevel">
 
 				</StackLayout>

@@ -6,16 +6,22 @@
     <ContentPage.Content>
 		<StackLayout Padding="20">
 			<StackLayout HorizontalOptions="Center" Padding="10">
-				<Label Text="Provide us informations to create your account."></Label>
 			</StackLayout>
 			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
-				<Entry Focused="Input_Focused" Placeholder="Username" WidthRequest="200"  x:Name="Input_Username"></Entry>
+				<Entry Focused="Input_Focused" Placeholder="Username" WidthRequest="250"  x:Name="Input_Username"></Entry>
 				<Entry Focused="Input_Focused" IsPassword="true" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
 				<StackLayout x:Name="ErrorLevel">
 				</StackLayout>
 				<Button BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
 			</StackLayout>
-		
+			<StackLayout Orientation="Horizontal" Padding="40">
+				<Label Text="Go to Login">
+					<Label.GestureRecognizers>
+						<TapGestureRecognizer Tapped="ToLogin_Tapped"></TapGestureRecognizer>
+					</Label.GestureRecognizers>
+				</Label>
+				<Label HorizontalOptions="EndAndExpand" Text="Forgot Password"></Label>
+			</StackLayout>
 		</StackLayout>
 
     </ContentPage.Content>

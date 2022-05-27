@@ -1,6 +1,6 @@
-﻿using Xamarin.Forms;
-using Client.Networking;
+﻿using Client.Networking;
 using Client.Utility;
+using Xamarin.Forms;
 
 namespace Client.Models
 {
@@ -12,7 +12,7 @@ namespace Client.Models
         public PeronFoundModel(string username)
         {
             OpenChatCommand = new Command(OpenChat);
-            Username = username; 
+            Username = username;
         }
 
         private void OpenChat()

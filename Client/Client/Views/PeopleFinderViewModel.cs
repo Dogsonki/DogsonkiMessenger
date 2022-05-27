@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Client.Models;
 using System.Collections.ObjectModel;
-using Client.Models;
 
 namespace Client.Views
 {

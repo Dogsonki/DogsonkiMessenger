@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Client.Networking.Model;
+﻿using Client.Networking.Model;
+using System.Collections.Generic;
 
 namespace Client.Networking
 {
@@ -30,7 +30,7 @@ namespace Client.Networking
         public static bool AbleToSend() => SendingCount > 0;
 
         public static int SendingCount => SendingPackets.Count;
-        
+
         public static List<SocketPacket> GetSendingPackets => SendingPackets;
     }
 }

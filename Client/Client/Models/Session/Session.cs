@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using Xamarin.Forms;
+﻿using Client.IO;
+using Newtonsoft.Json;
 using System.IO;
 using System.Text;
-using Client.IO;
+using Xamarin.Forms;
 
 namespace Client.Model.Session
 {
@@ -17,10 +17,10 @@ namespace Client.Model.Session
         public static void OverwriteSession(Session session)
         {
             IFileService file = DependencyService.Get<IFileService>();
-            file.WriteToFile(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(session))),"session.json");
+            file.WriteToFile(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(session))), "session.json");
         }
 
-        public Session(string session_key,string login_id)
+        public Session(string session_key, string login_id)
         {
             SessionKey = session_key;
             LoginID = login_id;

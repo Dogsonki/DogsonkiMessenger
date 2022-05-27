@@ -1,8 +1,10 @@
-﻿using System;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿using Client.Models;
 using Client.Networking;
 using Client.Pages;
+using Client.Utility;
+using System;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
 namespace Client
 {
@@ -15,7 +17,7 @@ namespace Client
             InitializeComponent();
         }
 
-        protected char[] IllegalCharacters = { '$','*', '{', '}', '#', '@' };
+        protected char[] IllegalCharacters = { '$', '*', '{', '}', '#', '@' };
 
         private void RegisterDone(object sender, EventArgs e)
         {
@@ -36,14 +38,7 @@ namespace Client
                 ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
                 return;
             }
-
-            if (!SocketCore.SendRaw("registering"))
-            {
-                ShowError("Samething went wrong, probably on server side ... ");
-            }
-
-            SocketCore.SendRaw(username);
-            SocketCore.SendR(RegisterCallback, password, 2);
+            SocketCore.SendR(RegisterCallback, new RegisterModel(username,password), 2);
         }
 
         protected Label _ErrorText = new Label();
@@ -84,6 +79,11 @@ namespace Client
         private void Input_Focused(object sender, FocusEventArgs e)
         {
             ClearError();
+        }
+
+        private void ToLogin_Tapped(object sender, EventArgs e)
+        {
+            StaticNavigator.PopAndPush(new LoginView());
         }
     }
 }

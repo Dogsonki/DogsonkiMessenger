@@ -2,20 +2,17 @@
 
 namespace Client.Models
 {
-    public class LoginModel
+    public class RegisterModel
     {
         [JsonProperty("login")]
         public string Login { get; set; }
         [JsonProperty("password")]
         public string Password { get; set; }
-        [JsonProperty("remember")]
-        public bool Remember { get; set; }
 
-        public LoginModel(string login, string password, bool remember)
+        public RegisterModel(string login,string password)
         {
             Login = login;
             Password = password;
-            Remember = remember;
         }
     }
 }
