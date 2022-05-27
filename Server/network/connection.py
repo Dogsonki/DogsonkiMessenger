@@ -3,9 +3,11 @@ import json
 import socket
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from mysql.connector.cursor_cext import CMySQLCursor
+from typing import Optional
 
 from Server.sql import handling_sql
+from Server.sql.connection import get_cursor
 
 current_connections = {}
 INSERT_SQL = handling_sql.InsertIntoDatabase()
@@ -66,6 +68,7 @@ class Connection:
     delimiter = b"$"
     connection: socket.socket
     buffer: Buffer
+    db_cursor = CMySQLCursor
     
     def __init__(self, connection: socket.socket, address):
         self.client = connection
@@ -75,8 +78,9 @@ class Connection:
         self.login = ""
         self.password = ""
         self.closed = False
+        self.db_cursor = get_cursor()
 
-    def send_message(self, message: str, token: MessageType):
+    def send_message(self, message, token: MessageType):
         message = json.dumps({"data": message, "token": token.value}).encode("UTF-8") + Connection.delimiter
         print(f"sent: {message}")
         try:
@@ -132,11 +136,11 @@ class Connection:
 
     def close_connection(self):
         if not self.closed:
+            self.db_cursor.close()
             self.closed = True
             if self.login:
                 del current_connections[self.login]
-            raise ConnectionAbortedError(
-                f"Closing connection with {self.client}")  # todo find better way to close connection
+            raise ConnectionAbortedError(f"Closing connection with {self.client}")  # todo find better way to close connection
 
 
 class Client(Connection):
@@ -151,23 +155,21 @@ class Client(Connection):
                 if is_logged_correctly:
                     break
             elif action_data.token == MessageType.REGISTER:
-                is_registered_correctly = self.register_user(action_data)
-                if is_registered_correctly:
-                    break
+                self.register_user(action_data)
             elif action_data.token == MessageType.SESSION_INFO:
                 is_logged_correctly = self.login_by_session(action_data)
                 if is_logged_correctly:
                     break
             else:
-                self.send_message("Error - should receive 'logging' or 'registering'", MessageType.ERROR)
+                self.send_message("Error - should receive 'logging' or 'registering' code", MessageType.ERROR)
 
     def login_by_session(self, session_data) -> bool:
         self.login_id = session_data.data["login_id"]
         session_key = session_data.data["session_key"]
-        self.login_id = SELECT_SQL.check_session(self.login_id, session_key)
+        self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
         if not self.login_id:
             return False
-        self.login, self.password = SELECT_SQL.get_user(self.login_id)
+        self.login, self.password = SELECT_SQL.get_user(self.db_cursor, self.login_id)
         self.send_message(self.login, MessageType.AUTOMATICALLY_LOGGED)
         current_connections[self.login] = self
         return True
@@ -176,15 +178,15 @@ class Client(Connection):
         self.login = login_data.data["login"]
         self.password = login_data.data["password"]
         remember = login_data.data["remember"]
-        self.login_id = SELECT_SQL.login_user(self.login, self.password)
+        self.login_id = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
             self.send_message("1", MessageType.LOGIN)  # 1 --> user has been logged
             if remember:
-                session_key = INSERT_SQL.create_session(self.login_id)
+                session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
-            user_chats = SELECT_SQL.get_user_chats(self.login)
+            user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
             self.send_message(user_chats, MessageType.SEARCH_USERS)
-            avatar, = SELECT_SQL.get_user_avatar(self.login)
+            avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
             # self.send_image(str(avatar))
             current_connections[self.login] = self
             return True
@@ -196,26 +198,24 @@ class Client(Connection):
         self.login = register_data.data["login"]
         self.password = register_data.data["password"]
         if self.validate_login_data():
-            if INSERT_SQL.register_user(self.login, self.password):
+            if INSERT_SQL.register_user(self.db_cursor, self.login, self.password):
                 self.send_message("1", MessageType.REGISTER)  # 1 --> user has been registered
-                return True
             else:
                 self.send_message("01", MessageType.REGISTER)  # 01 --> user with given login exists
         else:
             self.send_message("00", MessageType.REGISTER)  # 00 --> incorrect password
-        return False
 
     def logout(self):
         del current_connections[self.login]
         self.login = False
         self.password = False
-        INSERT_SQL.delete_session(self.login_id)
+        INSERT_SQL.delete_session(self.db_cursor, self.login_id)
         self.login_id = 0
         self.get_login_action()
 
     def set_avatar(self):
         avatar = self.receive_image()
-        INSERT_SQL.set_user_avatar(self.login, avatar)
+        INSERT_SQL.set_user_avatar(self.db_cursor, self.login, avatar)
 
     def validate_login_data(self):
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:

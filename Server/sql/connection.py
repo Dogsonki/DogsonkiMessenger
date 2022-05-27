@@ -1,18 +1,28 @@
 import json
-
+from dataclasses import dataclass
 import mysql.connector
+from mysql.connector.cursor_cext import CMySQLCursor
+
+
+@dataclass
+class DbConfig:
+    host: str
+    user: str
+    password: str
+    database: str
 
 
 with open("db_config.json") as file:
-    mysql_connect_data = json.load(file)
+    db_config: DbConfig = json.load(file, object_hook=lambda d: DbConfig(**d))
 
 DATABASE_CONNECTION = mysql.connector.connect(
-    host=mysql_connect_data["host"],
-    user=mysql_connect_data["user"],
-    password=mysql_connect_data["password"],
-    database=mysql_connect_data["database"],
+    host=db_config.host,
+    user=db_config.user,
+    password=db_config.password,
+    database=db_config.database,
     autocommit=True
 )
 
-database_cursor = DATABASE_CONNECTION.cursor()
 
+def get_cursor() -> CMySQLCursor:
+    return DATABASE_CONNECTION.cursor(buffered=True)

@@ -1,10 +1,11 @@
-import json
+import sys
+import os
 import socket
 import threading
-import os
+import json
 from dataclasses import dataclass
 
-os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # fix "no module named Server"
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # this fixes "no module named Server"
 
 from network.client_menu import ClientMenu
 from network.connection import Client
@@ -12,11 +13,11 @@ from sql.create_databse import CreateDatabase
 
 
 def listen_for_connections(sock: socket.socket):
-    sock.listen(10)
+    sock.listen(10)  # can accept max 10 connections at the same time
     print("Waiting for connections...")
     while True:
         connection, address = sock.accept()
-        threading._start_new_thread(on_new_connection, (connection, address))
+        threading.Thread(target=on_new_connection, args=(connection, address)).start()
         print(f"Accepted new connection: {address}")
 
 
