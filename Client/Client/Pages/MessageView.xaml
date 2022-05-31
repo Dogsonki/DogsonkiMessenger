@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			 xmlns:local="clr-namespace:Client.Views"
              x:Class="Client.MessageView"
-			 BackgroundColor="#1d1f1d">
+			 BackgroundColor="#121212">
 	
 	<ContentPage.BindingContext>
 		<local:MessageViewModel></local:MessageViewModel>

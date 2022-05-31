@@ -2,25 +2,26 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.RegisterView"
-			 BackgroundColor="#1d1f1d">
+			 BackgroundColor="#121212">
     <ContentPage.Content>
 		<StackLayout Padding="20">
 			<StackLayout HorizontalOptions="Center" Padding="10">
+				<Label TextColor="White" FontAttributes="Bold" FontSize="35" Text="Creating account"></Label>
 			</StackLayout>
-			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
-				<Entry Focused="Input_Focused" Placeholder="Username" WidthRequest="250"  x:Name="Input_Username"></Entry>
-				<Entry Focused="Input_Focused" IsPassword="true" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
+			<StackLayout WidthRequest="300" HorizontalOptions="Center" VerticalOptions="Center">
+				<Entry PlaceholderColor="White" Focused="Input_Focused" Placeholder="Username" x:Name="Input_Username"></Entry>
+				<Entry PlaceholderColor="White" Focused="Input_Focused" IsPassword="true" Placeholder="Password" x:Name="Input_Password"></Entry>
+				<Entry PlaceholderColor="White" Focused="Input_Focused" IsPassword="true" Placeholder="Repeat Password" x:Name="Input_RepeatPassword"></Entry>
 				<StackLayout x:Name="ErrorLevel">
 				</StackLayout>
-				<Button BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
+				<Button BackgroundColor="#252525"  BorderWidth="2" CornerRadius="10" Clicked="RegisterDone" Text="Register"></Button>
 			</StackLayout>
-			<StackLayout Orientation="Horizontal" Padding="40">
-				<Label Text="Go to Login">
+			<StackLayout Orientation="Horizontal">
+				<Label Text="Already register ?">
 					<Label.GestureRecognizers>
 						<TapGestureRecognizer Tapped="ToLogin_Tapped"></TapGestureRecognizer>
 					</Label.GestureRecognizers>
 				</Label>
-				<Label HorizontalOptions="EndAndExpand" Text="Forgot Password"></Label>
 			</StackLayout>
 		</StackLayout>
 

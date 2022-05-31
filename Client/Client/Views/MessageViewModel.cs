@@ -31,7 +31,7 @@ namespace Client.Views
         {
             if (rev == null || rev == null)
                 return;
-            SocketCore.SendRaw(rev);
+            SocketCore.Send(rev);
             var r = new MessageModel(LocalUser.Username, rev, DateTime.Now);
             Messages.Add(r);
             MessageView.ScrollToBottom(r);

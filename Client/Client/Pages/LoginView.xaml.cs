@@ -21,6 +21,11 @@ namespace Client.Pages
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
+            if(password == "a" && username == "a")//Bypass for test
+            {
+                StaticNavigator.PopAndPush(new MainAfterLoginPage(true));   
+            }
+
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 ShowError("Username or password is empty");

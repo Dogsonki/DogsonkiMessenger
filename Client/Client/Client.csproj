@@ -17,7 +17,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Networking\SocketConfig.json" />
-    <EmbeddedResource Include="Pages\B.png" />
+    <EmbeddedResource Include="Pages\B.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

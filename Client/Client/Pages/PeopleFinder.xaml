@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.PeopleFinder"
 			 xmlns:local="clr-namespace:Client.Views"
-			 BackgroundColor="#1d1f1d">
+			 BackgroundColor="#121212">
 	
 	<ContentPage.BindingContext>
 		<local:PeopleFinderViewModel></local:PeopleFinderViewModel>
@@ -13,7 +13,7 @@
 		<StackLayout>
 			<StackLayout>
 				<Entry WidthRequest="50"  x:Name="UsernameFind" Placeholder="Type to search"></Entry>
-				<Button Clicked="FindClicked" BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" Text="Find"></Button>
+				<Button BackgroundColor="#252525" Clicked="FindClicked" BorderWidth="2" CornerRadius="10" Text="Find"></Button>
 			</StackLayout>
 			<StackLayout>
 				<ListView x:Name="ViewOfPeople" ItemSelected="PeopleFound_ItemSelected"

@@ -1,6 +1,7 @@
 ﻿using Client.IO;
 using Client.Model.Session;
 using Client.Networking;
+using Client.Utility;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -22,13 +23,14 @@ namespace Client.Pages
         {
             //Read cache to auto login 
             //Need to do token 
+            Debug.Write("Reading storage");
             if (Device.RuntimePlatform == Device.Android)
             {
                 var r = StorageIO.ReadStorage<Session>("session", new Session("", ""));
 
                 if (!string.IsNullOrEmpty(r.SessionKey))
                 {
-                    SocketCore.SendRaw(r, 9);
+                    SocketCore.Send(r, 9);
                 }
             }
         }

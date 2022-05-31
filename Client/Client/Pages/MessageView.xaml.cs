@@ -42,7 +42,7 @@ namespace Client
             if (IsVisible)
                 return base.OnBackButtonPressed();
 
-            SocketCore.SendRaw(" ", 7); //Close chat 
+            SocketCore.Send(" ", 7); //Close chat 
 
             return base.OnBackButtonPressed();
         }

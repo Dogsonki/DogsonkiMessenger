@@ -35,19 +35,41 @@ namespace Client.Networking
         protected static Thread ManageSendingQueue { get; set; }
         protected static bool IsConnected { get; set; }
         protected static EncodingOption ActualDecoding { get; set; }
-        protected static List<byte[]> m_ReadingImage = new List<byte[]>();
+        protected static List<byte> m_ReadingImage = new List<byte>();
         protected static bool Initialized = false;
         protected static bool PendingConnection = false;
         private const int MaxBuffer = 1024;
+        protected static bool WillReadImage { get; set; }
+
+        private static Thread SocketInitTemporaryThread;
 
         public static bool Init()
         {
+            Debug.Write("Initializating sockets");
             Config = SocketConfig.ReadConfig();
+            Debug.Write("Readed socket config");
+            if(SocketInitTemporaryThread == null)
+            {
+                SocketInitTemporaryThread = new Thread(() =>
+                {
+                    try
+                    {
+                        Client = new TcpClient(Config.Ip, Config.Port);
+                        if (Client != null)
+                        {
+                            Stream = Client.GetStream();
+                        }
+                    }
+                    catch (Exception ex) { Debug.Error(ex); }
 
+                  
+                    //Thread should be interputed
+                });
+                SocketInitTemporaryThread.Start();
+            }
             try
             {
-                Client = new TcpClient(Config.Ip, Config.Port);
-                Stream = Client.GetStream();
+              
             }
             catch (Exception ex)
             {
@@ -61,6 +83,7 @@ namespace Client.Networking
                 return false;
             }
 
+            Debug.Write("Starting socket threads");
 
             Client.ReceiveBufferSize = MaxBuffer;
             Client.SendBufferSize = MaxBuffer;
@@ -123,63 +146,109 @@ namespace Client.Networking
             {
                 while (IsConnected)
                 {
-                    while ((LenBuffer = Stream.Read(buffer, 0, buffer.Length)) != 0)
+                    try
                     {
-                        bool _WillReadRaw = true;
-
-                        string DecodedString = string.Empty;
-                        switch (ActualDecoding)
+                        while ((LenBuffer = Stream.Read(buffer, 0, buffer.Length)) != 0)
                         {
-                            case EncodingOption.IMAGE:
-                                m_ReadingImage.Add(buffer);
-                                break;
+                            bool _WillReadRaw = true;
 
-                            case EncodingOption.UFT8:
-                                DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
-                                break;
-
-                            case EncodingOption.BASE64:
-                                DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
-                                ActualDecoding = EncodingOption.UFT8;
-                                break;
-                        }
-                        string[] Buffers = DecodedString.Split('$');
-                        for (int i = 0; i < Buffers.Length; i++)
-                        {
-                            _WillReadRaw = true;
-                            if (Buffers[i].Length == 0)
-                                continue;
-                            SocketPacket packet;
-                            try
+                            string DecodedString = string.Empty;
+                            switch (ActualDecoding)
                             {
-                                packet = JsonConvert.DeserializeObject<SocketPacket>(Buffers[i]);
-                                Debug.Write(packet.Token + " | " + packet.Data.GetType());
+                                case EncodingOption.IMAGE:
+                                    int len = buffer.Length;
+                                    bool _end = false;
+                                    if (Encoding.UTF8.GetString(buffer,0,LenBuffer)[LenBuffer-1] == '$')
+                                    {
+                                        Debug.Write("ENDING READGING IMAGE");
+                                        Debug.Write(Encoding.UTF8.GetString(buffer));
+                                        len--;
+                                        _end = true;
+                                    }
+                                 
+                                    for(int i = 0; i < len; i++)
+                                    {
+                                        m_ReadingImage.Add(buffer[i]);
+                                    }
+                                    if (_end)
+                                    {
+                                        var i =JsonConvert.DeserializeObject<SocketPacket>(Encoding.UTF8.GetString(m_ReadingImage.ToArray()).Replace("$",""));
+                                        Debug.Write("ENDED " + i.Token);
+                                    }
+                                    break;
+;
+                                case EncodingOption.UFT8:
+                                    DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
+                                    break;
+
+                                case EncodingOption.BASE64:
+                                    DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
+                                    ActualDecoding = EncodingOption.UFT8;
+                                    break;
                             }
-                            catch (Exception ex)
-                            {
-                                Debug.Error($"Cannot deserialize buffer to packet: {Buffers[i]} | {ex}");
-                                continue;
-                            }
 
-                            for (int j = 0; j < RequestedCallback.GetCount(); j++)
+                            if (WillReadImage)
+                                continue;
+
+                            string[] Buffers = DecodedString.Split('$');
+                            for (int i = 0; i < Buffers.Length; i++)
                             {
-                                RequestedCallback req = RequestedCallback.Callbacks[i];
-                                if (packet.Token == req.GetToken())
+                                if (WillReadImage)
                                 {
-                                    req.Invoke(packet.Data);
-                                    _WillReadRaw = false;
+                                    byte[] r = Encoding.UTF8.GetBytes(Buffers[i]);
+                                    for (int y = 0; y < Buffers[i].Length; y++)
+                                        m_ReadingImage.Add(r[y]);
                                 }
-                            }
+                                 
+                                _WillReadRaw = true;
+                                if (Buffers[i].Length == 0)
+                                    continue;
+                                SocketPacket packet;
+                                try
+                                {
+                                    packet = JsonConvert.DeserializeObject<SocketPacket>(Buffers[i]);
+                                    Debug.Write(packet.Token + " | " + packet.Data.GetType());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.Write("[SOCKET RECIVE] IMAGE PASRING ");
 
-                            if (_WillReadRaw)
-                            {
-                                ReadRawBuffer(packet);
-                            }
+                                    WillReadImage = true;
+                                    ActualDecoding = EncodingOption.IMAGE;
+                                    Debug.Write(Buffers[i]);
+                                    Debug.Write("LAST: " + Buffers[i][Buffers.Length] +"PRE "+ Buffers[i][Buffers.Length-1]);
+                                    byte[] bf = Encoding.UTF8.GetBytes(Buffers[i]);
+                                    for(int y=0;y< bf.Length; y++)
+                                    {
+                                        m_ReadingImage.Add(bf[y]);
+                                    }
+                                    Debug.Write(Encoding.UTF8.GetString(m_ReadingImage.ToArray()));
+                                    continue;
+                                }
+                                for (int j = 0; j < RequestedCallback.GetCount(); j++)
+                                {
+                                    RequestedCallback req = RequestedCallback.Callbacks[i];
+                                    if (packet.Token == req.GetToken())
+                                    {
+                                        req.Invoke(packet.Data);
+                                        _WillReadRaw = false;
+                                    }
+                                }
 
+                                if (_WillReadRaw)
+                                {
+                                    ReadRawBuffer(packet);
+                                }
+
+                            }
+                            Stream.Flush();
+                            buffer = new byte[MaxBuffer];
+                            DecodedString = string.Empty;
                         }
-                        Stream.Flush();
-                        buffer = new byte[MaxBuffer];
-                        DecodedString = string.Empty;
+                    }
+                    catch(Exception ex)
+                    {
+                        Debug.Write(ex);
                     }
                 }
 
@@ -214,6 +283,8 @@ namespace Client.Networking
                         byte[] Buffer = new byte[MaxBuffer];
                         try
                         {
+                            if (packet == null)//TODO: crashing on really small packet that trying to ddos server
+                                continue;
                             Buffer = packet.GetPacked();
                             Debug.Write($"[SOCKET SENDING] {Buffer.Length} | {Encoding.UTF8.GetString(Buffer)}");
                             Stream.Write(Buffer, 0, Buffer.Length);
@@ -273,30 +344,35 @@ namespace Client.Networking
                         Device.InvokeOnMainThreadAsync(() => StaticNavigator.PopAndPush(new MainAfterLoginPage()));
                     }
                     break;
+                case 11:
+                    Debug.Write("READING IMAGE ...");
+                    WillReadImage = true;
+                    ActualDecoding = EncodingOption.IMAGE;
+                    break;
                 default:
                     Console.WriteLine($"Cannot find raw definition");
                     break;
             }
         }
 
-        public static void SendFile(string resourceName, string location = "temp")
+        public static bool SendFile(byte[] fileinbytes)
         {
             /* 
              Buffer cannot be encoded into UTF8 or BASE64 
              have to be send just a raw byte[] 
-             */
-            IFileService sr = DependencyService.Get<IFileService>();
-            byte[] buffer = sr.ReadFileFromStorage(resourceName, location);
+            */
+            if (!AbleToSend())
+                return false;
 
-            SlicedBuffer sb = new SlicedBuffer(buffer, MaxBuffer);
-            SendRaw("3");
+            SocketPacket packet = new SocketPacket(fileinbytes, 8);
+            SlicedBuffer sb = new SlicedBuffer(packet.GetPacked(), MaxBuffer);
+            List<byte[]> sliced = sb.GetSlicedBuffer();
 
-            sb.GetSlicedBuffer().ForEach((buff) =>
+            foreach(var a in sliced)
             {
-                SendRaw(buff);
-            });
-
-            SendRaw("ENDFILE");
+                Stream.Write(a);
+            }
+            return true;
         }
 
         public static bool SendR(Action<object> Callback, object SendingData, int Token)
@@ -305,7 +381,7 @@ namespace Client.Networking
                 return false;
 
             RequestedCallback.Callbacks.Add(new RequestedCallback(Callback, SendingData, Token));
-            SendRaw(SendingData, Token);
+            Send(SendingData, Token);
             return true;
         }
 
@@ -331,7 +407,7 @@ namespace Client.Networking
             return true;
         }
 
-        public static bool SendRaw(object data, int token = -1, EncodingOption option = EncodingOption.UFT8, bool isImage = false, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+        public static bool Send(object data, int token = -1, EncodingOption option = EncodingOption.UFT8, bool isImage = false, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
             if (!AbleToSend())
                 return false;
@@ -339,6 +415,14 @@ namespace Client.Networking
             SocketPacket model = new SocketPacket(data, token);
             SocketQueue.Add(model);
 
+            return true;
+        }
+
+        public static bool SendPacket(SocketPacket packet)
+        {
+            if (!AbleToSend())
+                return false;
+            SocketQueue.Add(packet);
             return true;
         }
     }

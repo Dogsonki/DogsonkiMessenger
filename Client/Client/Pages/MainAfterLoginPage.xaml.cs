@@ -1,4 +1,5 @@
 ﻿using Client.Networking;
+using Client.Utility;
 using Client.Views;
 using System.IO;
 using System.Reflection;
@@ -20,29 +21,24 @@ namespace Client.Pages
             MainInstance = this;
             if (redirectedFormLogin)
                 MainAfterLoginViewModel.Clear();
-            return;
-            #region test png buffer
 
-            if (false)
+            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
+            byte[] b;
+            using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
             {
-                var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
-                byte[] b;
-                using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
-                {
 
-                    byte[] bf = new byte[16 * 1024];
-                    using (MemoryStream ms = new MemoryStream())
+                byte[] bf = new byte[16 * 1024];
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    int read;
+                    while ((read = stream.Read(bf, 0, bf.Length)) > 0)
                     {
-                        int read;
-                        while ((read = stream.Read(bf, 0, bf.Length)) > 0)
-                        {
-                            ms.Write(bf, 0, read);
-                        }
-                        b = ms.ToArray();
+                        ms.Write(bf, 0, read);
                     }
+                    b = ms.ToArray();
                 }
             }
-            #endregion
+            SocketCore.SendFile(b);
         }
 
         private void FindPeople_Clicked(object sender, System.EventArgs e)
@@ -58,7 +54,7 @@ namespace Client.Pages
 
         protected override bool OnBackButtonPressed()
         {
-            SocketCore.SendRaw(" ", 0);
+            SocketCore.Send(" ", 0);
             LocalUser.Logout();
             return true;
         }
