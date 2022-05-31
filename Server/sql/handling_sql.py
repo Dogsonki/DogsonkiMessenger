@@ -7,18 +7,15 @@ from mysql.connector.cursor_cext import CMySQLCursor
 
 class GetInfoFromDatabase:
     @staticmethod
-    def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender: str, receiver: str,
+    def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
                                            number_of_sent_last_messages: int):
-
-        if check_if_login_exist(cursor, receiver) is None:
-            return False
 
         cursor.execute("""SELECT content, u1.login, u2.login, time FROM ((messages
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                           INNER JOIN users AS u2 ON messages.receiver_id = u2.id) 
-                          WHERE (u1.login = %s AND u2.login = %s) OR (u1.login = %s AND u2.login = %s)
-                          ORDER BY ID LIMIT %s,30;""", (sender, receiver, receiver, sender,
-                                                        number_of_sent_last_messages))
+                          WHERE (sender_id = %s AND receiver_id = %s) OR (receiver_id = %s AND sender_id = %s)
+                          ORDER BY messages.id LIMIT %s,30;""", (sender_id, receiver_id, receiver_id, sender_id,
+                                                                 number_of_sent_last_messages))
         sql_data = cursor.fetchall()
         return sql_data
 
@@ -82,6 +79,8 @@ class GetInfoFromDatabase:
     def get_user_id(cursor: CMySQLCursor, login: str):
         cursor.execute("""SELECT id FROM users
                           WHERE login=%s""", (login,))
+        sql_data = cursor.fetchone()
+        return sql_data
 
 
 class InsertIntoDatabase:

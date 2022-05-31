@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections
@@ -22,14 +23,14 @@ class ClientMenu:
             elif message.token == MessageType.LOGOUT:
                 self.client.logout()
             elif message.token == MessageType.CHANGE_AVATAR:
-                self.client.set_avatar()
+                self.client.set_avatar(message.data)
 
 
 class Chatroom:
     def __init__(self, connection: Client, receiver):
         self.connection = connection
         self.receiver = receiver
-        self.receiver_id = GET_INFO_FROM_DB.get_user_id(self.connection.db_cursor, self.connection.login)
+        self.receiver_id, = GET_INFO_FROM_DB.get_user_id(self.connection.db_cursor, receiver)
         self.number_of_sent_last_messages = 0
 
     def init_chatroom(self):
@@ -38,12 +39,13 @@ class Chatroom:
 
     def send_last_messages(self):
         message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.db_cursor,
-                                                                              self.connection.login, self.receiver_id,
+                                                                              self.connection.login_id,
+                                                                              self.receiver_id,
                                                                               self.number_of_sent_last_messages)
         self.number_of_sent_last_messages += 30
         if message_history:
             for i in message_history:
-                data = {"user": i[1], "message": i[0], "time": str(i[3])}
+                data = {"user": i[1], "message": i[0], "time": datetime.timestamp(i[3])}
                 self.send_message(data)
 
     def send_message(self, message_data):
@@ -58,7 +60,8 @@ class Chatroom:
                     in_chat = False
                     break
 
-                if i.data != "" or i.data != " ":
+                i.data = i.data.strip()
+                if i.data != "":
                     receiver_connection = current_connections.get(self.receiver)
                     if receiver_connection:
                         data = {"user": self.receiver, "message": i.data, "time": time.time()}
