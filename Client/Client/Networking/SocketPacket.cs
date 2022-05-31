@@ -11,18 +11,38 @@ namespace Client.Networking.Model
         [JsonProperty("token")]
         public int Token { get; set; }
 
-        protected int UpdatedIndex;
-
         private bool IsImage { get; set; } = false;
+        private bool IsLastImagePacket { get; set; } = false;
 
-        public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+        /// <summary>
+        /// Prepares packet to be sended
+        /// </summary>
+        /// <returns>Prepared packet</returns>
+        public byte[] GetPacked()
+        {
+            if (!IsImage) return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+            else
+            {
+                if (IsLastImagePacket)
+                    return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+                else return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this));
+            }
+        }
 
         [JsonConstructor]
-        public SocketPacket(object data, int token=-1)
+        public SocketPacket(object data, int token = -1, bool isImage = false)
         {
-            //Debug.Write($"Creating Packet: type {content.GetType()} | {(string)content}");\
             Data = data;
             Token = token;
+            IsImage = isImage;
         }
+        public SocketPacket(object data,bool isImage, bool isLastPacket,int token)
+        {
+            Data = data;
+            IsImage = isImage;
+            IsLastImagePacket = isLastPacket;
+            Token = token;
+        }
+
     }
 }

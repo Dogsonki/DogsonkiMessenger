@@ -1,4 +1,7 @@
 ﻿namespace Client.IO
 {
-    public interface IStorage { }
+    public interface IStorage 
+    {
+        
+    }
 }

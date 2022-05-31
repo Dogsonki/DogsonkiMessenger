@@ -11,7 +11,7 @@ namespace Client.Views
         public static ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
 
         public MessageViewModel()
-        { 
+        {
         }
 
         /// <summary>
@@ -31,8 +31,10 @@ namespace Client.Views
         {
             if (rev == null || rev == null)
                 return;
-            SocketCore.SendRaw(rev);
-            Messages.Add(new MessageModel(LocalUser.Username, rev,DateTime.Now));
+            SocketCore.Send(rev);
+            var r = new MessageModel(LocalUser.Username, rev, DateTime.Now);
+            Messages.Add(r);
+            MessageView.ScrollToBottom(r);
         }
 
         /// <summary>
@@ -42,6 +44,7 @@ namespace Client.Views
         public static void AddMessage(MessageModel model)
         {
             Messages.Add(model);
+            MessageView.ScrollToBottom(model);
         }
     }
 }

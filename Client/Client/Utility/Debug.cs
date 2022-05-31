@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace Client.Utility
+namespace Client
 {
     internal class Debug
     {

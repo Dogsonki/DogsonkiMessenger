@@ -1,24 +1,24 @@
-﻿using System;
+﻿using Client.IO;
+using System;
 using System.IO;
 using System.Threading.Tasks;
-using Client.IO;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-[assembly: Xamarin.Forms.Dependency(typeof(Client.Droid.AndroidFileService))]
+[assembly: Dependency(typeof(Client.Droid.AndroidFileService))]
 namespace Client.Droid
 {
     public class AndroidFileService : IFileService
     {
         public static string GetPersonalDir(string location)
         {
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            documentsPath = Path.Combine(documentsPath, "Orders", location);
-            return documentsPath;
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            path = Path.Combine(path, "Storage", location);
+            return path;
         }
-        public bool FileExist(string name,string location = "temp") => File.Exists(Path.Combine(GetPersonalDir(location), name));
-        public bool DirectoryExist(string name,string location = "temp") => Directory.Exists(Path.Combine(GetPersonalDir(location), name));
-        public void CreateFile(string name,string location) => File.Create(Path.Combine(GetPersonalDir(location), name));
+        public bool FileExist(string name, string location = "temp") => File.Exists(Path.Combine(GetPersonalDir(location), name));
+        public bool DirectoryExist(string name, string location = "temp") => Directory.Exists(Path.Combine(GetPersonalDir(location), name));
+        public void CreateFile(string name, string location) => File.Create(Path.Combine(GetPersonalDir(location), name));
         public byte[] ReadFileFromStorage(string name, string location = "temp")
         {
             Device.InvokeOnMainThreadAsync(async () => await RequestPermissionAsync());
@@ -30,6 +30,7 @@ namespace Client.Droid
             return buffer;
         }
 
+        //API < 21 will ask for permissions
         private static async Task RequestPermissionAsync()//TODO: make it async and ask before appEntry
         {
             var write = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
@@ -49,7 +50,7 @@ namespace Client.Droid
         {
             var documentsPath = GetPersonalDir(location);
 
-            if(!Directory.Exists(documentsPath))
+            if (!Directory.Exists(documentsPath))
                 Directory.CreateDirectory(documentsPath);
 
             string filePath = Path.Combine(documentsPath, name);
@@ -65,7 +66,7 @@ namespace Client.Droid
                 fs.Write(bArray, 0, length);
             }
         }
-        public void CreateDirectory(string name,string location="temp") => Directory.CreateDirectory(Path.Combine(GetPersonalDir(location),name));
+        public void CreateDirectory(string name, string location = "temp") => Directory.CreateDirectory(Path.Combine(GetPersonalDir(location), name));
         public string GetPersonalDir() => GetPersonalDir();
     }
 }

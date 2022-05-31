@@ -2,20 +2,25 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.LoginView"
-			 BackgroundColor="#1d1f1d">
-    <ContentPage.Content>
+			 BackgroundColor="#121212">
+	<ContentPage.Content>
 		<StackLayout Padding="20" Spacing="20">
-			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
-				<Entry TextColor="White" Focused="Input_Focused" Placeholder="Username" WidthRequest="250" x:Name="Input_Username"></Entry>
-				<Entry TextColor="White" Focused="Input_Focused" IsPassword="True" Placeholder="Password" WidthRequest="200"  x:Name="Input_Password"></Entry>
+			<StackLayout Padding="10">
+				<Label TextColor="White" HorizontalOptions="Center" FontSize="35" FontAttributes="Bold" Text="Login"></Label>
+				<Label TextColor="White" HorizontalOptions="Center" FontSize="15" FontAttributes="Bold" Text="Please enter your login and password"></Label>
+			</StackLayout>
+			<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
+				<Entry TextColor="White" PlaceholderColor="White" Focused="Input_Focused" Placeholder="Username" x:Name="Input_Username"></Entry>
+				<Entry TextColor="White" PlaceholderColor="White" Focused="Input_Focused" IsPassword="True" Placeholder="Password"  x:Name="Input_Password"></Entry>
 				<StackLayout x:Name="ErrorLevel">
 
 				</StackLayout>
 				<StackLayout Orientation="Horizontal" Spacing="2">
 					<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
-					<Label Padding="5" Text="Remember me ?"></Label>
+					<Label TextColor="White" Padding="10" Text="Remember me"></Label>
+					<Label TextColor="White" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand" Padding="10" Text="Forgot Password"></Label>
 				</StackLayout>
-				<Button HeightRequest="50" BackgroundColor="#706f6d" BorderWidth="2" CornerRadius="10" WidthRequest="20" Clicked="LoginDone" Text="Login"></Button>
+				<Button TextColor="White" HeightRequest="50" BackgroundColor="#FF252525" BorderWidth="2" CornerRadius="10" WidthRequest="20" Clicked="LoginDone" Text="Login"></Button>
 			</StackLayout>
 
 		</StackLayout>

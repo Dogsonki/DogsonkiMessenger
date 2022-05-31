@@ -1,13 +1,13 @@
 ﻿using Android.App;
-using Android.Content.PM;
-using Android.Runtime;
-using Android.OS;
-using Android.Views.InputMethods;
 using Android.Content;
+using Android.Content.PM;
+using Android.OS;
+using Android.Runtime;
+using Android.Views.InputMethods;
 
 namespace Client.Droid
 {
-    [Activity(Label = "Client", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Label = "Client", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static MainActivity MainActivityInstance { get; set; }

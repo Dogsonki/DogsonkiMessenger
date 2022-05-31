@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MainAfterLoginPage"
 			 xmlns:local="clr-namespace:Client.Views"
-			 BackgroundColor="#1d1f1d">
+			 BackgroundColor="#121212">
 
 	<ContentPage.BindingContext>
 		<local:MainAfterLoginViewModel></local:MainAfterLoginViewModel>
@@ -18,7 +18,7 @@
 					<StackLayout.GestureRecognizers>
 						<TapGestureRecognizer Tapped="FindPeople_Clicked"></TapGestureRecognizer>
 					</StackLayout.GestureRecognizers>
-					<Frame CornerRadius="10" BackgroundColor="#706f6d" HorizontalOptions="Start">
+					<Frame CornerRadius="10" BackgroundColor="#252525"  HorizontalOptions="Start">
 						<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
 							<StackLayout>
 								<Image WidthRequest="35" HeightRequest="35" Source="findpeoplemagnifer.png"></Image>
@@ -36,7 +36,7 @@
 						<StackLayout.GestureRecognizers>
 							<TapGestureRecognizer Tapped="FriendList_Clicked"></TapGestureRecognizer>
 						</StackLayout.GestureRecognizers>
-						<Frame CornerRadius="10" BackgroundColor="#706f6d" HorizontalOptions="Start">
+						<Frame CornerRadius="10" BackgroundColor="#252525"  HorizontalOptions="Start">
 							<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
 								<StackLayout>
 									<Image WidthRequest="35" HeightRequest="35" Source="friendlisticoN.png"></Image>

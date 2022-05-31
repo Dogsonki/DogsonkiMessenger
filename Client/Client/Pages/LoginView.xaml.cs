@@ -1,7 +1,6 @@
 ﻿using Client.Models;
 using Client.Networking;
 using Client.Utility;
-using Client.Views;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -22,21 +21,27 @@ namespace Client.Pages
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
-            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if(password == "a" && username == "a")//Bypass for test
+            {
+                StaticNavigator.PopAndPush(new MainAfterLoginPage(true));   
+            }
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
                 ShowError("Username or password is empty");
                 return;
-            }    
+            }
 
-            if(!SocketCore.SendR(LoginCallback, new LoginModel(username,password,CheckRemember.IsChecked), 1))
+            if (!SocketCore.SendR(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), 1))
             {
                 ShowError("Unable to connect");
+                SocketCore.TryConnect();
                 return;
             }
         }
 
         protected Label _ErrorText = new Label();
-        protected bool _AlreadyShowen = false;  
+        protected bool _AlreadyShowen = false;
 
         private void ClearError()
         {
@@ -58,7 +63,7 @@ namespace Client.Pages
 
         private void LoginCallback(object rev)
         {
-            string recived = (string)rev; 
+            string recived = (string)rev;
             switch (recived[0])
             {
                 case '1':

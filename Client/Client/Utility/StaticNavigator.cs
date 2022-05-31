@@ -1,5 +1,5 @@
-﻿using Xamarin.Forms;
-using Client.Pages;
+﻿using Client.Pages;
+using Xamarin.Forms;
 
 namespace Client.Utility
 {

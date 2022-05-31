@@ -1,5 +1,6 @@
-﻿using Client.Pages;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
+using Client.Pages;
+using Client.Utility;
 
 namespace Client
 {
@@ -7,6 +8,7 @@ namespace Client
     {
         public App()
         {
+            Debug.Write("Entry");
             InitializeComponent();
             MainPage = new NavigationPage(new AppEntry());
         }

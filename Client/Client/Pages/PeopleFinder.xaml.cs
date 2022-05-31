@@ -1,9 +1,9 @@
-﻿using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using Client.Networking;
-using System;
-using Newtonsoft.Json.Linq;
+﻿using Client.Networking;
 using Client.Views;
+using Newtonsoft.Json.Linq;
+using System;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
 
 namespace Client.Pages
 {
@@ -25,7 +25,6 @@ namespace Client.Pages
             Console.WriteLine($"Looking for people ... {UsernameFind.Text}");
 
             PeopleFinderViewModel.ClearList();
-            LocalUser.ActualChatWith = UsernameFind.Text;
             SocketCore.SendR(ParseQuery, $"{UsernameFind.Text}", 4);
         }
 
@@ -34,11 +33,11 @@ namespace Client.Pages
             JArray users;
             try
             {
-                users= (JArray)req;
+                users = (JArray)req;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Cannot parse usernames: {req} : "+ex);
+                Console.WriteLine($"Cannot parse usernames: {req} : " + ex);
                 return;
             }
 

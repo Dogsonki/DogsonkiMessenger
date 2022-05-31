@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			 xmlns:local="clr-namespace:Client.Views"
              x:Class="Client.MessageView"
-			 BackgroundColor="#1d1f1d">
+			 BackgroundColor="#121212">
 	
 	<ContentPage.BindingContext>
 		<local:MessageViewModel></local:MessageViewModel>
@@ -11,25 +11,27 @@
 	<StackLayout>
 		<Label TextColor="White" x:Name="ChatUsername" HorizontalOptions="Center"
 			   FontAttributes="Bold" VerticalOptions="Center" FontSize="Medium"></Label>
-		<ListView CachingStrategy="RecycleElementAndDataTemplate"  SeparatorColor="#0000" 
+		<ListView HasUnevenRows="True" CachingStrategy="RecycleElementAndDataTemplate"  SeparatorColor="#0000" 
 				  ItemSelected="MessageList_ItemSelected" x:Name="MessageList"
 				  ItemsSource="{Binding Source={x:Static local:MessageViewModel.Messages}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
-						<StackLayout  Orientation="Horizontal">
-							<Grid>
+						<StackLayout Orientation="Horizontal">
+							<Grid VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="5" RowSpacing="0">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="auto"/>
-									<ColumnDefinition Width="auto"/>
+									<ColumnDefinition Width="*"/>
 								</Grid.ColumnDefinitions>
 								<Grid.RowDefinitions>
+									<RowDefinition Height="*" />
 									<RowDefinition Height="auto" />
-									<RowDefinition Height="*" />
-									<RowDefinition Height="*" />
 								</Grid.RowDefinitions>
-								<Label FontSize="Medium" FontAttributes="Bold" Grid.Column="2" Grid.Row="1" Text="Puzonne"></Label>
-								<Label Grid.Column="2" Grid.Row="2" Text="{Binding MessageContent}"></Label>
+								<Frame Grid.Row="0" Grid.Column="0" Padding="0" CornerRadius="20" WidthRequest="40" HeightRequest="40">
+									<Image Aspect="AspectFill" Source="openchat.png"></Image>
+								</Frame>
+								<Label  TextColor="White" Grid.Column="1" FontSize="Medium" FontAttributes="Bold" Text="{Binding Username}"></Label>
+								<Label VerticalOptions="End" Grid.Column="1" Grid.Row="0" FontSize="15" Text="{Binding MessageContent}"></Label>
 							</Grid>
 						</StackLayout>
 					</ViewCell>

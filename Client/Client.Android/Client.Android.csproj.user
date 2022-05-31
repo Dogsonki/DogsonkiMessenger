@@ -4,7 +4,7 @@
     <SelectedDevice>vivo V2028</SelectedDevice>
     <SelectedPlatformGroup>PhysicalDevice</SelectedPlatformGroup>
     <ActiveDebugProfile>vivo V2028</ActiveDebugProfile>
-    <DefaultDevice>pixel_5_-_api_30</DefaultDevice>
+    <DefaultDevice>nexus_6p_-_api_30</DefaultDevice>
     <AndroidDesignerPreferredTheme>MainTheme</AndroidDesignerPreferredTheme>
   </PropertyGroup>
 </Project>

@@ -1,10 +1,8 @@
-﻿#define l
-using Client.Networking;
+﻿using Client.Networking;
+using Client.Utility;
 using Client.Views;
-using System;
 using System.IO;
 using System.Reflection;
-using Client.IO;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,53 +12,33 @@ namespace Client.Pages
     public partial class MainAfterLoginPage : ContentPage
     {
         public static MainAfterLoginPage MainInstance { get; set; }
-        public static Image f;
+
         public MainAfterLoginPage(bool redirectedFormLogin = false)
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
-            f = here;
 
-          
             MainInstance = this;
-                if (redirectedFormLogin)
-                    MainAfterLoginViewModel.Clear();
-            return;
-            #region test png buffer
+            if (redirectedFormLogin)
+                MainAfterLoginViewModel.Clear();
 
-            if (false)
+            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
+            byte[] b;
+            using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
             {
-                var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
-                byte[] b;
-                using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
-                {
 
-                    byte[] bf = new byte[16 * 1024];
-                    using (MemoryStream ms = new MemoryStream())
+                byte[] bf = new byte[16 * 1024];
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    int read;
+                    while ((read = stream.Read(bf, 0, bf.Length)) > 0)
                     {
-                        int read;
-                        while ((read = stream.Read(bf, 0, bf.Length)) > 0)
-                        {
-                            ms.Write(bf, 0, read);
-                        }
-                        b = ms.ToArray();
+                        ms.Write(bf, 0, read);
                     }
+                    b = ms.ToArray();
                 }
             }
-
-            return;
-            IFileService aa = DependencyService.Get<IFileService>();
-            byte[] buffer = aa.ReadFileFromStorage("B.png");
-
-            using (MemoryStream s = new MemoryStream(buffer))
-            {
-                if (s == null)
-                {
-                    Console.WriteLine("Buffer was null");
-                }
-                SocketCore.SendFile(s.ToArray());
-            }
-            #endregion
+            SocketCore.SendFile(b);
         }
 
         private void FindPeople_Clicked(object sender, System.EventArgs e)
@@ -76,16 +54,9 @@ namespace Client.Pages
 
         protected override bool OnBackButtonPressed()
         {
-            SocketCore.SendRaw(" ",0);
-            LogOut("");
-            return base.OnBackButtonPressed();
-        }
-
-        private void LogOut(string rev)
-        {
-            LocalUser.IsLoggedIn = false;
-            LocalUser.ActualChatWith = "";
-            LocalUser.Username = "";
+            SocketCore.Send(" ", 0);
+            LocalUser.Logout();
+            return true;
         }
 
         private void LastChatsOpened_ItemSelected(object sender, SelectedItemChangedEventArgs e)
