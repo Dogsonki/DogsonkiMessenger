@@ -28,6 +28,7 @@ class MessageType(Enum):
     CHANGE_AVATAR = 8
     SESSION_INFO = 9
     AUTOMATICALLY_LOGGED = 10
+    FILE = 11
 
 
 @dataclass
@@ -114,26 +115,6 @@ class Connection:
                 self.close_connection()
                 return None
 
-    def send_image(self, image_raw):
-        try:
-            print(f"sent {image_raw}")
-            self.client.sendall(bytes(image_raw, "UTF-8"))
-        except socket.error:
-            self.close_connection()
-
-    def receive_image(self):
-        image_data = b""
-        while True:
-            data = self.client.recv(1024)
-            print(f"recv: {data}")
-            if data.decode("UTF-8", "ignore") == "ENDFILE":
-                break
-            if data == b"":
-                self.close_connection()
-            image_data += data
-        image_data = base64.b64encode(image_data)
-        return image_data
-
     def close_connection(self):
         if not self.closed:
             self.db_cursor.close()
@@ -153,15 +134,24 @@ class Client(Connection):
             if action_data.token == MessageType.LOGIN:
                 is_logged_correctly = self.login_user(action_data)
                 if is_logged_correctly:
+                    self.login_action()
                     break
             elif action_data.token == MessageType.REGISTER:
                 self.register_user(action_data)
             elif action_data.token == MessageType.SESSION_INFO:
                 is_logged_correctly = self.login_by_session(action_data)
                 if is_logged_correctly:
+                    self.login_action()
                     break
             else:
                 self.send_message("Error - should receive 'logging' or 'registering' code", MessageType.ERROR)
+
+    def login_action(self):
+        user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
+        self.send_message(user_chats, MessageType.SEARCH_USERS)
+        avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
+        self.send_message(str(base64.b64decode(avatar)), MessageType.FILE)
+        current_connections[self.login] = self
 
     def login_by_session(self, session_data) -> bool:
         self.login_id = session_data.data["login_id"]
@@ -171,7 +161,6 @@ class Client(Connection):
             return False
         self.login, self.password = SELECT_SQL.get_user(self.db_cursor, self.login_id)
         self.send_message(self.login, MessageType.AUTOMATICALLY_LOGGED)
-        current_connections[self.login] = self
         return True
 
     def login_user(self, login_data):
@@ -184,17 +173,12 @@ class Client(Connection):
             if remember:
                 session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
-            user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
-            self.send_message(user_chats, MessageType.SEARCH_USERS)
-            avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
-            # self.send_image(str(avatar))
-            current_connections[self.login] = self
             return True
         else:
             self.send_message("0", MessageType.LOGIN)  # 0 --> wrong login or password
         return False
 
-    def register_user(self, register_data) -> bool:
+    def register_user(self, register_data):
         self.login = register_data.data["login"]
         self.password = register_data.data["password"]
         if self.validate_login_data():
@@ -213,8 +197,8 @@ class Client(Connection):
         self.login_id = 0
         self.get_login_action()
 
-    def set_avatar(self):
-        avatar = self.receive_image()
+    def set_avatar(self, avatar: str):
+        avatar = base64.b64encode(bytes(avatar, "UTF-8"))
         INSERT_SQL.set_user_avatar(self.db_cursor, self.login, avatar)
 
     def validate_login_data(self):
