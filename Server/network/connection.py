@@ -89,7 +89,7 @@ class Connection:
         except socket.error:
             self.close_connection()
 
-    def receive_message(self) -> Optional[Message]:
+    def receive_message(self):
         while True:
             try:
                 received_message = self.buffer.read()
@@ -106,10 +106,8 @@ class Connection:
                         message.token = MessageType.EMPTY
                         data.append(Message)
                         break
-                    message = Message.deserialize(i)  # FIXME: handle incorrect data
+                    message = Message.deserialize(i)
                     data.append(message)
-                # if message.type == MessageType.CONTINUE:
-                #    continue
                 return data
             except socket.error:
                 self.close_connection()
@@ -125,7 +123,7 @@ class Connection:
 
 
 class Client(Connection):
-    def __init__(self, connection: socket.socket, address: str):
+    def __init__(self, connection: socket.socket, address):
         super().__init__(connection, address)
 
     def get_login_action(self):
@@ -134,19 +132,19 @@ class Client(Connection):
             if action_data.token == MessageType.LOGIN:
                 is_logged_correctly = self.login_user(action_data)
                 if is_logged_correctly:
-                    self.login_action()
+                    self.after_login()
                     break
             elif action_data.token == MessageType.REGISTER:
                 self.register_user(action_data)
             elif action_data.token == MessageType.SESSION_INFO:
                 is_logged_correctly = self.login_by_session(action_data)
                 if is_logged_correctly:
-                    self.login_action()
+                    self.after_login()
                     break
             else:
                 self.send_message("Error - should receive 'logging' or 'registering' code", MessageType.ERROR)
 
-    def login_action(self):
+    def after_login(self):
         user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
         self.send_message(user_chats, MessageType.SEARCH_USERS)
         avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
