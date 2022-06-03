@@ -5,6 +5,7 @@ using Xamarin.Forms;
 
 namespace Client.Networking
 {
+    //Add lifetime to callbacks, can be used as memory leak where cannot be invoked 
     public class RequestedCallback
     {
         //Callbacks might break sametimes when recive packet in wrong time
@@ -35,12 +36,11 @@ namespace Client.Networking
             {
                 try
                 {
-                    Debug.Write("Invoking Action += " + Callback.Method.Name);
                     Device.BeginInvokeOnMainThread(() => Callback.Invoke(Recived));
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    Debug.Write(ex);
                 }
             }
             Callbacks.Remove(this);

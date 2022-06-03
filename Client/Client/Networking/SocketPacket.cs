@@ -30,18 +30,18 @@ namespace Client.Networking.Model
         }
 
         [JsonConstructor]
-        public SocketPacket(object data, int token = -1, bool isImage = false)
+        public SocketPacket(object data, Token token = Networking.Token.EMPTY, bool isImage = false)
         {
             Data = data;
-            Token = token;
+            Token = (int)token;
             IsImage = isImage;
         }
-        public SocketPacket(object data,bool isImage, bool isLastPacket,int token)
+        public SocketPacket(object data,bool isImage, bool isLastPacket,Token token)
         {
             Data = data;
             IsImage = isImage;
             IsLastImagePacket = isLastPacket;
-            Token = token;
+            Token = (int)token;
         }
 
     }

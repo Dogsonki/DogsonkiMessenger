@@ -1,7 +1,7 @@
 ﻿using Client.Pages;
 using Xamarin.Forms;
 
-namespace Client.Utility
+namespace Client
 {
     public enum MainPages
     {

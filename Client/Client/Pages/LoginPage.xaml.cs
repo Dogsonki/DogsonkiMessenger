@@ -8,9 +8,9 @@ using Xamarin.Forms.Xaml;
 namespace Client.Pages
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class LoginView : ContentPage
+    public partial class LoginPage : ContentPage
     {
-        public LoginView()
+        public LoginPage()
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
@@ -32,9 +32,9 @@ namespace Client.Pages
                 return;
             }
 
-            if (!SocketCore.SendR(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), 1))
+            if (!SocketCore.SendR(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
             {
-                ShowError("Unable to connect");
+                ShowError("Unable to connect to the server");
                 SocketCore.TryConnect();
                 return;
             }

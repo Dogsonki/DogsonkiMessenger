@@ -2,18 +2,18 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 			 xmlns:local="clr-namespace:Client.Views"
-             x:Class="Client.MessageView"
+             x:Class="Client.MessagePage"
 			 BackgroundColor="#121212">
 	
 	<ContentPage.BindingContext>
-		<local:MessageViewModel></local:MessageViewModel>
+		<local:MessagePageView></local:MessagePageView>
 	</ContentPage.BindingContext>
 	<StackLayout>
 		<Label TextColor="White" x:Name="ChatUsername" HorizontalOptions="Center"
 			   FontAttributes="Bold" VerticalOptions="Center" FontSize="Medium"></Label>
 		<ListView HasUnevenRows="True" CachingStrategy="RecycleElementAndDataTemplate"  SeparatorColor="#0000" 
 				  ItemSelected="MessageList_ItemSelected" x:Name="MessageList"
-				  ItemsSource="{Binding Source={x:Static local:MessageViewModel.Messages}}">
+				  ItemsSource="{Binding Source={x:Static local:MessagePageView.Messages}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
@@ -38,6 +38,6 @@
 				</DataTemplate>
 			</ListView.ItemTemplate>
 		</ListView>
-		<Entry Completed="Entry_Completed" Placeholder="Message @"></Entry>
+		<Entry IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Completed="Entry_Completed" Placeholder="Message @"></Entry>
 	</StackLayout>
 </ContentPage>

@@ -5,7 +5,7 @@ using Xamarin.Forms;
 
 namespace Client.Views
 {
-    public class MainAfterLoginViewModel
+    public class MainAfterLoginPageView
     {
         public static ObservableCollection<PeronFoundModel> LastChats { get; set; } = new ObservableCollection<PeronFoundModel>();
 

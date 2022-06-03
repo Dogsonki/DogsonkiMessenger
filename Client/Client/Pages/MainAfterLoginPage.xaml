@@ -6,7 +6,7 @@
 			 BackgroundColor="#121212">
 
 	<ContentPage.BindingContext>
-		<local:MainAfterLoginViewModel></local:MainAfterLoginViewModel>
+		<local:MainAfterLoginPageView></local:MainAfterLoginPageView>
 	</ContentPage.BindingContext>
 
 	<ContentPage.Content>
@@ -48,8 +48,6 @@
 							</StackLayout>
 						</Frame>
 					</StackLayout>
-
-				
 				</StackLayout>
 			</StackLayout>
 
@@ -61,7 +59,7 @@
 			<StackLayout>
 				<ListView CachingStrategy="RetainElement"  SeparatorColor="#0000" 
 				  ItemSelected="LastChatsOpened_ItemSelected"
-				  ItemsSource="{Binding Source={x:Static local:MainAfterLoginViewModel.LastChats}}">
+				  ItemsSource="{Binding Source={x:Static local:MainAfterLoginPageView.LastChats}}">
 					<ListView.ItemTemplate>
 						<DataTemplate>
 							<ViewCell>
@@ -81,6 +79,5 @@
 				</ListView>
 			</StackLayout>
 		</StackLayout>
-		
 	</ContentPage.Content>
 </ContentPage>

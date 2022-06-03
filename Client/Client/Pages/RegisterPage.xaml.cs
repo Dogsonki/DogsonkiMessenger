@@ -9,19 +9,18 @@ using Xamarin.Forms.Xaml;
 namespace Client
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RegisterView : ContentPage
+    public partial class RegisterPage : ContentPage
     {
-        public RegisterView()
+        protected char[] IllegalCharacters = { '$', '*', '{', '}', '#', '@' };
+
+        public RegisterPage()
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
         }
 
-        protected char[] IllegalCharacters = { '$', '*', '{', '}', '#', '@' };
-
         private void RegisterDone(object sender, EventArgs e)
         {
-            SocketCore.TryConnect();
             string username = Input_Username.Text;
             string password = Input_Password.Text;
 
@@ -33,12 +32,22 @@ namespace Client
                 return;
             }
 
+            if(Input_RepeatPassword.Text != Input_Password.Text)
+            {
+                ShowError("Make sure your passwords match");
+                return;
+            }
+
             if ((IllegalCharIndex = username.IndexOfAny(IllegalCharacters)) > 0)
             {
                 ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
                 return;
             }
-            SocketCore.SendR(RegisterCallback, new RegisterModel(username,password), 2);
+            if(!SocketCore.SendR(RegisterCallback, new RegisterModel(username,password), Token.REGISTER))
+            {
+                ShowError("Unable to connect to the server");
+                return;
+            }
         }
 
         protected Label _ErrorText = new Label();
@@ -68,7 +77,7 @@ namespace Client
             if (recived[0] == '1')
             {
                 //Check if this function have to be invoked in main thread
-                Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginView()); });
+                Device.BeginInvokeOnMainThread(async () => { await Navigation.PopAsync(); await Navigation.PushAsync(new LoginPage()); });
             }
             else
             {
@@ -83,7 +92,7 @@ namespace Client
 
         private void ToLogin_Tapped(object sender, EventArgs e)
         {
-            StaticNavigator.PopAndPush(new LoginView());
+            StaticNavigator.PopAndPush(new LoginPage());
         }
     }
 }

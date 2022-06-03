@@ -6,16 +6,16 @@ using Xamarin.Forms;
 
 namespace Client
 {
-    public partial class MessageView : ContentPage
+    public partial class MessagePage : ContentPage
     {
-        private static MessageView _instance;
+        private static MessagePage _instance;
 
         public static void ScrollToBottom(MessageModel md)
         {
             _instance.MessageList.ScrollTo(md, ScrollToPosition.End, true);
         }
 
-        public MessageView(string Username) //Chat with only one person
+        public MessagePage(string Username) //Chat with only one person
         {
             InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, false);
@@ -42,7 +42,7 @@ namespace Client
             if (IsVisible)
                 return base.OnBackButtonPressed();
 
-            SocketCore.Send(" ", 7); //Close chat 
+            SocketCore.Send(" ", Token.END_CHAT); //Close chat 
 
             return base.OnBackButtonPressed();
         }
@@ -59,7 +59,7 @@ namespace Client
             }
             InputText.Replace("$", "69420"); //Temporary replacment cuz it will break server
 
-            MessageViewModel.AddMessage(input.Text);
+            MessagePageView.AddMessage(input.Text);
             input.Text = "";
         }
     }

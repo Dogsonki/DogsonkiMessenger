@@ -12,19 +12,25 @@ namespace Client.Models
 
         //Used by server
         [JsonConstructor]
-        public MessageModel(string user, string message, string time)
+        public MessageModel(string user, string message, double time)
         {
             Username = user;
             MessageContent = message;
-            time = time.Replace(".", "");
             try
             {
-                Time = DateTime.Parse(time);
+                Time = UnixToDateTime(time);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Cannot parse time {time}" + ex);
             }
+        }
+
+        public static DateTime UnixToDateTime(double unixTimeStamp)
+        {
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
+            return dateTime;
         }
 
         //Used by client

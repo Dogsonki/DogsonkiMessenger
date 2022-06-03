@@ -8,6 +8,7 @@ using Client.Utility;
 using Client.Views;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,7 +39,7 @@ namespace Client.Networking
         protected static List<byte> m_ReadingImage = new List<byte>();
         protected static bool Initialized = false;
         protected static bool PendingConnection = false;
-        private const int MaxBuffer = 1024;
+        private const int MaxBuffer = 1024/3;
         protected static bool WillReadImage { get; set; }
 
         private static Thread SocketInitTemporaryThread;
@@ -48,33 +49,18 @@ namespace Client.Networking
             Debug.Write("Initializating sockets");
             Config = SocketConfig.ReadConfig();
             Debug.Write("Readed socket config");
-            if(SocketInitTemporaryThread == null)
-            {
-                SocketInitTemporaryThread = new Thread(() =>
-                {
-                    try
-                    {
-                        Client = new TcpClient(Config.Ip, Config.Port);
-                        if (Client != null)
-                        {
-                            Stream = Client.GetStream();
-                        }
-                    }
-                    catch (Exception ex) { Debug.Error(ex); }
-
-                  
-                    //Thread should be interputed
-                });
-                SocketInitTemporaryThread.Start();
-            }
             try
             {
-              
+                Client = new TcpClient(Config.Ip, Config.Port);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                Debug.Error("Unable connect: " + ex);
+                Debug.Write(ex);
                 return false;
+            } 
+            if (Client != null)
+            {
+                Stream = Client.GetStream();
             }
 
             if (Client == null)
@@ -156,24 +142,46 @@ namespace Client.Networking
                             switch (ActualDecoding)
                             {
                                 case EncodingOption.IMAGE:
+                                    Debug.Write("BUFF: "+Encoding.UTF8.GetString(buffer, 0, buffer.Length));
+                                    for (int i = 0; i < buffer.Length; i++)
+                                    {
+                                        m_ReadingImage.Add(buffer[i]);
+                                    }
+
                                     int len = buffer.Length;
                                     bool _end = false;
                                     if (Encoding.UTF8.GetString(buffer,0,LenBuffer)[LenBuffer-1] == '$')
                                     {
-                                        Debug.Write("ENDING READGING IMAGE");
-                                        Debug.Write(Encoding.UTF8.GetString(buffer));
-                                        len--;
                                         _end = true;
                                     }
                                  
-                                    for(int i = 0; i < len; i++)
-                                    {
-                                        m_ReadingImage.Add(buffer[i]);
-                                    }
+
                                     if (_end)
                                     {
-                                        var i =JsonConvert.DeserializeObject<SocketPacket>(Encoding.UTF8.GetString(m_ReadingImage.ToArray()).Replace("$",""));
-                                        Debug.Write("ENDED " + i.Token);
+                                        string raw = Encoding.UTF8.GetString(m_ReadingImage.ToArray());
+                                        int ind = raw.IndexOf('$');
+                                        string rr = raw.Substring(0, ind);
+                                        string comp = rr.Replace("$", "").Replace("'", "").Replace("b'", "");
+                                        Debug.Write("1"+comp);
+                                        Debug.Write("2"+comp.Substring(comp.Length/2));
+                                        Debug.Write("2" + comp.Substring(raw.Length-200));
+                                        try
+                                        {
+                                            var i = JsonConvert.DeserializeObject<SocketPacket>(comp);
+                                            using (MemoryStream ss = new MemoryStream(Convert.FromBase64String((string)i.Data)))
+                                            {
+                                                ImageSource s = ImageSource.FromStream(() => new MemoryStream(ss.ToArray()));
+                                                Device.BeginInvokeOnMainThread(() =>
+                                                {
+                                                    MainAfterLoginPage.d.Source = s;
+                                                });
+                                            }  
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Debug.Write(ex);
+                                        }
+                                        Debug.Write("[RECIVED] " + comp);
                                     }
                                     break;
 ;
@@ -190,34 +198,34 @@ namespace Client.Networking
                             if (WillReadImage)
                                 continue;
 
-                            string[] Buffers = DecodedString.Split('$');
-                            for (int i = 0; i < Buffers.Length; i++)
+                            string[] SplitedBuffers = DecodedString.Split('$');
+
+                            for (int i = 0; i < SplitedBuffers.Length; i++)
                             {
                                 if (WillReadImage)
                                 {
-                                    byte[] r = Encoding.UTF8.GetBytes(Buffers[i]);
-                                    for (int y = 0; y < Buffers[i].Length; y++)
+                                    byte[] r = Encoding.UTF8.GetBytes(SplitedBuffers[i]);
+                                    for (int y = 0; y < SplitedBuffers[i].Length; y++)
                                         m_ReadingImage.Add(r[y]);
                                 }
                                  
                                 _WillReadRaw = true;
-                                if (Buffers[i].Length == 0)
+                                if (SplitedBuffers[i].Length == 0)
                                     continue;
                                 SocketPacket packet;
                                 try
                                 {
-                                    packet = JsonConvert.DeserializeObject<SocketPacket>(Buffers[i]);
+                                    packet = JsonConvert.DeserializeObject<SocketPacket>(SplitedBuffers[i]);
                                     Debug.Write(packet.Token + " | " + packet.Data.GetType());
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
+                                    
                                     Debug.Write("[SOCKET RECIVE] IMAGE PASRING ");
 
                                     WillReadImage = true;
                                     ActualDecoding = EncodingOption.IMAGE;
-                                    Debug.Write(Buffers[i]);
-                                    Debug.Write("LAST: " + Buffers[i][Buffers.Length] +"PRE "+ Buffers[i][Buffers.Length-1]);
-                                    byte[] bf = Encoding.UTF8.GetBytes(Buffers[i]);
+                                    byte[] bf = Encoding.UTF8.GetBytes(SplitedBuffers[i]);
                                     for(int y=0;y< bf.Length; y++)
                                     {
                                         m_ReadingImage.Add(bf[y]);
@@ -242,13 +250,15 @@ namespace Client.Networking
 
                             }
                             Stream.Flush();
+
+                            SplitedBuffers = null;
                             buffer = new byte[MaxBuffer];
                             DecodedString = string.Empty;
                         }
                     }
                     catch(Exception ex)
                     {
-                        Debug.Write(ex);
+                        RedirectConnectionLost(ex);
                     }
                 }
 
@@ -306,24 +316,24 @@ namespace Client.Networking
             Debug.Write($"Reading raw buffer {packet.Token}");
             switch (packet.Token)
             {
-                case -1:
+                case (int)Token.ERROR:
                     Debug.Write("Samething went wrong");
                     break;
-                case 4:
-                    PeopleFinder.ParseQuery(packet.Data);
+                case (int)Token.SEARCH_USER:
+                    SearchPageView.ParseQuery(packet.Data);
                     break;
-                case 5:
+                case (int)Token.CHAT_MESSAGE:
                     try
                     {
-                        Device.InvokeOnMainThreadAsync(() => MessageViewModel.AddMessage(((JObject)packet.Data).ToObject<MessageModel>()));
+                        Device.InvokeOnMainThreadAsync(() => MessagePageView.AddMessage(((JObject)packet.Data).ToObject<MessageModel>()));
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Cannot parse MessageModel {ex}");
                     }
                     break;
-                case 6:
-                    MainAfterLoginViewModel.ParseQuery((JArray)packet.Data);
+                case (int)Token.USER_CHAT:
+                    MainAfterLoginPageView.ParseQuery((JArray)packet.Data);
                     break;
                 case 7:
                     if (m_ReadNextImage)
@@ -364,7 +374,7 @@ namespace Client.Networking
             if (!AbleToSend())
                 return false;
 
-            SocketPacket packet = new SocketPacket(fileinbytes, 8);
+            SocketPacket packet = new SocketPacket(fileinbytes, Token.FILE_SEND);
             SlicedBuffer sb = new SlicedBuffer(packet.GetPacked(), MaxBuffer);
             List<byte[]> sliced = sb.GetSlicedBuffer();
 
@@ -375,13 +385,13 @@ namespace Client.Networking
             return true;
         }
 
-        public static bool SendR(Action<object> Callback, object SendingData, int Token)
+        public static bool SendR(Action<object> Callback, object SendingData, Token token)
         {
             if (!AbleToSend())
                 return false;
 
-            RequestedCallback.Callbacks.Add(new RequestedCallback(Callback, SendingData, Token));
-            Send(SendingData, Token);
+            RequestedCallback.Callbacks.Add(new RequestedCallback(Callback, SendingData, (int)token));
+            Send(SendingData, token);
             return true;
         }
 
@@ -407,7 +417,7 @@ namespace Client.Networking
             return true;
         }
 
-        public static bool Send(object data, int token = -1, EncodingOption option = EncodingOption.UFT8, bool isImage = false, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+        public static bool Send(object data, Token token = Token.EMPTY, EncodingOption option = EncodingOption.UFT8, bool isImage = false, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
         {
             if (!AbleToSend())
                 return false;

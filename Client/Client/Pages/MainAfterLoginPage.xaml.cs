@@ -3,6 +3,7 @@ using Client.Utility;
 using Client.Views;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -12,6 +13,7 @@ namespace Client.Pages
     public partial class MainAfterLoginPage : ContentPage
     {
         public static MainAfterLoginPage MainInstance { get; set; }
+        public static Image d;
 
         public MainAfterLoginPage(bool redirectedFormLogin = false)
         {
@@ -20,13 +22,13 @@ namespace Client.Pages
 
             MainInstance = this;
             if (redirectedFormLogin)
-                MainAfterLoginViewModel.Clear();
-
+                MainAfterLoginPageView.Clear();
+            d = here;
+            return;
             var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainAfterLoginPage)).Assembly;
             byte[] b;
             using (Stream stream = assembly.GetManifestResourceStream("Client.Pages.B.png"))
             {
-
                 byte[] bf = new byte[16 * 1024];
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -38,13 +40,12 @@ namespace Client.Pages
                     b = ms.ToArray();
                 }
             }
+            ImageSource xd = ImageSource.FromStream(() => new MemoryStream(b));
+           // here.Source = xd;
             SocketCore.SendFile(b);
         }
 
-        private void FindPeople_Clicked(object sender, System.EventArgs e)
-        {
-            Navigation.PushAsync(new PeopleFinder()); //Don't pop cuz you can get back to "main menu"
-        }
+        private void FindPeople_Clicked(object sender, System.EventArgs e) => Navigation.PushAsync(new SearchPage()); //Don't pop cuz you can get back to "main menu"
 
         private void FriendList_Clicked(object sender, System.EventArgs e)
         {

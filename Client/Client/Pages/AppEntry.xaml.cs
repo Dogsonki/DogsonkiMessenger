@@ -1,7 +1,6 @@
 ﻿using Client.IO;
 using Client.Model.Session;
 using Client.Networking;
-using Client.Utility;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -30,21 +29,13 @@ namespace Client.Pages
 
                 if (!string.IsNullOrEmpty(r.SessionKey))
                 {
-                    SocketCore.Send(r, 9);
+                    SocketCore.Send(r, Token.SESSION_INFO);
                 }
             }
         }
 
-        private void LoginOptionClicked(object sender, EventArgs e)
-        {
-            Navigation.PopAsync();
-            Navigation.PushAsync(new LoginView());
-        }
+        private void LoginOptionClicked(object sender, EventArgs e) => StaticNavigator.PopAndPush(new LoginPage());
 
-        private void RegisterOptionClicked(object sender, EventArgs e)
-        {
-            Navigation.PopAsync();
-            Navigation.PushAsync(new RegisterView());
-        }
+        private void RegisterOptionClicked(object sender, EventArgs e) => StaticNavigator.PopAndPush(new RegisterPage());   
     }
 }
