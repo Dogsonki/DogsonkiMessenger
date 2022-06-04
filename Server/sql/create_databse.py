@@ -1,17 +1,20 @@
+from mysql.connector.cursor_cext import CMySQLCursor
+
 from .connection import get_cursor
 
 
 class CreateDatabase:
-    def create_all_tables(self):
-        cursor = get_cursor()
-        self.create_users_table(cursor)
-        self.create_messages_table(cursor)
-        self.create_session_table(cursor)
-        cursor.close()
+    cursor: CMySQLCursor
 
-    @staticmethod
-    def create_users_table(cursor):
-        cursor.execute("""CREATE TABLE IF NOT EXISTS users (
+    def create_all_tables(self):
+        self.cursor = get_cursor()
+        self.create_users_table()
+        self.create_messages_table()
+        self.create_session_table()
+        self.cursor.close()
+
+    def create_users_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS users (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    login VARCHAR(50) NOT NULL UNIQUE,
                                    password VARCHAR(50) NOT NULL,
@@ -20,9 +23,8 @@ class CreateDatabase:
                                    avatar MEDIUMBLOB
                                    );""")
 
-    @staticmethod
-    def create_messages_table(cursor):
-        cursor.execute("""CREATE TABLE IF NOT EXISTS messages (
+    def create_messages_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS messages (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    content TEXT NOT NULL,
                                    sender_id INTEGER,
@@ -33,9 +35,8 @@ class CreateDatabase:
                                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL
                                    );""")
 
-    @staticmethod
-    def create_session_table(cursor):
-        cursor.execute("""CREATE TABLE IF NOT EXISTS sessions (
+    def create_session_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS sessions (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    login_id INTEGER NOT NULL, 
                                    session_key VARCHAR(50),

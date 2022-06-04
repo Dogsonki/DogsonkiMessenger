@@ -14,7 +14,7 @@ class ClientMenu:
 
     def listening(self):
         while True:
-            message, _ = self.client.receive_message()
+            message = self.client.receive_message()
             if message.token == MessageType.INIT_CHAT:
                 Chatroom(self.client, message.data).init_chatroom()
             elif message.token == MessageType.SEARCH_USERS:
@@ -52,21 +52,18 @@ class Chatroom:
         self.connection.send_message(message_data, MessageType.CHAT_MESSAGE)
 
     def receive_messages(self):
-        in_chat = True
-        while in_chat:
+        while True:
             message = self.connection.receive_message()
-            for i in message:
-                if i.token == MessageType.END_CHAT:
-                    in_chat = False
-                    break
+            if message.token == MessageType.END_CHAT:
+                break
 
-                i.data = i.data.strip()
-                if i.data != "":
-                    receiver_connection = current_connections.get(self.receiver)
-                    if receiver_connection:
-                        data = {"user": self.receiver, "message": i.data, "time": time.time()}
-                        receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-                    self.save_message_in_database(i.data)
+            message.data = message.data.strip()
+            if message.data != "":
+                receiver_connection = current_connections.get(self.receiver)
+                if receiver_connection:
+                    data = {"user": self.receiver, "message": message.data, "time": time.time()}
+                    receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
+                self.save_message_in_database(message.data)
 
     def save_message_in_database(self, message):
         INSERT_INTO_DB.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)

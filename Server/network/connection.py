@@ -61,7 +61,7 @@ class Buffer:
             if not data:
                 return None
             self.buffer += data
-        line, _, self.buffer = self.buffer.partition(b'\r\n')
+        line, _, self.buffer = self.buffer.partition(self.delimiter)
         return line.decode("UTF-8")
 
 
@@ -97,18 +97,8 @@ class Connection:
                 if not received_message:
                     self.close_connection()
                     return None
-                received_message = received_message.split("$")
-                data = []
-                for i in received_message:
-                    if not i:
-                        message = Message
-                        message.data = " "
-                        message.token = MessageType.EMPTY
-                        data.append(Message)
-                        break
-                    message = Message.deserialize(i)
-                    data.append(message)
-                return data
+                message = Message.deserialize(received_message)
+                return message
             except socket.error:
                 self.close_connection()
                 return None
@@ -128,7 +118,7 @@ class Client(Connection):
 
     def get_login_action(self):
         while True:
-            action_data, _ = self.receive_message()
+            action_data = self.receive_message()
             if action_data.token == MessageType.LOGIN:
                 is_logged_correctly = self.login_user(action_data)
                 if is_logged_correctly:
@@ -148,7 +138,7 @@ class Client(Connection):
         user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
         self.send_message(user_chats, MessageType.SEARCH_USERS)
         avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
-        self.send_message(str(base64.b64decode(avatar)), MessageType.FILE)
+        #self.send_message(str(base64.b64decode(avatar)), MessageType.FILE)
         current_connections[self.login] = self
 
     def login_by_session(self, session_data) -> bool:

@@ -21,7 +21,7 @@ def listen_for_connections(sock: socket.socket):
         print(f"Accepted new connection: {address}")
 
 
-def on_new_connection(connection, address):
+def on_new_connection(connection: socket.socket, address):
     client = Client(connection, address)
     client.get_login_action()
     ClientMenu(client).listening()

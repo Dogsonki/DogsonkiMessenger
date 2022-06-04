@@ -12,8 +12,8 @@ class GetInfoFromDatabase:
 
         cursor.execute("""SELECT content, u1.login, u2.login, time FROM ((messages
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
-                          INNER JOIN users AS u2 ON messages.receiver_id = u2.id) 
-                          WHERE (sender_id = %s AND receiver_id = %s) OR (receiver_id = %s AND sender_id = %s)
+                          INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
+                          WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
                           ORDER BY messages.id LIMIT %s,30;""", (sender_id, receiver_id, receiver_id, sender_id,
                                                                  number_of_sent_last_messages))
         sql_data = cursor.fetchall()
