@@ -41,12 +41,12 @@ class GetInfoFromDatabase:
         
     @staticmethod
     def search_by_login(cursor: CMySQLCursor, login: str):
-        cursor.execute("""SELECT login FROM users
+        cursor.execute("""SELECT id, login FROM users
                           WHERE login LIKE %s;""", ("%" + login,))
         logins = cursor.fetchall()
         if logins is None:
             return False
-        return [i for i, in logins]
+        return [i for i in logins]
 
     @staticmethod
     def get_user_chats(cursor: CMySQLCursor, login: str):
@@ -62,9 +62,9 @@ class GetInfoFromDatabase:
         return [i for i, in chats]
 
     @staticmethod
-    def get_user_avatar(cursor: CMySQLCursor, login: str):
+    def get_user_avatar(cursor: CMySQLCursor, login_id: str):
         cursor.execute("""SELECT avatar FROM users
-                          WHERE login=%s""", (login, ))
+                          WHERE id=%s""", (login_id, ))
         avatar = cursor.fetchone()
         return avatar
 

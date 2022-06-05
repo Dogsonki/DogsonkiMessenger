@@ -28,7 +28,8 @@ class MessageType(Enum):
     CHANGE_AVATAR = 8
     SESSION_INFO = 9
     AUTOMATICALLY_LOGGED = 10
-    FILE = 11
+    GET_AVATAR = 11
+    LAST_CHATS = 12
 
 
 @dataclass
@@ -82,7 +83,7 @@ class Connection:
         self.db_cursor = get_cursor()
 
     def send_message(self, message, token: MessageType):
-        message = json.dumps({"data": message, "token": token.value}).encode("UTF-8") + Connection.delimiter
+        message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8") + Connection.delimiter
         print(f"sent: {message}")
         try:
             self.client.send(message)
@@ -136,9 +137,7 @@ class Client(Connection):
 
     def after_login(self):
         user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
-        self.send_message(user_chats, MessageType.SEARCH_USERS)
-        avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, self.login)
-        #self.send_message(str(base64.b64decode(avatar)), MessageType.FILE)
+        self.send_message(user_chats, MessageType.LAST_CHATS)
         current_connections[self.login] = self
 
     def login_by_session(self, session_data) -> bool:
@@ -146,9 +145,10 @@ class Client(Connection):
         session_key = session_data.data["session_key"]
         self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
         if not self.login_id:
+            self.send_message(0, MessageType.AUTOMATICALLY_LOGGED)
             return False
         self.login, self.password = SELECT_SQL.get_user(self.db_cursor, self.login_id)
-        self.send_message(self.login, MessageType.AUTOMATICALLY_LOGGED)
+        self.send_message({"token": 1, "login": self.login, "login_id": self.login_id}, MessageType.AUTOMATICALLY_LOGGED)
         return True
 
     def login_user(self, login_data):
@@ -157,7 +157,7 @@ class Client(Connection):
         remember = login_data.data["remember"]
         self.login_id = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
-            self.send_message("1", MessageType.LOGIN)  # 1 --> user has been logged
+            self.send_message({"token": 1, "login": self.login, "login_id": self.login_id}, MessageType.LOGIN)  # 1 --> user has been logged
             if remember:
                 session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
@@ -188,6 +188,12 @@ class Client(Connection):
     def set_avatar(self, avatar: str):
         avatar = base64.b64encode(bytes(avatar, "UTF-8"))
         INSERT_SQL.set_user_avatar(self.db_cursor, self.login, avatar)
+
+    def get_avatar(self, login_id: str):
+        avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
+        if avatar:
+            avatar = str(base64.b64decode(avatar))
+        self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
 
     def validate_login_data(self):
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:

@@ -19,11 +19,16 @@ class ClientMenu:
                 Chatroom(self.client, message.data).init_chatroom()
             elif message.token == MessageType.SEARCH_USERS:
                 first_logins = GET_INFO_FROM_DB.search_by_login(self.client.db_cursor, message.data)
-                self.client.send_message(first_logins, MessageType.SEARCH_USERS)
+                first_logins_parsed = []
+                for i in first_logins:
+                    first_logins_parsed.append({"login": i[1], "id": i[0]})
+                self.client.send_message(first_logins_parsed, MessageType.SEARCH_USERS)
             elif message.token == MessageType.LOGOUT:
                 self.client.logout()
             elif message.token == MessageType.CHANGE_AVATAR:
                 self.client.set_avatar(message.data)
+            elif message.token == MessageType.GET_AVATAR:
+                self.client.get_avatar(message.data)
 
 
 class Chatroom:
@@ -61,7 +66,7 @@ class Chatroom:
             if message.data != "":
                 receiver_connection = current_connections.get(self.receiver)
                 if receiver_connection:
-                    data = {"user": self.receiver, "message": message.data, "time": time.time()}
+                    data = {"user": self.connection.login, "message": message.data, "time": time.time()}
                     receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
                 self.save_message_in_database(message.data)
 
