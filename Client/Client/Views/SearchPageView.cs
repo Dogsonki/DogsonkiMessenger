@@ -1,6 +1,6 @@
 ﻿using Client.Models;
 using Newtonsoft.Json.Linq;
-using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace Client.Views
@@ -9,33 +9,19 @@ namespace Client.Views
     {
         public static ObservableCollection<PeronFoundModel> PeopleFound { get; set; } = new ObservableCollection<PeronFoundModel>();
 
-        public static void AddFound(string username)
-        {
-            PeopleFound.Add(new PeronFoundModel(username));
-        }
+        public static void AddFound(UserModel user) => PeopleFound.Add(new PeronFoundModel(user));
 
-        public static void ClearList()
-        {
-            PeopleFound.Clear();
-        }
+        public static void ClearList() => PeopleFound.Clear();
 
         public static void ParseQuery(object req)
         {
-            JArray users;
-            try
+            List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
+            foreach(var user in users)
             {
-                users = (JArray)req;
+                UserModel u = UserModel.CreateOrGet(user.Username, user.ID);
+                AddFound(u);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Cannot parse usernames: {req} : " + ex);
-                return;
-            }
-
-            foreach (var a in users)
-            {
-                AddFound(a.ToString());
-            }
+           
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Client.Models;
 using Client.Networking;
+using Client.Pages;
 using Client.Utility.Services;
 using Client.Views;
 using Xamarin.Forms;
@@ -23,7 +24,7 @@ namespace Client
             _instance = this;
         }
 
-        private void MessageList_ItemSelected(object sender, SelectedItemChangedEventArgs e)
+        private void MessageListSelected(object sender, SelectedItemChangedEventArgs e)
         {
             var _temp = (ListView)sender;
             _temp.SelectedItem = null;
@@ -43,13 +44,14 @@ namespace Client
                 return base.OnBackButtonPressed();
 
             SocketCore.Send(" ", Token.END_CHAT); //Close chat 
-
-            return base.OnBackButtonPressed();
+            MessagePageView.ClearMessages();
+            MainAfterLoginPage.RedirectToInstace();
+            return true;    
         }
 
 
 
-        private void Entry_Completed(object sender, System.EventArgs e)
+        private void MessageCompleted(object sender, System.EventArgs e)
         {
             Entry input = (Entry)sender;
             string InputText = input.Text;

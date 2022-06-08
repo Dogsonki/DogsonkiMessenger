@@ -1,24 +1,24 @@
 ﻿using Client.Networking;
-using Client.Utility;
 using Xamarin.Forms;
 
 namespace Client.Models
 {
     public class PeronFoundModel
     {
-        public string Username { get; set; }
+        public UserModel User { get; set; }
         public Command OpenChatCommand { get; }
+        public ImageSource Image { get; set; }
 
-        public PeronFoundModel(string username)
+        public PeronFoundModel(UserModel user)
         {
             OpenChatCommand = new Command(OpenChat);
-            Username = username;
+            User = user;
         }
 
         private void OpenChat()
         {
-            SocketCore.Send($"{Username}", Token.INIT_CHAT);
-            StaticNavigator.PopAndPush(new MessagePage(Username));
+            SocketCore.Send($"{User.Name}", Token.INIT_CHAT);
+            StaticNavigator.PopAndPush(new MessagePage(User.Name));
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Client.Models;
 using Client.Networking;
 using Client.Utility;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -23,7 +25,7 @@ namespace Client.Pages
 
             if(password == "a" && username == "a")//Bypass for test
             {
-                StaticNavigator.PopAndPush(new MainAfterLoginPage(true));   
+                Navigation.PushAsync(new MainAfterLoginPage(true));
             }
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
@@ -63,17 +65,18 @@ namespace Client.Pages
 
         private void LoginCallback(object rev)
         {
-            string recived = (string)rev;
-            switch (recived[0])
+            LoginCallbackModel login = ((JObject)rev).ToObject<LoginCallbackModel>();
+
+            switch (login.Token)
             {
-                case '1':
+                case 1:
                     //Login is correct, setting up profile and redirecting to MainAfterLoginPage
 
-                    LocalUser.Username = Input_Username.Text;
-                    LocalUser.IsLoggedIn = true;
+                    LocalUser.Login(login.Username, login.ID.ToString());
+
                     StaticNavigator.Push(new MainAfterLoginPage(true));
                     break;
-                case '0':
+                case 0:
                     ShowError("Password or username is incorrect");
                     break;
                 default:
@@ -82,9 +85,6 @@ namespace Client.Pages
             }
         }
 
-        private void Input_Focused(object sender, FocusEventArgs e)
-        {
-            ClearError();
-        }
+        private void Input_Focused(object sender, FocusEventArgs e) => ClearError();
     }
 }

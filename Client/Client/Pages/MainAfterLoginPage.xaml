@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MainAfterLoginPage"
-			 xmlns:local="clr-namespace:Client.Views"
+			 xmlns:local="clr-namespace:Client.Views" 
+			 xmlns:user="clr-namespace:Client"
 			 BackgroundColor="#121212">
 
 	<ContentPage.BindingContext>
@@ -11,54 +12,35 @@
 
 	<ContentPage.Content>
 		<StackLayout>
-			<StackLayout Padding="20" Spacing="20" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand">
-				<Image  x:Name="here"></Image>
-				<!-- Find People -->
-				<StackLayout  Spacing="20">
-					<StackLayout.GestureRecognizers>
-						<TapGestureRecognizer Tapped="FindPeople_Clicked"></TapGestureRecognizer>
-					</StackLayout.GestureRecognizers>
-					<Frame CornerRadius="10" BackgroundColor="#252525"  HorizontalOptions="Start">
-						<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
-							<StackLayout>
-								<Image WidthRequest="35" HeightRequest="35" Source="findpeoplemagnifer.png"></Image>
-							</StackLayout>
-							<StackLayout>
-								<Label TextColor="White" Text="Find People!"></Label>
-								<Label FontSize="10" Text="Find and add people to friend list!"></Label>
-							</StackLayout>
-						</StackLayout>
-					</Frame>
-
-					<!-- Friend List -->
-
-					<StackLayout HorizontalOptions="CenterAndExpand">
-						<StackLayout.GestureRecognizers>
-							<TapGestureRecognizer Tapped="FriendList_Clicked"></TapGestureRecognizer>
-						</StackLayout.GestureRecognizers>
-						<Frame CornerRadius="10" BackgroundColor="#252525"  HorizontalOptions="Start">
-							<StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand">
-								<StackLayout>
-									<Image WidthRequest="35" HeightRequest="35" Source="friendlisticoN.png"></Image>
-								</StackLayout>
-								<StackLayout>
-									<Label x:Name="_Option" TextColor="White" Text="Friend List!"></Label>
-									<Label x:Name="Description" FontSize="10" Text="All of your friend here!"></Label>
-								</StackLayout>
-							</StackLayout>
-						</Frame>
+			<SearchBar IsSpellCheckEnabled="False" x:Name="SearchInput" SearchButtonPressed="SearchPressed" PlaceholderColor="White" TextColor="White" Placeholder="Search"></SearchBar>
+			<StackLayout Padding="15"></StackLayout>
+			
+			<StackLayout Orientation="Horizontal">
+				<Frame BorderColor="#121212" WidthRequest="65" HeightRequest="70" HorizontalOptions="Start" Padding="0" Margin="0" CornerRadius="50" HasShadow="False">
+					<Image  Source="{Binding user.Avatar}" Aspect="AspectFill" HorizontalOptions="Fill" VerticalOptions="Fill" > </Image>
+				</Frame>
+				<StackLayout>
+					<StackLayout WidthRequest="310" Orientation="Horizontal" Spacing="0">
+						<Label Text="{Binding user.Username}" FontAttributes="Bold" FontSize="16" TextColor="White"/>
+						<Label VerticalOptions="Center" TextColor="White" Text="#"/>
+						<Label VerticalOptions="Center" Text="{Binding user.ID}" TextColor="White"/>
 					</StackLayout>
+					<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand" Source="settings.png">
+						<Image.GestureRecognizers>
+							<TapGestureRecognizer Tapped="SettingsTapped">
+							</TapGestureRecognizer>
+						</Image.GestureRecognizers>
+					</Image>
 				</StackLayout>
 			</StackLayout>
-
+			<StackLayout Padding="20"></StackLayout>
 			<!-- Last Chats List -->
-			<Image x:Name="dd" WidthRequest="50" HeightRequest="50"></Image>
 			<StackLayout>
-				<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="20" Text="Last Chats"></Label>
+				<Label TextColor="White" VerticalOptions="Center" HorizontalOptions="Center" FontSize="20" Text="Last Chats"></Label>
 			</StackLayout>
 			<StackLayout>
-				<ListView CachingStrategy="RetainElement"  SeparatorColor="#0000" 
-				  ItemSelected="LastChatsOpened_ItemSelected"
+				<ListView CachingStrategy="RetainElement" SeparatorColor="#0000" 
+				  ItemSelected="LastChatsOpenedSelected"
 				  ItemsSource="{Binding Source={x:Static local:MainAfterLoginPageView.LastChats}}">
 					<ListView.ItemTemplate>
 						<DataTemplate>
@@ -70,7 +52,7 @@
 												<TapGestureRecognizer Command="{Binding OpenChatCommand}"/>
 											</Image.GestureRecognizers>
 										</Image>
-										<Label Grid.Row="0" Grid.Column="0" Text="{Binding Username}"  TextColor="White" />
+										<Label Grid.Row="0" Grid.Column="0" Text="{Binding User.Name}" TextColor="White" />
 									</Grid>
 								</StackLayout>
 							</ViewCell>

@@ -11,7 +11,7 @@
 
 	<ContentPage.Content>
 		<StackLayout>
-			<SearchBar x:Name="SerachInput" SearchButtonPressed="FindClicked" CancelButtonColor="White" TextColor="White" IsSpellCheckEnabled="False" PlaceholderColor="White" Placeholder="Type to search"></SearchBar>
+			<SearchBar x:Name="SearchInput" SearchButtonPressed="FindClicked" CancelButtonColor="White" TextColor="White" IsSpellCheckEnabled="False" PlaceholderColor="White" Placeholder="Search"></SearchBar>
 			<StackLayout>
 				<ListView ItemSelected="PeopleFound_ItemSelected" ItemsSource="{Binding Source={x:Static local:SearchPageView.PeopleFound}}">
 					<ListView.ItemTemplate>
@@ -25,15 +25,14 @@
 											<ColumnDefinition Width="auto"/>
 										</Grid.ColumnDefinitions>
 										<Frame WidthRequest="40" HeightRequest="40" VerticalOptions="Center" HorizontalOptions="Center" Padding="0" Margin="0" CornerRadius="50" HasShadow="False" BackgroundColor="#121212">
-											<Image Aspect="AspectFill" HorizontalOptions="Start" Source="B.png"></Image>
+											<Image Aspect="AspectFit" HorizontalOptions="Start" Source="{Binding User.Avatar}"></Image>
 										</Frame>
-										
 										<Image Grid.Column="1" HorizontalOptions="End" Source="openchat.png">
 											<Image.GestureRecognizers>
 												<TapGestureRecognizer Command="{Binding OpenChatCommand}"></TapGestureRecognizer>
 											</Image.GestureRecognizers>
 										</Image>
-										<Label TextColor="White" Grid.Row="0" Grid.Column="1" Text="{Binding Username}"></Label>
+										<Label TextColor="White" Grid.Row="0" Grid.Column="1" Text="{Binding User.Name}"></Label>
 									</Grid>
 								</StackLayout>
 							</ViewCell>

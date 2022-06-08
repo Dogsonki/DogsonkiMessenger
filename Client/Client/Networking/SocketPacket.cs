@@ -14,6 +14,8 @@ namespace Client.Networking.Model
         private bool IsImage { get; set; } = false;
         private bool IsLastImagePacket { get; set; } = false;
 
+        public object GetEncoded() => Data;
+
         /// <summary>
         /// Prepares packet to be sended
         /// </summary>
@@ -36,6 +38,7 @@ namespace Client.Networking.Model
             Token = (int)token;
             IsImage = isImage;
         }
+
         public SocketPacket(object data,bool isImage, bool isLastPacket,Token token)
         {
             Data = data;
@@ -43,6 +46,5 @@ namespace Client.Networking.Model
             IsLastImagePacket = isLastPacket;
             Token = (int)token;
         }
-
     }
 }
