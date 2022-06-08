@@ -5,14 +5,11 @@ using Xamarin.Forms;
 
 namespace Client.Models
 {
-    /// <summary>
-    /// Temporary solution for binding LocalUser 
-    /// </summary>
    public class LocalUser : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //Current have to be binding to property in view class to reuse it 
+        //Current have to be binded to property in view class to reuse it 
         public static LocalUser Current { get; } = new LocalUser();
 
         protected static bool InstanceCreated = false;  
@@ -80,9 +77,6 @@ namespace Client.Models
             isLoggedIn = false;
         }
 
-        public void OnPropertyChanges(string prop)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
+        public void OnPropertyChanges(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
     }
 }

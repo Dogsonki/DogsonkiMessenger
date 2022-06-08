@@ -26,13 +26,12 @@ namespace Client.Pages
             if (image == null)
                 return;
 
-            using (Stream stream = await image.OpenReadAsync())
+            Stream stream = await image.OpenReadAsync();
+            lock (stream)
             {
-                lock (stream)
-                {
-                    LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(Essential.StreamToBuffer(stream, stream.Length)));
-                }
+                LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(Essential.StreamToBuffer(stream, stream.Length)));
             }
+            await stream.DisposeAsync();
         }
     }
 }

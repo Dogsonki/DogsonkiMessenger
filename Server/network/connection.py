@@ -114,6 +114,7 @@ class Connection:
 
 
 class Client(Connection):
+
     def __init__(self, connection: socket.socket, address):
         super().__init__(connection, address)
 
