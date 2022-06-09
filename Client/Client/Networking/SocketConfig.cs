@@ -14,7 +14,7 @@ namespace Client.Networking.Config
 
         public static SocketConfig ReadConfig()
         {
-            string config = String.Empty;
+            string config = string.Empty;
             try
             {
                 var assembly = IntrospectionExtensions.GetTypeInfo(typeof(SocketConfig)).Assembly;
@@ -27,7 +27,7 @@ namespace Client.Networking.Config
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                throw ex;
             }
 
             if (!string.IsNullOrEmpty(config))

@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Xamarin.Forms;
 
@@ -47,6 +49,24 @@ namespace Client.IO
         {
             IFileService file = DependencyService.Get<IFileService>();
             file.WriteToFile(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(storage))), name, "Storage");
+        }
+        /// <summary>
+        /// Returns readed buffer of Embeded resource
+        /// </summary>
+        /// <param name="path">ex. "Client.Pages.B.png" </param>
+        /// <param name="typePath">ex. typeof(Client) </param>
+        /// <param name="maxBuffer"></param>
+        /// <returns></returns>
+        public static byte[] ReadEmbededResource(string path,Type typePath,int maxBuffer = 1024*24)
+        {
+            byte[] buffer;
+
+            var assembly = IntrospectionExtensions.GetTypeInfo(typePath.GetType()).Assembly;
+            using (Stream stream = assembly.GetManifestResourceStream(path))
+            {
+                buffer = Essential.StreamToBuffer(stream,maxBuffer);
+            }
+            return buffer;
         }
     }
 }

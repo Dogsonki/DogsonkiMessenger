@@ -18,24 +18,17 @@ namespace Client.Views
         /// AddMessage only by Client
         /// </summary>
         /// <param name="rev"></param>
-        public static void Test_AddMessage(string rev)
-        {
-            Messages.Add(new MessageModel(LocalUser.Username, rev, DateTime.Now));
-        }
-
-        /// <summary>
-        /// AddMessage only by Client
-        /// </summary>
-        /// <param name="rev"></param>
         public static void AddMessage(string rev)
         {
             if (rev == null || rev == null)
                 return;
             SocketCore.Send(rev);
-            var r = new MessageModel(LocalUser.Username, rev, DateTime.Now);
+            var r = new MessageModel(LocalUser.username, rev, DateTime.Now);
             Messages.Add(r);
             MessagePage.ScrollToBottom(r);
         }
+
+        public static void ClearMessages() => Messages.Clear();
 
         /// <summary>
         /// AddMessage only by server

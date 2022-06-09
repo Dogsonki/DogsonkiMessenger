@@ -5,10 +5,18 @@ namespace Client
 {
     internal class Debug
     {
-        public static void Error(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null) => Console.WriteLine("[ERROR]: " + path + " at: " + lineNumber + " : " + Content);
+        public static void Error(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+        {
+#if DEBUG
+            Console.WriteLine("[ERROR]: " + path.Substring(60) + " at: " + lineNumber + " : " + Content);
+#endif
+        }
 
-        public static void Write(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null) => Console.WriteLine("[DEBUG]: " + path + " at: " + lineNumber + " : " + Content);
-
-        public static void Clear() => Console.Clear();
+        public static void Write(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+        {
+#if DEBUG
+            Console.WriteLine("[DEBUG]: " + path.Substring(60) + " at: " + lineNumber + " : " + Content);
+#endif
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace Client.Models
         [JsonProperty("remember")]
         public bool Remember { get; set; }
 
+
         public LoginModel(string login, string password, bool remember)
         {
             Login = login;

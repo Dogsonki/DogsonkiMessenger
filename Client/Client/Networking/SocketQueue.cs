@@ -31,6 +31,6 @@ namespace Client.Networking
 
         public static int SendingCount => SendingPackets.Count;
 
-        public static List<SocketPacket> GetSendingPackets => SendingPackets;
+        public static SocketPacket[] GetSendingPackets => SendingPackets.ToArray();
     }
 }

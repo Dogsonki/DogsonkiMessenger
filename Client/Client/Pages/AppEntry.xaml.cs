@@ -10,32 +10,33 @@ namespace Client.Pages
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AppEntry : ContentPage
     {
-        public AppEntry()
+        public AppEntry(bool readSession)
         {
             NavigationPage.SetHasNavigationBar(this, false);
             InitializeComponent();
             SocketCore.Init();
-            ReadStorage();
+
+            if (readSession)
+            {
+                ReadStorage();
+            }
         }
 
         private void ReadStorage()
         {
-            //Read cache to auto login 
-            //Need to do token 
-            Debug.Write("Reading storage");
             if (Device.RuntimePlatform == Device.Android)
             {
-                var r = StorageIO.ReadStorage<Session>("session", new Session("", ""));
+                var session = StorageIO.ReadStorage<Session>("session", new Session("", ""));
 
-                if (!string.IsNullOrEmpty(r.SessionKey))
+                if (!string.IsNullOrEmpty(session.SessionKey))
                 {
-                    SocketCore.Send(r, Token.SESSION_INFO);
+                    SocketCore.Send(session, Token.SESSION_INFO);
                 }
             }
         }
 
-        private void LoginOptionClicked(object sender, EventArgs e) => StaticNavigator.PopAndPush(new LoginPage());
+        private void LoginOptionClicked(object sender, EventArgs e) => Navigation.PushAsync(new LoginPage());
 
-        private void RegisterOptionClicked(object sender, EventArgs e) => StaticNavigator.PopAndPush(new RegisterPage());   
+        private void RegisterOptionClicked(object sender, EventArgs e) => Navigation.PushAsync(new RegisterPage());   
     }
 }

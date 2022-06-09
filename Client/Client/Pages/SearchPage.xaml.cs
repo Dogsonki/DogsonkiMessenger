@@ -1,5 +1,4 @@
-﻿using Client.Models;
-using Client.Networking;
+﻿using Client.Networking;
 using Client.Views;
 using System;
 using Xamarin.Forms;
@@ -10,6 +9,7 @@ namespace Client.Pages
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SearchPage : ContentPage
     {
+        protected static SearchPage CachedSearchView;
 
         public SearchPage()
         {
@@ -20,11 +20,26 @@ namespace Client.Pages
 
         private void FindClicked(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(SerachInput.Text))
+            if (string.IsNullOrEmpty(SearchInput.Text))
                 return;
 
             SearchPageView.ClearList();
-            if (!SocketCore.SendR(SearchPageView.ParseQuery, $"{SerachInput.Text}", Token.SEARCH_USER))
+            if (!SocketCore.SendR(SearchPageView.ParseQuery, $"{SearchInput.Text}", Token.SEARCH_USER))
+            {
+                //TODO: make error level
+            }
+        }
+
+        public static void RedirectAndSearch(string search)
+        {
+            if (CachedSearchView == null)
+                CachedSearchView = new SearchPage();
+
+            CachedSearchView.SearchInput.Text = search;
+
+            StaticNavigator.Push(CachedSearchView);
+            SearchPageView.ClearList();
+            if (!SocketCore.SendR(SearchPageView.ParseQuery, $"{search}", Token.SEARCH_USER))
             {
                 //TODO: make error level
             }

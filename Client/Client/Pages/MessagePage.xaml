@@ -12,7 +12,7 @@
 		<Label TextColor="White" x:Name="ChatUsername" HorizontalOptions="Center"
 			   FontAttributes="Bold" VerticalOptions="Center" FontSize="Medium"></Label>
 		<ListView HasUnevenRows="True" CachingStrategy="RecycleElementAndDataTemplate"  SeparatorColor="#0000" 
-				  ItemSelected="MessageList_ItemSelected" x:Name="MessageList"
+				  ItemSelected="MessageListSelected" x:Name="MessageList"
 				  ItemsSource="{Binding Source={x:Static local:MessagePageView.Messages}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
@@ -38,6 +38,6 @@
 				</DataTemplate>
 			</ListView.ItemTemplate>
 		</ListView>
-		<Entry IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Completed="Entry_Completed" Placeholder="Message @"></Entry>
+		<Entry IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Completed="MessageCompleted" Placeholder="Message @"></Entry>
 	</StackLayout>
 </ContentPage>

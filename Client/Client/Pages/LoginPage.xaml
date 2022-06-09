@@ -12,9 +12,7 @@
 			<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
 				<Entry TextColor="White" PlaceholderColor="White" Focused="Input_Focused" Placeholder="Username" x:Name="Input_Username"></Entry>
 				<Entry TextColor="White" PlaceholderColor="White" Focused="Input_Focused" IsPassword="True" Placeholder="Password"  x:Name="Input_Password"></Entry>
-				<StackLayout x:Name="ErrorLevel">
-
-				</StackLayout>
+				<StackLayout x:Name="ErrorLevel"></StackLayout>
 				<StackLayout Orientation="Horizontal" Spacing="2">
 					<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
 					<Label TextColor="White" Padding="10" Text="Remember me"></Label>

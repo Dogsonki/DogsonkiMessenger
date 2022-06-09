@@ -5,6 +5,6 @@ namespace Client.Droid
 {
     public class AndroidKeybaordService : IKeyboardService
     {
-        public bool IsKeyboardVisible() => MainActivity.MainActivityInstance.GetInputManager().IsAcceptingText;
+        public bool IsKeyboardVisible() => MainActivity.Instance.GetInputManager().IsAcceptingText;
     }
 }
