@@ -46,11 +46,11 @@ class GetInfoFromDatabase:
         logins = cursor.fetchall()
         if logins is None:
             return False
-        return [i for i in logins]
+        return logins
 
     @staticmethod
     def get_user_chats(cursor: CMySQLCursor, login: str):
-        cursor.execute("""SELECT u2.login FROM ((messages
+        cursor.execute("""SELECT u2.id, u2.login FROM ((messages
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                           INNER JOIN users AS u2 ON messages.receiver_id = u2.id) 
                           WHERE u1.login=%s OR u2.login=%s
@@ -59,7 +59,7 @@ class GetInfoFromDatabase:
         chats = cursor.fetchall()
         if chats is None:
             return False
-        return [i for i, in chats]
+        return chats
 
     @staticmethod
     def get_user_avatar(cursor: CMySQLCursor, login_id: str):

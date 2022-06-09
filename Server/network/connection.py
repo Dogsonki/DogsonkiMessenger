@@ -23,7 +23,7 @@ class MessageType(Enum):
     INIT_CHAT = 3
     SEARCH_USERS = 4
     CHAT_MESSAGE = 5
-    USER_CHAT = 6
+    USER_CHAT = 6  # todo do czegos innego
     END_CHAT = 7
     CHANGE_AVATAR = 8
     SESSION_INFO = 9
@@ -84,7 +84,6 @@ class Connection:
 
     def send_message(self, message, token: MessageType):
         message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8") + Connection.delimiter
-        print(f"sent: {message}")
         try:
             self.client.send(message)
         except socket.error:
@@ -94,7 +93,6 @@ class Connection:
         while True:
             try:
                 received_message = self.buffer.read()
-                print(f"recv: {received_message}")
                 if not received_message:
                     self.close_connection()
                     return None
@@ -137,7 +135,11 @@ class Client(Connection):
 
     def after_login(self):
         user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
-        self.send_message(user_chats, MessageType.LAST_CHATS)
+        chats = []
+        if user_chats:
+            for i in user_chats:
+                chats.append({"login": i[1], "id": i[0]})
+        self.send_message(chats, MessageType.LAST_CHATS)
         current_connections[self.login] = self
 
     def login_by_session(self, session_data) -> bool:
