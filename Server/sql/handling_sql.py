@@ -14,8 +14,8 @@ class GetInfoFromDatabase:
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                           INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
                           WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
-                          ORDER BY messages.id LIMIT %s,30;""", (sender_id, receiver_id, receiver_id, sender_id,
-                                                                 number_of_sent_last_messages))
+                          ORDER BY messages.id DESC LIMIT %s,30;""", (sender_id, receiver_id, receiver_id, sender_id,
+                                                                      number_of_sent_last_messages))
         sql_data = cursor.fetchall()
         return sql_data
 
@@ -65,7 +65,7 @@ class GetInfoFromDatabase:
     def get_user_avatar(cursor: CMySQLCursor, login_id: str):
         cursor.execute("""SELECT avatar FROM users
                           WHERE id=%s""", (login_id, ))
-        avatar = cursor.fetchone()
+        avatar, = cursor.fetchone()
         return avatar
 
     @staticmethod

@@ -23,7 +23,7 @@ class MessageType(Enum):
     INIT_CHAT = 3
     SEARCH_USERS = 4
     CHAT_MESSAGE = 5
-    USER_CHAT = 6  # todo do czegos innego
+    GET_OLD_MESSAGES = 6
     END_CHAT = 7
     CHANGE_AVATAR = 8
     SESSION_INFO = 9
@@ -148,7 +148,7 @@ class Client(Connection):
         session_key = session_data.data["session_key"]
         self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
         if not self.login_id:
-            self.send_message(0, MessageType.AUTOMATICALLY_LOGGED)
+            self.send_message({"token": 0, "login": None, "login_id": None}, MessageType.AUTOMATICALLY_LOGGED)
             return False
         self.login, self.password = SELECT_SQL.get_user(self.db_cursor, self.login_id)
         self.send_message({"token": 1, "login": self.login, "login_id": self.login_id}, MessageType.AUTOMATICALLY_LOGGED)
@@ -166,7 +166,7 @@ class Client(Connection):
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
             return True
         else:
-            self.send_message("0", MessageType.LOGIN)  # 0 --> wrong login or password
+            self.send_message({"token": 0, "login": None, "login_id": None}, MessageType.LOGIN)  # 0 --> wrong login or password
         return False
 
     def register_user(self, register_data):
@@ -193,7 +193,7 @@ class Client(Connection):
         INSERT_SQL.set_user_avatar(self.db_cursor, self.login, avatar)
 
     def get_avatar(self, login_id: str):
-        avatar, = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
+        avatar = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
         if avatar:
             avatar = str(base64.b64decode(avatar))
         self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
