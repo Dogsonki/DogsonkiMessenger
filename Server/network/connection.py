@@ -242,9 +242,12 @@ class Client(Connection):
 
     def get_avatar(self, login_id: str):
         avatar = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
-        if avatar:
-            avatar = str(base64.b64decode(avatar[0]))
-        else:
+        try:
+            if avatar[0]:
+                avatar = str(base64.b64decode(avatar[0]))
+            else:
+                avatar = " "
+        except IndexError:
             avatar = " "
         self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
 
