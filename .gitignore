@@ -128,12 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /Client/Client.Android/obj/
-/Client/Client.Android/obj/
 /Client/Client.iOS/obj/
 /Client/Client.Android/bin/
 /Client/Client/Networking/SocketConfig.json
 /Client/Client/obj/
 /Client/Client/bin/
-/Client/Client/bin/
-/Client/Client/obj/
 /Client/Client.iOS/bin/
+/Client/obj/
