@@ -11,11 +11,13 @@ class CreateDatabase:
         self.create_users_table()
         self.create_messages_table()
         self.create_session_table()
+        self.create_confirmation_mail_table()
         self.cursor.close()
 
     def create_users_table(self):
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS users (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                                   nick VARCHAR(50) NOT NULL UNIQUE,
                                    login VARCHAR(50) NOT NULL UNIQUE,
                                    password VARCHAR(50) NOT NULL,
                                    warnings INTEGER NOT NULL,
@@ -43,3 +45,11 @@ class CreateDatabase:
                                    
                                    FOREIGN KEY (login_id) REFERENCES users(id) ON DELETE CASCADE
                                    );""")
+
+    def create_confirmation_mail_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS email_confirmation (
+                                  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                                  creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                  mail VARCHAR(50) NOT NULL UNIQUE,
+                                  code INTEGER NOT NULL
+                                  );""")

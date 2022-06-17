@@ -3,15 +3,21 @@ import json
 import socket
 from dataclasses import dataclass
 from enum import Enum
-from mysql.connector.cursor_cext import CMySQLCursor
 from typing import Optional
+import json
+
+from mysql.connector.cursor_cext import CMySQLCursor
+from email_validator import validate_email, EmailNotValidError
 
 from Server.sql import handling_sql
 from Server.sql.connection import get_cursor
+from Server.network.email_handling import SmptConnection, get_confirmation_code
 
 current_connections = {}
 INSERT_SQL = handling_sql.InsertIntoDatabase()
 SELECT_SQL = handling_sql.GetInfoFromDatabase()
+
+smpt_connection = SmptConnection()
 
 
 class MessageType(Enum):
@@ -83,6 +89,7 @@ class Connection:
         self.db_cursor = get_cursor()
 
     def send_message(self, message, token: MessageType):
+        print(f"sent: {message}")
         message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8") + Connection.delimiter
         try:
             self.client.send(message)
@@ -97,6 +104,7 @@ class Connection:
                     self.close_connection()
                     return None
                 message = Message.deserialize(received_message)
+                print(f"recv: {received_message}")
                 return message
             except socket.error:
                 self.close_connection()
@@ -170,15 +178,55 @@ class Client(Connection):
         return False
 
     def register_user(self, register_data):
-        self.login = register_data.data["login"]
+        nick = register_data.data["login"]
+        self.login = register_data.data["email"]
         self.password = register_data.data["password"]
-        if self.validate_login_data():
-            if INSERT_SQL.register_user(self.db_cursor, self.login, self.password):
-                self.send_message("1", MessageType.REGISTER)  # 1 --> user has been registered
-            else:
-                self.send_message("01", MessageType.REGISTER)  # 01 --> user with given login exists
+        if not self.validate_login_data():
+            self.send_message("8", MessageType.REGISTER)  # 8 --> incorrect password or mail
+            return
+
+        if handling_sql.check_if_nick_exist(self.db_cursor, nick):
+            self.send_message("7", MessageType.REGISTER)  # 7 -> nickname is taken
+            return
+
+        code = get_confirmation_code()
+        if not INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code):
+            self.send_message("6", MessageType.REGISTER)  # 6 --> this email is waiting for confirmation
+            confirmed = self.confirm_email(code)
         else:
-            self.send_message("00", MessageType.REGISTER)  # 00 --> incorrect password
+            if not self.send_confirmation_email(code):
+                self.send_message("4", MessageType.REGISTER)  # 4 --> cannot send email
+                return
+            self.send_message("2", MessageType.REGISTER)  # -> 2 email sent
+            confirmed = self.confirm_email(code)
+
+        if not confirmed:
+            return
+
+        if INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick):
+            self.send_message("0", MessageType.REGISTER)  # 1 --> user has been registered
+        else:
+            self.send_message("3", MessageType.REGISTER)  # 3 --> user with given email exists
+
+    def confirm_email(self, code: int) -> bool:
+        while True:
+            code_from_user = self.receive_message()
+            if code_from_user.data == "a":
+                self.send_confirmation_email(code)
+                continue
+            if code_from_user.data == "b":
+                return False
+
+            if SELECT_SQL.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data)):
+                return True
+            else:
+                self.send_message("9", MessageType.REGISTER)  # 9 --> wrong confirmation email
+
+    def send_confirmation_email(self, code: int):
+        message = smpt_connection.create_message(self.login, code)
+        if not smpt_connection.send_mail(self.login, message):
+            return False
+        return True
 
     def logout(self):
         del current_connections[self.login]
@@ -195,10 +243,16 @@ class Client(Connection):
     def get_avatar(self, login_id: str):
         avatar = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
         if avatar:
-            avatar = str(base64.b64decode(avatar))
+            avatar = str(base64.b64decode(avatar[0]))
+        else:
+            avatar = " "
         self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
 
     def validate_login_data(self):
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:
+            try:
+                validate_email(self.login).email
+            except EmailNotValidError:
+                return False
             return True
         return False

@@ -40,9 +40,9 @@ class GetInfoFromDatabase:
             return sql_data[0]
         
     @staticmethod
-    def search_by_login(cursor: CMySQLCursor, login: str):
-        cursor.execute("""SELECT id, login FROM users
-                          WHERE login LIKE %s;""", ("%" + login,))
+    def search_by_nick(cursor: CMySQLCursor, nick: str):
+        cursor.execute("""SELECT id, nick FROM users
+                          WHERE login LIKE %s;""", ("%" + nick,))
         logins = cursor.fetchall()
         if logins is None:
             return False
@@ -65,7 +65,7 @@ class GetInfoFromDatabase:
     def get_user_avatar(cursor: CMySQLCursor, login_id: str):
         cursor.execute("""SELECT avatar FROM users
                           WHERE id=%s""", (login_id, ))
-        avatar, = cursor.fetchone()
+        avatar = cursor.fetchone()
         return avatar
 
     @staticmethod
@@ -82,6 +82,16 @@ class GetInfoFromDatabase:
         sql_data = cursor.fetchone()
         return sql_data
 
+    @staticmethod
+    def check_email_confirmation(cursor: CMySQLCursor, login: str, code: int):
+        cursor.execute("""SELECT id FROM email_confirmation
+                          WHERE mail=%s AND code=%s;""", (login, code))
+        sql_data = cursor.fetchone()
+        if sql_data:
+            cursor.execute("""DELETE FROM email_confirmation
+                              WHERE mail=%s;""", (login,))
+        return sql_data
+
 
 class InsertIntoDatabase:
     @staticmethod
@@ -90,10 +100,10 @@ class InsertIntoDatabase:
                           VALUES (%s, %s, %s);""", (content, sender, receiver))
 
     @staticmethod
-    def register_user(cursor: CMySQLCursor, login: str, password: str):
+    def register_user(cursor: CMySQLCursor, login: str, password: str, nick: str):
         try:
-            cursor.execute("""INSERT INTO users(login, password, warnings, is_banned)
-                              VALUES (%s, %s, 0, 0);""", (login, password))
+            cursor.execute("""INSERT INTO users(login, password, nick, warnings, is_banned)
+                              VALUES (%s, %s, %s, 0, 0);""", (login, password, nick))
             return True
         except IntegrityError:
             return False
@@ -112,6 +122,15 @@ class InsertIntoDatabase:
         return session_key
 
     @staticmethod
+    def create_confirmation_code(cursor: CMySQLCursor, login: str, code: int) -> bool:
+        try:
+            cursor.execute("""INSERT INTO email_confirmation(mail, code)
+                              VALUES (%s, %s)""", (login, code))
+            return True
+        except IntegrityError:
+            return False
+
+    @staticmethod
     def delete_session(cursor: CMySQLCursor, login_id: int):
         cursor.execute("""DELETE FROM sessions
                           WHERE login_id=%s;""", (login_id,))
@@ -120,5 +139,12 @@ class InsertIntoDatabase:
 def check_if_login_exist(cursor: CMySQLCursor, login: str):
     cursor.execute("""SELECT login FROM users
                       WHERE login = %s;""", (login, ))
+    sql_data = cursor.fetchone()
+    return sql_data
+
+
+def check_if_nick_exist(cursor: CMySQLCursor, nick: str):
+    cursor.execute("""SELECT nick FROM users
+                      WHERE nick = %s;""", (nick, ))
     sql_data = cursor.fetchone()
     return sql_data

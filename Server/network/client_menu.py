@@ -18,7 +18,7 @@ class ClientMenu:
             if message.token == MessageType.INIT_CHAT:
                 Chatroom(self.client, message.data).init_chatroom()
             elif message.token == MessageType.SEARCH_USERS:
-                first_logins = GET_INFO_FROM_DB.search_by_login(self.client.db_cursor, message.data)
+                first_logins = GET_INFO_FROM_DB.search_by_nick(self.client.db_cursor, message.data)
                 first_logins_parsed = []
                 for i in first_logins:
                     first_logins_parsed.append({"login": i[1], "id": i[0]})
