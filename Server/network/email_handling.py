@@ -25,15 +25,15 @@ def get_confirmation_code() -> int:
 
 
 class SmptConnection:
+    smpt_connection: smtplib.SMTP
+
     def __init__(self):
-        self.smpt_connection = smtplib.SMTP(host=SMTP_CONFIG.hostname, port=587)
         self.connect()
 
     def connect(self):
+        self.smpt_connection = smtplib.SMTP(host=SMTP_CONFIG.hostname, port=587)
         context = ssl.create_default_context(cafile=certifi.where())
-        self.smpt_connection.ehlo()
         self.smpt_connection.starttls(context=context)
-        self.smpt_connection.ehlo()
         self.smpt_connection.login(SMTP_CONFIG.mail, SMTP_CONFIG.password)
 
     def send_mail(self, receiver: str, message: MIMEMultipart) -> bool:

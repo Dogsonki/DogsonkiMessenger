@@ -190,7 +190,9 @@ class Client(Connection):
             return
 
         code = get_confirmation_code()
-        if not INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code):
+        created = INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code)
+        if created is not True:
+            code = created
             self.send_message("6", MessageType.REGISTER)  # 6 --> this email is waiting for confirmation
             confirmed = self.confirm_email(code)
         else:
@@ -204,7 +206,7 @@ class Client(Connection):
             return
 
         if INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick):
-            self.send_message("0", MessageType.REGISTER)  # 1 --> user has been registered
+            self.send_message("0", MessageType.REGISTER)  # 0 --> user has been registered
         else:
             self.send_message("3", MessageType.REGISTER)  # 3 --> user with given email exists
 
@@ -217,10 +219,15 @@ class Client(Connection):
             if code_from_user.data == "b":
                 return False
 
-            if SELECT_SQL.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data)):
+            confirmed = SELECT_SQL.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data))
+            if confirmed is True:
                 return True
             else:
-                self.send_message("9", MessageType.REGISTER)  # 9 --> wrong confirmation email
+                if confirmed[0] > 5:
+                    self.send_message("10", MessageType.REGISTER)  # 10 -> max attempts, try again
+                    return False
+                else:
+                    self.send_message("9", MessageType.REGISTER)  # 9 --> wrong confirmation code
 
     def send_confirmation_email(self, code: int):
         message = smpt_connection.create_message(self.login, code)

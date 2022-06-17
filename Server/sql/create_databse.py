@@ -51,5 +51,6 @@ class CreateDatabase:
                                   id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                   creation_time DATETIME DEFAULT CURRENT_TIMESTAMP,
                                   mail VARCHAR(50) NOT NULL UNIQUE,
-                                  code INTEGER NOT NULL
+                                  code INTEGER NOT NULL,
+                                  attempts SMALLINT DEFAULT 0
                                   );""")

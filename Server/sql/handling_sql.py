@@ -84,10 +84,24 @@ class GetInfoFromDatabase:
 
     @staticmethod
     def check_email_confirmation(cursor: CMySQLCursor, login: str, code: int):
+        delete = False
         cursor.execute("""SELECT id FROM email_confirmation
                           WHERE mail=%s AND code=%s;""", (login, code))
         sql_data = cursor.fetchone()
         if sql_data:
+            sql_data = True
+            delete = True
+        else:
+            cursor.execute("""UPDATE email_confirmation
+                              SET attempts=attempts+1
+                              WHERE mail=%s;""", (login,))
+            cursor.execute("""SELECT attempts FROM email_confirmation
+                              WHERE mail=%s;""", (login,))
+            sql_data = cursor.fetchone()
+            if sql_data[0] > 5:
+                delete = True
+
+        if delete:
             cursor.execute("""DELETE FROM email_confirmation
                               WHERE mail=%s;""", (login,))
         return sql_data
@@ -128,7 +142,10 @@ class InsertIntoDatabase:
                               VALUES (%s, %s)""", (login, code))
             return True
         except IntegrityError:
-            return False
+            cursor.execute("""SELECT code FROM email_confirmation
+                              WHERE mail=%s;""", (login,))
+            data = cursor.fetchone()
+            return data[0]
 
     @staticmethod
     def delete_session(cursor: CMySQLCursor, login_id: int):
