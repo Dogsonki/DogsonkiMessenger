@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.MainPage"
+			 xmlns:local="clr-namespace:Client.Pages"
+			 xmlns:user="clr-namespace:Client"
+			 BackgroundColor="#121212">
+
+	<ContentPage.BindingContext>
+		<user:LocalUser></user:LocalUser>
+	</ContentPage.BindingContext>
+
+	<StackLayout>
+		<StackLayout  Margin="0,0,0,20">
+			<SearchBar x:Name="SearchInput" SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False" WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"></SearchBar>
+		</StackLayout>
+		<StackLayout Orientation="Horizontal" Margin="0,0,0,20" >
+			<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start" CornerRadius="40" HeightRequest="80" WidthRequest="80">
+				<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80" HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+			</Frame>
+			<StackLayout WidthRequest="270">
+				<StackLayout Spacing="0" Orientation="Horizontal">
+					<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
+					<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="#" />
+					<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+				</StackLayout>
+			</StackLayout>
+			<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand" VerticalOptions="End" Source="settings.jpg">
+				<Image.GestureRecognizers>
+					<TapGestureRecognizer Tapped="SetingsTapped"/>
+				</Image.GestureRecognizers>
+			</Image>
+		</StackLayout>
+		<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Last Chats"></Label>
+		<!-- 6943 -->
+		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<ViewCell>
+						<StackLayout>
+							<StackLayout.GestureRecognizers>
+								<TapGestureRecognizer Command="{Binding OpenChatCommand}"/>
+							</StackLayout.GestureRecognizers>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="*" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<StackLayout Spacing="15" Orientation="Horizontal">
+									<Frame BackgroundColor="#121212" BorderColor="White" HorizontalOptions="Start" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
+										<Image Source="{Binding Image}" Aspect="Fill">
+										</Image>
+									</Frame>
+									<Label TextColor="White" VerticalOptions="Center" Text="{Binding  User.Name}"/>
+								</StackLayout>
+							</Grid>
+						</StackLayout>
+					</ViewCell>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+	</StackLayout>
+</ContentPage>

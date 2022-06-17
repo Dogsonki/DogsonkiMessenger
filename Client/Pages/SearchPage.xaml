@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.SearchPage"
+             xmlns:local="clr-namespace:Client.Pages"
+             Title="SearchPage"
+			 BackgroundColor="#121212">
+    <StackLayout>
+		<SearchBar x:Name="SearchInput" SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False" WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"></SearchBar>
+		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:SearchPage.UsersFound}}">
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<ViewCell>
+						<StackLayout>
+							<StackLayout.GestureRecognizers>
+								<TapGestureRecognizer Command="{Binding OpenChatCommand}"/>
+							</StackLayout.GestureRecognizers>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="*" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<StackLayout Spacing="15" Orientation="Horizontal">
+									<Frame HorizontalOptions="Start" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
+										<Image Source="{Binding Image}" Aspect="Fill">
+										</Image>
+									</Frame>
+									<Label TextColor="White" VerticalOptions="Center" Text="{Binding  User.Name}"/>
+								</StackLayout>
+							</Grid>
+						</StackLayout>
+					</ViewCell>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+		</ListView>
+	</StackLayout>
+</ContentPage>

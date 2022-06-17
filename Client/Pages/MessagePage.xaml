@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.MessagePage"
+             xmlns:local="clr-namespace:Client.Pages"
+             Title="MessagePage"
+			 BackgroundColor="#121212">
+
+		<StackLayout>
+		<AbsoluteLayout HorizontalOptions="Center">
+			<Label x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
+		</AbsoluteLayout>
+			<ListView x:Name="MessageList" CachingStrategy="RecycleElementAndDataTemplate" IsPullToRefreshEnabled="True" Refreshing="Refresh" HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:MessagePage.Messages}}">
+				<ListView.ItemTemplate>
+					<DataTemplate>
+						<ViewCell>
+							<StackLayout>
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="auto" />
+										<RowDefinition Height="*" />
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="2" />
+										<ColumnDefinition Width="2" />
+									</Grid.ColumnDefinitions>
+									<StackLayout Grid.Row="0" VerticalOptions="Start" Orientation="Horizontal">
+										<Frame HorizontalOptions="Start" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
+											<Image Aspect="Fill">
+											</Image>
+										</Frame>
+									<StackLayout Grid.Column="1" Orientation="Vertical">
+										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="17" TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+										<Label HorizontalOptions="StartAndExpand" TextColor="White" MaximumWidthRequest="300" FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}"/>
+									</StackLayout>
+									</StackLayout>
+								</Grid>
+							</StackLayout>
+						</ViewCell>
+					</DataTemplate>
+				</ListView.ItemTemplate>
+			</ListView>
+		<StackLayout/>
+		<Frame x:Name="MessageInputFrame" BorderColor="White" BackgroundColor="#0f0f0f" Padding="0" CornerRadius="22" HeightRequest="44" WidthRequest="200">
+			<Entry TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" WidthRequest="200" x:Name="MessageInput" HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
+			   IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Message @"/>
+		</Frame>
+
+
+	</StackLayout>  
+</ContentPage>

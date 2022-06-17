@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.Register.ConfirmEmailCode"
+             Title="ConfirmEmailCode"
+			 BackgroundColor="#121212">
+    <StackLayout>
+		<Label HorizontalOptions="Center" Text="Confirm your email." FontSize="30" Margin="0,0,0,10"/>
+		<Label WidthRequest="300" FontSize="16" HorizontalOptions="Center" x:Name="noteEmail"/>
+		<StackLayout Padding="25"/>
+		<StackLayout HorizontalOptions="Center">
+			<Frame BorderColor="White" HeightRequest="40" Background="#121212">
+				<Entry Completed="CheckCode" FontSize="20" WidthRequest="60" HeightRequest="100" Keyboard="Numeric" MaxLength="5" Placeholder="Code"></Entry>
+			</Frame>
+		</StackLayout>
+		<StackLayout HorizontalOptions="Center" x:Name="ErrorLevel">
+		</StackLayout>
+		<StackLayout Padding="15">
+			<Label FontSize="17" Text="Resend code">
+				<Label.GestureRecognizers>
+					<TapGestureRecognizer Tapped="ResendCode"></TapGestureRecognizer>
+				</Label.GestureRecognizers>
+			</Label>
+		</StackLayout>
+		<StackLayout Padding="15">
+			<Label FontSize="17" Text="Cancel registration">
+				<Label.GestureRecognizers>
+					<TapGestureRecognizer Tapped="Cancel"></TapGestureRecognizer>
+				</Label.GestureRecognizers>
+			</Label>
+		</StackLayout>
+
+	</StackLayout>
+</ContentPage>

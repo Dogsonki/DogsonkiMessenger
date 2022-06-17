@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.LoginPage"
+			 BackgroundColor="#121212">
+
+	<StackLayout Padding="20" Spacing="15">
+		<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text="Login"/>
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" Register">
+				<Label.GestureRecognizers>
+					<TapGestureRecognizer Tapped="RedirectToRegister"></TapGestureRecognizer>
+				</Label.GestureRecognizers>
+			</Label>
+		</StackLayout>
+
+		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"></Line>
+		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
+
+			<Entry IsSpellCheckEnabled="False"  FontSize="Medium" HeightRequest="60" TextColor="White" 
+						PlaceholderColor="White" Focused="LoginFocused"
+						Placeholder="Username" x:Name="Input_Username"/>
+			<Line X1="0" Stroke="White" X2="350"/>
+
+			<Entry Focused="LoginFocused" FontSize="Medium" HeightRequest="50"
+					   TextColor="White" PlaceholderColor="White"
+					   IsPassword="True" Placeholder="Password" x:Name="Input_Password"/>
+			<Line X1="0" Stroke="White" X2="350"/>
+
+			<StackLayout  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
+
+			<StackLayout Orientation="Horizontal">
+				<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
+				<Label TextColor="White" Padding="10" Text="Remember me"/>
+				<Label TextColor="White" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand" Padding="10" Text="Forgot Password"/>
+			</StackLayout>
+
+			<StackLayout Padding="15">
+				<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" WidthRequest="250" Clicked="LoginDone" Text="Login"/>
+			</StackLayout>
+		</StackLayout>
+	</StackLayout>
+</ContentPage>
