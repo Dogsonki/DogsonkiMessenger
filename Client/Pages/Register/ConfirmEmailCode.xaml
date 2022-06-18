@@ -22,13 +22,5 @@
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
-		<StackLayout Padding="15">
-			<Label FontSize="17" Text="Cancel registration">
-				<Label.GestureRecognizers>
-					<TapGestureRecognizer Tapped="Cancel"></TapGestureRecognizer>
-				</Label.GestureRecognizers>
-			</Label>
-		</StackLayout>
-
 	</StackLayout>
 </ContentPage>

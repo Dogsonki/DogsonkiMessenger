@@ -28,7 +28,6 @@ public partial class MainPage : ContentPage
 	{
 		InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-		AddLastUsers(new SearchModel[] { new SearchModel("uwu", 11) });
         if (Instance is null)
 			Instance = this;
 	}

@@ -35,12 +35,14 @@ public class UserModel : BindableObject
         Name = username;
         ID = id;
 
-        Users.Add(this);
-
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Users.Add(this);
+        });
         SocketCore.Send(ID, Token.AVATAR_REQUEST);
     }
-    
 
+    public static void ClearUsers() => Users.Clear();
 
     public static UserModel CreateOrGet(string username, uint id)
     {

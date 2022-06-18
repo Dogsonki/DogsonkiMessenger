@@ -7,11 +7,14 @@ namespace Client.Pages.Register;
 public partial class ConfirmEmailCode : ContentPage
 {
     private Stopwatch ResendCooldownTimer = new Stopwatch();
-    private const int RESENDCOOLDOWN = 15;
+    private const int RESENDCOOLDOWN = 60;
+    private const int MAX_CODE_ATTEMPS = 5;
+    private int CheckAttemps = 0;
 
 	public ConfirmEmailCode(string email)
 	{
 		InitializeComponent();
+        CheckAttemps = 0;
 		NavigationPage.SetHasNavigationBar(this, false);
         ResendCooldownTimer.Start();
 		noteEmail.Text = $"We've sent a code to {email} and type code to window below";
@@ -19,6 +22,10 @@ public partial class ConfirmEmailCode : ContentPage
 
     private void CheckCode(object sender, EventArgs e)
     {
+        if(CheckAttemps == MAX_CODE_ATTEMPS)
+        {
+            return;
+        }
         SocketCore.SendR(CodeSended,((Entry)sender).Text,Token.REGISTER);
     }
 
@@ -41,11 +48,26 @@ public partial class ConfirmEmailCode : ContentPage
 
     private void CodeSended(object rev)
     {
-        char token = ((string)rev)[0];
+        RToken token = Tokens.CharToRToken(rev);
         switch (token)
         {
-            case '9':
-                MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new LoginPage()));
+            case RToken.WRONG_CODE:
+                ShowError($"Wrong code, left {MAX_CODE_ATTEMPS-CheckAttemps}");
+                CheckAttemps++;
+                break;
+            case RToken.MAX_CODE_ATTEMPS:
+                CheckAttemps = MAX_CODE_ATTEMPS;
+                ShowError("Max attemps used");
+                break;
+            case RToken.ACCEPT:
+                MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Navigation.PopAsync();
+                    Navigation.PushAsync(new LoginPage("Your accout has been activated \n You can now login to your account"));
+                });
+                break;
+            default:
+                ShowError($"Unknown error {(int)token}");
                 break;
         }
     }
@@ -63,8 +85,13 @@ public partial class ConfirmEmailCode : ContentPage
             ShowError($"You have to wait {RESENDCOOLDOWN - ResendCooldownTimer.Elapsed.Seconds} to send code again");
         }
     }
-    private void Cancel(object sender, EventArgs e)
+
+    protected override bool OnBackButtonPressed()
     {
-        SocketCore.Send("b", Token.REGISTER);
+        if(CheckAttemps < MAX_CODE_ATTEMPS)
+        {
+            SocketCore.Send("b", Token.REGISTER);
+        }
+        return base.OnBackButtonPressed();
     }
 }

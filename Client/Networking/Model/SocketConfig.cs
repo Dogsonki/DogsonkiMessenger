@@ -1,5 +1,4 @@
 ﻿using Client.IO;
-using Client.Networking.Core;
 using Newtonsoft.Json;
 
 namespace Client.Networking.Model;
@@ -13,19 +12,7 @@ public class SocketConfig
 
     public static SocketConfig ReadConfig()
     {
-        SocketConfig config = null;
-        config = EmbededStorage.Read<SocketConfig>(typeof(SocketCore), "Client.Networking.SocketConfig.json");
-
-        try
-        {
-        }
-        catch (Exception ex)
-        {
-            Debug.Write(ex);
-            return null;
-        }
-
-        return config;
+        return EmbededStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
     }
 
     public SocketConfig(string ip, int port)

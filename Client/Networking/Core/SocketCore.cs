@@ -8,6 +8,7 @@ namespace Client.Networking.Core;
 public class SocketCore : Connection
 {
     public SocketCore() : base(Recive, MenageQueue) { }
+
     public static void Init() => new SocketCore();
     private static string LongBuffer = "";
 
@@ -16,6 +17,7 @@ public class SocketCore : Connection
         SocketPacket packet;
         if (!SocketPacket.TryDeserialize(out packet, buffer))
             return;
+
         foreach (RequestedCallback callback in RequestedCallback.Callbacks)
         {
             if (packet.Token == callback.GetToken())
@@ -43,7 +45,6 @@ public class SocketCore : Connection
                         continue;
 
                     LongBuffer += DecodedString;
-
                     string buff;
                     int indexDollar = 1;
                     while (indexDollar > 0)
@@ -66,9 +67,15 @@ public class SocketCore : Connection
                 {
                     Debug.Error("Error in casting buffer into packet " + ex);
                 }
+                else if(Stream == null)
+                {
+                    Connect();
+                    Debug.Error("Connection stream is null");
+                }
                 else
                 {
-                    RedirectConnectionLost(ex);
+                    Debug.Error(ex);
+                    //RedirectConnectionLost(ex);
                 }
             }
             Thread.Sleep(10);
@@ -104,8 +111,12 @@ public class SocketCore : Connection
                     }
                 }
             }
-            SocketQueue.Renew();
-            Thread.Sleep(10);
+            if (Client != null && Stream != null && IsConnected)
+            {
+               SocketQueue.Renew();
+            }
+           
+            Thread.Sleep(5);
         }
     }
 

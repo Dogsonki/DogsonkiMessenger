@@ -13,8 +13,11 @@
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
-
 		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"></Line>
+
+		<StackLayout x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center">
+		</StackLayout>
+		
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
 
 			<Entry IsSpellCheckEnabled="False"  FontSize="Medium" HeightRequest="60" TextColor="White" 

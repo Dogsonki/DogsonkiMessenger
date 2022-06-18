@@ -1,16 +1,17 @@
-﻿using Newtonsoft.Json;
+﻿using Client.Networking.Model;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 
 namespace Client.IO
 {
-    public class EmbededStorage
+    public static class EmbededStorage
     {
         public static T Read<T>(Type type,string Path)
         {
             try
             {
-                var assembly = IntrospectionExtensions.GetTypeInfo(type.GetType()).Assembly;
+                var assembly = IntrospectionExtensions.GetTypeInfo(type).Assembly;
                 Stream stream = assembly.GetManifestResourceStream(Path);
                 using (var reader = new StreamReader(stream))
                 {
