@@ -135,3 +135,5 @@ dmypy.json
 /Client/Client/bin/
 /Client/Client.iOS/bin/
 /Client/obj/
+/Client/bin/Debug/net6.0-android
+/Client/bin/Release/net6.0-android

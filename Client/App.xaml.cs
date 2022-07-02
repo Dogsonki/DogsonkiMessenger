@@ -1,32 +1,41 @@
 ﻿using Client.Pages;
 using Client.Networking.Core;
 using Client.Networking.Model;
+using Newtonsoft.Json;
+using Client.Model.Session;
 
 namespace Client;
 
 public partial class App : Application
 {
+    private static LoginPage CurrentLoginPage;
 	public App()
 	{
 		InitializeComponent();
-		MainPage = new NavigationPage(new LoginPage());
+        CurrentLoginPage = new LoginPage();
 
-		ReadSession();
+        MainPage = new NavigationPage(CurrentLoginPage);
+
+        Connection.AddOnConnection(ReadSession);
+
 		SocketCore.Init();
 	}
 
-	private void ReadSession()
+	private static void ReadSession()
     {
 #if ANDROID
         AndroidFileService wr = new AndroidFileService();
         bool SessionExist = wr.CreateFileIfNotExist("session.json");
         if (SessionExist)
         {
-			string session = File.ReadAllText(AndroidFileService.GetPersonalDir("session.json"));
-            Debug.Write(session);
-            if (!string.IsNullOrEmpty(session))
-            {
-                SocketCore.Send(session,Token.SESSION_INFO);
+            string ses = File.ReadAllText(AndroidFileService.GetPersonalDir("session.json"));
+			Session session = JsonConvert.DeserializeObject<Session>(ses);
+            if (session != null && !string.IsNullOrEmpty(ses))
+            {  
+                if(session.SessionKey != null)
+                {
+                    SocketCore.Send(session, Token.SESSION_INFO);
+                }
             }
         }
 #endif

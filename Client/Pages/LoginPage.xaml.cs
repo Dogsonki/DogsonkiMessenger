@@ -7,11 +7,28 @@ namespace Client.Pages;
 
 public partial class LoginPage : ContentPage
 {
-	public LoginPage()
+	public LoginPage(string info = null)
 	{
 		InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-	}
+
+        if (!string.IsNullOrEmpty(info)) AddInfo(info);
+    }
+
+    private Label InfoText = new Label()
+    {
+        TextColor = Color.FromRgb(255, 255, 255),
+        FontAttributes = FontAttributes.Bold,
+        FontSize = 16,
+        HorizontalTextAlignment = TextAlignment.Center
+    };
+
+    public void AddInfo(string info)
+    {
+        InfoText.Text = info;
+        if (!InfoLevel.Contains(InfoText))
+            InfoLevel.Children.Add(InfoText);
+    }
 
     private Label ErrorText = new Label()
     {
@@ -24,6 +41,7 @@ public partial class LoginPage : ContentPage
         if(!ErrorLevel.Children.Contains(ErrorText))
             ErrorLevel.Children.Add(ErrorText);
     }
+
     private void RemoveError() => ErrorLevel.Children.Remove(ErrorText);
 
     private void LoginFocused(object sender, FocusEventArgs e) => RemoveError();
@@ -37,12 +55,6 @@ public partial class LoginPage : ContentPage
         string username = Input_Username.Text;
         string password = Input_Password.Text;
 
-        if(username == "a" && password == "a")
-        {
-            LocalUser.Login(username, "0");
-            StaticNavigator.Push(new MainPage());
-        }
-
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             ShowError("Username or password is empty");
@@ -55,18 +67,17 @@ public partial class LoginPage : ContentPage
             return;
         }
     }
-    private void LoginCallback(object rev)
+    public void LoginCallback(object rev)
     {
         LoginCallbackModel login = ((JObject)rev).ToObject<LoginCallbackModel>();
-
         switch (login.Token)
         {
-            case "0":
-                LocalUser.Login(login.Username, login.ID);
-                StaticNavigator.Push(new MainPage());
-                break;
             case "1":
-                ShowError($"Unkown error: " + (string)rev);
+                LocalUser.Login(login.Username, login.ID,login.Email);
+                Navigation.PushAsync(new MainPage());
+                break;
+            case "0":
+                ShowError($"Wrong email or password");
                 break;
             default:
                 ShowError("Samething went wrong, probably on server side ... ");

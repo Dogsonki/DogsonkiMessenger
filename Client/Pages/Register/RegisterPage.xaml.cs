@@ -86,7 +86,7 @@ public partial class RegisterPage : ContentPage
                 ShowError("User with given username already exists");
                 break;
             default:
-                ShowError($"Unknown error {token}");
+                ShowError($"Unknown error {(int)token}");
                 break;
         }
     }

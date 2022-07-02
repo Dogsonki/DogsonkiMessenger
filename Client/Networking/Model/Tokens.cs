@@ -22,7 +22,7 @@ public enum Token : int
     LOGIN_SESSION = 10,
     AVATAR_REQUEST = 11,
     LAST_USERS = 12,
-    CONFIRMATION_CODE_ACCEPT = 13,
+    LAST_GROUP_CHATS = 13,
 }
 
 /// <summary>
@@ -37,11 +37,15 @@ public enum RToken : int
     EMAIL_WAITING = 6,
     NICKNAME_TAKEN = 7,
     INCORRECT_PASSW_OR_LOGIN = 8,
+    WRONG_CODE = 9,
+    MAX_CODE_ATTEMPS = 10
 }
 
 public static class Tokens
 {
-    public static RToken CharToRToken(object rev) => (RToken)int.Parse(rev.ToString()[0].ToString());//Get string and get char but don't convert as special
+    public static RToken CharToRToken(object rev) => (RToken)int.Parse(rev.ToString()); //Get string and get char but don't convert as special
+
+
     public static void Process(SocketPacket packet)
     {
         switch ((Token)packet.Token)
@@ -72,11 +76,14 @@ public static class Tokens
                 LoginCallbackModel model = ((JObject)packet.Data).ToObject<LoginCallbackModel>();
                 if (model.Token == "1")
                 {
-                    LocalUser.Login(model.Username, model.ID);
-                    MainThread.InvokeOnMainThreadAsync(() => StaticNavigator.PopAndPush(new MainPage()));
+                    LocalUser.Login(model.Username, model.ID, model.Email);
                 }
                 break;
             case Token.AVATAR_REQUEST:
+                if (MainThread.IsMainThread)
+                {
+                    Debug.Write("MAINTHREAD");
+                }
                 UserImageRequest img = ((JObject)packet.Data).ToObject<UserImageRequest>();
                 if (img.ImageData == " ")
                 {
@@ -86,6 +93,11 @@ public static class Tokens
                 avat = avat.Substring(0, avat.Length - 1);
 
                 var user = UserModel.GetUser(img.UserID);
+                if(user == null)
+                {
+                    Debug.Error("USER_AVATAR_NULL_REFRENCE");
+                    return;
+                }
                 byte[] imgBuffer = Convert.FromBase64String(avat);
                 if (user.isLocalUser)
                 {
@@ -100,7 +112,7 @@ public static class Tokens
                 SearchModel[] users = ((JArray)packet.Data).ToObject<SearchModel[]>();
                 MainPage.AddLastUsers(users);
                 break;
-            case Token.CONFIRMATION_CODE_ACCEPT:
+            case Token.LAST_GROUP_CHATS:
                 MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new MainPage()));
                 break;
             default:

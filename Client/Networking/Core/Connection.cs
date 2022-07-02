@@ -15,16 +15,26 @@ public class Connection
     public static bool IsConnected { get; private set; }
     public static bool IsInitialized { get; private set; } = false;
     public static int MaxBuffer = 1024 * 128;
+    public static bool IsConnecting { get; protected set; }
+    private static List<Action> OnConnectionActions = new List<Action>();
 
-    private static void Connect()
+    public static void AddOnConnection(Action action) => OnConnectionActions.Add(action);
+
+    public static void Connect()
     {
+        if (IsConnecting)
+            return;
+        IsConnecting = true;
         try
         {
-            Client = new TcpClient(Config.Ip, Config.Port);
+            Config = SocketConfig.ReadConfig();
+            Client = new TcpClient(Config.Ip,Config.Port);
+            Stream = Client.GetStream();
         }
         catch(Exception)
         {
-            throw; //TODO: Check if it's thread safe
+            IsConnecting = false;
+            return;
         }
 
         ReciveThread.Start();
@@ -32,17 +42,21 @@ public class Connection
 
         IsInitialized = true;
         IsConnected = true;
+        IsConnecting = false;
+
+        foreach(Action act in OnConnectionActions)
+        {
+            act?.Invoke();
+        }
     }
 
     public Connection(ThreadStart ReciveHandler, ThreadStart SendingHandler) 
     {
         ReciveThread = new Thread(ReciveHandler);
         ManageSendingQueue = new Thread(SendingHandler);
-
         try
         {
-            Config = SocketConfig.ReadConfig();
-            Task.Run(Connect);
+            Connect();
         }
         catch(Exception ex)
         {
