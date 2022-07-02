@@ -3,8 +3,7 @@ import json
 import socket
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
-import json
+from typing import Optional, Union
 
 from mysql.connector.cursor_cext import CMySQLCursor
 from email_validator import validate_email, EmailNotValidError
@@ -36,12 +35,17 @@ class MessageType(Enum):
     AUTOMATICALLY_LOGGED = 10
     GET_AVATAR = 11
     LAST_CHATS = 12
+    LAST_GROUP_CHATS = 13
+    NEW_MESSAGE = 14
+    CREATE_GROUP = 15
+    ADD_TO_GROUP = 16
+    INIT_GROUP_CHAT = 17
 
 
 @dataclass
 class Message:
     token: MessageType
-    data: str
+    data: Union[str, dict]
 
     @classmethod
     def deserialize(cls, message: str):
@@ -54,43 +58,43 @@ class Message:
 
 class Buffer:
     socket: socket.socket
-    buffer: bytes
+    buffer_: bytes
     delimiter: bytes
 
-    def __init__(self, sock, delimiter=b"$"):
+    def __init__(self, sock):
         self.socket = sock
-        self.buffer = b""
-        self.delimiter = delimiter
+        self.buffer_ = b""
+        self.delimiter = b"$"
 
     def read(self) -> Optional[str]:
-        while self.delimiter not in self.buffer:
+        while self.delimiter not in self.buffer_:
             data = self.socket.recv(1024)
             if not data:
                 return None
-            self.buffer += data
-        line, _, self.buffer = self.buffer.partition(self.delimiter)
+            self.buffer_ += data
+        line, _, self.buffer_ = self.buffer_.partition(self.delimiter)
         return line.decode("UTF-8")
 
 
 class Connection:
     delimiter = b"$"
-    connection: socket.socket
     buffer: Buffer
     db_cursor = CMySQLCursor
     
-    def __init__(self, connection: socket.socket, address):
-        self.client = connection
+    def __init__(self, client: socket.socket, address):
+        self.client = client
         self.address = address
-        self.buffer = Buffer(connection)
+        self.buffer = Buffer(client)
         self.login_id = 0
         self.login = ""
         self.password = ""
+        self.nick = ""
         self.closed = False
         self.db_cursor = get_cursor()
 
     def send_message(self, message, token: MessageType):
-        print(f"sent: {message}")
-        message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8") + Connection.delimiter
+        message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8")+self.delimiter
+        print(message)
         try:
             self.client.send(message)
         except socket.error:
@@ -115,12 +119,11 @@ class Connection:
             self.db_cursor.close()
             self.closed = True
             if self.login:
-                del current_connections[self.login]
+                del current_connections[self.nick]
             raise ConnectionAbortedError(f"Closing connection with {self.client}")  # todo find better way to close connection
 
 
 class Client(Connection):
-
     def __init__(self, connection: socket.socket, address):
         super().__init__(connection, address)
 
@@ -149,17 +152,26 @@ class Client(Connection):
             for i in user_chats:
                 chats.append({"login": i[1], "id": i[0]})
         self.send_message(chats, MessageType.LAST_CHATS)
-        current_connections[self.login] = self
+
+        group_chats = []
+        user_group_chats = SELECT_SQL.get_user_groups(self.db_cursor, self.login)
+        if user_group_chats:
+            for i in user_group_chats:
+                group_chats.append({"group_name": i[1], "id": i[0]})
+        self.send_message(group_chats, MessageType.LAST_GROUP_CHATS)
+        current_connections[self.nick] = self
 
     def login_by_session(self, session_data) -> bool:
         self.login_id = session_data.data["login_id"]
         session_key = session_data.data["session_key"]
         self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
         if not self.login_id:
-            self.send_message({"token": 0, "login": None, "login_id": None}, MessageType.AUTOMATICALLY_LOGGED)
+            self.send_message({"token": 0, "email": None, "login_id": None, "nick": None},
+                              MessageType.AUTOMATICALLY_LOGGED)
             return False
-        self.login, self.password = SELECT_SQL.get_user(self.db_cursor, self.login_id)
-        self.send_message({"token": 1, "login": self.login, "login_id": self.login_id}, MessageType.AUTOMATICALLY_LOGGED)
+        self.login, self.password, self.nick = SELECT_SQL.get_user(self.db_cursor, self.login_id)
+        self.send_message({"token": 1, "email": self.login, "login_id": self.login_id, "nick": self.nick},
+                          MessageType.AUTOMATICALLY_LOGGED)
         return True
 
     def login_user(self, login_data):
@@ -168,13 +180,15 @@ class Client(Connection):
         remember = login_data.data["remember"]
         self.login_id = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
-            self.send_message({"token": 1, "login": self.login, "login_id": self.login_id}, MessageType.LOGIN)  # 1 --> user has been logged
+            self.nick, = SELECT_SQL.get_nick(self.db_cursor, self.login_id)
+            self.send_message({"token": 1, "email": self.login, "login_id": self.login_id, "nick": self.nick},
+                              MessageType.LOGIN)  # 1 --> user has been logged
             if remember:
                 session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
             return True
         else:
-            self.send_message({"token": 0, "login": None, "login_id": None}, MessageType.LOGIN)  # 0 --> wrong login or password
+            self.send_message({"token": 0, "email": None, "login_id": None, "nick": None}, MessageType.LOGIN)  # 0 --> wrong login or password
         return False
 
     def register_user(self, register_data):
@@ -184,10 +198,11 @@ class Client(Connection):
         if not self.validate_login_data():
             self.send_message("8", MessageType.REGISTER)  # 8 --> incorrect password or mail
             return
-
         if handling_sql.check_if_nick_exist(self.db_cursor, nick):
             self.send_message("7", MessageType.REGISTER)  # 7 -> nickname is taken
             return
+        if handling_sql.check_if_login_exist(self.db_cursor, self.login):
+            self.send_message("3", MessageType.REGISTER)  # 3 --> user with given email exists
 
         code = get_confirmation_code()
         created = INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code)
@@ -204,11 +219,8 @@ class Client(Connection):
 
         if not confirmed:
             return
-
-        if INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick):
-            self.send_message("0", MessageType.REGISTER)  # 0 --> user has been registered
-        else:
-            self.send_message("3", MessageType.REGISTER)  # 3 --> user with given email exists
+        INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick)
+        self.send_message("0", MessageType.REGISTER)  # 0 --> user has been registered
 
     def confirm_email(self, code: int) -> bool:
         while True:
@@ -236,7 +248,7 @@ class Client(Connection):
         return True
 
     def logout(self):
-        del current_connections[self.login]
+        del current_connections[self.nick]
         self.login = False
         self.password = False
         INSERT_SQL.delete_session(self.db_cursor, self.login_id)
@@ -254,7 +266,7 @@ class Client(Connection):
                 avatar = str(base64.b64decode(avatar[0]))
             else:
                 avatar = " "
-        except IndexError:
+        except (IndexError, TypeError):
             avatar = " "
         self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
 

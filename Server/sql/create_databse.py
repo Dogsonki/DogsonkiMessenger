@@ -12,6 +12,9 @@ class CreateDatabase:
         self.create_messages_table()
         self.create_session_table()
         self.create_confirmation_mail_table()
+        self.create_group_table()
+        self.create_group_user_link_table()
+        self.create_group_messages_table()
         self.cursor.close()
 
     def create_users_table(self):
@@ -54,3 +57,31 @@ class CreateDatabase:
                                   code INTEGER NOT NULL,
                                   attempts SMALLINT DEFAULT 0
                                   );""")
+
+    def create_group_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS groups_ (
+                                   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                                   name VARCHAR(50)
+                                   );""")
+
+    def create_group_user_link_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS group_user_link_table (
+                                  user_id INTEGER NOT NULL,
+                                  group_id INTEGER NOT NULL,
+                                  is_admin BIT DEFAULT 0,
+                               
+                                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                                  FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE
+                                  );""")
+
+    def create_group_messages_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS groups_messages (
+                                   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                                   content TEXT NOT NULL,
+                                   sender_id INTEGER,
+                                   group_id INTEGER,
+                                   time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   
+                                   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
+                                   FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   
+                                   );""")
