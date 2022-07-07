@@ -9,8 +9,8 @@ public class Connection
     public static NetworkStream Stream { get; set; }
     public static SocketConfig Config { get; set; }
 
-    protected static Thread ReciveThread { get; set; }
-    protected static Thread ManageSendingQueue { get; set; }
+    protected static Thread ReciveThread { get; private set; }
+    protected static Thread ManageSendingQueue { get; private set; }
 
     public static bool IsConnected { get; private set; }
     public static bool IsInitialized { get; private set; } = false;
@@ -54,6 +54,7 @@ public class Connection
     {
         ReciveThread = new Thread(ReciveHandler);
         ManageSendingQueue = new Thread(SendingHandler);
+
         try
         {
             Connect();

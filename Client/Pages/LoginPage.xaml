@@ -9,7 +9,7 @@
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text="Login"/>
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" Register">
 				<Label.GestureRecognizers>
-					<TapGestureRecognizer Tapped="RedirectToRegister"></TapGestureRecognizer>
+					<TapGestureRecognizer Tapped="RedirectToRegister"/>
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
@@ -20,7 +20,7 @@
 		
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
 
-			<Entry IsSpellCheckEnabled="False"  FontSize="Medium" HeightRequest="60" TextColor="White" 
+			<Entry IsSpellCheckEnabled="False" FontSize="Medium" HeightRequest="60" TextColor="White" 
 						PlaceholderColor="White" Focused="LoginFocused"
 						Placeholder="Username" x:Name="Input_Username"/>
 			<Line X1="0" Stroke="White" X2="350"/>

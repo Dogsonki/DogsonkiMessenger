@@ -2,6 +2,7 @@
 
 namespace Client.Models;
 
+[Serializable]
 public class LoginCallbackModel
 {
     [JsonProperty("nick")]

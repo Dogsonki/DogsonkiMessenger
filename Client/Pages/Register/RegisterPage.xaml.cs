@@ -2,6 +2,7 @@ using Client.Models;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Pages.Register;
+using System.Net.Mail;
 
 namespace Client.Pages;
 
@@ -13,7 +14,10 @@ public partial class RegisterPage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
     }
 
-    private async void RedirectToLogin(object sender, EventArgs e) => await Navigation.PushAsync(new LoginPage());
+    private async void RedirectToLogin(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new LoginPage());
+    }
 
     protected char[] IllegalCharacters = { '$', '*', '{', '}', '#', '@' };
 
@@ -55,7 +59,14 @@ public partial class RegisterPage : ContentPage
             ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
             return;
         }
-        if (!SocketCore.SendR(RegisterCallback, new RegisterModel(username, password,email), Token.REGISTER))
+        MailAddress _tempAdr;
+        if (!MailAddress.TryCreate(email, out _tempAdr))
+        {
+            ShowError("Invalid email");
+            return;
+        }
+
+        if (!SocketCore.SendCallback(RegisterCallback, new RegisterModel(username, password,email), Token.REGISTER))
         {
             ShowError("Unable to connect to the server");
             return;

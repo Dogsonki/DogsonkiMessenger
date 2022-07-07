@@ -1,16 +1,20 @@
 using Client.Models;
 using Client.Networking.Core;
 using Client.Networking.Model;
-using Newtonsoft.Json.Linq;
+using Client.Utility;
 
 namespace Client.Pages;
 
 public partial class LoginPage : ContentPage
 {
+    private static LoginPage Instance;
+
 	public LoginPage(string info = null)
 	{
 		InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
+
+        Instance = this;
 
         if (!string.IsNullOrEmpty(info)) AddInfo(info);
     }
@@ -50,18 +54,25 @@ public partial class LoginPage : ContentPage
     {
         await Navigation.PushAsync(new RegisterPage());
     }
+
     private void LoginDone(object sender, EventArgs e)
     {
         string username = Input_Username.Text;
         string password = Input_Password.Text;
 
+#if DEBUG
+        if(username == "a" && password == "a")
+        {
+            LocalUser.Login("uwu", "2", "wo@");
+        }
+#endif
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             ShowError("Username or password is empty");
             return;
         }
 
-        if (!SocketCore.SendR(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
             ShowError("Unable to connect to the server");
             return;
@@ -69,12 +80,11 @@ public partial class LoginPage : ContentPage
     }
     public void LoginCallback(object rev)
     {
-        LoginCallbackModel login = ((JObject)rev).ToObject<LoginCallbackModel>();
+        LoginCallbackModel login = Essential.ModelCast<LoginCallbackModel>(rev);
         switch (login.Token)
         {
             case "1":
                 LocalUser.Login(login.Username, login.ID,login.Email);
-                Navigation.PushAsync(new MainPage());
                 break;
             case "0":
                 ShowError($"Wrong email or password");

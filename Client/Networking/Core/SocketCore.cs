@@ -1,5 +1,6 @@
 ﻿using Client.Networking.Model;
 using Client.Pages;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -10,7 +11,9 @@ public class SocketCore : Connection
     public SocketCore() : base(Recive, MenageQueue) { }
 
     public static void Init() => new SocketCore();
+
     private static string LongBuffer = "";
+    private static readonly object ProcessPadLock = new object();
 
     private static void ProcessBuffer(string buffer)
     {
@@ -18,15 +21,26 @@ public class SocketCore : Connection
         if (!SocketPacket.TryDeserialize(out packet, buffer))
             return;
 
-        foreach (RequestedCallback callback in RequestedCallback.Callbacks)
+        Debug.Write(packet.Data + " TOKEN: " +packet.Token);
+
+        if (packet.Token == (int)Token.CHAT_MESSAGE)
         {
-            if (packet.Token == callback.GetToken())
-            {
-                callback.Invoke(packet.Data);
-                return;
-            }
+            ReadRawBuffer(packet);
+            return;
         }
-        ReadRawBuffer(packet);
+        
+        ThreadPool.QueueUserWorkItem((object stateInfo) =>
+        {
+            foreach (RequestedCallback callback in RequestedCallback.Callbacks)
+            {
+                if (packet.Token == callback.GetToken())
+                {
+                    callback.Invoke(packet.Data);
+                    return;
+                }
+            }
+            ReadRawBuffer(packet);
+        });
     }
 
     private static void Recive()
@@ -34,25 +48,28 @@ public class SocketCore : Connection
         byte[] buffer = new byte[MaxBuffer];
         int LenBuffer;
 
-        while (IsConnected)
+        while (true)
         {
             try
             {
                 while ((LenBuffer = Stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     string DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
+
                     if (string.IsNullOrEmpty(DecodedString))
                         continue;
 
                     LongBuffer += DecodedString;
                     string buff;
                     int indexDollar = 1;
+
                     while (indexDollar > 0)
                     {
-                        indexDollar = LongBuffer.IndexOf('$'); //Finding dollar is really expensive when is long 
+                        indexDollar = LongBuffer.IndexOf('$'); //Finding dollar is really expensive when buffer is long 
                                                                //buffer try rework this
                         if (indexDollar == -1)
                             break;
+
                         buff = LongBuffer.Substring(0, indexDollar);
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
                         ProcessBuffer(buff);
@@ -85,7 +102,7 @@ public class SocketCore : Connection
     private static void RedirectConnectionLost(Exception ex, [CallerLineNumber] int lineNumber = 0)
     {
         Debug.Error(lineNumber + "::" + ex);
-        MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new LoginPage()));
+        MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new LoginPage("Connection with server lost")));
     }
 
     private static void MenageQueue()
@@ -99,8 +116,9 @@ public class SocketCore : Connection
                     byte[] Buffer = new byte[MaxBuffer];
                     try
                     {
-                        if (packet == null)//TODO: crashing on really small packet that trying to ddos server
+                        if (packet == null)
                             continue;
+
                         Buffer = packet.GetPacked();
                         Stream.Write(Buffer, 0, Buffer.Length);
                     }
@@ -122,22 +140,30 @@ public class SocketCore : Connection
 
     private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
 
-    public static bool SendR(Action<object> Callback, object SendingData, Token token)
+    public static bool SendCallback(Action<object> Callback, object SendingData, Token token)
     {
         if (!AbleToSend())
             return false;
-
-        RequestedCallback.AddCallback(new RequestedCallback(Callback, SendingData, (int)token));
-        Send(SendingData, token);
+        ThreadPool.QueueUserWorkItem(delegate
+        {
+            RequestedCallback.AddCallback(new RequestedCallback(Callback, SendingData, (int)token));
+            Send(SendingData, token);
+        }, null);
+       
         return true;
     }
 
-    public static bool Send(object data, Token token = Token.EMPTY, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+    public static bool Send(object data, Token token = Token.EMPTY)
     {
         if (!AbleToSend())
             return false;
-        SocketPacket model = new SocketPacket(data, token);
-        SocketQueue.Add(model);
+
+        ThreadPool.QueueUserWorkItem(delegate
+        {
+            SocketPacket model = new SocketPacket(data, token);
+            SocketQueue.Add(model);
+
+        }, null);
 
         return true;
     }
@@ -146,7 +172,11 @@ public class SocketCore : Connection
     {
         if (!AbleToSend())
             return false;
-        SocketQueue.Add(packet);
+        ThreadPool.QueueUserWorkItem(delegate
+        {
+            SocketQueue.Add(packet);
+        }, null);
+
         return true;
     }
 }

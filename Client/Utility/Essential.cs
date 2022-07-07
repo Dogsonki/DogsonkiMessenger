@@ -1,4 +1,7 @@
-﻿namespace Client.Utility
+﻿using Client.Models;
+using Newtonsoft.Json.Linq;
+
+namespace Client.Utility
 {
     public class Essential
     {
@@ -14,6 +17,27 @@
                 }
                 return ms.ToArray();
             }
+        }
+
+        public static T ModelCast<T>(object data)
+        {
+            T dest = default;
+            try
+            {
+                if (data.GetType() == typeof(JObject))
+                {
+                    dest = ((JObject)data).ToObject<T>();
+                }
+                else if (data.GetType() == typeof(JArray))
+                {
+                    dest = ((JArray)data).ToObject<T>();
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.Error(ex);
+            } 
+            return dest;
         }
     }
 }

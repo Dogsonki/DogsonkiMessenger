@@ -1,7 +1,7 @@
 ﻿using Client.Models;
 using Client.Pages;
-using Newtonsoft.Json.Linq;
 using Client.IO;
+using Client.Utility;
 
 namespace Client.Networking.Model;
 
@@ -23,6 +23,8 @@ public enum Token : int
     AVATAR_REQUEST = 11,
     LAST_USERS = 12,
     LAST_GROUP_CHATS = 13,
+    SEND_MESSAGE = 14,
+    GROUP_CHAT_CREATE = 15,
 }
 
 /// <summary>
@@ -31,9 +33,11 @@ public enum Token : int
 public enum RToken : int
 {
     ACCEPT = 0,
+    NULL_BYTE = 1,
     EMAIL_SENT = 2,
     USER_ALREADY_EXISTS = 3,
     CANNOT_SEND_EMAIL = 4,
+    NULL_BYTE = 5,
     EMAIL_WAITING = 6,
     NICKNAME_TAKEN = 7,
     INCORRECT_PASSW_OR_LOGIN = 8,
@@ -45,72 +49,38 @@ public static class Tokens
 {
     public static RToken CharToRToken(object rev) => (RToken)int.Parse(rev.ToString()); //Get string and get char but don't convert as special
 
-
     public static void Process(SocketPacket packet)
     {
         switch ((Token)packet.Token)
         {
             case Token.ERROR:
-                Debug.Error("TOKEN -2");
+                Debug.Error(packet.Data+"TOKEN -2");
                 break;
             case Token.SEARCH_USER:
                 SearchPage.ParseFound(packet.Data);
                 break;
             case Token.CHAT_MESSAGE:
-                try
-                {
-                    MainThread.BeginInvokeOnMainThread(() => MessagePage.AddMessage(((JObject)packet.Data).ToObject<MessageModel>()));
-                }
-                catch (Exception ex)
-                {
-                    Debug.Error(ex);
-                }
+                MessagePage.AddMessage(packet);
                 break;
             case Token.GET_MORE_MESSAGES:
                 break;
             case Token.SESSION_INFO:
-                Session session = ((JObject)packet.Data).ToObject<Session>();
+                Session session = Essential.ModelCast<Session>(packet.Data);
                 Session.OverwriteSession(session);
                 break;
             case Token.LOGIN_SESSION:
-                LoginCallbackModel model = ((JObject)packet.Data).ToObject<LoginCallbackModel>();
+                LoginCallbackModel model = Essential.ModelCast<LoginCallbackModel>(packet.Data);
                 if (model.Token == "1")
                 {
+                    Debug.Write("LOGGIN BY SESSION SUCCESS");
                     LocalUser.Login(model.Username, model.ID, model.Email);
                 }
                 break;
             case Token.AVATAR_REQUEST:
-                if (MainThread.IsMainThread)
-                {
-                    Debug.Write("MAINTHREAD");
-                }
-                UserImageRequest img = ((JObject)packet.Data).ToObject<UserImageRequest>();
-                if (img.ImageData == " ")
-                {
-                    return;
-                }
-                string avat = img.ImageData.Substring(2);
-                avat = avat.Substring(0, avat.Length - 1);
-
-                var user = UserModel.GetUser(img.UserID);
-                if(user == null)
-                {
-                    Debug.Error("USER_AVATAR_NULL_REFRENCE");
-                    return;
-                }
-                byte[] imgBuffer = Convert.FromBase64String(avat);
-                if (user.isLocalUser)
-                {
-                    MainThread.BeginInvokeOnMainThread(() => LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
-                }
-                else
-                {
-                    MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
-                }
+                UserImageRequest.ProcessImage(packet);
                 break;
             case Token.LAST_USERS:
-                SearchModel[] users = ((JArray)packet.Data).ToObject<SearchModel[]>();
-                MainPage.AddLastUsers(users);
+                MainPage.AddLastUsers(packet);
                 break;
             case Token.LAST_GROUP_CHATS:
                 MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new MainPage()));

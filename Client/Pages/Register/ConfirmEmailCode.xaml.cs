@@ -26,7 +26,7 @@ public partial class ConfirmEmailCode : ContentPage
         {
             return;
         }
-        SocketCore.SendR(CodeSended,((Entry)sender).Text,Token.REGISTER);
+        SocketCore.SendCallback(CodeSended,((Entry)sender).Text,Token.REGISTER);
     }
 
     private Label ErrorText = new Label()
@@ -54,7 +54,7 @@ public partial class ConfirmEmailCode : ContentPage
             case RToken.WRONG_CODE:
                 ShowError($"Wrong code, left {MAX_CODE_ATTEMPS-CheckAttemps}");
                 CheckAttemps++;
-                break;
+                break;  
             case RToken.MAX_CODE_ATTEMPS:
                 CheckAttemps = MAX_CODE_ATTEMPS;
                 ShowError("Max attemps used");
@@ -62,7 +62,6 @@ public partial class ConfirmEmailCode : ContentPage
             case RToken.ACCEPT:
                 MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Navigation.PopAsync();
                     Navigation.PushAsync(new LoginPage("Your accout has been activated \n You can now login to your account"));
                 });
                 break;

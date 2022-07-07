@@ -1,11 +1,11 @@
-﻿namespace Client.Networking.Model
+﻿using Client.Networking.Core;
+
+namespace Client.Networking.Model
 {
     //Add lifetime to callbacks, can be used as memory leak where cannot be invoked 
     public class RequestedCallback
     {
-        //Callbacks might break sametimes when recive packet in wrong time
         public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
-
         protected Action<object> Callback;
 
         public object ContentSend;

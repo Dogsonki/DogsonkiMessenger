@@ -7,17 +7,14 @@ namespace Client;
 [Bindable(BindableSupport.Yes)]
 public class LocalUser : BindableObject
 {
-    /*
-     TODO: Create properties that provides all informations from UserModel not from localuser that being copied by both classes
-     */
-
     //Current have to be binded to property in view class to reuse it 
     public static LocalUser Current { get; set; } 
     public LocalUser User { get { return Current; } }
+    public static User UserRef { get; set; }
 
     protected static bool InstanceCreated = false;
 
-    public static ImageSource avatar;
+    public static ImageSource avatar { get; private set; }
     public ImageSource Avatar
     {
         get
@@ -27,28 +24,28 @@ public class LocalUser : BindableObject
         set { avatar = value; OnPropertyChanged(nameof(Avatar)); }
     }
 
-    public static string username;
+    public static string username { get; private set; }
     public string Username
     {
         get { return username; }
         set { username = value; OnPropertyChanged(nameof(Username)); }
     }
 
-    public static string id;
+    public static string id { get; private set; }
     public string ID
     {
         get { return id; }
         set { id = value; OnPropertyChanged(nameof(ID)); }
     }
 
-    public static bool isLoggedIn;
+    public static bool isLoggedIn { get; private set; }
     public bool IsLoggedIn
     {
         get { return isLoggedIn; }
         set { isLoggedIn = value; OnPropertyChanged(nameof(IsLoggedIn)); }
     }
 
-    public static string email;
+    public static string email { get; private set; }
     public string Email 
     {
         get { return email; } 
@@ -58,12 +55,9 @@ public class LocalUser : BindableObject
     public static void Logout()
     {
         SocketCore.Send(" ", 0);
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            StaticNavigator.Push(new LoginPage());
-        });
         ToDefault();
     }
+
     public static void Login(string _username, string _id,string _email)
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -76,11 +70,12 @@ public class LocalUser : BindableObject
             Current.Username = _username;
             Current.Email = _email;
             isLoggedIn = true;
-            MainThread.BeginInvokeOnMainThread(() => StaticNavigator.Push(new MainPage()));
-        });
-        UserModel user = UserModel.CreateOrGet(username, uint.Parse(_id));
-        user.isLocalUser = true;
 
+            User user = Models.User.CreateLocalUser(username, uint.Parse(_id));
+            UserRef = user;
+
+            StaticNavigator.Push(new MainPage());
+        });
     }
 
     public LocalUser()
@@ -92,12 +87,14 @@ public class LocalUser : BindableObject
             InstanceCreated = true;
         }
     }
-    protected static void ToDefault()
+    private static void ToDefault()
     {
         Current.Username = "NOT_LOGGED_USER";
         Current.ID = 0xffffffff.ToString();
-        UserModel.ClearUsers();
         isLoggedIn = false;
         Current.Avatar = null;
+
+        MainPage.LastChats.Clear();
+        Models.User.ClearUsers();
     }
 }

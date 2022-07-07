@@ -1,6 +1,7 @@
 using Client.Models;
 using Client.Networking.Core;
 using Client.Networking.Model;
+using Client.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 
@@ -12,47 +13,60 @@ public partial class MessagePage : ContentPage
 
     public static ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
 
-    public static UserModel ChatUser { get; set; }
+    public static User ChatUser { get; set; }
 
     private static void OnNewMessage(MessageModel LastMessage)
     {
-        Current.MessageList.ScrollTo(LastMessage, ScrollToPosition.End, false);
+        //Current.MessageList.ScrollTo(LastMessage, ScrollToPosition.End, false);
     }
 
-    public MessagePage(UserModel user)
+    public MessagePage(User user)
 	{
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-        Current = this;
+        NavigationPage.SetHasBackButton(this, true);
+
+        Current = this; 
+        Messages.Clear();
+
         ChatUser = user;
         ChatUsername.Text = "Chatting with @"+user.Name;
     }
 
+    //TODO: THIS IS FUCK BUGGED 
     protected override bool OnBackButtonPressed()
     {
-        if (!MessageInput.IsFocused)
-        {
-            SocketCore.Send(" ", Token.END_CHAT);
-        }
+        SocketCore.Send(" ", Token.END_CHAT);
         return base.OnBackButtonPressed();
     } 
 
     public static void AddMessage(string message,DateTime time)
     {
-        MessageModel u = new MessageModel(ChatUser.Name, message, time);
+        MessageModel u = new MessageModel(LocalUser.username, message, time);
+        SocketCore.Send(message,Token.SEND_MESSAGE);
         Messages.Add(u);
         OnNewMessage(u);
     }
+    public static void AddMessage(MessageModel message)
+    {
+        Messages.Add(message);
+        OnNewMessage(message);
+    }
 
-    public static void AddMessage(MessageModel message) => Messages.Add(message);
+    public static void AddMessage(SocketPacket packet)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        AddMessage(Essential.ModelCast<MessageModel>(packet.Data)));
+    }
 
     private void MessageInputDone(object sender, EventArgs e)
     {
         string message = ((Entry)sender).Text;
+
         if (string.IsNullOrEmpty(message))
             return;
+
         AddMessage(message, DateTime.Now);
-        SocketCore.Send(message,Token.EMPTY);
         ((Entry)sender).Text = "";
     }
 
@@ -72,12 +86,12 @@ public partial class MessagePage : ContentPage
     {
         if(MessageInput.Text.Length > 0 && !_isFoc)
         {
-            MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 200, end: 350, easing: Easing.Linear), length: 250);
+            //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 200, end: 350, easing: Easing.Linear), length: 250);
             _isFoc = true;
         }
         else if(MessageInput.Text.Length == 0 && _isFoc)
         {
-            MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 350, end: 200, easing: Easing.SpringIn), length: 500);
+            //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 350, end: 200, easing: Easing.SpringIn), length: 500);
             _isFoc = false;
         }
     }

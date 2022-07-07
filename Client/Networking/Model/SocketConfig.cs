@@ -10,14 +10,14 @@ public class SocketConfig
     [JsonProperty("Socket_PORT")]
     public int Port;
 
-    public static SocketConfig ReadConfig()
-    {
-        return EmbededStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
-    }
-
     public SocketConfig(string ip, int port)
     {
         Ip = ip;
         Port = port;
+    }
+
+    public static SocketConfig ReadConfig()
+    {
+        return EmbededStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
     }
 }

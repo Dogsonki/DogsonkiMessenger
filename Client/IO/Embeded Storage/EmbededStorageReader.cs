@@ -1,5 +1,4 @@
-﻿using Client.Networking.Model;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 

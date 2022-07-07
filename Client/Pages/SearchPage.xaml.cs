@@ -8,7 +8,7 @@ namespace Client.Pages;
 
 public partial class SearchPage : ContentPage
 {
-    public static ObservableCollection<PersonFoundModel> UsersFound { get; set; } = new ObservableCollection<PersonFoundModel>();
+    public static ObservableCollection<User> UsersFound { get; set; } = new ObservableCollection<User>();
 
     public SearchPage(string preInputText)
 	{
@@ -19,7 +19,11 @@ public partial class SearchPage : ContentPage
 
     private void SearchPressed(object sender, EventArgs e)
     {
-        SocketCore.Send(((SearchBar)sender).Text, Token.SEARCH_USER);
+        string input = ((SearchBar)sender).Text;
+        if (!string.IsNullOrEmpty(input))
+        {
+            SocketCore.Send(input, Token.SEARCH_USER);
+        }
     }
 
     public static void ParseFound(object req)
@@ -27,8 +31,7 @@ public partial class SearchPage : ContentPage
         List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
         foreach (var user in users)
         {
-            UserModel u = UserModel.CreateOrGet(user.Username, user.ID);
-            UsersFound.Add(new PersonFoundModel(u));
+            UsersFound.Add(User.CreateOrGet(user.Username, user.ID));
         }
     }
 }

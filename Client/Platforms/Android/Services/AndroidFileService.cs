@@ -53,14 +53,17 @@ namespace Client;
         MainThread.InvokeOnMainThreadAsync(() => RequestPermissionAsync());
 
         string filePath = Path.Combine(GetPersonalDir(location), name);
-
-        byte[] buffer = File.ReadAllBytes(filePath);
-
-        return buffer;
+        byte[] buffer;
+        Debug.Write(filePath);
+        if (File.Exists(filePath))
+        {
+            buffer = File.ReadAllBytes(filePath);
+        }
+        return null;
     }
 
     //API < 21 will ask for permissions
-    private static async Task RequestPermissionAsync()//TODO: make it async and ask before appEntry
+    private static async Task RequestPermissionAsync()
     {
         var write = await Permissions.CheckStatusAsync<Permissions.StorageWrite>();
         if (write != PermissionStatus.Granted)
@@ -75,7 +78,7 @@ namespace Client;
         }
     }
 
-    public void WriteToFile(MemoryStream stream, string location)
+    public void WriteToFile(MemoryStream stream, string location = TempLocation )
     {
         byte[] bArray = new byte[stream.Length];
         using (FileStream fs = new FileStream(location, FileMode.OpenOrCreate))
@@ -88,11 +91,11 @@ namespace Client;
             fs.Write(bArray, 0, length);
         }
     }
-    public void WriteToFile(string content, string location)
+    public void WriteToFile(string content, string location = TempLocation)
     {
         File.WriteAllBytes(GetPersonalDir(location),Encoding.UTF8.GetBytes(content));
     }
-    public void WriteToFile(byte[] content, string location)
+    public void WriteToFile(byte[] content, string location = TempLocation)
     {
         File.WriteAllBytes(GetPersonalDir(location), content);
     }

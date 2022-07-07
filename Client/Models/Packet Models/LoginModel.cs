@@ -2,6 +2,7 @@
 
 namespace Client.Models;
 
+[Serializable]
 public class LoginModel
 {
     [JsonProperty("login")]

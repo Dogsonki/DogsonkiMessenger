@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Client.Model.Session;
 
+[Serializable]
 public class Session : IStorage
 {
     [JsonProperty("session_key")]
