@@ -1,4 +1,4 @@
-﻿namespace Client.Models;
+﻿namespace Client.Models.UserType.Bindable;
 
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
@@ -6,12 +6,20 @@
 public class AnyListBindable : BindableObject
 {
     private User BindedUser;
-    
+
     public string Name
     {
         get
         {
             return BindedUser.Name;
+        }
+    }
+
+    public Command Input
+    {
+        get
+        {
+            return BindedUser.OpenChatCommand;
         }
     }
 

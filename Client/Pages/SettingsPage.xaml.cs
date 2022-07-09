@@ -1,4 +1,5 @@
 using Client.IO;
+using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
@@ -34,6 +35,7 @@ public partial class SettingsPage : ContentPage
         ImageBuffer = Essential.StreamToBuffer(stream, stream.Length);
 
         SocketCore.Send(ImageBuffer, Token.CHANGE_AVATAR);
+
         LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
 
         Cache.SaveToCache(ImageBuffer, "avatar" + LocalUser.id);

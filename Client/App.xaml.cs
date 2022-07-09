@@ -2,13 +2,14 @@
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Newtonsoft.Json;
-using Client.Model.Session;
+using Client.Models.Session;
 
 namespace Client;
 
 public partial class App : Application
 {
     private static LoginPage CurrentLoginPage;
+
 	public App()
 	{
 		InitializeComponent();

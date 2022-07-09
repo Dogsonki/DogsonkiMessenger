@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-
+﻿using Client.Models.UserType.Bindable;
+using Newtonsoft.Json;
 namespace Client.Models;
 
 [Serializable]

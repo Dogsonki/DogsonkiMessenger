@@ -3,46 +3,50 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MainPage"
 			 xmlns:local="clr-namespace:Client.Pages"
-			 xmlns:user="clr-namespace:Client"
+			 xmlns:user="clr-namespace:Client.Models.UserType.Bindable"
 			 BackgroundColor="#121212">
 
 	<ContentPage.BindingContext>
 		<user:LocalUser></user:LocalUser>
 	</ContentPage.BindingContext>
 
-	<StackLayout>
-		<StackLayout  Margin="0,0,0,20">
-			<SearchBar CancelButtonColor="White" BackgroundColor="#121212" x:Name="SearchInput" SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False" WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"></SearchBar>
+	<ScrollView>
+		<StackLayout>
+			<StackLayout  Margin="0,0,0,20">
+			<SearchBar CancelButtonColor="White" BackgroundColor="#121212" x:Name="SearchInput"
+							   SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" 
+							   TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False"
+							   WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"/>
 		</StackLayout>
-		<StackLayout Orientation="Horizontal" Margin="0,0,0,20" >
-			<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start" CornerRadius="40" HeightRequest="80" WidthRequest="80">
-				<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80" HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
-			</Frame>
-			<StackLayout WidthRequest="270">
-				<StackLayout Spacing="0" Orientation="Horizontal">
-					<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
-					<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="#" />
-					<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+
+			<StackLayout Orientation="Horizontal" Margin="0,0,0,20" >
+				<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
+						   CornerRadius="40" HeightRequest="80" WidthRequest="80">
+					<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
+							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+				</Frame>
+				<StackLayout WidthRequest="270">
+					<StackLayout Spacing="0" Orientation="Horizontal">
+						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
+						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="#" />
+						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+					</StackLayout>
 				</StackLayout>
+				<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand" VerticalOptions="End" Source="settings.svg">
+					<Image.GestureRecognizers>
+						<TapGestureRecognizer Tapped="SetingsTapped"/>
+					</Image.GestureRecognizers>
+				</Image>
 			</StackLayout>
-			<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand" VerticalOptions="End" Source="settings.svg">
-				<Image.GestureRecognizers>
-					<TapGestureRecognizer Tapped="SetingsTapped"/>
-				</Image.GestureRecognizers>
-			</Image>
-		</StackLayout>
+			
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Last Chats"/>
 
-		<Label TextColor="White" HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Last Chats"/>
-
-		<!-- 6943 -->
-		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" 
-				  ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
-			<ListView.ItemTemplate>
-				<DataTemplate>
-					<ViewCell>
+			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
+				<BindableLayout.ItemTemplate>
+					<DataTemplate>
 						<StackLayout>
 							<StackLayout.GestureRecognizers>
-								<TapGestureRecognizer Command="{Binding OpenChatCommand}" />
+								<TapGestureRecognizer Command="{Binding Input}" />
 							</StackLayout.GestureRecognizers>
 							<Grid>
 								<Grid.RowDefinitions>
@@ -62,9 +66,9 @@
 								</StackLayout>
 							</Grid>
 						</StackLayout>
-					</ViewCell>
-				</DataTemplate>
-			</ListView.ItemTemplate>
-		</ListView>
-	</StackLayout>
+					</DataTemplate>
+				</BindableLayout.ItemTemplate>
+			</StackLayout>
+		</StackLayout>
+	</ScrollView>
 </ContentPage>

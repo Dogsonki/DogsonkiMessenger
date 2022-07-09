@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 
 namespace Client.Networking.Model;
 
+[Serializable]
 public class SocketConfig
 {
     [JsonProperty("Socket_IP")]

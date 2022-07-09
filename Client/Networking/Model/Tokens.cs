@@ -2,6 +2,7 @@
 using Client.Pages;
 using Client.IO;
 using Client.Utility;
+using Client.Models.UserType.Bindable;
 
 namespace Client.Networking.Model;
 
@@ -37,7 +38,6 @@ public enum RToken : int
     EMAIL_SENT = 2,
     USER_ALREADY_EXISTS = 3,
     CANNOT_SEND_EMAIL = 4,
-    NULL_BYTE = 5,
     EMAIL_WAITING = 6,
     NICKNAME_TAKEN = 7,
     INCORRECT_PASSW_OR_LOGIN = 8,
@@ -77,7 +77,7 @@ public static class Tokens
                 }
                 break;
             case Token.AVATAR_REQUEST:
-                UserImageRequest.ProcessImage(packet);
+                UserImageRequestModel.ProcessImage(packet);
                 break;
             case Token.LAST_USERS:
                 MainPage.AddLastUsers(packet);

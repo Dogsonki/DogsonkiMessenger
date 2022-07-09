@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System.Text;
 
-namespace Client.Model.Session;
+namespace Client.Models.Session;
 
 [Serializable]
 public class Session : IStorage

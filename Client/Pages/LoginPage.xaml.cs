@@ -1,4 +1,5 @@
 using Client.Models;
+using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;

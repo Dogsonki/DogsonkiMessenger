@@ -4,7 +4,7 @@ using Client.Networking.Model;
 using Client.Pages;
 using System.ComponentModel;
 
-namespace Client.Models;
+namespace Client.Models.UserType.Bindable;
 
 [Bindable(BindableSupport.Yes)]
 public class User : BindableObject
@@ -12,32 +12,41 @@ public class User : BindableObject
     public static List<User> Users = new List<User>();
     public List<MessageModel> CachedMessages = new List<MessageModel>();
 
-    protected ImageSource avatar;
+    private ImageSource avatar;
     public ImageSource Avatar
     {
         get
         {
             if (IsLocalUser)
             {
-               return LocalUser.Current.Avatar;
+                return LocalUser.Current.Avatar;
             }
             return avatar;
         }
         set
         {
-            avatar = value;
-            OnPropertyChanged(nameof(Avatar));
+            if (IsLocalUser)
+            {
+                LocalUser.Current.Avatar = value;
+            }
+            else
+            {
+                avatar = value;
+                OnPropertyChanged(nameof(Avatar));
+            }
         }
     }
 
+    /* As LocalUser have his own binding but User reuse it LocalUser have to be binding as LocalUser.<BindableObject> */
     public bool IsLocalUser = false;
 
+    /* Name and ID will never change then don't make them as OnPropertyChanged */
     public string Name { get; set; }
     public uint ID { get; set; }
 
     public Command OpenChatCommand { get; set; }
 
-    public User(string username, uint id,bool isLocalUser = false)
+    public User(string username, uint id, bool isLocalUser = false)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -54,22 +63,19 @@ public class User : BindableObject
 
         byte[] AvatarCacheBuffer = Cache.ReadCache("avatar" + id);
 
-        if(AvatarCacheBuffer is not null)
+        if (AvatarCacheBuffer.Length > 0)
         {
-            ImageSource avatar = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
-
+            ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                Avatar = avatar;
+                Avatar = src;
             });
         }
         else
         {
-            Debug.Write("Cached image dose not exists");
+            Debug.Write($"SENDING_REQUEST_AVATAR: {id}");
+            SocketCore.Send(id, Token.AVATAR_REQUEST);
         }
-
-        Debug.Write($"SENDING_REQUEST_AVATAR: {id}");
-        SocketCore.Send(id, Token.AVATAR_REQUEST);
     }
 
     public static void ClearUsers() => Users.Clear();
@@ -89,13 +95,13 @@ public class User : BindableObject
         if ((user = Users.Find(x => x.ID == id)) != null)
             return user;
 
-        return new User(username, id,false);
+        return new User(username, id, false);
     }
 
     public static User CreateLocalUser(string username, uint id)
     {
         return new User(username, id, true);
-    } 
+    }
 
     public static User GetUser(uint id) => Users.Find(x => x.ID == id);
 }

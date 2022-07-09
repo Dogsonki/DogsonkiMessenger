@@ -7,7 +7,7 @@ namespace Client;
 {
     private const string TempLocation = "temp";
 
-    public static string GetPersonalDir(string location) => FileSystem.CacheDirectory + $"/{location}";
+    public static string GetPersonalDir(string location) => FileSystem.Current.CacheDirectory + $"/{location}";
 
     /// <summary>
     /// Returns false if directory was not present in location

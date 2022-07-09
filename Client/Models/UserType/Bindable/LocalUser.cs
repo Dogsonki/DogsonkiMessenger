@@ -1,14 +1,14 @@
-﻿using Client.Models;
-using Client.Networking.Core;
+﻿using Client.Networking.Core;
 using Client.Pages;
 using System.ComponentModel;
 
-namespace Client;
+namespace Client.Models.UserType.Bindable;
+
 [Bindable(BindableSupport.Yes)]
 public class LocalUser : BindableObject
 {
-    //Current have to be binded to property in view class to reuse it 
-    public static LocalUser Current { get; set; } 
+    /* Current have to be binded to property in view class to reuse it  */
+    public static LocalUser Current { get; set; }
     public LocalUser User { get { return Current; } }
     public static User UserRef { get; set; }
 
@@ -46,10 +46,10 @@ public class LocalUser : BindableObject
     }
 
     public static string email { get; private set; }
-    public string Email 
+    public string Email
     {
-        get { return email; } 
-        set { email = value;OnPropertyChanged(nameof(Email)); } 
+        get { return email; }
+        set { email = value; OnPropertyChanged(nameof(Email)); }
     }
 
     public static void Logout()
@@ -58,7 +58,7 @@ public class LocalUser : BindableObject
         ToDefault();
     }
 
-    public static void Login(string _username, string _id,string _email)
+    public static void Login(string _username, string _id, string _email)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -71,7 +71,7 @@ public class LocalUser : BindableObject
             Current.Email = _email;
             isLoggedIn = true;
 
-            User user = Models.User.CreateLocalUser(username, uint.Parse(_id));
+            User user = Bindable.User.CreateLocalUser(username, uint.Parse(_id));
             UserRef = user;
 
             StaticNavigator.Push(new MainPage());
@@ -80,13 +80,14 @@ public class LocalUser : BindableObject
 
     public LocalUser()
     {
-        if (!InstanceCreated) 
+        if (!InstanceCreated)
         {
             Current = this;
             ToDefault();
             InstanceCreated = true;
         }
     }
+
     private static void ToDefault()
     {
         Current.Username = "NOT_LOGGED_USER";
@@ -95,6 +96,6 @@ public class LocalUser : BindableObject
         Current.Avatar = null;
 
         MainPage.LastChats.Clear();
-        Models.User.ClearUsers();
+        Bindable.User.ClearUsers();
     }
 }

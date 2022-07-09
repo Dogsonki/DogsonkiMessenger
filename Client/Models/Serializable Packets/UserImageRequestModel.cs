@@ -1,18 +1,19 @@
-﻿using Client.Networking.Model;
+﻿using Client.Models.UserType.Bindable;
+using Client.Networking.Model;
 using Client.Utility;
 using Newtonsoft.Json;
 
 namespace Client.Models;
 
 [Serializable]
-public class UserImageRequest
+public class UserImageRequestModel
 {
     [JsonProperty("avatar")]
     public string ImageData { get; set; }
     [JsonProperty("login_id")]
     public uint UserID { get; set; }
 
-    public UserImageRequest(string avatar, uint login_id)
+    public UserImageRequestModel(string avatar, uint login_id)
     {
         ImageData = avatar;
         UserID = login_id;
@@ -20,7 +21,7 @@ public class UserImageRequest
 
     public static void ProcessImage(SocketPacket packet)
     {
-        UserImageRequest img = Essential.ModelCast<UserImageRequest>(packet.Data);
+        UserImageRequestModel img = Essential.ModelCast<UserImageRequestModel>(packet.Data);
         if (img.ImageData == " ")
         {
             return;

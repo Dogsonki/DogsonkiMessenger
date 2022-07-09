@@ -1,4 +1,5 @@
 using Client.Models;
+using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
@@ -14,16 +15,16 @@ public partial class MainPage : ContentPage
 	public static void AddLastUsers(SocketPacket packet)
     {
         SearchModel[] users = Essential.ModelCast<SearchModel[]>(packet.Data);
-        List<AnyListBindable> binable = new List<AnyListBindable>();
+        List<AnyListBindable> bindable = new List<AnyListBindable>();
 
-        foreach (SearchModel user in users)
+        Parallel.ForEach(users, (user) =>
         {
-           binable.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.ID)));
-        }
+            bindable.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.ID)));
+        });
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            foreach(AnyListBindable use in binable)
+            foreach(AnyListBindable use in bindable)
             {
                 LastChats.Add(use);
             }
@@ -40,11 +41,14 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
+#if DEBUG
+  
+#endif
+
         if (Instance is null)
         {
             Instance = this;
-        }
-        else { return; }            
+        }         
 	}
 
 	private async void SetingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
