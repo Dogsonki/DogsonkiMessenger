@@ -13,6 +13,7 @@ public class UserImageRequestModel
     [JsonProperty("login_id")]
     public uint UserID { get; set; }
 
+    [JsonConstructor]
     public UserImageRequestModel(string avatar, uint login_id)
     {
         ImageData = avatar;
@@ -22,6 +23,7 @@ public class UserImageRequestModel
     public static void ProcessImage(SocketPacket packet)
     {
         UserImageRequestModel img = Essential.ModelCast<UserImageRequestModel>(packet.Data);
+
         if (img.ImageData == " ")
         {
             return;
@@ -34,18 +36,12 @@ public class UserImageRequestModel
             Debug.Error("USER_AVATAR_NULL_REFRENCE");
             return;
         }
+
         string avat = img.ImageData.Substring(2);
         avat = avat.Substring(0, avat.Length - 1);
 
         byte[] imgBuffer = Convert.FromBase64String(avat);
 
-        if (user.IsLocalUser)
-        {
-            MainThread.BeginInvokeOnMainThread(() => LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
-        }
-        else
-        {
-            MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
-        }
+        MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
     }
 }

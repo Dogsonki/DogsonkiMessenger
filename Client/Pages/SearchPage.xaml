@@ -6,7 +6,15 @@
              Title="SearchPage"
 			 BackgroundColor="#121212">
     <StackLayout>
-		<SearchBar x:Name="SearchInput" SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False" WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"></SearchBar>
+		<StackLayout  Margin="0,0,0,20">
+			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
+			   HeightRequest="44" WidthRequest="300">
+				<Entry WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Search"
+				   Keyboard="Plain" Completed="SearchPressed"/>
+			</Frame>
+		</StackLayout>
 		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:SearchPage.UsersFound}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>

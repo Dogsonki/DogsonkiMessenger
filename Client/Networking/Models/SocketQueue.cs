@@ -1,5 +1,6 @@
 ﻿namespace Client.Networking.Model;
 
+/* Works as Stacked Queue */
 public class SocketQueue
 {
     public static List<SocketPacket> SendingPackets = new List<SocketPacket>();
@@ -8,7 +9,6 @@ public class SocketQueue
     /// <summary>
     /// Adds packet to WaitingPackets 
     /// </summary>
-    /// <param name="packet"></param>
     public static void Add(SocketPacket packet) => WaitingPackets.Add(packet);
 
     /// <summary>
@@ -16,14 +16,17 @@ public class SocketQueue
     /// </summary>
     public static void Renew()
     {
-        SendingPackets = new List<SocketPacket>(WaitingPackets);
+        if(WaitingPackets.Count > 0 || SendingPackets.Count > 0) 
+        {
+            SendingPackets = new List<SocketPacket>(WaitingPackets);
+        }
+
         WaitingPackets.Clear();
     }
 
     /// <summary>
-    /// If count of SendingPackets is more than 0
+    /// Returns count of SendingPackets is more than 0
     /// </summary>
-    /// <returns></returns>
     public static bool AbleToSend() => SendingCount > 0;
 
     public static int SendingCount => SendingPackets.Count;

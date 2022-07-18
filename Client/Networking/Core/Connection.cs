@@ -1,4 +1,5 @@
 ﻿using Client.Networking.Model;
+using Client.Utility;
 using System.Net.Sockets;
 
 namespace Client.Networking.Core;
@@ -16,6 +17,7 @@ public class Connection
     public static bool IsInitialized { get; private set; } = false;
     public static int MaxBuffer = 1024 * 128;
     public static bool IsConnecting { get; protected set; }
+
     private static List<Action> OnConnectionActions = new List<Action>();
 
     public static void AddOnConnection(Action action) => OnConnectionActions.Add(action);
@@ -64,13 +66,13 @@ public class Connection
             Type ERROR_TYPE = ex.GetType();
             if (ERROR_TYPE == typeof(SocketException))
             {
-                Debug.Write("UNABLE_TO_CONNECT");//its ok
+                Debug.Error("UNABLE_TO_CONNECT");//its ok
             }
             else if (ERROR_TYPE == typeof(ArgumentNullException) || ERROR_TYPE == typeof(ArgumentOutOfRangeException))
             {
                 Debug.Error("SOCKETCONFIG_DESERIALIZE_ERROR " + ex);
             }
-            Debug.Write(ex);
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
     }
 
@@ -78,21 +80,10 @@ public class Connection
     {
         if (Client == null || Stream == null)
         {
-            Debug.Error("Client is null");
+            Logger.Push("Client or stream is null", TraceType.Packet, LogLevel.Error);
             return false;
         }
 
-        if (!IsConnected)
-        {
-            Debug.Error("Client is not connected to server");
-            return false;
-        }
-
-        if (!Client.Connected)
-        {
-            Debug.Error("Client disconnected form server");
-            return false;
-        }
         return true;
     }
 

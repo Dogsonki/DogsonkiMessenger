@@ -12,7 +12,7 @@ public class LoginModel
     [JsonProperty("remember")]
     public bool Remember { get; set; }
 
-
+    [JsonConstructor]
     public LoginModel(string login, string password, bool remember)
     {
         Login = login;

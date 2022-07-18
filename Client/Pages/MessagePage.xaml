@@ -47,9 +47,9 @@
 				</ListView.ItemTemplate>
 			</ListView>
 		<StackLayout/>
-		<Frame x:Name="MessageInputFrame" BorderColor="White" BackgroundColor="#0f0f0f" Padding="0" CornerRadius="22" 
-			   HeightRequest="44" WidthRequest="200">
-			<Entry TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" WidthRequest="250" x:Name="MessageInput"
+		<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
+			   HeightRequest="44" WidthRequest="300"> 
+			<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
 			   IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Message @"/>
 		</Frame>

@@ -13,15 +13,16 @@ public class Session : IStorage
     [JsonProperty("login_id")]
     public string LoginID { get; set; } = string.Empty;
 
-    public static void OverwriteSession(Session session)
-    {
-        IFileService file = DependencyService.Get<IFileService>();
-        file.WriteToFile(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(session))), "session.json");
-    }
-
+    [JsonConstructor]
     public Session(string session_key, string login_id)
     {
         SessionKey = session_key;
         LoginID = login_id;
+    }
+
+    public static void OverwriteSession(Session session)
+    {
+        IFileService file = DependencyService.Get<IFileService>();
+        file.WriteToFile(new MemoryStream(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(session))), "session.json");
     }
 }

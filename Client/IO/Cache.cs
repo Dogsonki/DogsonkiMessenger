@@ -1,4 +1,6 @@
-﻿namespace Client.IO;
+﻿using Client.Utility;
+
+namespace Client.IO;
 
 internal class Cache
 {
@@ -6,7 +8,7 @@ internal class Cache
 
     public static void SaveToCache(object obj,string name)//TODO: make it serializing data classes
     {
-        if (obj is null) { Debug.Error("Cached object is null "+name); return; }
+        if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
 
         try
         {
@@ -18,9 +20,9 @@ internal class Cache
                     PermissionStatus status = await Permissions.RequestAsync<Permissions.StorageRead>();
                 });
 
-                if(!Directory.Exists(FileSystem.Current.AppDataDirectory + "/temp/"))
+                if(!Directory.Exists(FileSystem.Current.CacheDirectory + "/temp/"))
                 {
-                    Directory.CreateDirectory(FileSystem.Current.AppDataDirectory + "/temp/");
+                    Directory.CreateDirectory(FileSystem.Current.CacheDirectory + "/temp/");
                 }
 
                 File.WriteAllBytes(FileSystem.Current.CacheDirectory + "/temp/"+name, (byte[])obj);
@@ -29,28 +31,8 @@ internal class Cache
         }
         catch(Exception ex)
         {
-            Debug.Error(ex);
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
-    }
-
-    public static T ReadCache<T>(string name)
-    {
-#if ANDROID
-        string cachePath = FileSystem.Current.CacheDirectory + "/temp/";
-
-        if (!File.Exists(cachePath + name))
-        {
-            Debug.Error("Cache file dose not exist");
-            return default(T);
-        }
-        byte[] Buffer = File.ReadAllBytes(cachePath + name);
-
-        if (typeof(T) == typeof(ImageSource))
-        {
-            return (T)(object)ImageSource.FromStream(() => new MemoryStream(Buffer));
-        }
-#endif
-        return default;
     }
 
     public static byte[] ReadCache(string name)
@@ -60,14 +42,14 @@ internal class Cache
             string cachePath = FileSystem.Current.CacheDirectory + "/temp/";
             if (!File.Exists(cachePath + name))
             {
-                Debug.Error("Cache file dose not exist");
+                Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
                 return new byte[0];
             }
             return File.ReadAllBytes(cachePath + name);
         }
         catch(Exception ex)
         {
-            Debug.Error(ex);
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
             return new byte[0];
         }
     }

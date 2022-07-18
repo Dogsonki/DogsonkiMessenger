@@ -13,6 +13,47 @@
 			<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Profile Settings"/>
 			<Button Clicked="ChangeAvatar" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
 			<Button Clicked="Logout" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Logout"/>
+			<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="DEBUG"/>
+
+			<StackLayout>
+				<StackLayout Orientation="Horizontal">
+					<StackLayout Spacing="0" Orientation="Vertical">
+						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="Use trace function logger" />
+						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="Traces all functions" />
+					</StackLayout>
+				</StackLayout>
+				<StackLayout HorizontalOptions="End">
+					<Switch/>
+				</StackLayout>
+			</StackLayout>
+
+			<StackLayout>
+				<StackLayout Orientation="Horizontal">
+					<StackLayout Spacing="0" Orientation="Vertical">
+						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="Use trace packet logger" />
+						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="Traces all packets received/sended" />
+					</StackLayout>
+				</StackLayout>
+				<StackLayout HorizontalOptions="End">
+					<Switch/>
+				</StackLayout>
+			</StackLayout>
+
+			<StackLayout>
+				<StackLayout Orientation="Horizontal">
+					<StackLayout Spacing="0" Orientation="Vertical">
+						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="Use parrel loops" />
+						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="Client will use multi threaded loops for non blocking operations" />
+					</StackLayout>
+				</StackLayout>
+				<StackLayout HorizontalOptions="End">
+					<Switch/>
+				</StackLayout>
+			</StackLayout>
+
+			<Button Clicked="ShowConsole" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="DEBUG CONSOLE"/>
+			<Button Clicked="ClearCache" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="CLEAR CACHE"/>
+
 		</StackLayout>
 	</StackLayout>
 	

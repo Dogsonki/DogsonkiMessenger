@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Client.Utility;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 
@@ -22,7 +23,7 @@ namespace Client.IO
             {
                 if(ex.GetType() == typeof(NullReferenceException))
                 {
-                    Debug.Error(ex);
+                    Logger.Push(ex, TraceType.Func, LogLevel.Error);
                 }
                 return default;
             }

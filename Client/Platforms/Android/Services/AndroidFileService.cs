@@ -54,7 +54,6 @@ namespace Client;
 
         string filePath = Path.Combine(GetPersonalDir(location), name);
         byte[] buffer;
-        Debug.Write(filePath);
         if (File.Exists(filePath))
         {
             buffer = File.ReadAllBytes(filePath);

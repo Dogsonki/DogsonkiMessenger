@@ -11,6 +11,7 @@ public class SocketConfig
     [JsonProperty("Socket_PORT")]
     public int Port;
 
+    [JsonConstructor]
     public SocketConfig(string ip, int port)
     {
         Ip = ip;

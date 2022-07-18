@@ -10,15 +10,17 @@
 		<user:LocalUser></user:LocalUser>
 	</ContentPage.BindingContext>
 
-	<ScrollView>
+	<ScrollView x:Name="view" HorizontalScrollBarVisibility="Never">
 		<StackLayout>
 			<StackLayout  Margin="0,0,0,20">
-			<SearchBar CancelButtonColor="White" BackgroundColor="#121212" x:Name="SearchInput"
-							   SearchButtonPressed="SearchPressed" IsTextPredictionEnabled="False" FontSize="Body" 
-							   TextColor="White" PlaceholderColor="LightGrey" IsSpellCheckEnabled="False"
-							   WidthRequest="370" HorizontalOptions="Start" Placeholder="Search"/>
-		</StackLayout>
-
+				<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
+			   HeightRequest="44" WidthRequest="300">
+					<Entry WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Search"
+				   Keyboard="Plain" Completed="SearchPressed"/>
+				</Frame>
+			</StackLayout>
 			<StackLayout Orientation="Horizontal" Margin="0,0,0,20" >
 				<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
 						   CornerRadius="40" HeightRequest="80" WidthRequest="80">
@@ -32,9 +34,10 @@
 						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 					</StackLayout>
 				</StackLayout>
-				<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand" VerticalOptions="End" Source="settings.svg">
+				<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand"
+					   VerticalOptions="End" Source="setting.png">
 					<Image.GestureRecognizers>
-						<TapGestureRecognizer Tapped="SetingsTapped"/>
+						<TapGestureRecognizer Tapped="SettingsTapped"/>
 					</Image.GestureRecognizers>
 				</Image>
 			</StackLayout>

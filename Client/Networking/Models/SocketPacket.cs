@@ -3,6 +3,7 @@ using System.Text;
 
 namespace Client.Networking.Model;
 
+
 public class SocketPacket
 {
     [JsonProperty("data")]
@@ -10,9 +11,8 @@ public class SocketPacket
 
     [JsonProperty("token")]
     public int Token { get; set; }
-
-    private bool IsImage { get; set; } = false;
-    private bool IsLastImagePacket { get; set; } = false;
+   
+    //Images are sent as normal packets
 
     public object GetEncoded() => Data;
 
@@ -22,13 +22,7 @@ public class SocketPacket
     /// <returns>Prepared packet</returns>
     public byte[] GetPacked()
     {
-        if (!IsImage) return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
-        else
-        {
-            if (IsLastImagePacket)
-                return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
-            else return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this));
-        }
+        return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
     }
 
     [JsonConstructor]
@@ -36,14 +30,11 @@ public class SocketPacket
     {
         Data = data;
         Token = (int)token;
-        IsImage = isImage;
     }
 
     public SocketPacket(object data, bool isImage, bool isLastPacket, Token token)
     {
         Data = data;
-        IsImage = isImage;
-        IsLastImagePacket = isLastPacket;
         Token = (int)token;
     }
 

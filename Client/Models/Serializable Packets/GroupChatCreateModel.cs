@@ -10,6 +10,7 @@ internal class GroupChatCreateModel
     [JsonProperty("creator")]
     public int Creator { get; set; }
 
+    [JsonConstructor]
     public GroupChatCreateModel(string group_name, int creator)
     {
         GroupName = group_name;

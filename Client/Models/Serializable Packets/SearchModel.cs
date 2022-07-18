@@ -10,6 +10,7 @@ public class SearchModel
     [JsonProperty("login_id")]
     public uint ID { get; set; }
 
+    [JsonConstructor]
     public SearchModel(string username, uint id)
     {
         Username = username;

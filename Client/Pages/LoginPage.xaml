@@ -7,17 +7,17 @@
 	<StackLayout Padding="20" Spacing="15">
 		<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text="Login"/>
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" Register">
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" or "/>
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text="Register">
 				<Label.GestureRecognizers>
 					<TapGestureRecognizer Tapped="RedirectToRegister"/>
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
 		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"></Line>
-
-		<StackLayout x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center">
-		</StackLayout>
 		
+		<StackLayout IsVisible="false" x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center"/>
+
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
 
 			<Entry IsSpellCheckEnabled="False" FontSize="Medium" HeightRequest="60" TextColor="White" 
@@ -30,7 +30,7 @@
 					   IsPassword="True" Placeholder="Password" x:Name="Input_Password"/>
 			<Line X1="0" Stroke="White" X2="350"/>
 
-			<StackLayout  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
+			<StackLayout IsVisible="true" WidthRequest="300"  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
 
 			<StackLayout Orientation="Horizontal">
 				<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>

@@ -12,6 +12,7 @@ public class RegisterModel
     [JsonProperty("email")]
     public string Email { get; set; }
 
+    [JsonConstructor]
     public RegisterModel(string login, string password,string email)
     {
         Login = login;

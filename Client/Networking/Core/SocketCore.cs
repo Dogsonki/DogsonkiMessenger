@@ -1,5 +1,6 @@
 ﻿using Client.Networking.Model;
 using Client.Pages;
+using Client.Utility;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -64,12 +65,15 @@ public class SocketCore : Connection
 
                     while (indexDollar > 0)
                     {
-                        indexDollar = LongBuffer.IndexOf('$'); //Finding dollar is really expensive when buffer is long 
-                                                               //buffer try rework this
+                        indexDollar = LongBuffer.IndexOf('$',StringComparison.Ordinal);
+                                                               
                         if (indexDollar == -1)
                             break;
 
                         buff = LongBuffer.Substring(0, indexDollar);
+
+                        Logger.Push(buff, TraceType.Packet, LogLevel.Debug);
+
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
                         ProcessBuffer(buff);
                     }
@@ -79,6 +83,7 @@ public class SocketCore : Connection
             }
             catch (Exception ex)
             {
+                Logger.Push(ex, TraceType.Packet, LogLevel.Error);
                 if (ex is InvalidCastException)
                 {
                     Debug.Error("Error in casting buffer into packet " + ex);
@@ -123,7 +128,7 @@ public class SocketCore : Connection
                     }
                     catch (Exception ex)
                     {
-                        Debug.Error($"Exception when sending buffer Length: {Buffer?.Length}");
+                        Logger.Push($"Exception when sending buffer Length: {Buffer?.Length}",TraceType.Packet,LogLevel.Error);
                         RedirectConnectionLost(ex);
                     }
                 }
@@ -143,12 +148,10 @@ public class SocketCore : Connection
     {
         if (!AbleToSend())
             return false;
-        ThreadPool.QueueUserWorkItem(delegate
-        {
-            RequestedCallback.AddCallback(new RequestedCallback(Callback, SendingData, (int)token));
-            Send(SendingData, token);
-        }, null);
-       
+
+        RequestedCallback.AddCallback(new RequestedCallback(Callback, SendingData, (int)token));
+        Send(SendingData, token);
+
         return true;
     }
 
@@ -157,12 +160,8 @@ public class SocketCore : Connection
         if (!AbleToSend())
             return false;
 
-        ThreadPool.QueueUserWorkItem(delegate
-        {
-            SocketPacket model = new SocketPacket(data, token);
-            SocketQueue.Add(model);
-
-        }, null);
+        SocketPacket model = new SocketPacket(data, token);
+        SocketQueue.Add(model);
 
         return true;
     }
@@ -171,10 +170,8 @@ public class SocketCore : Connection
     {
         if (!AbleToSend())
             return false;
-        ThreadPool.QueueUserWorkItem(delegate
-        {
-            SocketQueue.Add(packet);
-        }, null);
+
+        SocketQueue.Add(packet);
 
         return true;
     }

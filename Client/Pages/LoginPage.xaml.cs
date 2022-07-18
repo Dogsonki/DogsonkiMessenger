@@ -3,49 +3,30 @@ using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
+using Client.Pages.Helpers;
 
 namespace Client.Pages;
 
 public partial class LoginPage : ContentPage
 {
     private static LoginPage Instance;
+    private MessagePopPage message;
 
 	public LoginPage(string info = null)
 	{
 		InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
+        message = new MessagePopPage(this);
 
         Instance = this;
 
-        if (!string.IsNullOrEmpty(info)) AddInfo(info);
-    }
-
-    private Label InfoText = new Label()
-    {
-        TextColor = Color.FromRgb(255, 255, 255),
-        FontAttributes = FontAttributes.Bold,
-        FontSize = 16,
-        HorizontalTextAlignment = TextAlignment.Center
-    };
-
-    public void AddInfo(string info)
-    {
-        InfoText.Text = info;
-        if (!InfoLevel.Contains(InfoText))
-            InfoLevel.Children.Add(InfoText);
+        if (!string.IsNullOrEmpty(info)) message.ShowInfo(info);
     }
 
     private Label ErrorText = new Label()
     {
         TextColor = Color.FromRgb(255, 0, 0)
     };
-
-    private void ShowError(string error)
-    {
-        ErrorText.Text = error; 
-        if(!ErrorLevel.Children.Contains(ErrorText))
-            ErrorLevel.Children.Add(ErrorText);
-    }
 
     private void RemoveError() => ErrorLevel.Children.Remove(ErrorText);
 
@@ -69,13 +50,13 @@ public partial class LoginPage : ContentPage
 #endif
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            ShowError("Username or password is empty");
+            message.ShowError("Username or password is empty");
             return;
         }
 
         if (!SocketCore.SendCallback(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
-            ShowError("Unable to connect to the server");
+            message.ShowError("Unable to connect to the server");
             return;
         }
     }
@@ -88,10 +69,10 @@ public partial class LoginPage : ContentPage
                 LocalUser.Login(login.Username, login.ID,login.Email);
                 break;
             case "0":
-                ShowError($"Wrong email or password");
+                message.ShowError($"Wrong email or password");
                 break;
             default:
-                ShowError("Samething went wrong, probably on server side ... ");
+                message.ShowError("Samething went wrong, probably on server side ... ");
                 break;
         }
     }

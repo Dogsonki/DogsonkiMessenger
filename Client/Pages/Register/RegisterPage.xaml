@@ -11,6 +11,7 @@
 					<TapGestureRecognizer Tapped="RedirectToLogin"/>
 				</Label.GestureRecognizers>
 			</Label>
+			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" or "/>
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text=" Register"/>
 		</StackLayout>
 		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"/>

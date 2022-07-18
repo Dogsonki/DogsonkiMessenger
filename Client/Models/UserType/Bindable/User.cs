@@ -73,7 +73,6 @@ public class User : BindableObject
         }
         else
         {
-            Debug.Write($"SENDING_REQUEST_AVATAR: {id}");
             SocketCore.Send(id, Token.AVATAR_REQUEST);
         }
     }
