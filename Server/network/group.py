@@ -1,7 +1,7 @@
 import time
 
 from Server.sql import handling_sql
-from .connection import Client, MessageType, current_connections
+from .connection import Client, MessageType, current_connections, Message
 from . import functions
 
 INSERT_INTO_DB = handling_sql.InsertIntoDatabase()
@@ -48,17 +48,20 @@ class GroupChatroom(functions.Chatroom):
             elif message.token == MessageType.GET_OLD_MESSAGES:
                 self.send_last_messages(True)
             elif message.token == MessageType.NEW_MESSAGE:
-                message_ = message.data.strip()
-                if message_ != "":
-                    for i in self.group_members:
-                        receiver_connection = current_connections.get(i)
-                        if receiver_connection:
-                            data = {"user": self.connection.nick, "message": message_,
-                                    "time": time.time(), "user_id": self.connection.login_id}
-                            receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-                        self.save_message_in_database(message_)
+                self.on_new_message(message)
             else:
                 self.connection.send_message("", MessageType.ERROR)
+
+    def on_new_message(self, message: Message):
+        message_ = message.data.strip()
+        if message_ != "":
+            for i in self.group_members:
+                receiver_connection = current_connections.get(i)
+                if receiver_connection:
+                    data = {"user": self.connection.nick, "message": message_,
+                            "time": time.time(), "user_id": self.connection.login_id}
+                    receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
+            self.save_message_in_database(message_)
 
     def save_message_in_database(self, message):
         INSERT_INTO_DB.save_group_message(self.connection.db_cursor, message, self.connection.login_id, self.group_id)

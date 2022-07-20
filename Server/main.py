@@ -4,6 +4,7 @@ import socket
 import threading
 import json
 from dataclasses import dataclass
+from typing import Tuple
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # this fixes "no module named Server"
 
@@ -21,7 +22,7 @@ def listen_for_connections(sock: socket.socket):
         print(f"Accepted new connection: {address}")
 
 
-def on_new_connection(connection: socket.socket, address):
+def on_new_connection(connection: socket.socket, address: Tuple[str, int]):  # address: [ip, port]
     client = Client(connection, address)
     client.get_login_action()
     ClientMenu(client).listening()

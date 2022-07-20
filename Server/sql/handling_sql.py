@@ -1,14 +1,26 @@
 import os
 import binascii
+from datetime import datetime
+from dataclasses import dataclass
+from typing import List, Tuple, Union
 
 from mysql.connector.errors import IntegrityError
 from mysql.connector.cursor_cext import CMySQLCursor
 
 
+@dataclass
+class ChatMessage:
+    content: str
+    sender: str
+    receiver: str
+    time: datetime
+    sender_id: int
+
+
 class GetInfoFromDatabase:
     @staticmethod
     def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
-                                           number_of_sent_last_messages: int):
+                                           number_of_sent_last_messages: int) -> List[ChatMessage]:
 
         cursor.execute("""SELECT content, u1.nick, u2.nick, time, sender_id FROM ((messages
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
@@ -17,10 +29,14 @@ class GetInfoFromDatabase:
                           ORDER BY messages.id DESC LIMIT %s,30;""", (sender_id, receiver_id, receiver_id, sender_id,
                                                                       number_of_sent_last_messages))
         sql_data = cursor.fetchall()
-        return sql_data
+        messages = []
+        for i in sql_data:
+            messages.append(ChatMessage(i[0], i[1], i[2], i[3], i[4]))
+        return messages
 
     @staticmethod
-    def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int, number_of_sent_last_messages: int):
+    def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
+                                                 number_of_sent_last_messages: int) -> List[ChatMessage]:
 
         cursor.execute("""SELECT content, u.nick, u2.nick, time, sender_id FROM ((groups_messages
                           INNER JOIN users AS u ON messages.sender_id = u.id)
@@ -28,10 +44,13 @@ class GetInfoFromDatabase:
                           WHERE group_id = %s
                           ORDER BY messages.id DESC LIMIT %s,30;""", (group_id, number_of_sent_last_messages))
         sql_data = cursor.fetchall()
-        return sql_data
+        messages = []
+        for i in sql_data:
+            messages.append(ChatMessage(i[0], i[1], i[2], i[3], i[4]))
+        return messages
 
     @staticmethod
-    def login_user(cursor: CMySQLCursor, login: str, password: str):
+    def login_user(cursor: CMySQLCursor, login: str, password: str) -> Tuple:
         cursor.execute("""SELECT id, is_banned FROM users
                           WHERE login = %s and password = %s;""", (login, password))
         sql_data = cursor.fetchone()
@@ -41,7 +60,7 @@ class GetInfoFromDatabase:
             return sql_data
 
     @staticmethod
-    def check_session(cursor: CMySQLCursor, login_id: int, session_key: str):
+    def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:
         cursor.execute("""SELECT login_id FROM sessions
                           WHERE login_id=%s AND session_key=%s;""", (login_id, session_key))
         sql_data = cursor.fetchone()
@@ -51,7 +70,7 @@ class GetInfoFromDatabase:
             return sql_data[0]
         
     @staticmethod
-    def search_by_nick(cursor: CMySQLCursor, nick: str):
+    def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
         cursor.execute("""SELECT id, nick FROM users
                           WHERE nick LIKE %s;""", ("%" + nick + "%",))
         logins = cursor.fetchall()
@@ -60,7 +79,7 @@ class GetInfoFromDatabase:
         return logins
 
     @staticmethod
-    def get_user_chats(cursor: CMySQLCursor, login: str):
+    def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
         cursor.execute("""SELECT u2.id, u2.nick FROM ((messages
                           INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                           INNER JOIN users AS u2 ON messages.receiver_id = u2.id) 
@@ -73,28 +92,27 @@ class GetInfoFromDatabase:
         return chats
 
     @staticmethod
-    def get_user_avatar(cursor: CMySQLCursor, login_id: str):
+    def get_user_avatar(cursor: CMySQLCursor, login_id: str) -> Union[Tuple, None]:
         cursor.execute("""SELECT avatar FROM users
                           WHERE id=%s""", (login_id, ))
         avatar = cursor.fetchone()
         return avatar
 
     @staticmethod
-    def get_user(cursor: CMySQLCursor, login_id: int):
+    def get_user(cursor: CMySQLCursor, login_id: int) -> Tuple[str, str, str]:
         cursor.execute("""SELECT login, password, nick, is_banned FROM users
                           WHERE id=%s;""", (login_id,))
         sql_data = cursor.fetchone()
         return sql_data
 
     @staticmethod
-    def get_user_id(cursor: CMySQLCursor, login: str):
+    def get_user_id(cursor: CMySQLCursor, login: str) -> int:
         cursor.execute("""SELECT id FROM users
                           WHERE nick=%s""", (login,))
         sql_data = cursor.fetchone()
-        return sql_data
+        return sql_data[0]
 
-    @staticmethod
-    def check_email_confirmation(cursor: CMySQLCursor, login: str, code: int):
+    def check_email_confirmation(self, cursor: CMySQLCursor, login: str, code: int) -> Union[bool, int]:
         delete = False
         cursor.execute("""SELECT id FROM email_confirmation
                           WHERE mail=%s AND code=%s;""", (login, code))
@@ -103,9 +121,7 @@ class GetInfoFromDatabase:
             sql_data = True
             delete = True
         else:
-            cursor.execute("""UPDATE email_confirmation
-                              SET attempts=attempts+1
-                              WHERE mail=%s;""", (login,))
+            self.update_email_confirmation_attempts(cursor, login)
             cursor.execute("""SELECT attempts FROM email_confirmation
                               WHERE mail=%s;""", (login,))
             sql_data = cursor.fetchone()
@@ -113,19 +129,29 @@ class GetInfoFromDatabase:
                 delete = True
 
         if delete:
-            cursor.execute("""DELETE FROM email_confirmation
-                              WHERE mail=%s;""", (login,))
+            self.delete_confirmation_code(cursor, login)
         return sql_data
-
+    
     @staticmethod
-    def get_nick(cursor: CMySQLCursor, login_id: str):
+    def update_email_confirmation_attempts(cursor: CMySQLCursor, login: str):
+        cursor.execute("""UPDATE email_confirmation
+                          SET attempts=attempts+1
+                          WHERE mail=%s;""", (login,))
+        
+    @staticmethod
+    def delete_confirmation_code(cursor: CMySQLCursor, login: str):
+        cursor.execute("""DELETE FROM email_confirmation
+                          WHERE mail=%s;""", (login,))
+        
+    @staticmethod
+    def get_nick(cursor: CMySQLCursor, login_id: str) -> Union[None, str]:
         cursor.execute("""SELECT nick FROM users
                           WHERE id=%s""", (login_id,))
         sql_data = cursor.fetchone()
         return sql_data
 
     @staticmethod
-    def get_user_groups(cursor: CMySQLCursor, login: str):
+    def get_user_groups(cursor: CMySQLCursor, login: str) -> Union[Tuple, bool]:
         cursor.execute("""SELECT g.name, g.id FROM ((group_user_link_table
                           INNER JOIN users AS u ON group_user_link_table.user_id)
                           INNER JOIN groups_ AS g ON group_user_link_table.group_id)
@@ -143,7 +169,7 @@ class GetInfoFromDatabase:
         return sql_data
 
     @staticmethod
-    def get_group_members(cursor: CMySQLCursor, group_id: int):
+    def get_group_members(cursor: CMySQLCursor, group_id: int) -> List:
         cursor.execute("""SELECT u.nick FROM group_user_link_table
                           INNER JOIN users AS u ON group_user_link_table.user_id 
                           WHERE group_id=%s;""", (group_id,))
@@ -185,7 +211,7 @@ class InsertIntoDatabase:
         return session_key
 
     @staticmethod
-    def create_confirmation_code(cursor: CMySQLCursor, login: str, code: int) -> bool:
+    def create_confirmation_code(cursor: CMySQLCursor, login: str, code: int) -> Union[bool, int]:
         try:
             cursor.execute("""INSERT INTO email_confirmation(mail, code)
                               VALUES (%s, %s)""", (login, code))
@@ -212,7 +238,7 @@ class InsertIntoDatabase:
                           WHERE user_id=%s AND group_id=%s;""", (login_id, group_id))
 
     @staticmethod
-    def create_group(cursor: CMySQLCursor, name: str):
+    def create_group(cursor: CMySQLCursor, name: str) -> int:
         cursor.execute("""INSERT INTO groups_(name)
                           VALUES (%s);""", (name,))
         cursor.execute("""SELECT id FROM groups_ 
@@ -228,14 +254,14 @@ class InsertIntoDatabase:
                           WHERE user_id=%s AND group_id=%s;""", (login_id, group_id))
         
 
-def check_if_login_exist(cursor: CMySQLCursor, login: str):
+def check_if_login_exist(cursor: CMySQLCursor, login: str) -> Union[Tuple, None]:
     cursor.execute("""SELECT login FROM users
                       WHERE login = %s;""", (login, ))
     sql_data = cursor.fetchone()
     return sql_data
 
 
-def check_if_nick_exist(cursor: CMySQLCursor, nick: str):
+def check_if_nick_exist(cursor: CMySQLCursor, nick: str) -> Union[Tuple, None]:
     cursor.execute("""SELECT nick FROM users
                       WHERE nick = %s;""", (nick, ))
     sql_data = cursor.fetchone()

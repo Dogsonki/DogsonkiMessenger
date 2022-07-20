@@ -36,16 +36,18 @@ class SmptConnection:
         self.smpt_connection.starttls(context=context)
         self.smpt_connection.login(SMTP_CONFIG.mail, SMTP_CONFIG.password)
 
-    def send_mail(self, receiver: str, message: MIMEMultipart) -> bool:
+    def send_mail(self, receiver: str, message: MIMEMultipart, retry: bool = False) -> bool:
         try:
             self.smpt_connection.sendmail(SMTP_CONFIG.mail, receiver, message.as_string())
             return True
         except smtplib.SMTPRecipientsRefused:
             return False
         except smtplib.SMTPServerDisconnected:
-            self.connect()
-            self.smpt_connection.sendmail(SMTP_CONFIG.mail, receiver, message.as_string())
-            return True
+            if not retry:
+                self.connect()
+                self.send_mail(receiver, message, True)
+            else:
+                return False
 
     @staticmethod
     def create_message(receiver: str, code: int) -> MIMEMultipart:

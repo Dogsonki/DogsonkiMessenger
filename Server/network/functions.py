@@ -5,6 +5,9 @@ from .connection import Client, MessageType
 
 
 class Chatroom(metaclass=abc.ABCMeta):
+    connection: Client
+    number_of_sent_last_messages: int
+
     def __init__(self, connection: Client):
         self.connection = connection
         self.number_of_sent_last_messages = 0
@@ -27,7 +30,8 @@ class Chatroom(metaclass=abc.ABCMeta):
             if not old:
                 message_history.reverse()
             for i in message_history:
-                data = {"user": i[1], "message": i[0], "time": datetime.timestamp(i[3]), "user_id": i[4]}
+                data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
+                        "user_id": i.sender_id}
                 self.send_message(data, old)
 
     def send_message(self, message_data: dict, old: bool):

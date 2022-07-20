@@ -3,7 +3,7 @@ import json
 import socket
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 from mysql.connector.cursor_cext import CMySQLCursor
 from email_validator import validate_email, EmailNotValidError
@@ -57,18 +57,18 @@ class Message:
 
 
 class Buffer:
-    socket: socket.socket
+    sock: socket.socket
     buffer_: bytes
     delimiter: bytes
 
-    def __init__(self, sock):
-        self.socket = sock
+    def __init__(self, sock: socket.socket):
+        self.sock = sock
         self.buffer_ = b""
         self.delimiter = b"$"
 
     def read(self) -> Optional[str]:
         while self.delimiter not in self.buffer_:
-            data = self.socket.recv(1024)
+            data = self.sock.recv(1024)
             if not data:
                 return None
             self.buffer_ += data
@@ -77,11 +77,18 @@ class Buffer:
 
 
 class Connection:
-    delimiter = b"$"
+    client: socket.socket
+    address: Tuple[str, int]
     buffer: Buffer
-    db_cursor = CMySQLCursor
+    login_id: int
+    login: str
+    password: str
+    nick: str
+    closed: bool
+    db_cursor: CMySQLCursor
+    delimiter: bytes
     
-    def __init__(self, client: socket.socket, address):
+    def __init__(self, client: socket.socket, address: Tuple[str, int]):
         self.client = client
         self.address = address
         self.buffer = Buffer(client)
@@ -91,10 +98,10 @@ class Connection:
         self.nick = ""
         self.closed = False
         self.db_cursor = get_cursor()
+        self.delimiter = b"$"
 
     def send_message(self, message, token: MessageType):
         message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8")+self.delimiter
-        print(message)
         try:
             self.client.send(message)
         except socket.error:
@@ -108,7 +115,6 @@ class Connection:
                     self.close_connection()
                     return None
                 message = Message.deserialize(received_message)
-                print(f"recv: {received_message}")
                 return message
             except socket.error:
                 self.close_connection()
@@ -124,7 +130,7 @@ class Connection:
 
 
 class Client(Connection):
-    def __init__(self, connection: socket.socket, address):
+    def __init__(self, connection: socket.socket, address: Tuple[str, int]):
         super().__init__(connection, address)
 
     def get_login_action(self):
@@ -132,18 +138,18 @@ class Client(Connection):
             action_data = self.receive_message()
             if action_data.token == MessageType.LOGIN:
                 is_logged_correctly = self.login_user(action_data)
-                if is_logged_correctly:
-                    self.after_login()
-                    break
             elif action_data.token == MessageType.REGISTER:
                 self.register_user(action_data)
+                is_logged_correctly = False
             elif action_data.token == MessageType.SESSION_INFO:
                 is_logged_correctly = self.login_by_session(action_data)
-                if is_logged_correctly:
-                    self.after_login()
-                    break
             else:
                 self.send_message("Error - should receive 'logging' or 'registering' code", MessageType.ERROR)
+                is_logged_correctly = False
+
+            if is_logged_correctly:
+                self.after_login()
+                break
 
     def after_login(self):
         user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
@@ -184,7 +190,7 @@ class Client(Connection):
     def login_user(self, login_data) -> bool:
         """
         token:
-            0 - wrong session
+            0 - wrong email/password
             1 - logged
             -1 - banned
         """
@@ -206,35 +212,47 @@ class Client(Connection):
         return False
 
     def register_user(self, register_data):
+        """
+        codes from server:
+            0 - user has been registered
+            2 - email sent
+            3 - user with given email exists
+            4 - cannot send email
+            6 - this email is waiting for confirmation
+            7 - nickname is taken
+            8 - password or mail failed validation
+            9 - wrong confirmation code
+            10 - max attempts during writing code from email, try again
+        """
         nick = register_data.data["login"]
         self.login = register_data.data["email"]
         self.password = register_data.data["password"]
         if not self.validate_login_data():
-            self.send_message("8", MessageType.REGISTER)  # 8 --> incorrect password or mail
+            self.send_message("8", MessageType.REGISTER)
             return
         if handling_sql.check_if_nick_exist(self.db_cursor, nick):
-            self.send_message("7", MessageType.REGISTER)  # 7 -> nickname is taken
+            self.send_message("7", MessageType.REGISTER)
             return
         if handling_sql.check_if_login_exist(self.db_cursor, self.login):
-            self.send_message("3", MessageType.REGISTER)  # 3 --> user with given email exists
+            self.send_message("3", MessageType.REGISTER)
 
         code = get_confirmation_code()
         created = INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code)
         if created is not True:
             code = created
-            self.send_message("6", MessageType.REGISTER)  # 6 --> this email is waiting for confirmation
+            self.send_message("6", MessageType.REGISTER)
             confirmed = self.confirm_email(code)
         else:
             if not self.send_confirmation_email(code):
-                self.send_message("4", MessageType.REGISTER)  # 4 --> cannot send email
+                self.send_message("4", MessageType.REGISTER)
                 return
-            self.send_message("2", MessageType.REGISTER)  # -> 2 email sent
+            self.send_message("2", MessageType.REGISTER)
             confirmed = self.confirm_email(code)
 
         if not confirmed:
             return
         INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick)
-        self.send_message("0", MessageType.REGISTER)  # 0 --> user has been registered
+        self.send_message("0", MessageType.REGISTER)
 
     def confirm_email(self, code: int) -> bool:
         while True:
@@ -250,12 +268,12 @@ class Client(Connection):
                 return True
             else:
                 if confirmed[0] > 5:
-                    self.send_message("10", MessageType.REGISTER)  # 10 -> max attempts, try again
+                    self.send_message("10", MessageType.REGISTER)
                     return False
                 else:
-                    self.send_message("9", MessageType.REGISTER)  # 9 --> wrong confirmation code
+                    self.send_message("9", MessageType.REGISTER)
 
-    def send_confirmation_email(self, code: int):
+    def send_confirmation_email(self, code: int) -> bool:
         message = smpt_connection.create_message(self.login, code)
         if not smpt_connection.send_mail(self.login, message):
             return False
@@ -263,10 +281,10 @@ class Client(Connection):
 
     def logout(self):
         del current_connections[self.nick]
-        self.login = False
-        self.password = False
+        self.login = ""
+        self.password = ""
         INSERT_SQL.delete_session(self.db_cursor, self.login_id)
-        self.login_id = 0
+        self.login_id = -1
         self.get_login_action()
 
     def set_avatar(self, avatar: str):
@@ -284,7 +302,7 @@ class Client(Connection):
             avatar = " "
         self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
 
-    def validate_login_data(self):
+    def validate_login_data(self) -> bool:
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:
             try:
                 validate_email(self.login).email

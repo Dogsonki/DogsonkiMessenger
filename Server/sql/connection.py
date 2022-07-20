@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+
 import mysql.connector
 from mysql.connector.cursor_cext import CMySQLCursor
 
