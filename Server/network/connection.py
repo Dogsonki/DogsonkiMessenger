@@ -123,8 +123,8 @@ class Connection:
         self.db_cursor.close()
         if self.login:
             del current_connections[self.nick]
-        print(f"Closing connection with {self.client}")  # todo find better way to close connection
-        sys.exit()
+        print(f"Closing connection with {self.client}")
+        sys.exit()  # close the thread that was responsible for the connection with the given client
 
 
 class Client(Connection):
@@ -197,17 +197,20 @@ class Client(Connection):
         remember = login_data.data["remember"]
         self.login_id, is_banned = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
-            self.nick, = SELECT_SQL.get_nick(self.db_cursor, self.login_id)
+            self.nick = SELECT_SQL.get_nick(self.db_cursor, self.login_id)
             token, callback = [-1, False] if is_banned else [1, True]
             self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                               MessageType.LOGIN)
             if remember:
-                session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
-                self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
+                self.create_session()
             return callback
         else:
             self.send_message({"token": 0, "email": None, "login_id": None, "nick": None}, MessageType.LOGIN)
         return False
+
+    def create_session(self):
+        session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
+        self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
 
     def register_user(self, register_data):
         """
@@ -265,7 +268,7 @@ class Client(Connection):
             if confirmed is True:
                 return True
             else:
-                if confirmed[0] > 5:
+                if confirmed > 5:
                     self.send_message("10", MessageType.REGISTER)
                     return False
                 else:

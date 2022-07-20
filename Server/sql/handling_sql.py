@@ -99,7 +99,7 @@ class GetInfoFromDatabase:
         return avatar
 
     @staticmethod
-    def get_user(cursor: CMySQLCursor, login_id: int) -> Tuple[str, str, str]:
+    def get_user(cursor: CMySQLCursor, login_id: int) -> Tuple[str, str, str, bool]:
         cursor.execute("""SELECT login, password, nick, is_banned FROM users
                           WHERE id=%s;""", (login_id,))
         sql_data = cursor.fetchone()
@@ -124,8 +124,8 @@ class GetInfoFromDatabase:
             self.update_email_confirmation_attempts(cursor, login)
             cursor.execute("""SELECT attempts FROM email_confirmation
                               WHERE mail=%s;""", (login,))
-            sql_data = cursor.fetchone()
-            if sql_data[0] > 5:
+            sql_data, = cursor.fetchone()
+            if sql_data > 5:
                 delete = True
 
         if delete:
@@ -144,11 +144,11 @@ class GetInfoFromDatabase:
                           WHERE mail=%s;""", (login,))
         
     @staticmethod
-    def get_nick(cursor: CMySQLCursor, login_id: str) -> Union[None, str]:
+    def get_nick(cursor: CMySQLCursor, login_id: int) -> str:
         cursor.execute("""SELECT nick FROM users
                           WHERE id=%s""", (login_id,))
         sql_data = cursor.fetchone()
-        return sql_data
+        return sql_data[0]
 
     @staticmethod
     def get_user_groups(cursor: CMySQLCursor, login: str) -> Union[Tuple, bool]:
