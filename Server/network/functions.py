@@ -24,7 +24,8 @@ class Chatroom(metaclass=abc.ABCMeta):
     def _send_last_messages(self, message_history: list, old: bool):
         self.number_of_sent_last_messages += 30
         if message_history:
-            message_history.reverse()
+            if not old:
+                message_history.reverse()
             for i in message_history:
                 data = {"user": i[1], "message": i[0], "time": datetime.timestamp(i[3]), "user_id": i[4]}
                 self.send_message(data, old)

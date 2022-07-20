@@ -53,7 +53,7 @@ class GetInfoFromDatabase:
     @staticmethod
     def search_by_nick(cursor: CMySQLCursor, nick: str):
         cursor.execute("""SELECT id, nick FROM users
-                          WHERE nick LIKE %s;""", ("%" + nick,))
+                          WHERE nick LIKE %s;""", ("%" + nick + "%",))
         logins = cursor.fetchall()
         if logins is None:
             return False
