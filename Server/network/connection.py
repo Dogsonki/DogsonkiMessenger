@@ -1,3 +1,4 @@
+import sys
 import base64
 import json
 import socket
@@ -96,7 +97,6 @@ class Connection:
         self.login = ""
         self.password = ""
         self.nick = ""
-        self.closed = False
         self.db_cursor = get_cursor()
         self.delimiter = b"$"
 
@@ -107,26 +107,24 @@ class Connection:
         except socket.error:
             self.close_connection()
 
-    def receive_message(self):
+    def receive_message(self) -> Message:
         while True:
             try:
                 received_message = self.buffer.read()
                 if not received_message:
                     self.close_connection()
-                    return None
-                message = Message.deserialize(received_message)
-                return message
+                else:
+                    message = Message.deserialize(received_message)
+                    return message
             except socket.error:
                 self.close_connection()
-                return None
 
     def close_connection(self):
-        if not self.closed:
-            self.db_cursor.close()
-            self.closed = True
-            if self.login:
-                del current_connections[self.nick]
-            raise ConnectionAbortedError(f"Closing connection with {self.client}")  # todo find better way to close connection
+        self.db_cursor.close()
+        if self.login:
+            del current_connections[self.nick]
+        print(f"Closing connection with {self.client}")  # todo find better way to close connection
+        sys.exit()
 
 
 class Client(Connection):
