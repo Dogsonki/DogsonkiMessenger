@@ -14,9 +14,6 @@ from Server.sql.connection import get_cursor
 from Server.network.email_handling import SmptConnection, get_confirmation_code
 
 current_connections = {}
-INSERT_SQL = handling_sql.InsertIntoDatabase()
-SELECT_SQL = handling_sql.GetInfoFromDatabase()
-
 smpt_connection = SmptConnection()
 
 
@@ -150,7 +147,7 @@ class Client(Connection):
                 break
 
     def after_login(self):
-        user_chats = SELECT_SQL.get_user_chats(self.db_cursor, self.login)
+        user_chats = handling_sql.get_user_chats(self.db_cursor, self.login)
         chats = []
         if user_chats:
             for i in user_chats:
@@ -158,7 +155,7 @@ class Client(Connection):
         self.send_message(chats, MessageType.LAST_CHATS)
 
         group_chats = []
-        user_group_chats = SELECT_SQL.get_user_groups(self.db_cursor, self.login)
+        user_group_chats = handling_sql.get_user_groups(self.db_cursor, self.login)
         if user_group_chats:
             for i in user_group_chats:
                 group_chats.append({"group_name": i[1], "id": i[0]})
@@ -174,12 +171,12 @@ class Client(Connection):
         """
         self.login_id = session_data.data["login_id"]
         session_key = session_data.data["session_key"]
-        self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
+        self.login_id = handling_sql.check_session(self.db_cursor, self.login_id, session_key)
         if not self.login_id:
             self.send_message({"token": 0, "email": None, "login_id": None, "nick": None},
                               MessageType.AUTOMATICALLY_LOGGED)
             return False
-        self.login, self.password, self.nick, is_banned = SELECT_SQL.get_user(self.db_cursor, self.login_id)
+        self.login, self.password, self.nick, is_banned = handling_sql.get_user(self.db_cursor, self.login_id)
         token, callback = [-1, False] if is_banned else [1, True]
         self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                           MessageType.AUTOMATICALLY_LOGGED)
@@ -195,9 +192,9 @@ class Client(Connection):
         self.login = login_data.data["login"]
         self.password = login_data.data["password"]
         remember = login_data.data["remember"]
-        self.login_id, is_banned = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
+        self.login_id, is_banned = handling_sql.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
-            self.nick = SELECT_SQL.get_nick(self.db_cursor, self.login_id)
+            self.nick = handling_sql.get_nick(self.db_cursor, self.login_id)
             token, callback = [-1, False] if is_banned else [1, True]
             self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                               MessageType.LOGIN)
@@ -209,7 +206,7 @@ class Client(Connection):
         return False
 
     def create_session(self):
-        session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
+        session_key = handling_sql.create_session(self.db_cursor, self.login_id)
         self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
 
     def register_user(self, register_data):
@@ -238,7 +235,7 @@ class Client(Connection):
             self.send_message("3", MessageType.REGISTER)
 
         code = get_confirmation_code()
-        created = INSERT_SQL.create_confirmation_code(self.db_cursor, self.login, code)
+        created = handling_sql.create_confirmation_code(self.db_cursor, self.login, code)
         if created is not True:
             code = created
             self.send_message("6", MessageType.REGISTER)
@@ -252,7 +249,7 @@ class Client(Connection):
 
         if not confirmed:
             return
-        INSERT_SQL.register_user(self.db_cursor, self.login, self.password, nick)
+        handling_sql.register_user(self.db_cursor, self.login, self.password, nick)
         self.send_message("0", MessageType.REGISTER)
 
     def confirm_email(self, code: int) -> bool:
@@ -264,7 +261,7 @@ class Client(Connection):
             if code_from_user.data == "b":
                 return False
 
-            confirmed = SELECT_SQL.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data))
+            confirmed = handling_sql.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data))
             if confirmed is True:
                 return True
             else:
@@ -284,16 +281,16 @@ class Client(Connection):
         del current_connections[self.nick]
         self.login = ""
         self.password = ""
-        INSERT_SQL.delete_session(self.db_cursor, self.login_id)
+        handling_sql.delete_session(self.db_cursor, self.login_id)
         self.login_id = -1
         self.get_login_action()
 
     def set_avatar(self, avatar: str):
         avatar = base64.b64encode(bytes(avatar, "UTF-8"))
-        INSERT_SQL.set_user_avatar(self.db_cursor, self.login, avatar)
+        handling_sql.set_user_avatar(self.db_cursor, self.login, avatar)
 
     def get_avatar(self, login_id: str):
-        avatar = SELECT_SQL.get_user_avatar(self.db_cursor, login_id)
+        avatar = handling_sql.get_user_avatar(self.db_cursor, login_id)
         try:
             if avatar[0]:
                 avatar = str(base64.b64decode(avatar[0]))

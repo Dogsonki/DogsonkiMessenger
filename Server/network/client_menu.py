@@ -5,9 +5,6 @@ from .connection import Client, MessageType, current_connections, Message
 from . import functions
 from . import group
 
-INSERT_INTO_DB = handling_sql.InsertIntoDatabase()
-GET_INFO_FROM_DB = handling_sql.GetInfoFromDatabase()
-
 
 class ClientMenu:
     client: Client
@@ -33,20 +30,20 @@ class ClientMenu:
             elif message.token == MessageType.ADD_TO_GROUP:
                 group.add_to_group(self.client, message.data)
             elif message.token == MessageType.INIT_GROUP_CHAT:
-                group.GroupChatroom(self.client, message.data).init_chatroom()
+                group.GroupChatroom(self.client, int(message.data)).init_chatroom()
 
 
 class NormalChatroom(functions.Chatroom):
     def __init__(self, connection: Client, receiver: str):
         super().__init__(connection)
         self.receiver = receiver
-        self.receiver_id = GET_INFO_FROM_DB.get_user_id(self.connection.db_cursor, self.receiver)
+        self.receiver_id = handling_sql.get_user_id(self.connection.db_cursor, self.receiver)
 
     def send_last_messages(self, old: bool = False):
-        message_history = GET_INFO_FROM_DB.get_last_30_messages_from_chatroom(self.connection.db_cursor,
-                                                                              self.connection.login_id,
-                                                                              self.receiver_id,
-                                                                              self.number_of_sent_last_messages)
+        message_history = handling_sql.get_last_30_messages_from_chatroom(self.connection.db_cursor,
+                                                                          self.connection.login_id,
+                                                                          self.receiver_id,
+                                                                          self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old)
 
     def receive_messages(self):
@@ -72,11 +69,11 @@ class NormalChatroom(functions.Chatroom):
             self.save_message_in_database(message_)
 
     def save_message_in_database(self, message):
-        INSERT_INTO_DB.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)
+        handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)
 
 
 def search_users(client: Client, nick: str):
-    first_logins = GET_INFO_FROM_DB.search_by_nick(client.db_cursor, nick)
+    first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
     first_logins_parsed = []
     for i in first_logins:
         first_logins_parsed.append({"login": i[1], "id": i[0]})

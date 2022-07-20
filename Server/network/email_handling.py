@@ -56,7 +56,8 @@ class SmptConnection:
         message["To"] = receiver
         message["Subject"] = "Kod potwierdzający"
         message.attach(MIMEText(f"""<h1>Twój kod to {code}</h1>
-                                    Jeśli nie chciałeś/aś połączyć tego maila z aplikacją dogsonki messenger, zignoruj tego maila""",
+                                    Jeśli nie chciałeś/aś połączyć tego maila z aplikacją dogsonki messenger,
+                                     zignoruj tego maila""",
                                 "html", "utf-8"))
         return message
 
