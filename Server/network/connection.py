@@ -162,6 +162,12 @@ class Client(Connection):
         current_connections[self.nick] = self
 
     def login_by_session(self, session_data) -> bool:
+        """
+        token:
+            0 - wrong session
+            1 - logged
+            -1 - banned
+        """
         self.login_id = session_data.data["login_id"]
         session_key = session_data.data["session_key"]
         self.login_id = SELECT_SQL.check_session(self.db_cursor, self.login_id, session_key)
@@ -169,26 +175,34 @@ class Client(Connection):
             self.send_message({"token": 0, "email": None, "login_id": None, "nick": None},
                               MessageType.AUTOMATICALLY_LOGGED)
             return False
-        self.login, self.password, self.nick = SELECT_SQL.get_user(self.db_cursor, self.login_id)
-        self.send_message({"token": 1, "email": self.login, "login_id": self.login_id, "nick": self.nick},
+        self.login, self.password, self.nick, is_banned = SELECT_SQL.get_user(self.db_cursor, self.login_id)
+        token, callback = [-1, False] if is_banned else [1, True]
+        self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                           MessageType.AUTOMATICALLY_LOGGED)
-        return True
+        return callback
 
-    def login_user(self, login_data):
+    def login_user(self, login_data) -> bool:
+        """
+        token:
+            0 - wrong session
+            1 - logged
+            -1 - banned
+        """
         self.login = login_data.data["login"]
         self.password = login_data.data["password"]
         remember = login_data.data["remember"]
-        self.login_id = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
+        self.login_id, is_banned = SELECT_SQL.login_user(self.db_cursor, self.login, self.password)
         if self.login_id:
             self.nick, = SELECT_SQL.get_nick(self.db_cursor, self.login_id)
-            self.send_message({"token": 1, "email": self.login, "login_id": self.login_id, "nick": self.nick},
-                              MessageType.LOGIN)  # 1 --> user has been logged
+            token, callback = [-1, False] if is_banned else [1, True]
+            self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
+                              MessageType.LOGIN)
             if remember:
                 session_key = INSERT_SQL.create_session(self.db_cursor, self.login_id)
                 self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
-            return True
+            return callback
         else:
-            self.send_message({"token": 0, "email": None, "login_id": None, "nick": None}, MessageType.LOGIN)  # 0 --> wrong login or password
+            self.send_message({"token": 0, "email": None, "login_id": None, "nick": None}, MessageType.LOGIN)
         return False
 
     def register_user(self, register_data):

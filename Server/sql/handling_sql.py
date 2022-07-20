@@ -32,13 +32,13 @@ class GetInfoFromDatabase:
 
     @staticmethod
     def login_user(cursor: CMySQLCursor, login: str, password: str):
-        cursor.execute("""SELECT id FROM users
+        cursor.execute("""SELECT id, is_banned FROM users
                           WHERE login = %s and password = %s;""", (login, password))
         sql_data = cursor.fetchone()
         if sql_data is None:
-            return False
+            return False, None
         else:
-            return sql_data[0]
+            return sql_data
 
     @staticmethod
     def check_session(cursor: CMySQLCursor, login_id: int, session_key: str):
@@ -81,7 +81,7 @@ class GetInfoFromDatabase:
 
     @staticmethod
     def get_user(cursor: CMySQLCursor, login_id: int):
-        cursor.execute("""SELECT login, password, nick FROM users
+        cursor.execute("""SELECT login, password, nick, is_banned FROM users
                           WHERE id=%s;""", (login_id,))
         sql_data = cursor.fetchone()
         return sql_data
@@ -211,7 +211,8 @@ class InsertIntoDatabase:
         cursor.execute("""DELETE FROM group_user_link_table
                           WHERE user_id=%s AND group_id=%s;""", (login_id, group_id))
 
-    def create_group(self, cursor: CMySQLCursor, name: str):
+    @staticmethod
+    def create_group(cursor: CMySQLCursor, name: str):
         cursor.execute("""INSERT INTO groups_(name)
                           VALUES (%s);""", (name,))
         cursor.execute("""SELECT id FROM groups_ 
