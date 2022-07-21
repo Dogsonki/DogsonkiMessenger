@@ -6,34 +6,10 @@ from . import functions
 from . import group
 
 
-class ClientMenu:
-    client: Client
-
-    def __init__(self, client: Client):
-        self.client = client
-
-    def listening(self):
-        while True:
-            message = self.client.receive_message()
-            if message.token == MessageType.INIT_CHAT:
-                NormalChatroom(self.client, message.data).init_chatroom()
-            elif message.token == MessageType.SEARCH_USERS:
-                search_users(self.client, message.data)
-            elif message.token == MessageType.LOGOUT:
-                self.client.logout()
-            elif message.token == MessageType.CHANGE_AVATAR:
-                self.client.set_avatar(message.data)
-            elif message.token == MessageType.GET_AVATAR:
-                self.client.get_avatar(message.data)
-            elif message.token == MessageType.CREATE_GROUP:
-                group.create_group(self.client, message.data)
-            elif message.token == MessageType.ADD_TO_GROUP:
-                group.add_to_group(self.client, message.data)
-            elif message.token == MessageType.INIT_GROUP_CHAT:
-                group.GroupChatroom(self.client, int(message.data)).init_chatroom()
-
-
 class NormalChatroom(functions.Chatroom):
+    receiver: str
+    receiver_id: int
+
     def __init__(self, connection: Client, receiver: str):
         super().__init__(connection)
         self.receiver = receiver
@@ -78,3 +54,45 @@ def search_users(client: Client, nick: str):
     for i in first_logins:
         first_logins_parsed.append({"login": i[1], "id": i[0]})
     client.send_message(first_logins_parsed, MessageType.SEARCH_USERS)
+
+
+def logout(client: Client, data: str):
+    client.logout()
+
+
+def change_avatar(client: Client, data: str):
+    client.set_avatar(data)
+
+
+def get_avatar(client: Client, data: str):
+    client.get_avatar(data)
+
+
+def start_chatroom(client: Client, data: str):
+    NormalChatroom(client, data).init_chatroom()
+
+
+def start_group_chatroom(client: Client, data: str):
+    group.GroupChatroom(client, data).init_chatroom()
+
+
+class ClientMenu:
+    client: Client
+    actions: dict = {
+        MessageType.INIT_CHAT: start_chatroom,
+        MessageType.SEARCH_USERS: search_users,
+        MessageType.LOGOUT: logout,
+        MessageType.CHANGE_AVATAR: change_avatar,
+        MessageType.GET_AVATAR: get_avatar,
+        MessageType.CREATE_GROUP: group.create_group,
+        MessageType.ADD_TO_GROUP: group.add_to_group,
+        MessageType.INIT_GROUP_CHAT: start_group_chatroom
+    }
+
+    def __init__(self, client: Client):
+        self.client = client
+
+    def listening(self):
+        while True:
+            message = self.client.receive_message()
+            self.actions[message.token](self.client, message.data)

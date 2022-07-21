@@ -26,14 +26,16 @@ def add_to_group(client: Client, data: dict):
 
 
 class GroupChatroom(functions.Chatroom):
-    def __init__(self, connection: Client, group_id: int):
+    group_id: str
+    group_members: list
+
+    def __init__(self, connection: Client, group_id: str):
         super().__init__(connection)
-        self.group_id = group_id
-        self.group_members = handling_sql.get_group_members(self.connection.db_cursor, group_id)
+        self.group_members = handling_sql.get_group_members(self.connection.db_cursor, int(group_id))
 
     def send_last_messages(self, old: bool = False):
         message_history = handling_sql.get_last_30_messages_from_group_chatroom(self.connection.db_cursor,
-                                                                                self.group_id,
+                                                                                int(self.group_id),
                                                                                 self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old)
 

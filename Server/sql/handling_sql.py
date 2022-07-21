@@ -29,7 +29,7 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
     sql_data = cursor.fetchall()
     messages = []
     for i in sql_data:
-        messages.append(ChatMessage(i[0], i[1], i[2], i[3], i[4]))
+        messages.append(ChatMessage(*i))
     return messages
 
 
