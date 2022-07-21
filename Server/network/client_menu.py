@@ -9,10 +9,12 @@ from . import group
 class NormalChatroom(functions.Chatroom):
     receiver: str
     receiver_id: int
+    friends: bool
 
     def __init__(self, connection: Client, receiver: str):
         super().__init__(connection)
         self.receiver = receiver
+        self.friends = True
         self.receiver_id = handling_sql.get_user_id(self.connection.db_cursor, self.receiver)
 
     def send_last_messages(self, old: bool = False):
@@ -20,7 +22,10 @@ class NormalChatroom(functions.Chatroom):
                                                                           self.connection.login_id,
                                                                           self.receiver_id,
                                                                           self.number_of_sent_last_messages)
-        self._send_last_messages(message_history, old)
+        if not message_history and not old:
+            self.friends = False
+        else:
+            self._send_last_messages(message_history, old)
 
     def receive_messages(self):
         while True:
@@ -45,6 +50,9 @@ class NormalChatroom(functions.Chatroom):
             self.save_message_in_database(message_)
 
     def save_message_in_database(self, message):
+        if not self.friends:
+            handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
+            self.friends = True
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)
 
 
@@ -59,7 +67,6 @@ def search_users(client: Client, nick: str):
     first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
     for i in first_logins:
         data.append({"name": i[1], "id": i[0], "type": "user"})
-    print(data)
     client.send_message(data, MessageType.SEARCH_USERS)
 
 

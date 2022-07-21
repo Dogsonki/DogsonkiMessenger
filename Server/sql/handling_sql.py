@@ -78,12 +78,10 @@ def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
 
 
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
-    cursor.execute("""SELECT u2.id, u2.nick FROM ((messages
-                      INNER JOIN users AS u1 ON messages.sender_id = u1.id)
-                      INNER JOIN users AS u2 ON messages.receiver_id = u2.id) 
-                      WHERE u1.login=%s OR u2.login=%s
-                      GROUP BY u2.login
-                      ORDER BY time DESC;""", (login, login))
+    cursor.execute("""SELECT u2.id, u2.nick FROM ((users_link_table
+                      INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
+                      INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id) 
+                      WHERE u1.login=%s OR u2.login=%s;""", (login, login))
     chats = cursor.fetchall()
     if chats is None:
         return False
@@ -275,3 +273,8 @@ def set_group_avatar(cursor: CMySQLCursor, group_id: int, avatar: bytes):
     cursor.execute("""UPDATE groups_ 
                       SET avatar = %s 
                       WHERE id = %s;""", (avatar, group_id))
+
+
+def create_users_link(cursor: CMySQLCursor, user1_id: int, user2_id: int):
+    cursor.execute("""INSERT INTO users_link_table(user_id, group_id)
+                      VALUES (%s, %s)""", (user1_id, user2_id))
