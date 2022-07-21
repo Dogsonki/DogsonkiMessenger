@@ -49,11 +49,18 @@ class NormalChatroom(functions.Chatroom):
 
 
 def search_users(client: Client, nick: str):
+    data = []
+
+    groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
+    for i in groups:
+        if i[0].startswith(nick):
+            data.append({"name": i[0], "id": i[1], "type": "group"})
+
     first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
-    first_logins_parsed = []
     for i in first_logins:
-        first_logins_parsed.append({"login": i[1], "id": i[0]})
-    client.send_message(first_logins_parsed, MessageType.SEARCH_USERS)
+        data.append({"name": i[1], "id": i[0], "type": "user"})
+    print(data)
+    client.send_message(data, MessageType.SEARCH_USERS)
 
 
 def logout(client: Client, data: str):

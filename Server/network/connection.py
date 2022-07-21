@@ -33,13 +33,12 @@ class MessageType(Enum):
     AUTOMATICALLY_LOGGED = 10
     GET_AVATAR = 11
     LAST_CHATS = 12
-    LAST_GROUP_CHATS = 13
+    SET_GROUP_AVATAR = 13
     NEW_MESSAGE = 14
     CREATE_GROUP = 15
     ADD_TO_GROUP = 16
     INIT_GROUP_CHAT = 17
     GET_GROUP_AVATAR = 18
-    SET_GROUP_AVATAR = 19
 
 
 @dataclass
@@ -153,15 +152,14 @@ class Client(Connection):
         chats = []
         if user_chats:
             for i in user_chats:
-                chats.append({"login": i[1], "id": i[0]})
-        self.send_message(chats, MessageType.LAST_CHATS)
+                chats.append({"name": i[1], "id": i[0], "type": "user"})
 
-        group_chats = []
         user_group_chats = handling_sql.get_user_groups(self.db_cursor, self.login_id)
         if user_group_chats:
             for i in user_group_chats:
-                group_chats.append({"group_name": i[0], "id": i[1]})
-        self.send_message(group_chats, MessageType.LAST_GROUP_CHATS)
+                chats.append({"name": i[0], "id": i[1], "type": "group"})
+
+        self.send_message(chats, MessageType.LAST_CHATS)
         current_connections[self.nick] = self
 
     def login_by_session(self, session_data) -> bool:
