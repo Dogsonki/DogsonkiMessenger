@@ -1,4 +1,5 @@
 import time
+import base64
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
@@ -26,6 +27,23 @@ def add_to_group(client: Client, data: dict):
     else:
         message = "1"  # 1 -> adding person is not a group admin
     client.send_message(message, MessageType.ADD_TO_GROUP)
+
+
+def get_avatar(client: Client, group_id: int):
+    avatar = handling_sql.get_group_avatar(client.db_cursor, group_id)
+    try:
+        if avatar[0]:
+            avatar = str(base64.b64decode(avatar[0]))
+        else:
+            avatar = " "
+    except (IndexError, TypeError):
+        avatar = " "
+    client.send_message({"avatar": avatar, "group_id": group_id}, MessageType.GET_AVATAR)
+
+
+def set_avatar(client: Client, data: dict):
+    avatar = base64.b64encode(bytes(data["avatar"], "UTF-8"))
+    handling_sql.set_group_avatar(client.db_cursor, data["group_id"], avatar)
 
 
 class GroupChatroom(functions.Chatroom):

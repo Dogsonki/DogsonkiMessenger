@@ -76,6 +76,14 @@ def start_group_chatroom(client: Client, data: str):
     group.GroupChatroom(client, data).init_chatroom()
 
 
+def get_group_avatar(client: Client, data: str):
+    group.get_avatar(client, int(data))
+
+
+def set_group_avatar(client: Client, data: dict):
+    group.set_avatar(client, data)
+
+
 class ClientMenu:
     client: Client
     actions: dict = {
@@ -86,7 +94,9 @@ class ClientMenu:
         MessageType.GET_AVATAR: get_avatar,
         MessageType.CREATE_GROUP: group.create_group,
         MessageType.ADD_TO_GROUP: group.add_to_group,
-        MessageType.INIT_GROUP_CHAT: start_group_chatroom
+        MessageType.INIT_GROUP_CHAT: start_group_chatroom,
+        MessageType.GET_GROUP_AVATAR: get_group_avatar,
+        MessageType.SET_GROUP_AVATAR: set_group_avatar
     }
 
     def __init__(self, client: Client):

@@ -38,6 +38,8 @@ class MessageType(Enum):
     CREATE_GROUP = 15
     ADD_TO_GROUP = 16
     INIT_GROUP_CHAT = 17
+    GET_GROUP_AVATAR = 18
+    SET_GROUP_AVATAR = 19
 
 
 @dataclass

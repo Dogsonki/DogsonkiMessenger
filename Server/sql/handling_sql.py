@@ -262,3 +262,16 @@ def check_if_nick_exist(cursor: CMySQLCursor, nick: str) -> Union[Tuple, None]:
                       WHERE nick = %s;""", (nick, ))
     sql_data = cursor.fetchone()
     return sql_data
+
+
+def get_group_avatar(cursor: CMySQLCursor, group_id: int) -> Union[Tuple, None]:
+    cursor.execute("""SELECT avatar FROM groups_
+                      WHERE id=%s""", (group_id, ))
+    avatar = cursor.fetchone()
+    return avatar
+
+
+def set_group_avatar(cursor: CMySQLCursor, group_id: int, avatar: bytes):
+    cursor.execute("""UPDATE groups_ 
+                      SET avatar = %s 
+                      WHERE id = %s;""", (avatar, group_id))

@@ -61,7 +61,8 @@ class CreateDatabase:
     def create_group_table(self):
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS groups_ (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                                   name VARCHAR(50)
+                                   name VARCHAR(50),
+                                   avatar MEDIUMBLOB
                                    );""")
 
     def create_group_user_link_table(self):
