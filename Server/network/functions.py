@@ -27,14 +27,14 @@ class Chatroom(metaclass=abc.ABCMeta):
     def _send_last_messages(self, message_history: list, old: bool):
         self.number_of_sent_last_messages += 30
         if message_history:
-            if not old:
-                message_history.reverse()
+            message_list = []
             for i in message_history:
                 data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
                         "user_id": i.sender_id}
-                self.send_message(data, old)
+                message_list.append(data)
+            self.send_message(message_list, old)
 
-    def send_message(self, message_data: dict, old: bool):
+    def send_message(self, message_data: list, old: bool):
         if old:
             token = MessageType.GET_OLD_MESSAGES
         else:

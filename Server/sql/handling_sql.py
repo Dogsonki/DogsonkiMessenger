@@ -150,11 +150,10 @@ def get_nick(cursor: CMySQLCursor, login_id: int) -> str:
     return sql_data[0]
 
 
-def get_user_groups(cursor: CMySQLCursor, login: str) -> Union[Tuple, bool]:
-    cursor.execute("""SELECT g.name, g.id FROM ((group_user_link_table
-                      INNER JOIN users AS u ON group_user_link_table.user_id)
-                      INNER JOIN groups_ AS g ON group_user_link_table.group_id)
-                      WHERE u.login=%s;""", (login,))
+def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[Tuple, bool]:
+    cursor.execute("""SELECT g.name, g.id FROM group_user_link_table
+                      INNER JOIN groups_ AS g ON group_user_link_table.group_id
+                      WHERE user_id=%s;""", (login_id,))
     sql_data = cursor.fetchall()
     if sql_data is None:
         return False

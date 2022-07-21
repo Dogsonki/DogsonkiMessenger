@@ -8,9 +8,12 @@ from . import functions
 def create_group(client: Client, data: dict):
     group_name = data["group_name"]
     creator = data["creator"]
+    users = data["users"]
     group_id = handling_sql.create_group(client.db_cursor, group_name)
     handling_sql.add_to_group(client.db_cursor, creator, group_id)
     handling_sql.make_admin(client.db_cursor, creator, group_id)
+    for i in users:
+        add_to_group(client, {"group_id": group_id, "added_person_id": i})
     client.send_message(group_id, MessageType.CREATE_GROUP)
 
 
@@ -57,10 +60,11 @@ class GroupChatroom(functions.Chatroom):
             for i in self.group_members:
                 receiver_connection = current_connections.get(i)
                 if receiver_connection:
-                    data = {"user": self.connection.nick, "message": message_,
-                            "time": time.time(), "user_id": self.connection.login_id}
+                    data = [{"user": self.connection.nick, "message": message_,
+                            "time": time.time(), "user_id": self.connection.login_id}]
                     receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
             self.save_message_in_database(message_)
 
     def save_message_in_database(self, message):
-        handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id, self.group_id)
+        handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
+                                        int(self.group_id))

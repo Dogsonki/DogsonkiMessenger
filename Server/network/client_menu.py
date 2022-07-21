@@ -39,8 +39,8 @@ class NormalChatroom(functions.Chatroom):
         if message_ != "":
             receiver_connection = current_connections.get(self.receiver)
             if receiver_connection:
-                data = {"user": self.connection.nick, "message": message_,
-                        "time": time.time(), "user_id": self.connection.login_id}
+                data = [{"user": self.connection.nick, "message": message_,
+                        "time": time.time(), "user_id": self.connection.login_id}]
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
             self.save_message_in_database(message_)
 

@@ -155,10 +155,10 @@ class Client(Connection):
         self.send_message(chats, MessageType.LAST_CHATS)
 
         group_chats = []
-        user_group_chats = handling_sql.get_user_groups(self.db_cursor, self.login)
+        user_group_chats = handling_sql.get_user_groups(self.db_cursor, self.login_id)
         if user_group_chats:
             for i in user_group_chats:
-                group_chats.append({"group_name": i[1], "id": i[0]})
+                group_chats.append({"group_name": i[0], "id": i[1]})
         self.send_message(group_chats, MessageType.LAST_GROUP_CHATS)
         current_connections[self.nick] = self
 
