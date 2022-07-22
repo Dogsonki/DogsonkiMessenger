@@ -17,18 +17,24 @@ public class SocketCore : Connection
 
     private static void ProcessBuffer(string buffer)
     {
-        SocketPacket packet;
-        if (!SocketPacket.TryDeserialize(out packet, buffer))
-            return;
-
-        Debug.Write(packet.Data + " TOKEN: " +packet.Token);
+        SocketPacket packet = null;
+        try
+        {
+            if (!SocketPacket.TryDeserialize(out packet, buffer))
+                return;
+        }
+        catch (Exception ex)
+        {
+            Logger.Push("Buffer: " + buffer + " ERROR", TraceType.Packet, LogLevel.Error);
+            Logger.Push(ex, TraceType.Packet, LogLevel.Error);
+        }
 
         if (packet.Token == (int)Token.CHAT_MESSAGE)
         {
             ReadRawBuffer(packet);
             return;
         }
-        
+
         ThreadPool.QueueUserWorkItem((object stateInfo) =>
         {
             foreach (RequestedCallback callback in RequestedCallback.Callbacks)
@@ -65,8 +71,8 @@ public class SocketCore : Connection
 
                     while (indexDollar > 0)
                     {
-                        indexDollar = LongBuffer.IndexOf('$',StringComparison.Ordinal);
-                                                               
+                        indexDollar = LongBuffer.IndexOf('$', StringComparison.Ordinal);
+
                         if (indexDollar == -1)
                             break;
 
@@ -88,15 +94,14 @@ public class SocketCore : Connection
                 {
                     Debug.Error("Error in casting buffer into packet " + ex);
                 }
-                else if(Stream == null)
+                else if (Stream == null)
                 {
                     Connect();
                     Debug.Error("Connection stream is null");
                 }
                 else
                 {
-                    Debug.Error(ex);
-                    //RedirectConnectionLost(ex);
+
                 }
             }
             Thread.Sleep(10);
@@ -128,16 +133,16 @@ public class SocketCore : Connection
                     }
                     catch (Exception ex)
                     {
-                        Logger.Push($"Exception when sending buffer Length: {Buffer?.Length}",TraceType.Packet,LogLevel.Error);
+                        Logger.Push($"Exception when sending buffer Length: {Buffer?.Length}", TraceType.Packet, LogLevel.Error);
                         RedirectConnectionLost(ex);
                     }
                 }
             }
             if (Client != null && Stream != null && IsConnected)
             {
-               SocketQueue.Renew();
+                SocketQueue.Renew();
             }
-           
+
             Thread.Sleep(5);
         }
     }

@@ -4,6 +4,6 @@
              x:Class="Client.Pages.TemporaryPages.ChangingAvatarPage"
              Title="ChangingAvatarPage">
     <VerticalStackLayout>
-		<Image x:Name="NewAvatar"/>
+		<Image x:Username="NewAvatar"/>
 	</VerticalStackLayout>
 </ContentPage>

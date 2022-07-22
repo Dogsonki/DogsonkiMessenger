@@ -9,6 +9,7 @@ public class MessageModel
     public string Username { get; set; }
     public ImageSource AvatarImage { get; set; }
     public DateTime Time { get; set; }
+    public uint UserId { get; set; }
 
     //Used by server
     [JsonConstructor]
@@ -17,6 +18,7 @@ public class MessageModel
         Username = user;
         MessageContent = message;
         AvatarImage = User.CreateOrGet(user, user_id).Avatar;
+        UserId = user_id;
 
         try
         {

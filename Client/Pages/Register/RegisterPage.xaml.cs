@@ -1,6 +1,6 @@
 using Client.Models;
 using Client.Networking.Core;
-using Client.Networking.Model;
+using Client.Pages.Helpers;
 using Client.Pages.Register;
 using System.Net.Mail;
 
@@ -8,10 +8,13 @@ namespace Client.Pages;
 
 public partial class RegisterPage : ContentPage
 {
+    public MessagePopPage message;
+
     public RegisterPage()
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
+        message = new MessagePopPage(this);
     }
 
     private async void RedirectToLogin(object sender, EventArgs e)
@@ -19,7 +22,7 @@ public partial class RegisterPage : ContentPage
         await Navigation.PushAsync(new LoginPage());
     }
 
-    protected char[] IllegalCharacters = { '$', '*', '{', '}', '#', '@' };
+    private readonly char[] IllegalCharacters = { '$', '{', '}', '@', ':' };
 
     private Label ErrorText = new Label()
     {
@@ -44,31 +47,32 @@ public partial class RegisterPage : ContentPage
 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordRepeat))
         {
-            ShowError("Username / password or email is empty");
+            message.ShowError("Username / password or email is empty");
             return;
         }
 
         if (password != passwordRepeat)
         {
-            ShowError("Make sure your passwords match");
+            message.ShowError("Make sure your passwords match");
             return;
         }
 
         if ((IllegalCharIndex = username.IndexOfAny(IllegalCharacters)) > 0)
         {
-            ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
-            return;
-        }
-        MailAddress _tempAdr;
-        if (!MailAddress.TryCreate(email, out _tempAdr))
-        {
-            ShowError("Invalid email");
+            message.ShowError($"Username contains illegal character - {username[IllegalCharIndex]}");
             return;
         }
 
-        if (!SocketCore.SendCallback(RegisterCallback, new RegisterModel(username, password,email), Token.REGISTER))
+        MailAddress _tempAdr;
+        if (!MailAddress.TryCreate(email, out _tempAdr))
         {
-            ShowError("Unable to connect to the server");
+            message.ShowError("Invalid email");
+            return;
+        }
+
+        if (!SocketCore.SendCallback(RegisterCallback, new RegisterModel(username, password, email), Token.REGISTER))
+        {
+            message.ShowError("Unable to connect to the server");
             return;
         }
     }
@@ -85,19 +89,19 @@ public partial class RegisterPage : ContentPage
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
             case RToken.USER_ALREADY_EXISTS:
-                ShowError("User with given email already exists");
+                message.ShowError("User with given email already exists");
                 break;
             case RToken.CANNOT_SEND_EMAIL:
-                ShowError("Cannot send code to this email");
+                message.ShowError("Cannot send code to this email");
                 break;
             case RToken.EMAIL_WAITING:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
             case RToken.NICKNAME_TAKEN:
-                ShowError("User with given username already exists");
+                message.ShowError("User with given username already exists");
                 break;
             default:
-                ShowError($"Unknown error {(int)token}");
+                message.ShowError($"Unknown error {(int)token}");
                 break;
         }
     }

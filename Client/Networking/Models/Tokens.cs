@@ -1,10 +1,12 @@
-﻿using Client.Models;
-using Client.Pages;
-using Client.IO;
-using Client.Utility;
+﻿using Client.IO;
+using Client.Models;
 using Client.Models.UserType.Bindable;
+using Client.Networking.Model;
+using Client.Pages;
+using Client.Pages.TemporaryPages.GroupChat;
+using Client.Utility;
 
-namespace Client.Networking.Model;
+namespace Client;
 
 public enum Token : int
 {
@@ -54,15 +56,19 @@ public static class Tokens
         switch ((Token)packet.Token)
         {
             case Token.ERROR:
-                Debug.Error(packet.Data+"TOKEN -2");
+                Debug.Error(packet.Data + "TOKEN -2");
                 break;
             case Token.SEARCH_USER:
-                SearchPage.ParseFound(packet.Data);
+                if (!LocalUser.isCreatingGroup)
+                    SearchPage.ParseFound(packet.Data);
+                else
+                    GroupChatCreator.ParseFound(packet.Data);
                 break;
             case Token.CHAT_MESSAGE:
                 MessagePage.AddMessage(packet);
                 break;
             case Token.GET_MORE_MESSAGES:
+                MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
                 Session session = Essential.ModelCast<Session>(packet.Data);
@@ -72,8 +78,11 @@ public static class Tokens
                 LoginCallbackModel model = Essential.ModelCast<LoginCallbackModel>(packet.Data);
                 if (model.Token == "1")
                 {
-                    Debug.Write("LOGGIN BY SESSION SUCCESS");
                     LocalUser.Login(model.Username, model.ID, model.Email);
+                }
+                else if (model.Token == "-1")
+                {
+                    LoginPage.Current.message.ShowError("User is banned");
                 }
                 break;
             case Token.AVATAR_REQUEST:
@@ -83,10 +92,10 @@ public static class Tokens
                 MainPage.AddLastUsers(packet);
                 break;
             case Token.LAST_GROUP_CHATS:
-                MainThread.BeginInvokeOnMainThread(() => StaticNavigator.PopAndPush(new MainPage()));
+                MainPage.AddLastGroups(packet);
                 break;
             default:
-                Debug.Write("TOKEN_UNRECOGNIZED: " + (string)packet.Data);
+                Debug.Write("TOKEN_UNRECOGNIZED: " + packet.Data);
                 break;
         }
     }

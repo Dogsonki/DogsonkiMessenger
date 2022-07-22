@@ -16,7 +16,7 @@ public class LoginCallbackModel
 
     [JsonConstructor]
     public LoginCallbackModel(string nick, string login_id, string token, string email)
-    { 
+    {
         Username = nick;
         ID = login_id;
         Token = token;

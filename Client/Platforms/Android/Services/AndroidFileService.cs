@@ -1,9 +1,10 @@
 ﻿using Client.IO;
 using System.Text;
 
+
 namespace Client;
 
- public class AndroidFileService : IFileService
+public class AndroidFileService : IFileService
 {
     private const string TempLocation = "temp";
 
@@ -12,7 +13,7 @@ namespace Client;
     /// <summary>
     /// Returns false if directory was not present in location
     /// </summary>
-    public bool CreateDirectoryIfNotExist(string name,string location= TempLocation)
+    public bool CreateDirectoryIfNotExist(string name, string location = TempLocation)
     {
         if (!DirectoryExist(name, location))
         {
@@ -25,7 +26,7 @@ namespace Client;
     /// <summary>
     ///  Returns true if file was present in location
     /// </summary>
-    public bool CreateFileIfNotExist(string location,string content = null)
+    public bool CreateFileIfNotExist(string location, string content = null)
     {
         if (!File.Exists(GetPersonalDir(location)))
         {
@@ -39,7 +40,7 @@ namespace Client;
             }
             else
             {
-                using (Stream stream = File.Open(GetPersonalDir(location), FileMode.Create)) {}//Thread safe creating file
+                using (Stream stream = File.Open(GetPersonalDir(location), FileMode.Create)) { }//Thread safe creating file
             }
             return false;
         }
@@ -77,7 +78,7 @@ namespace Client;
         }
     }
 
-    public void WriteToFile(MemoryStream stream, string location = TempLocation )
+    public void WriteToFile(MemoryStream stream, string location = TempLocation)
     {
         byte[] bArray = new byte[stream.Length];
         using (FileStream fs = new FileStream(location, FileMode.OpenOrCreate))
@@ -92,7 +93,7 @@ namespace Client;
     }
     public void WriteToFile(string content, string location = TempLocation)
     {
-        File.WriteAllBytes(GetPersonalDir(location),Encoding.UTF8.GetBytes(content));
+        File.WriteAllBytes(GetPersonalDir(location), Encoding.UTF8.GetBytes(content));
     }
     public void WriteToFile(byte[] content, string location = TempLocation)
     {

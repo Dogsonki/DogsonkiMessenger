@@ -1,5 +1,4 @@
 using Client.Networking.Core;
-using Client.Networking.Model;
 using System.Diagnostics;
 
 namespace Client.Pages.Register;
@@ -11,22 +10,22 @@ public partial class ConfirmEmailCode : ContentPage
     private const int MAX_CODE_ATTEMPS = 5;
     private int CheckAttemps = 0;
 
-	public ConfirmEmailCode(string email)
-	{
-		InitializeComponent();
+    public ConfirmEmailCode(string email)
+    {
+        InitializeComponent();
         CheckAttemps = 0;
-		NavigationPage.SetHasNavigationBar(this, false);
+        NavigationPage.SetHasNavigationBar(this, false);
         ResendCooldownTimer.Start();
-		noteEmail.Text = $"We've sent a code to {email} and type code to window below";
-	}
+        noteEmail.Text = $"We've sent a code to {email} and type code to window below";
+    }
 
     private void CheckCode(object sender, EventArgs e)
     {
-        if(CheckAttemps == MAX_CODE_ATTEMPS)
+        if (CheckAttemps == MAX_CODE_ATTEMPS)
         {
             return;
         }
-        SocketCore.SendCallback(CodeSended,((Entry)sender).Text,Token.REGISTER);
+        SocketCore.SendCallback(CodeSended, ((Entry)sender).Text, Token.REGISTER);
     }
 
     private Label ErrorText = new Label()
@@ -42,7 +41,7 @@ public partial class ConfirmEmailCode : ContentPage
     }
     private void RemoveError()
     {
-        if(ErrorLevel.Children.Contains(ErrorText))
+        if (ErrorLevel.Children.Contains(ErrorText))
             ErrorLevel.Children.Remove(ErrorText);
     }
 
@@ -52,12 +51,17 @@ public partial class ConfirmEmailCode : ContentPage
         switch (token)
         {
             case RToken.WRONG_CODE:
-                ShowError($"Wrong code, left {MAX_CODE_ATTEMPS-CheckAttemps}");
+                ShowError($"Wrong code, left {MAX_CODE_ATTEMPS - CheckAttemps}");
                 CheckAttemps++;
-                break;  
+                break;
             case RToken.MAX_CODE_ATTEMPS:
                 CheckAttemps = MAX_CODE_ATTEMPS;
-                ShowError("Max attemps used");
+                MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    RegisterPage rg = new RegisterPage();
+                    rg.message.ShowError("Max attemps used. Please try again later!");
+                    Navigation.PushAsync(rg);
+                });
                 break;
             case RToken.ACCEPT:
                 MainThread.InvokeOnMainThreadAsync(() =>
@@ -87,7 +91,7 @@ public partial class ConfirmEmailCode : ContentPage
 
     protected override bool OnBackButtonPressed()
     {
-        if(CheckAttemps < MAX_CODE_ATTEMPS)
+        if (CheckAttemps < MAX_CODE_ATTEMPS)
         {
             SocketCore.Send("b", Token.REGISTER);
         }

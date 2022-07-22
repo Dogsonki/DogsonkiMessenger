@@ -1,6 +1,4 @@
-﻿using Client.Networking.Core;
-
-namespace Client.Networking.Model
+﻿namespace Client.Networking.Model
 {
     //Add lifetime to callbacks, can be used as memory leak where cannot be invoked 
     public class RequestedCallback

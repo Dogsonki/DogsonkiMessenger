@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.TemporaryPages.GroupChat.GroupChatCreator"
+			 xmlns:local="clr-namespace:Client.Pages.TemporaryPages.GroupChat"
+			 xmlns:user="clr-namespace:Client.Models.UserType.Bindable"
+             Title="GroupChatCreator"
+			 BackgroundColor="#121212"> 
+	
+	<ScrollView>
+		<StackLayout>
+			<Label TextColor="White" Text="Chat Group Creator" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center"/>
+			<StackLayout Padding="10"/>
+			<StackLayout>
+				<StackLayout Orientation="Horizontal">
+					<Label FontSize="Small" HorizontalOptions="Center" VerticalOptions="Center" Text="Group Name: "/>
+					<Entry FontSize="Small" HorizontalOptions="Center" VerticalOptions="Center" x:Name="GroupName" />
+				</StackLayout>
+			
+				<StackLayout Padding="10"/>
+				<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:GroupChatCreator.Invited}}">
+					<BindableLayout.ItemTemplate>
+						<DataTemplate>
+							<StackLayout>
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="auto" />
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*" />
+										<ColumnDefinition Width="Auto" />
+									</Grid.ColumnDefinitions>
+									<StackLayout Spacing="15" Orientation="Horizontal">
+										<Frame BackgroundColor="#191919" BorderColor="White"
+										   HorizontalOptions="Start" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
+											<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
+											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding Avatar}"/>
+										</Frame>
+										<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+									</StackLayout>
+								</Grid>
+							</StackLayout>
+						</DataTemplate>
+					</BindableLayout.ItemTemplate>
+				</StackLayout>
+			</StackLayout>
+			<StackLayout Padding="5"/>
+			<Button Clicked="CreateGroup" TextColor="White" CornerRadius="20" BackgroundColor="#202020" BorderWidth="0" WidthRequest="250"  Text="Create Group"/>
+			<StackLayout Padding="5"/>
+			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
+			   HeightRequest="44" WidthRequest="300">
+				<Entry Completed="Search" WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Search for users"
+				   Keyboard="Plain"/>
+			</Frame>
+			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:GroupChatCreator.UsersFound}}">
+				<BindableLayout.ItemTemplate>
+					<DataTemplate>
+						<StackLayout>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="*" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<StackLayout Spacing="15" Orientation="Horizontal">
+
+									<Frame BackgroundColor="#121212" BorderColor="White" HorizontalOptions="Start" 
+												   WidthRequest="50" HeightRequest="50" CornerRadius="25" >
+										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50" HorizontalOptions="Fill"
+													   VerticalOptions="Fill" Source="{Binding Avatar}"/>
+									</Frame>
+									<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+									<StackLayout VerticalOptions="Center">
+										<StackLayout.GestureRecognizers>
+											<TapGestureRecognizer Command="{Binding Input}" CommandParameter="{Binding .}"/>
+										</StackLayout.GestureRecognizers>
+										<StackLayout HorizontalOptions="End" VerticalOptions="Center">
+											<Image Aspect="AspectFill" WidthRequest="25" HeightRequest="25" HorizontalOptions="Fill" 
+													   VerticalOptions="Fill" Source="add.png"/>
+										</StackLayout>
+									</StackLayout>
+								</StackLayout>
+							</Grid>
+						</StackLayout>
+					</DataTemplate>
+				</BindableLayout.ItemTemplate>
+			</StackLayout>
+		</StackLayout>
+	</ScrollView>
+</ContentPage>

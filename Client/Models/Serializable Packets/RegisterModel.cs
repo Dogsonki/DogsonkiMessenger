@@ -13,7 +13,7 @@ public class RegisterModel
     public string Email { get; set; }
 
     [JsonConstructor]
-    public RegisterModel(string login, string password,string email)
+    public RegisterModel(string login, string password, string email)
     {
         Login = login;
         Password = password;

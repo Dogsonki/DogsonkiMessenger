@@ -9,11 +9,14 @@ internal class GroupChatCreateModel
     public string GroupName { get; set; }
     [JsonProperty("creator")]
     public int Creator { get; set; }
+    [JsonProperty("users")]
+    public int[] Users { get; set; }
 
     [JsonConstructor]
-    public GroupChatCreateModel(string group_name, int creator)
+    public GroupChatCreateModel(string group_name, int creator, int[] users) 
     {
         GroupName = group_name;
         Creator = creator;
+        Users = users;
     }
 }

@@ -6,7 +6,7 @@ internal class Cache
 {
     private const string CachePath = "/temp/";
 
-    public static void SaveToCache(object obj,string name)//TODO: make it serializing data classes
+    public static void SaveToCache(object obj, string name)//TODO: make it serializing data classes
     {
         if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
 
@@ -20,16 +20,16 @@ internal class Cache
                     PermissionStatus status = await Permissions.RequestAsync<Permissions.StorageRead>();
                 });
 
-                if(!Directory.Exists(FileSystem.Current.CacheDirectory + "/temp/"))
+                if (!Directory.Exists(FileSystem.Current.CacheDirectory + "/temp/"))
                 {
                     Directory.CreateDirectory(FileSystem.Current.CacheDirectory + "/temp/");
                 }
 
-                File.WriteAllBytes(FileSystem.Current.CacheDirectory + "/temp/"+name, (byte[])obj);
+                File.WriteAllBytes(FileSystem.Current.CacheDirectory + "/temp/" + name, (byte[])obj);
 #endif
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
@@ -47,7 +47,7 @@ internal class Cache
             }
             return File.ReadAllBytes(cachePath + name);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
             return new byte[0];
@@ -56,7 +56,7 @@ internal class Cache
 
     public static void DebugPrintAllCacheFiles()
     {
-        foreach(string file in Directory.GetFiles(FileSystem.Current.CacheDirectory + "/temp/"))
+        foreach (string file in Directory.GetFiles(FileSystem.Current.CacheDirectory + "/temp/"))
         {
             Debug.Write(file);
         }

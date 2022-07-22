@@ -32,7 +32,7 @@
 						PlaceholderColor="White"
 						Placeholder="Password"/>
 			<Line X1="0" Stroke="White" X2="350"/>
-			
+
 			<Entry x:Name="InputPasswordRepeat" IsPassword="True" FontSize="Medium" HeightRequest="60" TextColor="White" 
 						PlaceholderColor="White"
 						Placeholder="Repeat Password"/>

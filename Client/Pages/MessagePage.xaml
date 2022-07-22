@@ -10,7 +10,7 @@
 		<AbsoluteLayout HorizontalOptions="Center">
 			<Label x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
 		</AbsoluteLayout>
-		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" Refreshing="Refresh"
+		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RetainElement" Refreshing="Refresh"
 					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" 
 					  ItemsSource="{Binding Source={x:Static local:MessagePage.Messages}}">
 			<ListView.ItemTemplate>
@@ -48,7 +48,7 @@
 			</ListView>
 		<StackLayout/>
 		<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
-			   HeightRequest="44" WidthRequest="300"> 
+			   HeightRequest="44" WidthRequest="300">
 			<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
 			   IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Message @"/>

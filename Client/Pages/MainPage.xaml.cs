@@ -4,35 +4,61 @@ using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Client.Pages;
 
 public partial class MainPage : ContentPage
 {
-	public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
-	public static MainPage Instance;
+    public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
+    public static MainPage Instance;
 
-	public static void AddLastUsers(SocketPacket packet)
+    public static void AddLastUsers(SocketPacket packet)
     {
-        SearchModel[] users = Essential.ModelCast<SearchModel[]>(packet.Data);
         List<AnyListBindable> bindable = new List<AnyListBindable>();
-
-        Parallel.ForEach(users, (user) =>
+        Task.Run(() =>
         {
-            bindable.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.ID)));
-        });
+            SearchModel[] users = Essential.ModelCast<SearchModel[]>(packet.Data);
 
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            foreach(AnyListBindable use in bindable)
+            foreach (var user in users)
             {
-                LastChats.Add(use);
+                var u = User.CreateOrGet(user.Username, user.ID);
+                bindable.Add(new AnyListBindable(u, true));
             }
+        }).ContinueWith((w) =>
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                foreach (AnyListBindable use in bindable)
+                {
+                    LastChats.Add(use);
+                }
+            });
         });
     }
-    
+
+    public static void AddLastGroups(SocketPacket packet)
+    {
+        List<AnyListBindable> bindable = new List<AnyListBindable>();
+        Task.Run(() =>
+        {
+            GroupCallbackModel[] groups = Essential.ModelCast<GroupCallbackModel[]>(packet.Data);
+
+            foreach (var group in groups)
+            {
+                bindable.Add(new AnyListBindable(new Group(group.GroupName, group.GroupId)));
+            }
+        }).ContinueWith((w) =>
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                foreach (AnyListBindable use in bindable)
+                {
+                    LastChats.Add(use);
+                }
+            });
+        });
+    }
+
     protected override bool OnBackButtonPressed()
     {
         view.ScrollToAsync(0d, 0d, true);
@@ -40,8 +66,8 @@ public partial class MainPage : ContentPage
     }
 
     public MainPage()
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
         if (Instance is null)
@@ -50,14 +76,9 @@ public partial class MainPage : ContentPage
 
             Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
         }
+    }
 
-        for(int i = 0;i < 25; i++)
-        {
-            LastChats.Add(new AnyListBindable(User.CreateOrGet($"Test User{i}", (uint)i)));
-        }
-	}
-
-	private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
+    private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
 
     private async void SearchPressed(object sender, EventArgs e)
     {
@@ -71,7 +92,7 @@ public partial class MainPage : ContentPage
             SocketCore.Send(SearchInput, Token.SEARCH_USER);
             await Navigation.PushAsync(new SearchPage(SearchInput));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }

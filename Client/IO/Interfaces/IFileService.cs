@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Client.IO;
+﻿namespace Client.IO;
 
 public interface IFileService
 {

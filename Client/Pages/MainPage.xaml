@@ -65,7 +65,7 @@
 										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
 											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding Avatar}"/>
 									</Frame>
-									<Label TextColor="White" VerticalOptions="Center" Text="{Binding Name}"/>
+									<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
 								</StackLayout>
 							</Grid>
 						</StackLayout>

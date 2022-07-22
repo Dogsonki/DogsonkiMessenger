@@ -7,7 +7,7 @@ namespace Client.IO
 {
     public static class EmbededStorage
     {
-        public static T Read<T>(Type type,string Path)
+        public static T Read<T>(Type type, string Path)
         {
             try
             {
@@ -19,14 +19,14 @@ namespace Client.IO
                     return (T)((JObject)DesT).ToObject(typeof(T));
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                if(ex.GetType() == typeof(NullReferenceException))
+                if (ex.GetType() == typeof(NullReferenceException))
                 {
                     Logger.Push(ex, TraceType.Func, LogLevel.Error);
                 }
                 return default;
             }
-        } 
+        }
     }
 }

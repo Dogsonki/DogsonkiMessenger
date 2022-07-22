@@ -1,36 +1,28 @@
 using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
-using Client.Networking.Model;
-using Client.Utility;
 using Client.Pages.Helpers;
+using Client.Utility;
 
 namespace Client.Pages;
 
 public partial class LoginPage : ContentPage
 {
-    private static LoginPage Instance;
-    private MessagePopPage message;
+    public static LoginPage Current;
+    public MessagePopPage message;
 
-	public LoginPage(string info = null)
-	{
-		InitializeComponent();
+    public LoginPage(string info = null)
+    {
+        InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         message = new MessagePopPage(this);
 
-        Instance = this;
+        Current = this;
 
         if (!string.IsNullOrEmpty(info)) message.ShowInfo(info);
     }
 
-    private Label ErrorText = new Label()
-    {
-        TextColor = Color.FromRgb(255, 0, 0)
-    };
-
-    private void RemoveError() => ErrorLevel.Children.Remove(ErrorText);
-
-    private void LoginFocused(object sender, FocusEventArgs e) => RemoveError();
+    private void LoginFocused(object sender, FocusEventArgs e) => message.Clear(PopType.Error);
 
     private async void RedirectToRegister(object sender, EventArgs e)
     {
@@ -43,7 +35,7 @@ public partial class LoginPage : ContentPage
         string password = Input_Password.Text;
 
 #if DEBUG
-        if(username == "a" && password == "a")
+        if (username == "a" && password == "a")
         {
             LocalUser.Login("uwu", "2", "wo@");
         }
@@ -66,10 +58,13 @@ public partial class LoginPage : ContentPage
         switch (login.Token)
         {
             case "1":
-                LocalUser.Login(login.Username, login.ID,login.Email);
+                LocalUser.Login(login.Username, login.ID, login.Email);
                 break;
             case "0":
                 message.ShowError($"Wrong email or password");
+                break;
+            case "-1":
+                message.ShowError("User is banned");
                 break;
             default:
                 message.ShowError("Samething went wrong, probably on server side ... ");

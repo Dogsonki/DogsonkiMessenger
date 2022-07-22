@@ -54,6 +54,7 @@
 	  <None Remove="IO\SocketConfig.json" />
 	  <None Remove="Networking\SocketConfig.json" />
 	  <None Remove="Resources\Images\aa.png" />
+	  <None Remove="Resources\Images\add.png" />
 	  <None Remove="Resources\Images\setting.png" />
 	</ItemGroup>
 
@@ -78,9 +79,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Pages\CreateGroupChatPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	  <MauiXaml Update="Pages\DebugOnly\LoggingPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -103,6 +101,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\TemporaryPages\ChangingAvatarPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\TemporaryPages\GroupChat\GroupChatCreator.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

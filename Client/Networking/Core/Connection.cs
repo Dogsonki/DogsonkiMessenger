@@ -15,7 +15,7 @@ public class Connection
 
     public static bool IsConnected { get; private set; }
     public static bool IsInitialized { get; private set; } = false;
-    public static int MaxBuffer = 1024 * 128;
+    public static int MaxBuffer = 1024 * 254;
     public static bool IsConnecting { get; protected set; }
 
     private static List<Action> OnConnectionActions = new List<Action>();
@@ -30,10 +30,10 @@ public class Connection
         try
         {
             Config = SocketConfig.ReadConfig();
-            Client = new TcpClient(Config.Ip,Config.Port);
+            Client = new TcpClient(Config.Ip, Config.Port);
             Stream = Client.GetStream();
         }
-        catch(Exception)
+        catch (Exception)
         {
             IsConnecting = false;
             return;
@@ -46,13 +46,13 @@ public class Connection
         IsConnected = true;
         IsConnecting = false;
 
-        foreach(Action act in OnConnectionActions)
+        foreach (Action act in OnConnectionActions)
         {
             act?.Invoke();
         }
     }
 
-    public Connection(ThreadStart ReciveHandler, ThreadStart SendingHandler) 
+    public Connection(ThreadStart ReciveHandler, ThreadStart SendingHandler)
     {
         ReciveThread = new Thread(ReciveHandler);
         ManageSendingQueue = new Thread(SendingHandler);
@@ -61,7 +61,7 @@ public class Connection
         {
             Connect();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Type ERROR_TYPE = ex.GetType();
             if (ERROR_TYPE == typeof(SocketException))

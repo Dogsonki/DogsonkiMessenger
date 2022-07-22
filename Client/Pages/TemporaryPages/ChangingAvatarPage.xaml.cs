@@ -1,17 +1,16 @@
-using Client.Networking.Core;
 using Client.Utility;
 
 namespace Client.Pages.TemporaryPages;
 
 public partial class ChangingAvatarPage : ContentPage
 {
-	public ChangingAvatarPage()
-	{
-		InitializeComponent();
-	}
+    public ChangingAvatarPage()
+    {
+        InitializeComponent();
+    }
 
-	public async Task Init()
-	{
+    public async Task Init()
+    {
         byte[] ImageBuffer;
         var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
         {
@@ -23,6 +22,5 @@ public partial class ChangingAvatarPage : ContentPage
 
         ImageSource src = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
 
-        NewAvatar.Source = src;
     }
 }

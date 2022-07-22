@@ -1,7 +1,6 @@
 using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
-using Client.Networking.Model;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 
@@ -12,15 +11,20 @@ public partial class SearchPage : ContentPage
     public static ObservableCollection<User> UsersFound { get; set; } = new ObservableCollection<User>();
 
     public SearchPage(string preInputText)
-	{
-		InitializeComponent();
+    {
+        UsersFound.Clear();
+
+        InitializeComponent();
         SearchInput.Text = preInputText;
         NavigationPage.SetHasNavigationBar(this, false);
-	}
+    }
 
     private void SearchPressed(object sender, EventArgs e)
     {
-        string input = ((SearchBar)sender).Text;
+        UsersFound.Clear();
+
+        string input = ((Entry)sender).Text;
+
         if (!string.IsNullOrEmpty(input))
         {
             SocketCore.Send(input, Token.SEARCH_USER);

@@ -138,3 +138,5 @@ dmypy.json
 /Client/bin/Debug/net6.0-android
 /Client/bin/Release/net6.0-android
 *.keystore
+/Client/TODO.txt
+/Client/bin/Debug

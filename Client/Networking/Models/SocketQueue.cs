@@ -16,7 +16,7 @@ public class SocketQueue
     /// </summary>
     public static void Renew()
     {
-        if(WaitingPackets.Count > 0 || SendingPackets.Count > 0) 
+        if (WaitingPackets.Count > 0 || SendingPackets.Count > 0)
         {
             SendingPackets = new List<SocketPacket>(WaitingPackets);
         }

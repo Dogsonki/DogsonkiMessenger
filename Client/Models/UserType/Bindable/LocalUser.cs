@@ -13,6 +13,10 @@ public class LocalUser : BindableObject
     public static User UserRef { get; set; }
     public static LocalOptions Settings { get; set; }
 
+    /*  */
+    public static bool isCreatingGroup { get; set; } = false;
+
+
     protected static bool InstanceCreated = false;
 
     public static ImageSource avatar { get; private set; }
@@ -38,6 +42,8 @@ public class LocalUser : BindableObject
         get { return id; }
         set { id = value; OnPropertyChanged(nameof(ID)); }
     }
+
+    public static int Id => int.Parse(id);
 
     public static bool isLoggedIn { get; private set; }
     public bool IsLoggedIn

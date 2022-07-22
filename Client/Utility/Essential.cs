@@ -1,5 +1,4 @@
-﻿using Client.Models;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Client.Utility
 {
@@ -33,10 +32,10 @@ namespace Client.Utility
                     dest = ((JArray)data).ToObject<T>();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Error(ex);
-            } 
+            }
             return dest;
         }
     }

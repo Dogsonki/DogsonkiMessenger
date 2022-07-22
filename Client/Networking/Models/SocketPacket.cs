@@ -11,7 +11,7 @@ public class SocketPacket
 
     [JsonProperty("token")]
     public int Token { get; set; }
-   
+
     //Images are sent as normal packets
 
     public object GetEncoded() => Data;
@@ -26,7 +26,7 @@ public class SocketPacket
     }
 
     [JsonConstructor]
-    public SocketPacket(object data, Token token = Model.Token.EMPTY, bool isImage = false)
+    public SocketPacket(object data, Token token = Client.Token.EMPTY, bool isImage = false)
     {
         Data = data;
         Token = (int)token;
@@ -38,13 +38,13 @@ public class SocketPacket
         Token = (int)token;
     }
 
-    public static bool TryDeserialize(out SocketPacket packet,string buffer)
+    public static bool TryDeserialize(out SocketPacket packet, string buffer)
     {
         try
         {
             packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             packet = null;
             Debug.Error(ex);

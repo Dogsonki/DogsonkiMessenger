@@ -9,7 +9,7 @@ public class Logger
     private static List<string> FuncLoggerStack = new List<string>();
     private static List<string> PacketLoggerStack = new List<string>();
 
-    public static void Push(object trace,TraceType type,LogLevel level)
+    public static void Push(object trace, TraceType type, LogLevel level)
     {
         Debug.Write(trace);
 
@@ -18,7 +18,7 @@ public class Logger
             case TraceType.Packet: PacketLoggerStack.Add(trace.ToString()); break;
             case TraceType.Func: FuncLoggerStack.Add(trace.ToString()); break;
         }
-        LoggerStack.Add(new LogTemplate(trace.ToString(), level));
+        // LoggerStack.Add(new LogTemplate(trace.ToString(), level));
     }
 }
 
@@ -44,11 +44,11 @@ public struct LogTemplate
         message = msg;
     }
 
-    private static Color GetColor(LogLevel level) 
+    private static Color GetColor(LogLevel level)
     {
         switch (level)
         {
-            case LogLevel.Error: return ErrorColor; 
+            case LogLevel.Error: return ErrorColor;
             case LogLevel.Warning: return WarningColor;
             case LogLevel.Debug: return DebugColor;
         }

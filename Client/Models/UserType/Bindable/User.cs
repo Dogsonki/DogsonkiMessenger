@@ -1,6 +1,5 @@
 ﻿using Client.IO;
 using Client.Networking.Core;
-using Client.Networking.Model;
 using Client.Pages;
 using System.ComponentModel;
 
@@ -40,8 +39,8 @@ public class User : BindableObject
     /* As LocalUser have his own binding but User reuse it LocalUser have to be binding as LocalUser.<BindableObject> */
     public bool IsLocalUser = false;
 
-    /* Name and ID will never change then don't make them as OnPropertyChanged */
-    public string Name { get; set; }
+    /* Username and ID will never change then don't make them as OnPropertyChanged */
+    public string Username { get; set; }
     public uint ID { get; set; }
 
     public Command OpenChatCommand { get; set; }
@@ -53,7 +52,7 @@ public class User : BindableObject
             if (Users.Find(x => x.ID == id) != null)
                 return;
 
-            Name = username;
+            Username = username;
             ID = id;
             IsLocalUser = isLocalUser;
             OpenChatCommand = new Command(OpenChat);
@@ -83,7 +82,7 @@ public class User : BindableObject
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            SocketCore.Send($"{Name}", Token.INIT_CHAT);
+            SocketCore.Send($"{Username}", Token.INIT_CHAT);
             StaticNavigator.Push(new MessagePage(this));
         });
     }

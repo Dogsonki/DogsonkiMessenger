@@ -22,32 +22,35 @@ public partial class MessagePage : ContentPage
     }
 
     public MessagePage(User user)
-	{
+    {
+        ChatUser = user;
+
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         NavigationPage.SetHasBackButton(this, true);
 
-        Current = this; 
+        Current = this;
         Messages.Clear();
 
-        ChatUser = user;
-        ChatUsername.Text = "Chatting with @"+user.Name;
+        ChatUsername.Text = "Chatting with @" + user.Username;
     }
 
     //TODO: THIS IS FUCK BUGGED 
     protected override bool OnBackButtonPressed()
     {
+        Logger.Push("CHAT_CLOSE " + ChatUser.Username + "" + ChatUser.ID, TraceType.Func, LogLevel.Debug);
         SocketCore.Send(" ", Token.END_CHAT);
         return base.OnBackButtonPressed();
-    } 
+    }
 
-    public static void AddMessage(string message,DateTime time)
+    public static void AddMessage(string message, DateTime time)
     {
         MessageModel u = new MessageModel(LocalUser.username, message, time);
-        SocketCore.Send(message,Token.SEND_MESSAGE);
+        SocketCore.Send(message, Token.SEND_MESSAGE);
         Messages.Add(u);
         OnNewMessage(u);
     }
+
     public static void AddMessage(MessageModel message)
     {
         Messages.Add(message);
@@ -56,8 +59,28 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        AddMessage(Essential.ModelCast<MessageModel>(packet.Data)));
+        if (ChatUser.ID == int.Parse(LocalUser.id)) { return; }
+
+        Debug.Write("msg: "+packet.Data.GetType());
+
+        MessageModel[] message = null;
+        Task.Run(() =>
+        {
+            message = Essential.ModelCast<MessageModel[]>(packet.Data);
+        }).ContinueWith((w) =>
+        {
+            foreach(MessageModel msg in message)
+            {
+                if (msg.UserId != ChatUser.ID)
+                {
+                    if (int.Parse(LocalUser.id) != msg.UserId)
+                    {
+                        continue;
+                    }
+                }
+                MainThread.BeginInvokeOnMainThread(() => AddMessage(msg));
+            }
+        });
     }
 
     private void MessageInputDone(object sender, EventArgs e)
@@ -73,24 +96,30 @@ public partial class MessagePage : ContentPage
 
     public static void PrependNewMessages(object packet)
     {
-        MessageModel message = ((JObject)((SocketPacket)packet).Data).ToObject<MessageModel>();
-        Messages.Insert(0, message);
-        OnNewMessage(message);
+        MessageModel[] messages = ((JArray)((SocketPacket)packet).Data).ToObject<MessageModel[]>();
+        foreach(var msg in messages)
+        {
+            Messages.Insert(0, msg);
+        }
+       
+        OnNewMessage(messages.Last());
     }
+
     private void Refresh(object sender, EventArgs e)
     {
-        SocketCore.Send(" ", Token.GET_MORE_MESSAGES);   
+        SocketCore.Send(" ", Token.GET_MORE_MESSAGES);
+        ((ListView)sender).IsRefreshing = false;
     }
 
     private bool _isFoc = false;
     private void MessageInput_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if(MessageInput.Text.Length > 0 && !_isFoc)
+        if (MessageInput.Text.Length > 0 && !_isFoc)
         {
             //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 200, end: 350, easing: Easing.Linear), length: 250);
             _isFoc = true;
         }
-        else if(MessageInput.Text.Length == 0 && _isFoc)
+        else if (MessageInput.Text.Length == 0 && _isFoc)
         {
             //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 350, end: 200, easing: Easing.SpringIn), length: 500);
             _isFoc = false;
