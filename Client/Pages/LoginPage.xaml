@@ -14,22 +14,31 @@
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
-		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"></Line>
+		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"/>
+
+		<StackLayout>
+			<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+				<Entry x:Name="Input_Username" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Email"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+			</Frame>
+		</StackLayout>
+
+		<StackLayout>
+			<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+				<Entry x:Name="Input_Password" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       TextColor="White" PlaceholderColor="White" Placeholder="Password"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+			</Frame>
+		</StackLayout>
 		
 		<StackLayout IsVisible="false" x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center"/>
 
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
-
-			<Entry IsSpellCheckEnabled="False" FontSize="Medium" HeightRequest="60" TextColor="White" 
-						PlaceholderColor="White" Focused="LoginFocused"
-						Placeholder="Username" x:Name="Input_Username"/>
-			<Line X1="0" Stroke="White" X2="350"/>
-
-			<Entry Focused="LoginFocused" FontSize="Medium" HeightRequest="50"
-					   TextColor="White" PlaceholderColor="White"
-					   IsPassword="True" Placeholder="Password" x:Name="Input_Password"/>
-			<Line X1="0" Stroke="White" X2="350"/>
-
 			<StackLayout IsVisible="true" WidthRequest="300"  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
 
 			<StackLayout Orientation="Horizontal">
@@ -39,7 +48,9 @@
 			</StackLayout>
 
 			<StackLayout Padding="15">
-				<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" WidthRequest="250" Clicked="LoginDone" Text="Login"/>
+				<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" 
+						WidthRequest="250" Clicked="LoginDone" Text="Login" CornerRadius="15"
+						FontFamily="OpenSansSemibold"/>
 			</StackLayout>
 		</StackLayout>
 	</StackLayout>

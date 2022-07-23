@@ -5,6 +5,7 @@ using Android.App;
 [assembly: UsesPermission(Android.Manifest.Permission.WriteExternalStorage)]
 [assembly: UsesPermission(Android.Manifest.Permission.ManageExternalStorage)]
 #endif
+
 namespace Client;
 
 public static class MauiProgram

@@ -4,6 +4,7 @@
              x:Class="Client.Pages.RegisterPage"
              Title="RegisterPage"
 			 BackgroundColor="#121212">
+	
 	<StackLayout Padding="20" Spacing="15">
 		<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text="Login">
@@ -16,34 +17,54 @@
 		</StackLayout>
 		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"/>
 
-		<StackLayout WidthRequest="300" HorizontalOptions="Center" VerticalOptions="Center">
+		<StackLayout Spacing="15">
+			<StackLayout>
+				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+					<Entry x:Name="InputUsername" WidthRequest="287" Margin="10,0,0,0"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       TextColor="White" PlaceholderColor="White" Placeholder="Username"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				</Frame>
+			</StackLayout>
 
-			<Entry x:Name="InputUsername" FontSize="Medium" HeightRequest="60" TextColor="White" 
-						PlaceholderColor="White"
-						Placeholder="Username"/>
-			<Line X1="0" Stroke="White" X2="350"/>
+			<StackLayout>
+				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+					<Entry x:Name="InputEmail" WidthRequest="287" Margin="10,0,0,0"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       TextColor="White" PlaceholderColor="White" Placeholder="Email"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				</Frame>
+			</StackLayout>
+		
+			<StackLayout>
+				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+					<Entry x:Name="InputPassword" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       TextColor="White" PlaceholderColor="White" Placeholder="Password"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				</Frame>
+			</StackLayout>
+		
+			<StackLayout>
+				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
+			   HeightRequest="44" WidthRequest="300">
+					<Entry x:Name="InputPasswordRepeat" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
+				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
+			       TextColor="White" PlaceholderColor="White" Placeholder="Repeat Password"
+				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				</Frame>
+			</StackLayout>
 
-			<Entry x:Name="InputEmail" FontSize="Medium" HeightRequest="60" TextColor="White" 
-						PlaceholderColor="White"
-						Placeholder="Email" Keyboard="Email"/>
-			<Line X1="0" Stroke="White" X2="350"/>
-
-			<Entry x:Name="InputPassword" IsPassword="True" FontSize="Medium" HeightRequest="60" TextColor="White" 
-						PlaceholderColor="White"
-						Placeholder="Password"/>
-			<Line X1="0" Stroke="White" X2="350"/>
-
-			<Entry x:Name="InputPasswordRepeat" IsPassword="True" FontSize="Medium" HeightRequest="60" TextColor="White" 
-						PlaceholderColor="White"
-						Placeholder="Repeat Password"/>
-			<Line X1="0" Stroke="White" X2="350"/>
-
-			<StackLayout HorizontalOptions="Center" VerticalOptions="Center"  x:Name="ErrorLevel"/>
-
+			<StackLayout IsVisible="true" HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
 		</StackLayout>
 
-		<StackLayout Padding="15">
-			<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" WidthRequest="250" Clicked="RegisterDone" Text="Create account"/>
+		<StackLayout>
+			<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" 
+					WidthRequest="250" Clicked="RegisterDone" Text="Create account"
+					CornerRadius="15" FontFamily="OpenSansSemibold"/>
 		</StackLayout>
 		
 	</StackLayout>

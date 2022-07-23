@@ -24,18 +24,6 @@ public partial class RegisterPage : ContentPage
 
     private readonly char[] IllegalCharacters = { '$', '{', '}', '@', ':' };
 
-    private Label ErrorText = new Label()
-    {
-        TextColor = Color.FromRgb(255, 0, 0)
-    };
-
-    private void ShowError(string error)
-    {
-        ErrorText.Text = error;
-        if (!ErrorLevel.Children.Contains(ErrorText))
-            ErrorLevel.Children.Add(ErrorText);
-    }
-
     private void RegisterDone(object sender, EventArgs e)
     {
         string username = InputUsername.Text;
@@ -45,7 +33,8 @@ public partial class RegisterPage : ContentPage
 
         int IllegalCharIndex;
 
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordRepeat))
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)
+            || string.IsNullOrEmpty(passwordRepeat))
         {
             message.ShowError("Username / password or email is empty");
             return;

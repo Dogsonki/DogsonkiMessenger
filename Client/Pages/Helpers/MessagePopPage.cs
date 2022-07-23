@@ -41,6 +41,7 @@ namespace Client.Pages.Helpers
 
         public void ShowInfo(string info)
         {
+            InfoLevel.IsVisible = true;
             InfoText.Text = info;
             if (!InfoLevel.Contains(InfoText))
                 InfoLevel.Children.Add(InfoText);
@@ -67,7 +68,9 @@ namespace Client.Pages.Helpers
 
         public void ShowError(string error)
         {
+            ErrorLevel.IsVisible = true;
             ErrorText.Text = error;
+
             if (!ErrorLevel.Children.Contains(ErrorText))
                 ErrorLevel.Children.Add(ErrorText);
         }

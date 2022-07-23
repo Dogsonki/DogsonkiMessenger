@@ -61,7 +61,7 @@ public partial class LoginPage : ContentPage
                 LocalUser.Login(login.Username, login.ID, login.Email);
                 break;
             case "0":
-                message.ShowError($"Wrong email or password");
+                message.ShowError("Wrong email or password");
                 break;
             case "-1":
                 message.ShowError("User is banned");
