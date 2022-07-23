@@ -38,7 +38,7 @@ public partial class MessagePage : ContentPage
     //TODO: THIS IS FUCK BUGGED 
     protected override bool OnBackButtonPressed()
     {
-        Logger.Push("CHAT_CLOSE " + ChatUser.Username + "" + ChatUser.ID, TraceType.Func, LogLevel.Debug);
+        Logger.Push("CHAT_CLOSE " + ChatUser.Username + "" + ChatUser.Id, TraceType.Func, LogLevel.Debug);
         SocketCore.Send(" ", Token.END_CHAT);
         return base.OnBackButtonPressed();
     }
@@ -59,7 +59,7 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        if (ChatUser.ID == int.Parse(LocalUser.id)) { return; }
+        if (ChatUser.Id == int.Parse(LocalUser.id)) { return; }
 
         Debug.Write("msg: "+packet.Data.GetType());
 
@@ -71,7 +71,7 @@ public partial class MessagePage : ContentPage
         {
             foreach(MessageModel msg in message)
             {
-                if (msg.UserId != ChatUser.ID)
+                if (msg.UserId != ChatUser.Id)
                 {
                     if (int.Parse(LocalUser.id) != msg.UserId)
                     {

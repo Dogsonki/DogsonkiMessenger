@@ -4,9 +4,11 @@ namespace Client.IO;
 
 internal class Cache
 {
-    private const string CachePath = "/temp/";
 
-    public static void SaveToCache(object obj, string name)//TODO: make it serializing data classes
+    /// <summary>
+    /// For now cache only work with avatars: (byte[] avatarCache, avatar+UserId)
+    /// </summary>
+    public static void SaveToCache(object obj, string name)
     {
         if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
 
@@ -20,12 +22,12 @@ internal class Cache
                     PermissionStatus status = await Permissions.RequestAsync<Permissions.StorageRead>();
                 });
 
-                if (!Directory.Exists(FileSystem.Current.CacheDirectory + "/temp/"))
+                if (!Directory.Exists(CachePath))
                 {
-                    Directory.CreateDirectory(FileSystem.Current.CacheDirectory + "/temp/");
+                    Directory.CreateDirectory(CachePath);
                 }
 
-                File.WriteAllBytes(FileSystem.Current.CacheDirectory + "/temp/" + name, (byte[])obj);
+                File.WriteAllBytes(CachePath + name, (byte[])obj);
 #endif
             }
         }
@@ -35,30 +37,44 @@ internal class Cache
         }
     }
 
+    public static string CachePath => FileSystem.Current.CacheDirectory + "/temp/";
+
     public static byte[] ReadCache(string name)
     {
         try
         {
-            string cachePath = FileSystem.Current.CacheDirectory + "/temp/";
+            string cachePath = CachePath;
             if (!File.Exists(cachePath + name))
             {
                 Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
-                return new byte[0];
+                return null;
             }
+            Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
+
             return File.ReadAllBytes(cachePath + name);
         }
         catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
-            return new byte[0];
+            return null;
         }
     }
 
-    public static void DebugPrintAllCacheFiles()
+    public static void ClearAbsoluteCache()
     {
-        foreach (string file in Directory.GetFiles(FileSystem.Current.CacheDirectory + "/temp/"))
+        try
         {
-            Debug.Write(file);
+            string[] CacheFiles = Directory.GetFiles(CachePath);
+
+            foreach (var file in CacheFiles)
+            {
+                Logger.Push($"Deleting {file} from cache", TraceType.Func, LogLevel.Warning);
+                File.Delete(file);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
     }
 }

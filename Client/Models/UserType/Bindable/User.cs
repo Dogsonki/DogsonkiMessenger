@@ -41,19 +41,19 @@ public class User : BindableObject
 
     /* Username and ID will never change then don't make them as OnPropertyChanged */
     public string Username { get; set; }
-    public uint ID { get; set; }
+    public int Id { get; set; }
 
     public Command OpenChatCommand { get; set; }
 
-    public User(string username, uint id, bool isLocalUser = false)
+    public User(string username, int id, bool isLocalUser = false)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (Users.Find(x => x.ID == id) != null)
+            if (Users.Find(x => x.Id == id) != null)
                 return;
 
             Username = username;
-            ID = id;
+            Id = id;
             IsLocalUser = isLocalUser;
             OpenChatCommand = new Command(OpenChat);
 
@@ -62,7 +62,7 @@ public class User : BindableObject
 
         byte[] AvatarCacheBuffer = Cache.ReadCache("avatar" + id);
 
-        if (AvatarCacheBuffer.Length > 0)
+        if (AvatarCacheBuffer is not null)
         {
             ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
             MainThread.BeginInvokeOnMainThread(() =>
@@ -72,6 +72,7 @@ public class User : BindableObject
         }
         else
         {
+            Debug.Write("REQUESTING AVATAR");
             SocketCore.Send(id, Token.AVATAR_REQUEST);
         }
     }
@@ -87,19 +88,19 @@ public class User : BindableObject
         });
     }
 
-    public static User CreateOrGet(string username, uint id)
+    public static User CreateOrGet(string username, int id)
     {
         User user;
-        if ((user = Users.Find(x => x.ID == id)) != null)
+        if ((user = Users.Find(x => x.Id == id)) != null)
             return user;
 
         return new User(username, id, false);
     }
 
-    public static User CreateLocalUser(string username, uint id)
+    public static User CreateLocalUser(string username, int id)
     {
         return new User(username, id, true);
     }
 
-    public static User GetUser(uint id) => Users.Find(x => x.ID == id);
+    public static User GetUser(uint id) => Users.Find(x => x.Id == id);
 }

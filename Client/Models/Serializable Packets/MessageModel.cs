@@ -9,11 +9,11 @@ public class MessageModel
     public string Username { get; set; }
     public ImageSource AvatarImage { get; set; }
     public DateTime Time { get; set; }
-    public uint UserId { get; set; }
+    public int UserId { get; set; }
 
     //Used by server
     [JsonConstructor]
-    public MessageModel(string user, string message, double time, uint user_id)
+    public MessageModel(string user, string message, double time, int user_id)
     {
         Username = user;
         MessageContent = message;

@@ -71,6 +71,7 @@ public static class Tokens
                 MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
+                Debug.Write("SESSION GOT");
                 Session session = Essential.ModelCast<Session>(packet.Data);
                 Session.OverwriteSession(session);
                 break;

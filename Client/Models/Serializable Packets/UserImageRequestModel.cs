@@ -1,4 +1,5 @@
-﻿using Client.Models.UserType.Bindable;
+﻿using Client.IO;
+using Client.Models.UserType.Bindable;
 using Client.Networking.Model;
 using Client.Utility;
 using Newtonsoft.Json;
@@ -33,7 +34,7 @@ public class UserImageRequestModel
 
         if (user == null)
         {
-            Debug.Error("USER_AVATAR_NULL_REFRENCE");
+            Debug.Error("USER_NULL_REFRENCE");
             return;
         }
 
@@ -41,7 +42,7 @@ public class UserImageRequestModel
         avat = avat.Substring(0, avat.Length - 1);
 
         byte[] imgBuffer = Convert.FromBase64String(avat);
-
+        Cache.SaveToCache(imgBuffer, "avatar" + img.UserID);
         MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
     }
 }

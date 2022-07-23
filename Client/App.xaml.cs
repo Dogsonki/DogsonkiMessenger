@@ -1,7 +1,6 @@
-﻿using Client.Models.Session;
-using Client.Networking.Core;
+﻿using Client.Networking.Core;
 using Client.Pages;
-using Newtonsoft.Json;
+using Client.IO;
 
 namespace Client;
 
@@ -16,11 +15,11 @@ public partial class App : Application
         {
             CurrentLoginPage = new LoginPage();
 
+            Connection.AddOnConnection(Session.ReadSession);
+            SocketCore.Init(); //TODO: if throw redirect login with error 
+
             MainPage = new NavigationPage(CurrentLoginPage);
 
-            Connection.AddOnConnection(ReadSession);
-
-            SocketCore.Init();
         }
         catch(Exception ex)
         {
@@ -28,23 +27,5 @@ public partial class App : Application
         }
     }
 
-    private static void ReadSession()
-    {
-#if ANDROID
-        AndroidFileService wr = new();
-        bool SessionExist = wr.CreateFileIfNotExist("session.json");
-        if (SessionExist)
-        {
-            string ses = File.ReadAllText(AndroidFileService.GetPersonalDir("session.json"));
-            Session session = JsonConvert.DeserializeObject<Session>(ses);
-            if (session != null && !string.IsNullOrEmpty(ses))
-            {
-                if (session.SessionKey != null)
-                {
-                    SocketCore.Send(session, Token.SESSION_INFO);
-                }
-            }
-        }
-#endif
-    }
+
 }

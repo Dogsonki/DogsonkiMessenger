@@ -78,7 +78,7 @@ public class LocalUser : BindableObject
             Current.Email = _email;
             isLoggedIn = true;
 
-            User user = Bindable.User.CreateLocalUser(username, uint.Parse(_id));
+            User user = Bindable.User.CreateLocalUser(username, int.Parse(_id));
             UserRef = user;
 
             StaticNavigator.Push(new MainPage());

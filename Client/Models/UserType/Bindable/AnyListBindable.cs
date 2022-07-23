@@ -22,16 +22,16 @@ public class AnyListBindable : BindableObject
             return BindedUser.Username;
         }
     }
-    public uint Id 
+    public int Id 
     {
         get
         {
             if (type == BindType.Group)
             {
-                return (uint)BindedGroup.GroupId;
+                return BindedGroup.GroupId;
             }
 
-            return BindedUser.ID;
+            return BindedUser.Id;
         }
      }
     private Command input;

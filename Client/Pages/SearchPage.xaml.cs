@@ -34,9 +34,14 @@ public partial class SearchPage : ContentPage
     public static void ParseFound(object req)
     {
         List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
+
         foreach (var user in users)
         {
-            UsersFound.Add(User.CreateOrGet(user.Username, user.ID));
+            Debug.Write(user.Username + " " + user.Id);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                UsersFound.Add(User.CreateOrGet(user.Username, user.Id));
+            });
         }
     }
 }

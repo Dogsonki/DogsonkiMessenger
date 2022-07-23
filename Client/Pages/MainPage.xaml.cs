@@ -21,7 +21,8 @@ public partial class MainPage : ContentPage
 
             foreach (var user in users)
             {
-                var u = User.CreateOrGet(user.Username, user.ID);
+                Debug.Write(user.Username + " " + user.Username);
+                var u = User.CreateOrGet(user.Username, user.Id);
                 bindable.Add(new AnyListBindable(u, true));
             }
         }).ContinueWith((w) =>

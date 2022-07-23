@@ -8,12 +8,15 @@ public class SearchModel
     [JsonProperty("login")]
     public string Username { get; set; }
     [JsonProperty("login_id")]
-    public uint ID { get; set; }
+    public int Id { get; set; }
+    [JsonProperty("type")]
+    public string Type { get; set; }
 
     [JsonConstructor]
-    public SearchModel(string username, uint id)
+    public SearchModel(string name, int id,string type)
     {
-        Username = username;
-        ID = id;
+        Username = name;
+        Id = id;
+        Type = type;
     }
 }

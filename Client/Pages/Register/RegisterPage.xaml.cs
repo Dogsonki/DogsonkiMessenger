@@ -81,7 +81,7 @@ public partial class RegisterPage : ContentPage
                 message.ShowError("User with given email already exists");
                 break;
             case RToken.CANNOT_SEND_EMAIL:
-                message.ShowError("Cannot send code to this email");
+                MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
             case RToken.EMAIL_WAITING:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));

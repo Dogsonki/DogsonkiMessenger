@@ -10,9 +10,9 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 
-		<ApplicationTitle>Client</ApplicationTitle>
+		<ApplicationTitle>Dogsonki Messenger</ApplicationTitle>
 
-		<ApplicationId>com.companyname.client</ApplicationId>
+		<ApplicationId>com.dogsonkimessenger.client</ApplicationId>
 		<ApplicationIdGuid>44EEB889-2558-4BB7-B689-59ECF473A182</ApplicationIdGuid>
 		
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -20,10 +20,11 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">22.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+		<AnalysisLevel>latest</AnalysisLevel>
 	</PropertyGroup>
 
 	<!-- KEY APK-->
@@ -37,9 +38,37 @@
 	
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-android|AnyCPU'">
 	  <WarningLevel>7</WarningLevel>
+	  <FileAlignment>4096</FileAlignment>
+	  <AndroidUseAapt2>True</AndroidUseAapt2>
+	  <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
+	  <AndroidPackageFormat>apk</AndroidPackageFormat>
+	  <TrimMode>link</TrimMode>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-android|AnyCPU'">
 	  <WarningLevel>7</WarningLevel>
+	  <FileAlignment>4096</FileAlignment>
+	  <AndroidPackageFormat>aab</AndroidPackageFormat>
+	  <AndroidUseAapt2>True</AndroidUseAapt2>
+	  <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-ios|AnyCPU'">
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-ios|AnyCPU'">
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-maccatalyst|AnyCPU'">
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-maccatalyst|AnyCPU'">
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows10.0.19041.0|AnyCPU'">
+	  <TrimMode>link</TrimMode>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows10.0.19041.0|AnyCPU'">
+	  <TrimMode>link</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -51,9 +80,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="IO\SocketConfig.json" />
 	  <None Remove="Networking\SocketConfig.json" />
-	  <None Remove="Resources\Images\aa.png" />
 	  <None Remove="Resources\Images\add.png" />
 	  <None Remove="Resources\Images\setting.png" />
 	</ItemGroup>

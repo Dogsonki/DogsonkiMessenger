@@ -44,8 +44,10 @@ public partial class GroupChatCreator : ContentPage
 
         foreach (var user in users)
         {
-            AnyListBindable br = new AnyListBindable(User.CreateOrGet(user.Username, user.ID));
-            br.Input = new Command(AddToInvited);
+            AnyListBindable br = new(User.CreateOrGet(user.Username, user.Id))
+            {
+                Input = new Command(AddToInvited)
+            };
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -70,7 +72,7 @@ public partial class GroupChatCreator : ContentPage
 
     private void CreateGroup(object sender, EventArgs e)
     {
-        List<int> users = new List<int>();
+        List<int> users = new(Invited.Count);
 
         for(int i = 0; i < Invited.Count; i++)
         {
@@ -80,7 +82,6 @@ public partial class GroupChatCreator : ContentPage
             {
                 users.Add(id);
             }
-           
         }
 
         SocketCore.Send(new GroupChatCreateModel(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),Token.GROUP_CHAT_CREATE);

@@ -66,19 +66,7 @@ public partial class SettingsPage : ContentPage
 
     private void ClearCache(object sender, EventArgs e)
     {
-        foreach (var file in Directory.GetFiles(FileSystem.Current.CacheDirectory + "/temp/"))
-        {
-            Logger.Push($"[Cache] Deleting file {file}", TraceType.Func, LogLevel.Warning);
-            try
-            {
-                File.Delete(file);
-            }
-            catch (Exception ex)
-            {
-                Logger.Push($"Cannot delete cache file: {ex}", TraceType.Func, LogLevel.Error);
-            }
-            Logger.Push("[Cache] Cache cleared, remember that clearing cache will not have impact on actual files", TraceType.Func, LogLevel.Debug);
-        }
+        Cache.ClearAbsoluteCache();
     }
 
     private async void CreateGroup(object sender, EventArgs e)
