@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Client.Utility;
+using Newtonsoft.Json;
 
 namespace Client.Models;
 
@@ -11,12 +12,15 @@ public class SearchModel
     public int Id { get; set; }
     [JsonProperty("type")]
     public string Type { get; set; }
+    [JsonProperty("last_message_time")]
+    public DateTime LastMessageTime { get; set; }
 
     [JsonConstructor]
-    public SearchModel(string name, int id,string type)
+    public SearchModel(string name, int id,string type,double last_message_time)
     {
         Username = name;
         Id = id;
         Type = type;
+        LastMessageTime = Essential.UnixToDateTime(last_message_time);
     }
 }

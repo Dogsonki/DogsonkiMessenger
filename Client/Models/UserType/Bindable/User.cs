@@ -60,6 +60,7 @@ public class User : BindableObject
             Users.Add(this);
         });
 
+        Debug.Write($"Getting avatar: username: {username} id: {Id}");
         byte[] AvatarCacheBuffer = Cache.ReadCache("avatar" + id);
 
         if (AvatarCacheBuffer is not null)
@@ -81,9 +82,9 @@ public class User : BindableObject
 
     private void OpenChat()
     {
+        SocketCore.Send($"{Username}", Token.INIT_CHAT);
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            SocketCore.Send($"{Username}", Token.INIT_CHAT);
             StaticNavigator.Push(new MessagePage(this));
         });
     }

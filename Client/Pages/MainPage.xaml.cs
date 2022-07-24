@@ -12,51 +12,32 @@ public partial class MainPage : ContentPage
     public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
     public static MainPage Instance;
 
-    public static void AddLastUsers(SocketPacket packet)
+    public static void AddLastChats(SocketPacket packet)
     {
-        List<AnyListBindable> bindable = new List<AnyListBindable>();
-        Task.Run(() =>
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            SearchModel[] users = Essential.ModelCast<SearchModel[]>(packet.Data);
+            List<AnyListBindable> bindable = new List<AnyListBindable>();
 
-            foreach (var user in users)
+            SearchModel[] lastChats = Essential.ModelCast<SearchModel[]>(packet.Data);
+
+            foreach (var chat in lastChats)
             {
-                Debug.Write(user.Username + " " + user.Username);
-                var u = User.CreateOrGet(user.Username, user.Id);
-                bindable.Add(new AnyListBindable(u, true));
-            }
-        }).ContinueWith((w) =>
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                foreach (AnyListBindable use in bindable)
-                {
-                    LastChats.Add(use);
+                if(chat.Type == "user")
+                {       
+                    User user = User.CreateOrGet(chat.Username, chat.Id);
+                    bindable.Add(new AnyListBindable(user,true));
                 }
-            });
-        });
-    }
-
-    public static void AddLastGroups(SocketPacket packet)
-    {
-        List<AnyListBindable> bindable = new List<AnyListBindable>();
-        Task.Run(() =>
-        {
-            GroupCallbackModel[] groups = Essential.ModelCast<GroupCallbackModel[]>(packet.Data);
-
-            foreach (var group in groups)
-            {
-                bindable.Add(new AnyListBindable(new Group(group.GroupName, group.GroupId)));
-            }
-        }).ContinueWith((w) =>
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                foreach (AnyListBindable use in bindable)
+                else
                 {
-                    LastChats.Add(use);
+                    Group group = Group.CreateOrGet(chat.Username, chat.Id);
+                    bindable.Add(new AnyListBindable(group,true));
                 }
-            });
+            }
+
+            foreach (AnyListBindable bind in bindable)
+            {
+                LastChats.Add(bind);
+            }
         });
     }
 
@@ -69,7 +50,9 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
+
         NavigationPage.SetHasNavigationBar(this, false);
+        SocketCore.Send(" ", Token.LAST_CHATS);
 
         if (Instance is null)
         {

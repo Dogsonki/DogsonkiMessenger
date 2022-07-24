@@ -3,11 +3,14 @@
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
 /// </summary>
+
 public class AnyListBindable : BindableObject
 {
     private readonly User BindedUser;
     private readonly Group BindedGroup;
     private readonly bool UseUserInput;
+    private readonly bool UseGroupInput;
+
     private readonly BindType type;
 
     public string Username
@@ -16,7 +19,7 @@ public class AnyListBindable : BindableObject
         {
             if(type == BindType.Group)
             {
-                return BindedGroup.GroupName;
+                return BindedGroup.Name;
             }
 
             return BindedUser.Username;
@@ -28,7 +31,7 @@ public class AnyListBindable : BindableObject
         {
             if (type == BindType.Group)
             {
-                return BindedGroup.GroupId;
+                return BindedGroup.Id;
             }
 
             return BindedUser.Id;
@@ -39,15 +42,14 @@ public class AnyListBindable : BindableObject
     {
         get
         {
-            if(type == BindType.Group)
-            {
-                return null;
-            }
             if (UseUserInput)
             {
                 return BindedUser.OpenChatCommand;
             }
-
+            if (UseGroupInput)
+            {
+                return BindedGroup.OpenChatCommand;
+            } 
             return input;
         }
         set
@@ -71,28 +73,18 @@ public class AnyListBindable : BindableObject
     public AnyListBindable(User user,bool useUserInput = false, Command input = null)
     {
         type = BindType.User;
-
         BindedUser = user;
-
         UseUserInput = useUserInput;
-
         Input = input;
     }
 
-    public AnyListBindable(Group group, Command input = null)
+    public AnyListBindable(Group group,bool useGroupInput = false, Command input = null)
     {
+        Debug.Write("Group created with command: " + useGroupInput);
         BindedGroup = group;
         type = BindType.Group;
-
-        if (Input == null)
-        {
-           
-        }
-        else
-        {
-            Input = input;
-        }
-
+        UseGroupInput= useGroupInput;
+        Input = input;
     }
 }
 

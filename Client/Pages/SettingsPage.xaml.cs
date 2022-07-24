@@ -73,4 +73,10 @@ public partial class SettingsPage : ContentPage
     {
         await Navigation.PushAsync(new GroupChatCreator());
     }
+
+    private void UseLoggerSwitched(object sender, EventArgs e)
+    {
+        Switch sw = (Switch)sender;
+        sw.IsToggled = !sw.IsToggled;
+    }
 }

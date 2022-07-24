@@ -14,7 +14,9 @@ public partial class MessagePage : ContentPage
 
     public static ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
 
-    public static User ChatUser { get; set; }
+    private static User ChatUser { get; set; }
+    private static Group GroupChat { get; set; }
+    private static bool isGroupChat { get; set; } 
 
     private static void OnNewMessage(MessageModel LastMessage)
     {
@@ -24,6 +26,7 @@ public partial class MessagePage : ContentPage
     public MessagePage(User user)
     {
         ChatUser = user;
+        isGroupChat = false;
 
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
@@ -35,10 +38,22 @@ public partial class MessagePage : ContentPage
         ChatUsername.Text = "Chatting with @" + user.Username;
     }
 
-    //TODO: THIS IS FUCK BUGGED 
+    public MessagePage(Group group)
+    {
+        isGroupChat = true;
+        GroupChat = group;
+
+        InitializeComponent();
+        NavigationPage.SetHasNavigationBar(this, false);
+
+        Current = this;
+        Messages.Clear();
+
+        ChatUsername.Text = "Chatting group @" + group.Name;
+    }
+
     protected override bool OnBackButtonPressed()
     {
-        Logger.Push("CHAT_CLOSE " + ChatUser.Username + "" + ChatUser.Id, TraceType.Func, LogLevel.Debug);
         SocketCore.Send(" ", Token.END_CHAT);
         return base.OnBackButtonPressed();
     }
@@ -59,9 +74,10 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        if (ChatUser.Id == int.Parse(LocalUser.id)) { return; }
-
-        Debug.Write("msg: "+packet.Data.GetType());
+        if (!isGroupChat)
+        {
+            if (ChatUser.Id == LocalUser.Id) { return; }
+        }
 
         MessageModel[] message = null;
         Task.Run(() =>
@@ -71,11 +87,26 @@ public partial class MessagePage : ContentPage
         {
             foreach(MessageModel msg in message)
             {
-                if (msg.UserId != ChatUser.Id)
+                Debug.Write("MSG:: " + msg.MessageContent);
+                if (!isGroupChat)
                 {
-                    if (int.Parse(LocalUser.id) != msg.UserId)
+                    if (msg.UserId != ChatUser.Id)
+                    {
+                        if (LocalUser.Id != msg.UserId)
+                        {
+                            return; //WARNING: check if all messages are from diffrent sources
+                        }
+                    }
+                    if (msg.IsGroup)
                     {
                         continue;
+                    }
+                }
+                else
+                {
+                    if (msg.GroupId != GroupChat.Id)
+                    {
+                        return;
                     }
                 }
                 MainThread.BeginInvokeOnMainThread(() => AddMessage(msg));
@@ -116,12 +147,10 @@ public partial class MessagePage : ContentPage
     {
         if (MessageInput.Text.Length > 0 && !_isFoc)
         {
-            //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 200, end: 350, easing: Easing.Linear), length: 250);
             _isFoc = true;
         }
         else if (MessageInput.Text.Length == 0 && _isFoc)
         {
-            //MessageInputFrame.Animate("WidthRequest", animation: new Animation(callback: (double d) => { MessageInputFrame.WidthRequest = d; }, start: 350, end: 200, easing: Easing.SpringIn), length: 500);
             _isFoc = false;
         }
     }
