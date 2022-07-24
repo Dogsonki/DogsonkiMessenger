@@ -78,7 +78,7 @@ def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
 
 
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
-    cursor.execute("""SELECT u2.id, u2.nick FROM ((users_link_table
+    cursor.execute("""SELECT u2.id, u2.nick, last_message_time FROM ((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id) 
                       WHERE u1.login=%s OR u2.login=%s;""", (login, login))
@@ -149,7 +149,7 @@ def get_nick(cursor: CMySQLCursor, login_id: int) -> str:
 
 
 def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[Tuple, bool]:
-    cursor.execute("""SELECT g.name, g.id FROM group_user_link_table
+    cursor.execute("""SELECT g.name, g.id, last_message_time FROM group_user_link_table
                       INNER JOIN groups_ AS g ON group_user_link_table.group_id
                       WHERE user_id=%s;""", (login_id,))
     sql_data = cursor.fetchall()
@@ -276,5 +276,24 @@ def set_group_avatar(cursor: CMySQLCursor, group_id: int, avatar: bytes):
 
 
 def create_users_link(cursor: CMySQLCursor, user1_id: int, user2_id: int):
-    cursor.execute("""INSERT INTO users_link_table(user_id, group_id)
+    cursor.execute("""INSERT INTO users_link_table(user1_id, user2_id)
                       VALUES (%s, %s)""", (user1_id, user2_id))
+
+
+def change_password(cursor: CMySQLCursor, login: str, new_password: str):
+    cursor.execute("""UPDATE users
+                      SET password = %s
+                      WHERE login = %s;""", (new_password, login))
+
+
+def update_last_time_message(cursor: CMySQLCursor, user1_id: int, user2_id: int):
+    cursor.execute("""UPDATE users_link_table
+                      SET last_message_time=CURRENT_TIMESTAMP
+                      WHERE (user1_id=%s AND user2_id=%s) OR (user2_id=%s AND user1_id=%s);""",
+                   (user1_id, user2_id, user2_id, user1_id))
+
+
+def update_last_time_message_group(cursor: CMySQLCursor, group_id: int):
+    cursor.execute("""UPDATE group_user_link_table
+                      SET last_message_time=CURRENT_TIMESTAMP
+                      WHERE group_id=%s;""", (group_id,))

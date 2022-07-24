@@ -33,12 +33,13 @@ class MessageType(Enum):
     AUTOMATICALLY_LOGGED = 10
     GET_AVATAR = 11
     LAST_CHATS = 12
-    SET_GROUP_AVATAR = 13
+    FORGOT_PASSWORD = 13
     NEW_MESSAGE = 14
     CREATE_GROUP = 15
     ADD_TO_GROUP = 16
     INIT_GROUP_CHAT = 17
     GET_GROUP_AVATAR = 18
+    SET_GROUP_AVATAR = 19
 
 
 @dataclass
@@ -139,6 +140,9 @@ class Client(Connection):
                 is_logged_correctly = False
             elif action_data.token == MessageType.SESSION_INFO:
                 is_logged_correctly = self.login_by_session(action_data)
+            elif action_data.token == MessageType.FORGOT_PASSWORD:
+                self.forgot_password(action_data.data)
+                is_logged_correctly = False
             else:
                 self.send_message("Error - should receive 'logging' or 'registering' code", MessageType.ERROR)
                 is_logged_correctly = False
@@ -148,18 +152,6 @@ class Client(Connection):
                 break
 
     def after_login(self):
-        user_chats = handling_sql.get_user_chats(self.db_cursor, self.login)
-        chats = []
-        if user_chats:
-            for i in user_chats:
-                chats.append({"name": i[1], "id": i[0], "type": "user"})
-
-        user_group_chats = handling_sql.get_user_groups(self.db_cursor, self.login_id)
-        if user_group_chats:
-            for i in user_group_chats:
-                chats.append({"name": i[0], "id": i[1], "type": "group"})
-
-        self.send_message(chats, MessageType.LAST_CHATS)
         current_connections[self.nick] = self
 
     def login_by_session(self, session_data) -> bool:
@@ -239,20 +231,19 @@ class Client(Connection):
         if created is not True:
             code = created
             self.send_message("6", MessageType.REGISTER)
-            confirmed = self.confirm_email(code)
         else:
             if not self.send_confirmation_email(code):
                 self.send_message("4", MessageType.REGISTER)
                 return
             self.send_message("2", MessageType.REGISTER)
-            confirmed = self.confirm_email(code)
+        confirmed = self.confirm_email(code, MessageType.REGISTER)
 
         if not confirmed:
             return
         handling_sql.register_user(self.db_cursor, self.login, self.password, nick)
         self.send_message("0", MessageType.REGISTER)
 
-    def confirm_email(self, code: int) -> bool:
+    def confirm_email(self, code: int, type_: MessageType) -> bool:
         while True:
             code_from_user = self.receive_message()
             if code_from_user.data == "a":
@@ -266,16 +257,49 @@ class Client(Connection):
                 return True
             else:
                 if confirmed > 5:
-                    self.send_message("10", MessageType.REGISTER)
+                    self.send_message("10", type_)
                     return False
                 else:
-                    self.send_message("9", MessageType.REGISTER)
+                    self.send_message("9", type_)
 
     def send_confirmation_email(self, code: int) -> bool:
         message = smpt_connection.create_message(self.login, code)
         if not smpt_connection.send_mail(self.login, message):
             return False
         return True
+
+    def forgot_password(self, login: str):
+        """
+        info from server:
+            0 - changed password
+            1 - cannot send email
+            2 - login doesn't exist
+            3 - password doesn't match requirements
+            9 - wrong confirmation code
+            10 - max attempts during writing code from email, try again
+        """
+        if not handling_sql.check_if_login_exist(self.db_cursor, login):
+            self.send_message("2", MessageType.FORGOT_PASSWORD)
+            return
+
+        code = get_confirmation_code()
+        created = handling_sql.create_confirmation_code(self.db_cursor, login, code)
+        if created is not True:
+            code = created
+        else:
+            if not self.send_confirmation_email(code):
+                self.send_message("1", MessageType.FORGOT_PASSWORD)
+                return
+        confirmed = self.confirm_email(code, MessageType.FORGOT_PASSWORD)
+        if confirmed:
+            while True:
+                new_password = self.receive_message().data
+                if 2 <= len(new_password) <= 50:
+                    break
+                else:
+                    self.send_message("3", MessageType.FORGOT_PASSWORD)
+            handling_sql.change_password(self.db_cursor, login, new_password)
+            self.send_message("0", MessageType.FORGOT_PASSWORD)
 
     def logout(self):
         del current_connections[self.nick]

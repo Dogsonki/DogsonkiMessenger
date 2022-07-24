@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
@@ -53,6 +54,8 @@ class NormalChatroom(functions.Chatroom):
         if not self.friends:
             handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
             self.friends = True
+        else:
+            handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)
 
 
@@ -98,6 +101,21 @@ def set_group_avatar(client: Client, data: dict):
     group.set_avatar(client, data)
 
 
+def send_last_chats(client: Client, data: str):
+    user_chats = handling_sql.get_user_chats(client.db_cursor, client.login)
+    chats = []
+    if user_chats:
+        for i in user_chats:
+            chats.append({"name": i[1], "id": i[0], "last_message_time": datetime.timestamp(i[2]), "type": "user"})
+
+    user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
+    if user_group_chats:
+        for i in user_group_chats:
+            chats.append({"name": i[0], "id": i[1], "last_message_time": datetime.timestamp(i[2]), "type": "group"})
+
+    client.send_message(chats, MessageType.LAST_CHATS)
+
+
 class ClientMenu:
     client: Client
     actions: dict = {
@@ -110,7 +128,8 @@ class ClientMenu:
         MessageType.ADD_TO_GROUP: group.add_to_group,
         MessageType.INIT_GROUP_CHAT: start_group_chatroom,
         MessageType.GET_GROUP_AVATAR: get_group_avatar,
-        MessageType.SET_GROUP_AVATAR: set_group_avatar
+        MessageType.SET_GROUP_AVATAR: set_group_avatar,
+        MessageType.LAST_CHATS: send_last_chats
     }
 
     def __init__(self, client: Client):

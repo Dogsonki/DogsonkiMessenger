@@ -34,6 +34,7 @@ class CreateDatabase:
                                   user1_id INTEGER NOT NULL,
                                   user2_id INTEGER NOT NULL,
                                   is_friend BIT DEFAULT 0,
+                                  last_message_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                                   FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
                                   FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE
@@ -82,6 +83,7 @@ class CreateDatabase:
                                   group_id INTEGER NOT NULL,
                                   is_admin BIT DEFAULT 0,
                                   is_accepted_by_user BIT DEFAULT 0,
+                                  last_message_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                
                                   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                                   FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE
