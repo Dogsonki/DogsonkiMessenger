@@ -47,18 +47,19 @@ def set_avatar(client: Client, data: dict):
 
 
 class GroupChatroom(functions.Chatroom):
-    group_id: str
+    group_id: int
     group_members: list
 
     def __init__(self, connection: Client, group_id: str):
         super().__init__(connection)
-        self.group_members = handling_sql.get_group_members(self.connection.db_cursor, int(group_id))
+        self.group_id = int(group_id)
+        self.group_members = handling_sql.get_group_members(self.connection.db_cursor, self.group_id)
 
     def send_last_messages(self, old: bool = False):
         message_history = handling_sql.get_last_30_messages_from_group_chatroom(self.connection.db_cursor,
-                                                                                int(self.group_id),
+                                                                                self.group_id,
                                                                                 self.number_of_sent_last_messages)
-        self._send_last_messages(message_history, old)
+        self._send_last_messages(message_history, old, True, self.group_id)
 
     def receive_messages(self):
         while True:
@@ -76,11 +77,13 @@ class GroupChatroom(functions.Chatroom):
         message_ = message.data.strip()
         if message_ != "":
             for i in self.group_members:
-                receiver_connection = current_connections.get(i)
-                if receiver_connection:
-                    data = [{"user": self.connection.nick, "message": message_,
-                            "time": time.time(), "user_id": self.connection.login_id}]
-                    receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
+                if i != self.connection.nick:
+                    receiver_connection = current_connections.get(i)
+                    if receiver_connection:
+                        data = [{"user": self.connection.nick, "message": message_,
+                                "time": time.time(), "user_id": self.connection.login_id,
+                                 "is_group": True, "group_id": self.group_id}]
+                        receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
             self.save_message_in_database(message_)
 
     def save_message_in_database(self, message):

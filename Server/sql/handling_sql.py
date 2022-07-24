@@ -12,7 +12,6 @@ from mysql.connector.cursor_cext import CMySQLCursor
 class ChatMessage:
     content: str
     sender: str
-    receiver: str
     time: datetime
     sender_id: int
 
@@ -20,7 +19,7 @@ class ChatMessage:
 def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
                                        number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u1.nick, u2.nick, time, sender_id FROM ((messages
+    cursor.execute("""SELECT content, u1.nick, time, sender_id FROM ((messages
                       INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                       INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
@@ -36,15 +35,15 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
 def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
                                              number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u.nick, u2.nick, time, sender_id FROM ((groups_messages
-                      INNER JOIN users AS u ON messages.sender_id = u.id)
-                      INNER JOIN groups_ AS g ON messages.group_id = g.id)
+    cursor.execute("""SELECT content, u.nick, time, sender_id FROM ((groups_messages
+                      INNER JOIN users AS u ON groups_messages.sender_id = u.id)
+                      INNER JOIN groups_ AS g ON groups_messages.group_id = g.id)
                       WHERE group_id = %s
-                      ORDER BY messages.id DESC LIMIT %s,30;""", (group_id, number_of_sent_last_messages))
+                      ORDER BY groups_messages.id DESC LIMIT %s,30;""", (group_id, number_of_sent_last_messages))
     sql_data = cursor.fetchall()
     messages = []
     for i in sql_data:
-        messages.append(ChatMessage(i[0], i[1], i[2], i[3], i[4]))
+        messages.append(ChatMessage(*i))
     return messages
 
 
@@ -78,7 +77,7 @@ def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
 
 
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
-    cursor.execute("""SELECT u2.id, u2.nick, last_message_time FROM ((users_link_table
+    cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, last_message_time FROM ((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id) 
                       WHERE u1.login=%s OR u2.login=%s;""", (login, login))
@@ -150,7 +149,7 @@ def get_nick(cursor: CMySQLCursor, login_id: int) -> str:
 
 def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[Tuple, bool]:
     cursor.execute("""SELECT g.name, g.id, last_message_time FROM group_user_link_table
-                      INNER JOIN groups_ AS g ON group_user_link_table.group_id
+                      INNER JOIN groups_ AS g ON group_user_link_table.group_id = g.id
                       WHERE user_id=%s;""", (login_id,))
     sql_data = cursor.fetchall()
     if sql_data is None:
@@ -167,7 +166,7 @@ def get_is_admin(cursor: CMySQLCursor, login_id: int, group_id: int) -> bool:
 
 def get_group_members(cursor: CMySQLCursor, group_id: int) -> List:
     cursor.execute("""SELECT u.nick FROM group_user_link_table
-                      INNER JOIN users AS u ON group_user_link_table.user_id 
+                      INNER JOIN users AS u ON group_user_link_table.user_id = u.id
                       WHERE group_id=%s;""", (group_id,))
     sql_data = cursor.fetchall()
     return [i[0] for i in sql_data]

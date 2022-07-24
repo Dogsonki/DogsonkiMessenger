@@ -26,7 +26,7 @@ class NormalChatroom(functions.Chatroom):
         if not message_history and not old:
             self.friends = False
         else:
-            self._send_last_messages(message_history, old)
+            self._send_last_messages(message_history, old, False)
 
     def receive_messages(self):
         while True:
@@ -46,7 +46,8 @@ class NormalChatroom(functions.Chatroom):
             receiver_connection = current_connections.get(self.receiver)
             if receiver_connection:
                 data = [{"user": self.connection.nick, "message": message_,
-                        "time": time.time(), "user_id": self.connection.login_id}]
+                        "time": time.time(), "user_id": self.connection.login_id,
+                         "is_group": False, "group_id": -1}]
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
             self.save_message_in_database(message_)
 
@@ -106,7 +107,10 @@ def send_last_chats(client: Client, data: str):
     chats = []
     if user_chats:
         for i in user_chats:
-            chats.append({"name": i[1], "id": i[0], "last_message_time": datetime.timestamp(i[2]), "type": "user"})
+            if client.login_id == i[2]:
+                chats.append({"name": i[1], "id": i[0], "last_message_time": datetime.timestamp(i[4]), "type": "user"})
+            else:
+                chats.append({"name": i[3], "id": i[2], "last_message_time": datetime.timestamp(i[4]), "type": "user"})
 
     user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     if user_group_chats:

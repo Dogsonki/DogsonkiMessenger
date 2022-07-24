@@ -24,13 +24,13 @@ class Chatroom(metaclass=abc.ABCMeta):
     def receive_messages(self):
         pass
 
-    def _send_last_messages(self, message_history: list, old: bool):
+    def _send_last_messages(self, message_history: list, old: bool, is_group: bool, group_id: int = -1):
         self.number_of_sent_last_messages += 30
         if message_history:
             message_list = []
             for i in message_history:
                 data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
-                        "user_id": i.sender_id}
+                        "user_id": i.sender_id, "is_group": is_group, "group_id": group_id}
                 message_list.append(data)
             self.send_message(message_list, old)
 
