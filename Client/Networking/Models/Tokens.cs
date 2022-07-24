@@ -24,10 +24,11 @@ public enum Token : int
     SESSION_INFO = 9,
     LOGIN_SESSION = 10,
     AVATAR_REQUEST = 11,
-    LAST_USERS = 12,
-    LAST_GROUP_CHATS = 13,
+    LAST_CHATS = 12,
+    PASSWORD_FORGOT = 13,
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
+    GROUP_CHAT_INIT = 17
 }
 
 /// <summary>
@@ -71,7 +72,7 @@ public static class Tokens
                 MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
-                Debug.Write("SESSION GOT");
+
                 Session session = Essential.ModelCast<Session>(packet.Data);
                 Session.OverwriteSession(session);
                 break;
@@ -89,11 +90,8 @@ public static class Tokens
             case Token.AVATAR_REQUEST:
                 UserImageRequestModel.ProcessImage(packet);
                 break;
-            case Token.LAST_USERS:
-                MainPage.AddLastUsers(packet);
-                break;
-            case Token.LAST_GROUP_CHATS:
-                MainPage.AddLastGroups(packet);
+            case Token.LAST_CHATS:
+                MainPage.AddLastChats(packet);
                 break;
             default:
                 Debug.Write("TOKEN_UNRECOGNIZED: " + packet.Data);

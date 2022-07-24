@@ -8,7 +8,7 @@ namespace Client.Pages;
 
 public partial class SearchPage : ContentPage
 {
-    public static ObservableCollection<User> UsersFound { get; set; } = new ObservableCollection<User>();
+    public static ObservableCollection<AnyListBindable> UsersFound { get; set; } = new ObservableCollection<AnyListBindable>();
 
     public SearchPage(string preInputText)
     {
@@ -37,10 +37,16 @@ public partial class SearchPage : ContentPage
 
         foreach (var user in users)
         {
-            Debug.Write(user.Username + " " + user.Id);
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                UsersFound.Add(User.CreateOrGet(user.Username, user.Id));
+                if(user.Type == "user")
+                {
+                    UsersFound.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.Id), true));
+                }
+                else
+                {
+                    UsersFound.Add(new AnyListBindable(Group.CreateOrGet(user.Username, user.Id),true));
+                }
             });
         }
     }
