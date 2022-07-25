@@ -273,8 +273,10 @@ class Client(Connection):
         info from server:
             0 - changed password
             1 - cannot send email
-            2 - login doesn't exist
+            2 - user with this email doesn't exist
             3 - password doesn't match requirements
+            4 - email sent
+            5 - correct code
             9 - wrong confirmation code
             10 - max attempts during writing code from email, try again
         """
@@ -283,6 +285,7 @@ class Client(Connection):
             return
 
         code = get_confirmation_code()
+        self.login = login
         created = handling_sql.create_confirmation_code(self.db_cursor, login, code)
         if created is not True:
             code = created
@@ -290,8 +293,11 @@ class Client(Connection):
             if not self.send_confirmation_email(code):
                 self.send_message("1", MessageType.FORGOT_PASSWORD)
                 return
+
+        self.send_message("4", MessageType.FORGOT_PASSWORD)
         confirmed = self.confirm_email(code, MessageType.FORGOT_PASSWORD)
         if confirmed:
+            self.send_message("5", MessageType.FORGOT_PASSWORD)
             while True:
                 new_password = self.receive_message().data
                 if 2 <= len(new_password) <= 50:
@@ -299,6 +305,7 @@ class Client(Connection):
                 else:
                     self.send_message("3", MessageType.FORGOT_PASSWORD)
             handling_sql.change_password(self.db_cursor, login, new_password)
+            handling_sql.delete_session(self.db_cursor, self.login_id)
             self.send_message("0", MessageType.FORGOT_PASSWORD)
 
     def logout(self):
