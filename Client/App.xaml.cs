@@ -15,7 +15,6 @@ public partial class App : Application
         {
             CurrentLoginPage = new LoginPage();
             MainPage = new NavigationPage(CurrentLoginPage);
-
             Connection.AddOnConnection(Session.ReadSession);
             SocketCore.Init(); //TODO: if throw redirect login with error 
         }

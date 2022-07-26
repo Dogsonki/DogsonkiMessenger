@@ -59,14 +59,14 @@ public partial class ConfirmEmailCode : ContentPage
                 MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     RegisterPage rg = new RegisterPage();
-                    rg.message.ShowError("Max attemps used. Please try again later!");
+                    rg.message.ShowError("Max attemps used. \n Please try again later!");
                     Navigation.PushAsync(rg);
                 });
                 break;
             case RToken.ACCEPT:
                 MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Navigation.PushAsync(new LoginPage("Your accout has been activated \n You can now login to your account"));
+                    Navigation.PushAsync(new LoginPage("Your accout has been activated. \n You can now login to your account"));
                 });
                 break;
             default:

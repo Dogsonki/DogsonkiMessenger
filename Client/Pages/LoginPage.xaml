@@ -42,9 +42,14 @@
 			<StackLayout IsVisible="true" WidthRequest="300"  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
 
 			<StackLayout Orientation="Horizontal">
-				<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
+				<CheckBox x:Name="CheckRemember" Color="#706f6d"/>
 				<Label TextColor="White" Padding="10" Text="Remember me"/>
-				<Label TextColor="White" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand" Padding="10" Text="Forgot Password"/>
+				<StackLayout VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
+					<StackLayout.GestureRecognizers>
+						<TapGestureRecognizer Tapped="RedirectToForgotPassword"/>
+					</StackLayout.GestureRecognizers>
+					<Label TextColor="White" Padding="10" Text="Forgot Password"/>
+				</StackLayout>
 			</StackLayout>
 
 			<StackLayout Padding="15">

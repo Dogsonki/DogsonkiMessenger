@@ -29,6 +29,11 @@ public partial class LoginPage : ContentPage
         await Navigation.PushAsync(new RegisterPage());
     }
 
+    private async void RedirectToForgotPassword(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new PasswordForgot.ForgotPasswordEnterEmail());
+    }
+
     private void LoginDone(object sender, EventArgs e)
     {
         string username = Input_Username.Text;

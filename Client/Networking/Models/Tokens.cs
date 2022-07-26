@@ -5,6 +5,7 @@ using Client.Networking.Model;
 using Client.Pages;
 using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
+using Client.Pages.PasswordForgot;
 
 namespace Client;
 
@@ -72,7 +73,6 @@ public static class Tokens
                 MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
-
                 Session session = Essential.ModelCast<Session>(packet.Data);
                 Session.OverwriteSession(session);
                 break;
