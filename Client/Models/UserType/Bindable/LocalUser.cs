@@ -24,6 +24,11 @@ public class LocalUser : BindableObject
     {
         get
         {
+            if(avatar is not null)
+            {
+                Debug.Write(avatar.Id);
+            }
+          
             return avatar;
         }
         set { avatar = value; OnPropertyChanged(nameof(Avatar)); }

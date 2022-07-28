@@ -12,6 +12,25 @@ public partial class MainPage : ContentPage
     public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
     public static MainPage Instance;
 
+    public MainPage()
+    {
+        InitializeComponent();
+
+        NavigationPage.SetHasNavigationBar(this, false);
+        SocketCore.Send(" ", Token.LAST_CHATS);
+
+        if (Instance is null)
+        {
+            Instance = this;
+
+            Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
+        }
+
+#if DEBUG
+        LastChats.Add(new AnyListBindable(User.CreateOrGet("uwu", 11),true));
+#endif
+    }
+
     public static void AddLastChats(SocketPacket packet)
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -45,21 +64,6 @@ public partial class MainPage : ContentPage
     {
         view.ScrollToAsync(0d, 0d, true);
         return true;
-    }
-
-    public MainPage()
-    {
-        InitializeComponent();
-
-        NavigationPage.SetHasNavigationBar(this, false);
-        SocketCore.Send(" ", Token.LAST_CHATS);
-
-        if (Instance is null)
-        {
-            Instance = this;
-
-            Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
-        }
     }
 
     private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());

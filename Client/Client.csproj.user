@@ -45,6 +45,9 @@
     <MauiXaml Update="Pages\TemporaryPages\ChangingAvatarPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
+    <MauiXaml Update="Pages\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
     <MauiXaml Update="Pages\TemporaryPages\GroupChat\GroupChatCreator.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>

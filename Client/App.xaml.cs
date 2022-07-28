@@ -1,6 +1,7 @@
 ﻿using Client.Networking.Core;
 using Client.Pages;
 using Client.IO;
+using Client.Models.UserType.Bindable;
 
 namespace Client;
 
@@ -13,10 +14,10 @@ public partial class App : Application
         InitializeComponent();
         try
         {
+            Connection.AddOnConnection(Session.ReadSession);
+            SocketCore.Init();
             CurrentLoginPage = new LoginPage();
             MainPage = new NavigationPage(CurrentLoginPage);
-            Connection.AddOnConnection(Session.ReadSession);
-            SocketCore.Init(); //TODO: if throw redirect login with error 
         }
         catch(Exception ex)
         {

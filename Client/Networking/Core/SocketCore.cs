@@ -1,6 +1,7 @@
 ﻿using Client.Networking.Model;
 using Client.Pages;
 using Client.Utility;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -99,10 +100,6 @@ public class SocketCore : Connection
                     Connect();
                     Debug.Error("Connection stream is null");
                 }
-                else
-                {
-
-                }
             }
             Thread.Sleep(10);
         }
@@ -165,8 +162,11 @@ public class SocketCore : Connection
         if (!AbleToSend())
             return false;
 
-        SocketPacket model = new SocketPacket(data, token);
-        SocketQueue.Add(model);
+        ThreadPool.QueueUserWorkItem((w) =>
+        {
+            SocketPacket model = new SocketPacket(data, token);
+            SocketQueue.Add(model);
+        });
 
         return true;
     }

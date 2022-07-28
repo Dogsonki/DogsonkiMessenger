@@ -5,6 +5,7 @@ using Client.Networking.Model;
 using Client.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
+using Client.Pages.TemporaryPages.ChatOptions;
 
 namespace Client.Pages;
 
@@ -20,7 +21,7 @@ public partial class MessagePage : ContentPage
 
     private static void OnNewMessage(MessageModel LastMessage)
     {
-        //Current.MessageList.ScrollTo(LastMessage, ScrollToPosition.End, false);
+        Current.MessageList.ScrollTo(LastMessage, ScrollToPosition.End, false);
     }
 
     public MessagePage(User user)
@@ -31,7 +32,7 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         NavigationPage.SetHasBackButton(this, true);
-
+        
         Current = this;
         Messages.Clear();
 
@@ -63,7 +64,7 @@ public partial class MessagePage : ContentPage
         MessageModel u = new MessageModel(LocalUser.username, message, time);
         SocketCore.Send(message, Token.SEND_MESSAGE);
         Messages.Add(u);
-        OnNewMessage(u);
+       // OnNewMessage(u);
     }
 
     public static void AddMessage(MessageModel message)
@@ -87,7 +88,6 @@ public partial class MessagePage : ContentPage
         {
             foreach(MessageModel msg in message)
             {
-                Debug.Write("MSG:: " + msg.MessageContent);
                 if (!isGroupChat)
                 {
                     if (msg.UserId != ChatUser.Id)
@@ -153,5 +153,18 @@ public partial class MessagePage : ContentPage
         {
             _isFoc = false;
         }
+    }
+
+    private async void ChatOptions(object sender, SwipedEventArgs e)
+    {
+        Debug.Write("aa");
+        await Navigation.PushAsync(new ChatOptionsMain(), true);
+    }
+
+    private void DebugSelected(object sender, SelectedItemChangedEventArgs e)
+    {
+        MessageModel msg = (MessageModel)e.SelectedItem;
+        Debug.Write(msg.Username);
+        Debug.Write(msg.AvatarImage.Id);
     }
 }

@@ -103,5 +103,5 @@ public class User : BindableObject
         return new User(username, id, true);
     }
 
-    public static User GetUser(uint id) => Users.Find(x => x.Id == id);
+    public static User GetUser(int id) => Users.Find(x => x.Id == id);
 }

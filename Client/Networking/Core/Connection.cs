@@ -66,11 +66,11 @@ public class Connection
             Type ERROR_TYPE = ex.GetType();
             if (ERROR_TYPE == typeof(SocketException))
             {
-                Debug.Error("UNABLE_TO_CONNECT");//its ok
+                Logger.Push("UNABLE_TO_CONNECT",TraceType.Func,LogLevel.Error);//its ok
             }
             else if (ERROR_TYPE == typeof(ArgumentNullException) || ERROR_TYPE == typeof(ArgumentOutOfRangeException))
             {
-                Debug.Error("SOCKETCONFIG_DESERIALIZE_ERROR " + ex);
+                Logger.Push("SOCKET_CONFIG_DESERIALIZE_ERROR", TraceType.Func, LogLevel.Error);
             }
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
