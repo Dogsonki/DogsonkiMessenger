@@ -1,4 +1,5 @@
-﻿using Client.Networking.Model;
+﻿using Client.Networking.Bot.Models;
+using Client.Networking.Model;
 using Client.Pages;
 using Client.Utility;
 using System.ComponentModel;
@@ -146,12 +147,18 @@ public class SocketCore : Connection
 
     private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
 
-    public static bool SendCallback(Action<object> Callback, object SendingData, Token token)
+    public static bool SendCallback(Action<object> Callback, object SendingData, Token token,bool SendableOnce = true)
     {
         if (!AbleToSend())
             return false;
 
+        if (SendableOnce && RequestedCallback.IsAlreadyQueued(token))
+        {
+            return true;
+        }
+
         RequestedCallback.AddCallback(new RequestedCallback(Callback, SendingData, (int)token));
+
         Send(SendingData, token);
 
         return true;
@@ -162,7 +169,7 @@ public class SocketCore : Connection
         if (!AbleToSend())
             return false;
 
-        ThreadPool.QueueUserWorkItem((w) =>
+        Task.Run(() =>
         {
             SocketPacket model = new SocketPacket(data, token);
             SocketQueue.Add(model);
@@ -171,10 +178,17 @@ public class SocketCore : Connection
         return true;
     }
 
-    public static bool SendPacket(SocketPacket packet)
+    public static bool SendCommand(IBotCommand command)
     {
-        if (!AbleToSend())
-            return false;
+        if (!AbleToSend()) return false;
+        SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
+        SocketQueue.Add(packet);
+        return true;
+    }
+
+    private static bool SendPacket(SocketPacket packet)
+    {
+        if (!AbleToSend()) return false;
 
         SocketQueue.Add(packet);
 

@@ -26,13 +26,7 @@ public class SocketPacket
     }
 
     [JsonConstructor]
-    public SocketPacket(object data, Token token = Client.Token.EMPTY, bool isImage = false)
-    {
-        Data = data;
-        Token = (int)token;
-    }
-
-    public SocketPacket(object data, bool isImage, bool isLastPacket, Token token)
+    public SocketPacket(object data, Token token = Client.Token.EMPTY)
     {
         Data = data;
         Token = (int)token;

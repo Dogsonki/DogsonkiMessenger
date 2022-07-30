@@ -6,6 +6,8 @@ using Client.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
+using Client.Networking.Bot.Models;
+using Newtonsoft.Json;
 
 namespace Client.Pages;
 
@@ -61,11 +63,54 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(string message, DateTime time)
     {
+        if (message.StartsWith("!"))
+        {
+            ProcessCommands(message.Split(" "));
+        }
         MessageModel u = new MessageModel(LocalUser.username, message, time);
         SocketCore.Send(message, Token.SEND_MESSAGE);
         Messages.Add(u);
-       // OnNewMessage(u);
     }
+
+    public static void ProcessCommands(string[] args)
+    {
+        try
+        {
+            string command = args[0];
+
+            switch (command)
+            {
+                case "!daily":
+                    SocketCore.SendCommand(new Daily(command));
+                    break;
+                case "!bet":
+                    if (!HasArgsCount(args.Length, Bet.ArgsCount)) return;
+                    SocketCore.SendCommand(new Bet(command, args[1], args[2]));
+                    break;
+                case "jackpotbuy":
+                    if (!HasArgsCount(args.Length, JackpotBuy.ArgsCount)) return;
+                    SocketCore.SendCommand(new JackpotBuy(command, args[1]));
+                    break;
+                case "zdrapka":
+                    SocketCore.SendCommand(new Scratchcard(command));
+                    break;
+                case "sklep":
+                    if (!HasArgsCount(args.Length, Shop.ArgsCount)) return;
+                    SocketCore.SendCommand(new Shop(command, args[1]));
+                    break;
+                case "slots":
+                    SocketCore.SendCommand(new Daily(command));
+                    break;
+                     
+            }
+        }
+        catch(Exception ex)
+        {
+            Debug.Error(ex);
+        }
+    }
+
+    private static bool HasArgsCount(int ArgsCount,int CommandArgsCount) => ArgsCount >= CommandArgsCount;
 
     public static void AddMessage(MessageModel message)
     {

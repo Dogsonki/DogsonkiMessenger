@@ -15,8 +15,10 @@ public class SearchModel
     [JsonProperty("last_message_time")]
     public DateTime LastMessageTime { get; set; }
 
+    public bool isGroup => Type != "user";
+
     [JsonConstructor]
-    public SearchModel(string name, int id,string type,double last_message_time)
+    public SearchModel(string name, int id, string type, double last_message_time)
     {
         Username = name;
         Id = id;

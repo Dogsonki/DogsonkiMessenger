@@ -69,11 +69,6 @@ public partial class SettingsPage : ContentPage
         Cache.ClearAbsoluteCache();
     }
 
-    private async void CreateGroup(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new GroupChatCreator());
-    }
-
     private void UseLoggerSwitched(object sender, EventArgs e)
     {
         Switch sw = (Switch)sender;

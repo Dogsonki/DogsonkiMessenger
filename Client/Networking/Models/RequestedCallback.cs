@@ -15,6 +15,8 @@
             Callback = callback;
         }
 
+        public static bool IsAlreadyQueued(Token token) => Callbacks.Find(x => x.GetToken() == (int)token) is not null;
+
         public static void AddCallback(RequestedCallback callback) => Callbacks.Add(callback);
 
         public int GetToken() => CallbackID;
@@ -23,8 +25,6 @@
         /// <summary>
         /// Invokes function and removes itself from list of callbacks
         /// </summary>
-        /// <param name="Recived"></param>
-        /// <returns></returns>
         public void Invoke(object Recived)
         {
             if (Callback != null)

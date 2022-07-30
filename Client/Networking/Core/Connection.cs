@@ -26,6 +26,7 @@ public class Connection
     {
         if (IsConnecting)
             return;
+
         IsConnecting = true;
         try
         {
@@ -86,5 +87,4 @@ public class Connection
 
         return true;
     }
-
 }

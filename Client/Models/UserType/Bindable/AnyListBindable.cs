@@ -70,7 +70,7 @@ public class AnyListBindable : BindableObject
         }
     }
 
-    public AnyListBindable(User user,bool useUserInput = false, Command input = null)
+    public AnyListBindable(User user, bool useUserInput = false, Command input = null)
     {
         type = BindType.User;
         BindedUser = user;
@@ -78,9 +78,8 @@ public class AnyListBindable : BindableObject
         Input = input;
     }
 
-    public AnyListBindable(Group group,bool useGroupInput = false, Command input = null)
+    public AnyListBindable(Group group, bool useGroupInput = false, Command input = null)
     {
-        Debug.Write("Group created with command: " + useGroupInput);
         BindedGroup = group;
         type = BindType.Group;
         UseGroupInput= useGroupInput;

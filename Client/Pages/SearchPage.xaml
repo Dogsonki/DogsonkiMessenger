@@ -21,7 +21,7 @@
 					<ViewCell>
 						<StackLayout>
 							<StackLayout.GestureRecognizers>
-								<TapGestureRecognizer Command="{Binding OpenChatCommand}" />
+								<TapGestureRecognizer Command="{Binding Input}" />
 							</StackLayout.GestureRecognizers>
 							<Grid>
 								<Grid.RowDefinitions>

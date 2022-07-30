@@ -29,7 +29,8 @@ public enum Token : int
     PASSWORD_FORGOT = 13,
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
-    GROUP_CHAT_INIT = 17
+    GROUP_CHAT_INIT = 17,
+    BOT_COMMAND = 20
 }
 
 /// <summary>

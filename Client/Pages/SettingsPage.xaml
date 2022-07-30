@@ -10,8 +10,6 @@
 			<StackLayout Spacing="10">
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Experimental"/>
 
-				<Button Clicked="CreateGroup" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Create Group"/>
-
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Profile Settings"/>
 				<Button Clicked="ChangeAvatar" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
 				<Button Clicked="Logout" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Logout"/>

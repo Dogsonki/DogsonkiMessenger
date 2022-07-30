@@ -2,6 +2,7 @@ using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
+using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
 using System.Collections.ObjectModel;
 
@@ -25,10 +26,6 @@ public partial class MainPage : ContentPage
 
             Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
         }
-
-#if DEBUG
-        LastChats.Add(new AnyListBindable(User.CreateOrGet("uwu", 11),true));
-#endif
     }
 
     public static void AddLastChats(SocketPacket packet)
@@ -41,7 +38,7 @@ public partial class MainPage : ContentPage
 
             foreach (var chat in lastChats)
             {
-                if(chat.Type == "user")
+                if(!chat.isGroup)
                 {       
                     User user = User.CreateOrGet(chat.Username, chat.Id);
                     bindable.Add(new AnyListBindable(user,true));
@@ -58,6 +55,11 @@ public partial class MainPage : ContentPage
                 LastChats.Add(bind);
             }
         });
+    }
+
+    private async void CreateGroup(object sender, EventArgs e)
+    {
+       await Navigation.PushAsync(new GroupChatCreator());
     }
 
     protected override bool OnBackButtonPressed()

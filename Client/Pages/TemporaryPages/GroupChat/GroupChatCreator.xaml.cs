@@ -16,7 +16,11 @@ public partial class GroupChatCreator : ContentPage
         Invited.Clear();
         UsersFound.Clear();
 
-        Invited.Add(new AnyListBindable(LocalUser.UserRef));
+        if(LocalUser.UserRef != null)
+        {
+            Invited.Add(new AnyListBindable(LocalUser.UserRef));
+        }
+      
         LocalUser.isCreatingGroup = true;
 
         InitializeComponent();

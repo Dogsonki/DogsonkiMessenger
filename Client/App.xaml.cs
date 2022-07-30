@@ -1,7 +1,6 @@
 ﻿using Client.Networking.Core;
 using Client.Pages;
 using Client.IO;
-using Client.Models.UserType.Bindable;
 
 namespace Client;
 

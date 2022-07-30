@@ -10,7 +10,7 @@
 			<Label x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
 		</AbsoluteLayout>
 		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElement" Refreshing="Refresh"
-					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="Single" ItemSelected="DebugSelected" 
+					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"
 					  ItemsSource="{Binding Source={x:Static local:MessagePage.Messages}}">
 			<ListView.ItemTemplate>
 					<DataTemplate>

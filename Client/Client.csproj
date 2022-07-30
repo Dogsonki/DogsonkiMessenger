@@ -82,7 +82,8 @@
 	<ItemGroup>
 	  <None Remove="Networking\SocketConfig.json" />
 	  <None Remove="Resources\Images\add.png" />
-	  <None Remove="Resources\Images\setting.png" />
+	  <None Remove="Resources\Images\creategroup.png" />
+	  <None Remove="Resources\Images\settings.png" />
 	</ItemGroup>
 
 	<ItemGroup>
