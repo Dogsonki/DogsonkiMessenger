@@ -28,23 +28,16 @@ public partial class RegisterPage : ContentPage
     {
         string username = InputUsername.Text;
         string password = InputPassword.Text;
-        string passwordRepeat = InputPasswordRepeat.Text;
         string email = InputEmail.Text;
 
         int IllegalCharIndex;
 
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)
-            || string.IsNullOrEmpty(passwordRepeat))
+        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             message.ShowError("Username / password or email is empty");
             return;
         }
 
-        if (password != passwordRepeat)
-        {
-            message.ShowError("Make sure your passwords match");
-            return;
-        }
 
         if ((IllegalCharIndex = username.IndexOfAny(IllegalCharacters)) > 0)
         {
@@ -52,8 +45,8 @@ public partial class RegisterPage : ContentPage
             return;
         }
 
-        MailAddress _tempAdr;
-        if (!MailAddress.TryCreate(email, out _tempAdr))
+        MailAddress _temp;
+        if (!MailAddress.TryCreate(email, out _temp))
         {
             message.ShowError("Invalid email");
             return;
@@ -71,9 +64,6 @@ public partial class RegisterPage : ContentPage
         RToken token = Tokens.CharToRToken(rev);
         switch (token)
         {
-            case RToken.ACCEPT:
-                MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new LoginPage()));
-                break;
             case RToken.EMAIL_SENT:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;

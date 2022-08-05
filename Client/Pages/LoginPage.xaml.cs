@@ -10,7 +10,7 @@ public partial class LoginPage : ContentPage
 {
     public static LoginPage Current;
     public MessagePopPage message;
-
+    
     public LoginPage(string info = null)
     {
         InitializeComponent();

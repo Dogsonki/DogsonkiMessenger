@@ -4,18 +4,9 @@
              x:Class="Client.Pages.RegisterPage"
              Title="RegisterPage"
 			 BackgroundColor="#121212">
-	
+
 	<StackLayout Padding="20" Spacing="15">
-		<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text="Login">
-				<Label.GestureRecognizers>
-					<TapGestureRecognizer Tapped="RedirectToLogin"/>
-				</Label.GestureRecognizers>
-			</Label>
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" or "/>
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text=" Register"/>
-		</StackLayout>
-		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"/>
+		<Label  VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Join to Dogsonki"/>
 
 		<StackLayout Spacing="15">
 			<StackLayout>
@@ -37,23 +28,13 @@
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 				</Frame>
 			</StackLayout>
-		
+
 			<StackLayout>
 				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
 			   HeightRequest="44" WidthRequest="300">
 					<Entry x:Name="InputPassword" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
 			       TextColor="White" PlaceholderColor="White" Placeholder="Password"
-				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
-				</Frame>
-			</StackLayout>
-		
-			<StackLayout>
-				<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
-			   HeightRequest="44" WidthRequest="300">
-					<Entry x:Name="InputPasswordRepeat" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
-				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       TextColor="White" PlaceholderColor="White" Placeholder="Repeat Password"
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 				</Frame>
 			</StackLayout>
@@ -66,6 +47,13 @@
 					WidthRequest="250" Clicked="RegisterDone" Text="Create account"
 					CornerRadius="15" FontFamily="OpenSansSemibold"/>
 		</StackLayout>
-		
+
+		<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+			<StackLayout.GestureRecognizers>
+				<TapGestureRecognizer Tapped="RedirectToLogin"/>
+			</StackLayout.GestureRecognizers>
+			<Label Text="Log in"/>
+		</StackLayout>
+
 	</StackLayout>
 </ContentPage>
