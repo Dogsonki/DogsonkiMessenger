@@ -27,11 +27,14 @@
 					<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
 							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
 				</Frame>
-				<StackLayout WidthRequest="270">
+				<StackLayout Padding="5" WidthRequest="270">
 					<StackLayout Spacing="0" Orientation="Horizontal">
 						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
 						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="#" />
 						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+					</StackLayout>
+					<StackLayout>
+						<Label x:Name="DogeCoinsCount" Text="DogeCoins: {dogeCoins}"/>
 					</StackLayout>
 				</StackLayout>
 				<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand"
@@ -41,7 +44,7 @@
 					</Image.GestureRecognizers>
 				</Image>
 			</StackLayout>
-			
+		
 			<Label TextColor="White" HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
 			<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
 				<StackLayout.GestureRecognizers>

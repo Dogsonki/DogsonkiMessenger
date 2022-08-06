@@ -5,7 +5,7 @@
 			 BackgroundColor="#121212">
 
 	<StackLayout Padding="10" Spacing="15">
-		<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Login to Dogsonki"/>
+		<Label TextColor="White" VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Login to Dogsonki"/>
 		<StackLayout>
 			<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
 			   HeightRequest="44" WidthRequest="300">
@@ -51,7 +51,7 @@
 				<StackLayout.GestureRecognizers>
 					<TapGestureRecognizer Tapped="RedirectToRegister"/>
 				</StackLayout.GestureRecognizers>
-				<Label Text="Sign in"/>
+				<Label TextColor="White" Text="Sign in"/>
 			</StackLayout>
 		</StackLayout>
 	</StackLayout>

@@ -6,8 +6,8 @@
 			 BackgroundColor="#121212">
 
 	<StackLayout>
-		<AbsoluteLayout HorizontalOptions="Center">
-			<Label x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
+		<AbsoluteLayout Margin="10,10,10,0">
+			<Label FontSize="Medium" x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
 		</AbsoluteLayout>
 		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElement" Refreshing="Refresh"
 					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"

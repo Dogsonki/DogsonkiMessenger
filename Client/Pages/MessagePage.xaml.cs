@@ -38,7 +38,7 @@ public partial class MessagePage : ContentPage
         Current = this;
         Messages.Clear();
 
-        ChatUsername.Text = "Chatting with @" + user.Username;
+        ChatUsername.Text = "@"+user.Username;
     }
 
     public MessagePage(Group group)
@@ -77,29 +77,43 @@ public partial class MessagePage : ContentPage
         try
         {
             string command = args[0];
+            string error = string.Empty;
 
             switch (command)
             {
                 case "!daily":
                     SocketCore.SendCommand(new Daily(command));
+                    if(!IBotCommand.PrepareAndSend(new Daily(command), out error))
+                    {
+                        AddMessage(error, DateTime.Now);
+                    }
                     break;
                 case "!bet":
-                    if (!HasArgsCount(args.Length, Bet.ArgsCount)) return;
-                    SocketCore.SendCommand(new Bet(command, args[1], args[2]));
+                    if (!Bet.HasArgs(args.Length)) return;
+                    if(!IBotCommand.PrepareAndSend(new Bet(command, args[1], args[2]),out error))
+                    {
+                        AddMessage(error, DateTime.Now);
+                    }
                     break;
                 case "jackpotbuy":
-                    if (!HasArgsCount(args.Length, JackpotBuy.ArgsCount)) return;
-                    SocketCore.SendCommand(new JackpotBuy(command, args[1]));
+                    if (!JackpotBuy.HasArgs(args.Length)) return;
+                    if (!IBotCommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error))
+                    {
+                        AddMessage(error, DateTime.Now);
+                    }
                     break;
                 case "zdrapka":
                     SocketCore.SendCommand(new Scratchcard(command));
                     break;
                 case "sklep":
-                    if (!HasArgsCount(args.Length, Shop.ArgsCount)) return;
-                    SocketCore.SendCommand(new Shop(command, args[1]));
+                    if (!Shop.HasArgs(args.Length)) return;
+                    if (!IBotCommand.PrepareAndSend(new Shop(command, args[1]), out error))
+                    {
+                        AddMessage(error, DateTime.Now);
+                    }
                     break;
                 case "slots":
-                    SocketCore.SendCommand(new Daily(command));
+                    SocketCore.SendCommand(new Slots(command));
                     break;
                      
             }
@@ -109,8 +123,6 @@ public partial class MessagePage : ContentPage
             Debug.Error(ex);
         }
     }
-
-    private static bool HasArgsCount(int ArgsCount,int CommandArgsCount) => ArgsCount >= CommandArgsCount;
 
     public static void AddMessage(MessageModel message)
     {

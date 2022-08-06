@@ -20,6 +20,10 @@ public partial class MainPage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
         SocketCore.Send(" ", Token.LAST_CHATS);
 
+        DogeCoinsCount.Text = "DogeCoins: "+LocalUser.GetDogeCoins().ToString();
+#if DEBUG
+        LastChats.Add(new AnyListBindable(new User("Test1", 1, false),true));
+#endif
         if (Instance is null)
         {
             Instance = this;

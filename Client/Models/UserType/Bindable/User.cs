@@ -36,6 +36,19 @@ public class User : BindableObject
         }
     }
 
+    private int dogeCoins;
+    public int DogeCoins
+    {
+        get
+        {
+            return dogeCoins;
+        }
+        set
+        {
+            dogeCoins = value;
+            OnPropertyChanged(nameof(DogeCoins));
+        }
+    }
     /* As LocalUser have his own binding but User reuse it LocalUser have to be binding as LocalUser.<BindableObject> */
     public bool IsLocalUser = false;
 
