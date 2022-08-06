@@ -9,7 +9,7 @@
 	
 	<ScrollView>
 		<StackLayout>
-			<Label TextColor="White" Text="Chat Group Creator" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center"/>
+			<Label Text="Chat Group Creator" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center"/>
 			<StackLayout Padding="10"/>
 			<StackLayout>
 				<StackLayout Orientation="Horizontal">
@@ -36,7 +36,7 @@
 											<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
 											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding Avatar}"/>
 										</Frame>
-										<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+										<Label VerticalOptions="Center" Text="{Binding Username}"/>
 									</StackLayout>
 								</Grid>
 							</StackLayout>
@@ -45,13 +45,13 @@
 				</StackLayout>
 			</StackLayout>
 			<StackLayout Padding="5"/>
-			<Button Clicked="CreateGroup" TextColor="White" CornerRadius="20" BackgroundColor="#202020" BorderWidth="0" WidthRequest="250"  Text="Create Group"/>
+			<Button Clicked="CreateGroup" CornerRadius="20" BackgroundColor="#202020" BorderWidth="0" WidthRequest="250"  Text="Create Group"/>
 			<StackLayout Padding="5"/>
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">
 				<Entry Completed="Search" WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Search for users"
+			       IsTextPredictionEnabled="True"  PlaceholderColor="White" Placeholder="Search for users"
 				   Keyboard="Plain"/>
 			</Frame>
 			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:GroupChatCreator.UsersFound}}">
@@ -73,7 +73,7 @@
 										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50" HorizontalOptions="Fill"
 													   VerticalOptions="Fill" Source="{Binding Avatar}"/>
 									</Frame>
-									<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+									<Label  VerticalOptions="Center" Text="{Binding Username}"/>
 									<StackLayout VerticalOptions="Center">
 										<StackLayout.GestureRecognizers>
 											<TapGestureRecognizer Command="{Binding Input}" CommandParameter="{Binding .}"/>

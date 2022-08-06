@@ -1,80 +1,6 @@
-﻿using Client.Networking.Core;
-using Newtonsoft.Json;
-using System.Reflection;
+﻿using Newtonsoft.Json;
 
-namespace Client.Networking.Bot.Models;
-
-public interface IBotCommand
-{
-    public string Command { get; set; }
-
-    /// <summary>
-    /// Checks if parameters from user has the same count as command properties
-    /// </summary>
-    public static bool HasAgrs(Type command,int ProvidedArgs) => command.GetProperties().Length == ProvidedArgs;
-
-    //For now it doesn't do much but will be useful when command will need Classes
-    /// <summary>
-    /// Checks if values of properties type have assigned types
-    /// </summary>
-    /// <param name="command">Runtime command class</param>
-    /// <param name="error">Error string</param>
-    public static bool CheckProperties(object command, out string error)
-    {
-        foreach(var prop in command.GetType().GetProperties())
-        {
-            object? PropValue = prop.GetValue(command);
-            if(PropValue is null)
-            {
-                error = $"{prop.Name} has no value";
-                return false;
-            }
-
-            Type PropType = PropValue.GetType();
-            CommandProperty? AssignedType = prop.GetCustomAttribute<CommandProperty>();
-
-            if(PropType is not null && AssignedType is not null)
-            {
-                if(PropType != AssignedType.PropertyType)
-                {
-                    if(AssignedType.PropertyType == typeof(int))
-                    {
-                        int _;
-                        if(!int.TryParse((string)PropValue,out _))
-                        {
-                            error = $"{prop.Name}:{PropType} value: {PropValue} is not a {AssignedType.PropertyType.ToString()}";
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        error = String.Empty;
-        return true;
-    }
-
-    public static bool PrepareAndSend(IBotCommand command, out string error) 
-    { 
-        if(CheckProperties(command, out error))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-public class CommandProperty : Attribute
-{
-    public Type PropertyType;
-
-    public CommandProperty(Type type)
-    {
-        PropertyType = type;
-    }
-}
+namespace Client.Networking.Models.BotCommands;
 
 [Serializable]
 public class Daily : IBotCommand
@@ -85,12 +11,11 @@ public class Daily : IBotCommand
 
     public Daily(string command)
     {
-       Command = command;
+        Command = command;
     }
 
     public bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Daily), ProvidedArgs);
 }
-
 
 [Serializable]
 public class Bet : IBotCommand
@@ -107,7 +32,7 @@ public class Bet : IBotCommand
     [CommandProperty(typeof(int))]
     public object WinPercent { get; set; }
 
-    public Bet(string command,object betMoney,object winPercent)
+    public Bet(string command, object betMoney, object winPercent)
     {
         Command = command;
         BetMoney = betMoney;
@@ -141,7 +66,7 @@ public class Scratchcard : IBotCommand
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
     public string Command { get; set; }
-    
+
     public Scratchcard(string command)
     {
         Command = command;
@@ -181,5 +106,4 @@ public class Slots : IBotCommand
     }
 
     public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Slots), ProvidedArgs);
-
 }

@@ -6,8 +6,8 @@ using Client.Utility;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
-using Client.Networking.Bot.Models;
-using Newtonsoft.Json;
+using Client.Networking.Models.BotCommands;
+using System.Linq;
 
 namespace Client.Pages;
 
@@ -39,6 +39,11 @@ public partial class MessagePage : ContentPage
         Messages.Clear();
 
         ChatUsername.Text = "@"+user.Username;
+
+        for(int i = 0; i < 25; i++)
+        {
+            AddMessage("nie œmieszne", DateTime.Now);
+        }
     }
 
     public MessagePage(Group group)
@@ -63,14 +68,37 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(string message, DateTime time)
     {
+        MessageModel u = new MessageModel(LocalUser.username, message, time);
+        SocketCore.Send(message, Token.SEND_MESSAGE);
+
+        if (IsLastMessageFromLocalUser && GetLastMessage() is not null)
+        {
+            GetLastMessage().MessageContent += $"\n {message}";
+        }
+        else
+        {
+            Messages.Add(u);
+        }
+
         if (message.StartsWith("!"))
         {
             ProcessCommands(message.Split(" "));
         }
-        MessageModel u = new MessageModel(LocalUser.username, message, time);
-        SocketCore.Send(message, Token.SEND_MESSAGE);
-        Messages.Add(u);
     }
+
+    private static MessageModel? GetLastMessage()
+    {
+        if(Messages.Count > 0)
+        {
+            return Messages.Last();
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.UserId == LocalUser.Id;
 
     public static void ProcessCommands(string[] args)
     {
@@ -126,7 +154,22 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(MessageModel message)
     {
-        Messages.Add(message);
+        MessageModel? lastMessage = GetLastMessage();
+        if(lastMessage is not null)
+        {
+            if(lastMessage.UserId == message.UserId)
+            {
+                lastMessage.MessageContent += $"\n {message.MessageContent}";
+            }
+            else
+            {
+                Messages.Add(message);
+            }
+        }
+        else
+        {
+            Messages.Add(message);
+        }
         OnNewMessage(message);
     }
 
@@ -200,16 +243,40 @@ public partial class MessagePage : ContentPage
     }
 
     private bool _isFoc = false;
+    private int _lastMessageLen;
+
     private void MessageInput_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (MessageInput.Text.Length > 0 && !_isFoc)
+        if (MessageInput.Text.StartsWith("!"))
         {
-            _isFoc = true;
+            if (!CommandsList.IsEnabled)
+            {
+                CommandsList.IsEnabled = true;
+                CommandsList.IsVisible = true;
+                BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands);
+            }
+            else
+            {
+                if (BotCommandList.Commands.Count > 1 && _lastMessageLen <= MessageInput.Text.Length)
+                {
+                    BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
+                }
+                else if (_lastMessageLen > MessageInput.Text.Length)
+                {
+                    var _ = BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text));
+                    if(_.Count() > 0)
+                    {
+                        BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
+                    }
+                }
+            }
         }
-        else if (MessageInput.Text.Length == 0 && _isFoc)
+        else
         {
-            _isFoc = false;
+            CommandsList.IsEnabled = false;
+            CommandsList.IsVisible = false;
         }
+        _lastMessageLen = MessageInput.Text.Length;
     }
 
     private async void ChatOptions(object sender, SwipedEventArgs e)

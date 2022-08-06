@@ -17,7 +17,7 @@
 			   HeightRequest="44" WidthRequest="300">
 					<Entry WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Search"
+			       IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Search"
 				   Keyboard="Plain" Completed="SearchPressed"/>
 				</Frame>
 			</StackLayout>
@@ -29,9 +29,9 @@
 				</Frame>
 				<StackLayout Padding="5" WidthRequest="270">
 					<StackLayout Spacing="0" Orientation="Horizontal">
-						<Label TextColor="White" FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
-						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="#" />
-						<Label TextColor="White" VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+						<Label FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
+						<Label VerticalOptions="Center" FontSize="Small" Text="#" />
+						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 					</StackLayout>
 					<StackLayout>
 						<Label x:Name="DogeCoinsCount" Text="DogeCoins: {dogeCoins}"/>
@@ -45,14 +45,14 @@
 				</Image>
 			</StackLayout>
 		
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
+			<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
 			<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
 				<StackLayout.GestureRecognizers>
 					<TapGestureRecognizer Tapped="CreateGroup"/>
 				</StackLayout.GestureRecognizers>
 				<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
 					   HorizontalOptions="Fill" VerticalOptions="Fill" Source="creategroup.png"/>
-				<Label TextColor="White" VerticalOptions="Center" HorizontalOptions="Center" Text="Create Group"/>
+				<Label VerticalOptions="Center" HorizontalOptions="Center" Text="Create Group"/>
 			</StackLayout>
 			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
 				<BindableLayout.ItemTemplate>
@@ -75,7 +75,7 @@
 										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
 											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding Avatar}"/>
 									</Frame>
-									<Label TextColor="White" VerticalOptions="Center" Text="{Binding Username}"/>
+									<Label VerticalOptions="Center" Text="{Binding Username}"/>
 								</StackLayout>
 							</Grid>
 						</StackLayout>

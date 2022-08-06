@@ -15,6 +15,7 @@ public partial class App : Application
         {
             Connection.AddOnConnection(Session.ReadSession);
             SocketCore.Init();
+
             CurrentLoginPage = new LoginPage();
             MainPage = new NavigationPage(CurrentLoginPage);
         }

@@ -1,14 +1,21 @@
 ﻿using Client.Models.UserType.Bindable;
 using Client.Utility;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Client.Models;
 
 [Serializable]
-public class MessageModel
+[Bindable(BindableSupport.Yes)]
+public class MessageModel : BindableObject
 {
     public User BindedUser { get; set; }
-    public string MessageContent { get; set; }
+    private string messageContent;
+    public string MessageContent
+    {
+        get { return messageContent; }
+        set { messageContent = value; OnPropertyChanged(nameof(MessageContent)); }
+    }
     public string Username
     {
         get
@@ -16,6 +23,7 @@ public class MessageModel
             return BindedUser.Username;
         }
     }
+
     public ImageSource AvatarImage
     {
         get
@@ -23,8 +31,26 @@ public class MessageModel
             return BindedUser.Avatar;
         }
     }
+
     public DateTime Time { get; set; }
-    public int UserId { get; set; }
+
+    private int userId;
+    public int UserId
+    {
+        get
+        {
+            if (BindedUser != null)
+            {
+                return BindedUser.Id;
+            }
+            else
+            {
+                return userId;
+            }
+        }
+        set { userId = value; }
+    }
+
     public int GroupId { get; set; }
     public bool IsGroup { get; set; }
 

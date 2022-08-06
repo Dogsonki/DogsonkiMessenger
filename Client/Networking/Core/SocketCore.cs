@@ -1,8 +1,7 @@
-﻿using Client.Networking.Bot.Models;
+﻿using Client.Networking.Models.BotCommands;
 using Client.Networking.Model;
 using Client.Pages;
 using Client.Utility;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 

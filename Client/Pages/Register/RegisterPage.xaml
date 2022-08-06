@@ -6,7 +6,7 @@
 			 BackgroundColor="#121212">
 
 	<StackLayout Padding="20" Spacing="15">
-		<Label TextColor="White" VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Join to Dogsonki"/>
+		<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Join to Dogsonki"/>
 
 		<StackLayout Spacing="15">
 			<StackLayout>
@@ -14,7 +14,7 @@
 			   HeightRequest="44" WidthRequest="300">
 					<Entry x:Name="InputUsername" WidthRequest="287" Margin="10,0,0,0"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       TextColor="White" PlaceholderColor="White" Placeholder="Username"
+			       PlaceholderColor="White" Placeholder="Username"
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 				</Frame>
 			</StackLayout>
@@ -24,7 +24,7 @@
 			   HeightRequest="44" WidthRequest="300">
 					<Entry x:Name="InputEmail" WidthRequest="287" Margin="10,0,0,0"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       TextColor="White" PlaceholderColor="White" Placeholder="Email"
+			       PlaceholderColor="White" Placeholder="Email"
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 				</Frame>
 			</StackLayout>
@@ -34,7 +34,7 @@
 			   HeightRequest="44" WidthRequest="300">
 					<Entry x:Name="InputPassword" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       TextColor="White" PlaceholderColor="White" Placeholder="Password"
+			       PlaceholderColor="White" Placeholder="Password"
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 				</Frame>
 			</StackLayout>
@@ -43,7 +43,7 @@
 		</StackLayout>
 
 		<StackLayout>
-			<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" 
+			<Button BackgroundColor="#FF252525" BorderWidth="0" 
 					WidthRequest="250" Clicked="RegisterDone" Text="Create account"
 					CornerRadius="15" FontFamily="OpenSansSemibold"/>
 		</StackLayout>
@@ -52,7 +52,7 @@
 			<StackLayout.GestureRecognizers>
 				<TapGestureRecognizer Tapped="RedirectToLogin"/>
 			</StackLayout.GestureRecognizers>
-			<Label TextColor="White" Text="Log in"/>
+			<Label Text="Log in"/>
 		</StackLayout>
 
 	</StackLayout>
