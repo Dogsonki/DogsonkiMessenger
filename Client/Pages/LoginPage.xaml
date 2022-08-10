@@ -25,7 +25,7 @@
 				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
 			</Frame>
 		</StackLayout>
-		
+
 		<StackLayout IsVisible="false" x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center"/>
 
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">

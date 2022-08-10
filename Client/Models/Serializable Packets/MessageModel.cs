@@ -31,9 +31,25 @@ public class MessageModel : BindableObject
             return BindedUser.Avatar;
         }
     }
-
     public DateTime Time { get; set; }
-
+    public string FactoredTime
+    {
+        get
+        {
+            if(Time.Day == DateTime.Now.Day)
+            {
+                return $"Today at {Time.Hour}:{Time.Minute}";
+            }
+            else if(Time.Day == DateTime.Now.Day-1)
+            {
+                return $"Yesterday at {Time.Hour}:{Time.Minute}";
+            }
+            else
+            {
+                return $"{Time.Day}/{Time.Month}/{Time.Year} at {Time.Hour}:{Time.Minute}";
+            }
+        }
+    }
     private int userId;
     public int UserId
     {
@@ -51,6 +67,9 @@ public class MessageModel : BindableObject
         set { userId = value; }
     }
 
+    public bool IsImageMessage { get; set; }
+    public bool IsContentMessage { get; set; }
+    public ImageSource ImageMessage { get; set; }
     public int GroupId { get; set; }
     public bool IsGroup { get; set; }
 
@@ -69,10 +88,24 @@ public class MessageModel : BindableObject
     }
 
     //Used by client
-    public MessageModel(string user, string message, DateTime time)
+    public MessageModel(string message)
     {
         MessageContent = message;
-        Time = time;
+        Time = DateTime.Now;
         BindedUser = LocalUser.UserRef;
+
+        IsImageMessage = false;
+        IsContentMessage = true;
+    }
+
+    public MessageModel(ImageSource imageSrc)
+    {
+        Time = DateTime.Now;
+        BindedUser = LocalUser.UserRef;
+
+        IsImageMessage = true;
+        IsContentMessage = false;
+
+        ImageMessage = imageSrc;
     }
 }

@@ -31,12 +31,19 @@
 										   Source="{Binding AvatarImage}">
 									</Image>
 								</Frame>
-								<StackLayout Grid.Column="1" Orientation="Vertical">
-									<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="17"
+								<StackLayout HorizontalOptions="Start" Margin="5,0,0,0" Grid.Column="1" Orientation="Vertical">
+									<StackLayout Orientation="Horizontal" HorizontalOptions="Start">
+										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="19"
 											   VerticalOptions="Center" Text="{Binding Username}"/>
-
-									<Label HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
+										<Label Margin="10,0,0,0" FontSize="Small" HorizontalOptions="Start" TextColor="Grey" VerticalOptions="Center" Text="{Binding FactoredTime}"/>
+									</StackLayout>
+									<StackLayout IsEnabled="{Binding IsContentMessage}" IsVisible="{Binding IsContentMessage}">
+										<Label LineHeight="1.1"  HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
 											   FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}"/>
+									</StackLayout>
+									<StackLayout IsEnabled="{Binding IsImageMessage}" IsVisible="{Binding IsImageMessage}">
+										<Image MaximumHeightRequest="300" MaximumWidthRequest="300" Source="{Binding ImageMessage}"/>
+									</StackLayout>
 								</StackLayout>
 							</StackLayout>
 						</Grid>
@@ -45,25 +52,39 @@
 			</ListView.ItemTemplate>
 		</ListView>
 		<StackLayout/>
-		<StackLayout HeightRequest="180" x:Name="CommandsList" IsVisible="false" IsEnabled="False">
-			<ListView SelectionMode="None" SeparatorVisibility="None" ItemsSource="{Binding Source={x:Static CommandList:BotCommandList.Commands}}">
-				<ListView.ItemTemplate>
-					<DataTemplate>
-						<ViewCell>
-							<StackLayout Margin="5,0,0,0" Orientation="Vertical">
-								<Label FontSize="Small" FontAttributes="Bold" Text="{Binding CommandName}"/>
-								<Label FontSize="Small" TextColor="Grey" Text="{Binding CommandDescription}"/>
-							</StackLayout>
-						</ViewCell>
-					</DataTemplate>
-				</ListView.ItemTemplate>
-			</ListView>
-		</StackLayout>
-		<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
+
+		<Frame CornerRadius="15" Padding="0" BackgroundColor="#161616"
+			   HeightRequest="180" x:Name="CommandsList" IsVisible="false" IsEnabled="False">
+			<StackLayout >
+				<ListView SelectionMode="None" SeparatorVisibility="None" 
+						  ItemsSource="{Binding Source={x:Static CommandList:BotCommandList.Commands}}">
+					<ListView.ItemTemplate>
+						<DataTemplate>
+							<ViewCell>
+								<StackLayout Margin="10,0,0,0" Orientation="Vertical">
+									<Label FontSize="Small" FontAttributes="Bold" Text="{Binding CommandName}"/>
+									<Label FontSize="Small" TextColor="Grey" Text="{Binding CommandDescription}"/>
+								</StackLayout>
+							</ViewCell>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
+			</StackLayout>
+		</Frame>
+		<HorizontalStackLayout>
+			<Frame WidthRequest="30" Padding="0" BackgroundColor="#202020">
+				<Frame.GestureRecognizers>
+					<TapGestureRecognizer Tapped="GetFile"/>
+				</Frame.GestureRecognizers>
+				<Image Source="filesend.png"/>
+			</Frame>
+			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">
-			<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
+				<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
 			   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>
-		</Frame>
+			</Frame>
+		</HorizontalStackLayout>
+
 	</StackLayout>  
 </ContentPage>

@@ -27,6 +27,7 @@ public static class BotCommandList
         new CommandModel("!jackpotbuy","Usage: !jackpotbuy {count}"),
         new CommandModel("!zdrapka","Gives you a scratchcard!"),
         new CommandModel("!slots","Try your luck at slots!"),
+        new CommandModel("!clear","Clears all visible messages"),
     };
 }
 

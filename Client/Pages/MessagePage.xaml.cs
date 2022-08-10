@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
 using Client.Networking.Models.BotCommands;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Client.Pages;
 
@@ -19,7 +20,7 @@ public partial class MessagePage : ContentPage
 
     private static User ChatUser { get; set; }
     private static Group GroupChat { get; set; }
-    private static bool isGroupChat { get; set; } 
+    private static bool isGroupChat { get; set; }
 
     private static void OnNewMessage(MessageModel LastMessage)
     {
@@ -34,16 +35,11 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         NavigationPage.SetHasBackButton(this, true);
-        
+
         Current = this;
         Messages.Clear();
 
-        ChatUsername.Text = "@"+user.Username;
-
-        for(int i = 0; i < 25; i++)
-        {
-            AddMessage("nie œmieszne", DateTime.Now);
-        }
+        ChatUsername.Text = "@" + user.Username;
     }
 
     public MessagePage(Group group)
@@ -66,18 +62,20 @@ public partial class MessagePage : ContentPage
         return base.OnBackButtonPressed();
     }
 
-    public static void AddMessage(string message, DateTime time)
+    public static void AddMessage(string message)
     {
-        MessageModel u = new MessageModel(LocalUser.username, message, time);
+        MessageModel? lastMessage = GetLastMessage();
+
+        MessageModel PreparedMessage = new MessageModel(message);
         SocketCore.Send(message, Token.SEND_MESSAGE);
 
-        if (IsLastMessageFromLocalUser && GetLastMessage() is not null)
+        if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImageMessage)
         {
-            GetLastMessage().MessageContent += $"\n {message}";
+            lastMessage.MessageContent += $"\n{message}";
         }
         else
         {
-            Messages.Add(u);
+            Messages.Add(PreparedMessage);
         }
 
         if (message.StartsWith("!"))
@@ -86,9 +84,11 @@ public partial class MessagePage : ContentPage
         }
     }
 
+    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.UserId == LocalUser.Id;
+
     private static MessageModel? GetLastMessage()
     {
-        if(Messages.Count > 0)
+        if (Messages.Count > 0)
         {
             return Messages.Last();
         }
@@ -98,9 +98,25 @@ public partial class MessagePage : ContentPage
         }
     }
 
-    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.UserId == LocalUser.Id;
+    private static void AddImageMessage(ImageSource src)
+    {
+        Messages.Add(new MessageModel(src));
+    }
 
-    public static void ProcessCommands(string[] args)
+    private async void GetFile(object sender, EventArgs e)
+    {
+        var pickedFile = await FilePicker.PickAsync();
+        if (pickedFile is not null)
+        {
+            if(pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg"))
+            {
+                var imageMemoryStream = await pickedFile.OpenReadAsync();
+                ImageSource src = ImageSource.FromStream(() => imageMemoryStream);
+                AddImageMessage(src);
+            }
+        }
+    }
+    private static void ProcessCommands(string[] args)
     {
         try
         {
@@ -113,37 +129,39 @@ public partial class MessagePage : ContentPage
                     SocketCore.SendCommand(new Daily(command));
                     if(!IBotCommand.PrepareAndSend(new Daily(command), out error))
                     {
-                        AddMessage(error, DateTime.Now);
+                        AddMessage(error);
                     }
                     break;
                 case "!bet":
                     if (!Bet.HasArgs(args.Length)) return;
                     if(!IBotCommand.PrepareAndSend(new Bet(command, args[1], args[2]),out error))
                     {
-                        AddMessage(error, DateTime.Now);
+                        AddMessage(error);
                     }
                     break;
-                case "jackpotbuy":
+                case "!jackpotbuy":
                     if (!JackpotBuy.HasArgs(args.Length)) return;
                     if (!IBotCommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error))
                     {
-                        AddMessage(error, DateTime.Now);
+                        AddMessage(error);
                     }
                     break;
-                case "zdrapka":
+                case "!zdrapka":
                     SocketCore.SendCommand(new Scratchcard(command));
                     break;
-                case "sklep":
+                case "!sklep":
                     if (!Shop.HasArgs(args.Length)) return;
                     if (!IBotCommand.PrepareAndSend(new Shop(command, args[1]), out error))
                     {
-                        AddMessage(error, DateTime.Now);
+                        AddMessage(error);
                     }
                     break;
-                case "slots":
+                case "!slots":
                     SocketCore.SendCommand(new Slots(command));
                     break;
-                     
+                case "!clear":
+                    Messages.Clear();
+                    break;
             }
         }
         catch(Exception ex)
@@ -159,7 +177,7 @@ public partial class MessagePage : ContentPage
         {
             if(lastMessage.UserId == message.UserId)
             {
-                lastMessage.MessageContent += $"\n {message.MessageContent}";
+                lastMessage.MessageContent += $"\n{message.MessageContent}";
             }
             else
             {
@@ -221,7 +239,7 @@ public partial class MessagePage : ContentPage
         if (string.IsNullOrEmpty(message))
             return;
 
-        AddMessage(message, DateTime.Now);
+        AddMessage(message);
         ((Entry)sender).Text = "";
     }
 
