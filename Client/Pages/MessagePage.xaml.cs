@@ -22,9 +22,10 @@ public partial class MessagePage : ContentPage
     private static Group GroupChat { get; set; }
     private static bool isGroupChat { get; set; }
 
-    private static void OnNewMessage(MessageModel LastMessage)
+    private static void OnNewMessage(MessageModel? LastMessage)
     {
-        Current.MessageList.ScrollTo(LastMessage, ScrollToPosition.End, false);
+        if (LastMessage is null) return;
+        Current.MessageList.ScrollTo(LastMessage,ScrollToPosition.End,false);
     }
 
     public MessagePage(User user)
@@ -34,7 +35,6 @@ public partial class MessagePage : ContentPage
 
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-        NavigationPage.SetHasBackButton(this, true);
 
         Current = this;
         Messages.Clear();
@@ -72,6 +72,7 @@ public partial class MessagePage : ContentPage
         if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImageMessage)
         {
             lastMessage.MessageContent += $"\n{message}";
+            Current.MessageList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, false);
         }
         else
         {
@@ -103,7 +104,7 @@ public partial class MessagePage : ContentPage
         Messages.Add(new MessageModel(src));
     }
 
-    private async void GetFile(object sender, EventArgs e)
+    private async void SendFile(object sender, EventArgs e)
     {
         var pickedFile = await FilePicker.PickAsync();
         if (pickedFile is not null)
@@ -181,12 +182,17 @@ public partial class MessagePage : ContentPage
             }
             else
             {
-                Messages.Add(message);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Messages.Add(message);
+                    OnNewMessage(GetLastMessage());
+                });
             }
         }
         else
         {
             Messages.Add(message);
+            OnNewMessage(GetLastMessage());
         }
         OnNewMessage(message);
     }
@@ -260,7 +266,6 @@ public partial class MessagePage : ContentPage
         ((ListView)sender).IsRefreshing = false;
     }
 
-    private bool _isFoc = false;
     private int _lastMessageLen;
 
     private void MessageInput_TextChanged(object sender, TextChangedEventArgs e)
@@ -299,7 +304,6 @@ public partial class MessagePage : ContentPage
 
     private async void ChatOptions(object sender, SwipedEventArgs e)
     {
-        Debug.Write("aa");
         await Navigation.PushAsync(new ChatOptionsMain(), true);
     }
 

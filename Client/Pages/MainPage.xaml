@@ -37,7 +37,7 @@
 						<Label x:Name="DogeCoinsCount" Text="DogeCoins: {dogeCoins}"/>
 					</StackLayout>
 				</StackLayout>
-				<Image WidthRequest="30" HeightRequest="30" HorizontalOptions="EndAndExpand"
+				<Image WidthRequest="50" HeightRequest="50" HorizontalOptions="EndAndExpand"
 					   VerticalOptions="End" Source="settings.png">
 					<Image.GestureRecognizers>
 						<TapGestureRecognizer Tapped="SettingsTapped"/>
