@@ -34,7 +34,7 @@ public partial class SettingsPage : ContentPage
             byte[] ImageBuffer;
 
             Stream stream = await image.OpenReadAsync();
-            ImageBuffer = Essential.StreamToBuffer(stream, stream.Length);
+            ImageBuffer = stream.StreamToBuffer();
 
             SocketCore.Send(ImageBuffer, Token.CHANGE_AVATAR);
 

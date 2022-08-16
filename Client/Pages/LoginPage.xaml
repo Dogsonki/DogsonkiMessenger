@@ -12,7 +12,7 @@
 				<Entry x:Name="Input_Username" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
 			       IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Email"
-				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				   Keyboard="Plain"/>
 			</Frame>
 		</StackLayout>
 
@@ -22,7 +22,7 @@
 				<Entry x:Name="Input_Password" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
 			       PlaceholderColor="White" Placeholder="Password"
-				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+				   Keyboard="Plain"/>
 			</Frame>
 		</StackLayout>
 

@@ -7,8 +7,8 @@ using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
 using Client.Networking.Models.BotCommands;
-using System.Linq;
-using System.Windows.Input;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace Client.Pages;
 
@@ -21,7 +21,8 @@ public partial class MessagePage : ContentPage
     private static User ChatUser { get; set; }
     private static Group GroupChat { get; set; }
     private static bool isGroupChat { get; set; }
-
+    private const int MAX_IMAGE_SIZE = 10_000_000;
+    
     private static void OnNewMessage(MessageModel? LastMessage)
     {
         if (LastMessage is null) return;
@@ -106,16 +107,37 @@ public partial class MessagePage : ContentPage
 
     private async void SendFile(object sender, EventArgs e)
     {
+        //Android had problem with copying stream to MemoryStream 
+        //TODO: redo this without copying buffer 2 times
+
         var pickedFile = await FilePicker.PickAsync();
+        Stream? imageStream = null;
+
         if (pickedFile is not null)
         {
             if(pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg"))
             {
-                var imageMemoryStream = await pickedFile.OpenReadAsync();
-                ImageSource src = ImageSource.FromStream(() => imageMemoryStream);
+                imageStream = await pickedFile.OpenReadAsync();
+                if(imageStream.Length > MAX_IMAGE_SIZE)
+                {
+                    await imageStream.DisposeAsync();
+                    SystemAddMessage("Image is too big, max image size is 10MB");
+                }
+
+                MemoryStream cpyStream = new MemoryStream();
+                await imageStream.CopyToAsync(cpyStream, (int)imageStream.Length);
+                ImageSource src = ImageSource.FromStream(() => new MemoryStream(cpyStream.ToArray()));
+
                 AddImageMessage(src);
+
+                ThreadPool.QueueUserWorkItem((padlock) =>
+                {
+                    MessageModel message = new MessageModel(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
+                    SocketCore.Send(message, Token.SEND_MESSAGE);
+                });
             }
         }
+        if (imageStream is null || pickedFile is null) return;
     }
     private static void ProcessCommands(string[] args)
     {
@@ -128,34 +150,22 @@ public partial class MessagePage : ContentPage
             {
                 case "!daily":
                     SocketCore.SendCommand(new Daily(command));
-                    if(!IBotCommand.PrepareAndSend(new Daily(command), out error))
-                    {
-                        AddMessage(error);
-                    }
+                    IBotCommand.PrepareAndSend(new Daily(command), out error);
                     break;
                 case "!bet":
                     if (!Bet.HasArgs(args.Length)) return;
-                    if(!IBotCommand.PrepareAndSend(new Bet(command, args[1], args[2]),out error))
-                    {
-                        AddMessage(error);
-                    }
+                    IBotCommand.PrepareAndSend(new Bet(command, args[1], args[2]), out error);
                     break;
                 case "!jackpotbuy":
                     if (!JackpotBuy.HasArgs(args.Length)) return;
-                    if (!IBotCommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error))
-                    {
-                        AddMessage(error);
-                    }
+                    IBotCommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error);
                     break;
                 case "!zdrapka":
                     SocketCore.SendCommand(new Scratchcard(command));
                     break;
                 case "!sklep":
                     if (!Shop.HasArgs(args.Length)) return;
-                    if (!IBotCommand.PrepareAndSend(new Shop(command, args[1]), out error))
-                    {
-                        AddMessage(error);
-                    }
+                    IBotCommand.PrepareAndSend(new Shop(command, args[1]), out error);
                     break;
                 case "!slots":
                     SocketCore.SendCommand(new Slots(command));
@@ -164,12 +174,18 @@ public partial class MessagePage : ContentPage
                     Messages.Clear();
                     break;
             }
+            if(error != string.Empty)
+            {
+                SystemAddMessage(error);
+            } 
         }
         catch(Exception ex)
         {
             Debug.Error(ex);
         }
     }
+
+    public static void SystemAddMessage(string message) => Messages.Add(new MessageModel(User.GetSystemBot(), message));
 
     public static void AddMessage(MessageModel message)
     {
@@ -210,7 +226,8 @@ public partial class MessagePage : ContentPage
             message = Essential.ModelCast<MessageModel[]>(packet.Data);
         }).ContinueWith((w) =>
         {
-            foreach(MessageModel msg in message)
+            if (message is null) return;
+            foreach (MessageModel msg in message)
             {
                 if (!isGroupChat)
                 {
@@ -244,20 +261,27 @@ public partial class MessagePage : ContentPage
 
         if (string.IsNullOrEmpty(message))
             return;
-
         AddMessage(message);
         ((Entry)sender).Text = "";
     }
 
     public static void PrependNewMessages(object packet)
     {
-        MessageModel[] messages = ((JArray)((SocketPacket)packet).Data).ToObject<MessageModel[]>();
-        foreach(var msg in messages)
+        try
         {
-            Messages.Insert(0, msg);
+            MessageModel[]? messages = ((JArray)((SocketPacket)packet).Data).ToObject<MessageModel[]>();
+            if (messages is null) return;
+
+            foreach (var msg in messages)
+            {
+                Messages.Insert(0, msg);
+            }
+            OnNewMessage(messages.Last());
         }
-       
-        OnNewMessage(messages.Last());
+        catch(Exception ex)
+        {
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+        }
     }
 
     private void Refresh(object sender, EventArgs e)
