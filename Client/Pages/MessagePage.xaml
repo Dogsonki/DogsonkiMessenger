@@ -72,11 +72,11 @@
 			</StackLayout>
 		</Frame>
 		<HorizontalStackLayout>
-			<Frame WidthRequest="30" Padding="0" BackgroundColor="#202020">
+			<Frame WidthRequest="30" Padding="0" BackgroundColor="#191919">
 				<Frame.GestureRecognizers>
-					<TapGestureRecognizer Tapped="GetFile"/>
+					<TapGestureRecognizer Tapped="SendFile"/>
 				</Frame.GestureRecognizers>
-				<Image Source="filesend.png"/>
+				<Image HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
 			</Frame>
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">

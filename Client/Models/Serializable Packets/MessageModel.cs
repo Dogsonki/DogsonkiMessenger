@@ -9,13 +9,16 @@ namespace Client.Models;
 [Bindable(BindableSupport.Yes)]
 public class MessageModel : BindableObject
 {
+    [JsonIgnore]
     public User BindedUser { get; set; }
+
     private string messageContent;
     public string MessageContent
     {
         get { return messageContent; }
         set { messageContent = value; OnPropertyChanged(nameof(MessageContent)); }
     }
+
     public string Username
     {
         get
@@ -24,6 +27,7 @@ public class MessageModel : BindableObject
         }
     }
 
+    [JsonIgnore]
     public ImageSource AvatarImage
     {
         get
@@ -32,6 +36,8 @@ public class MessageModel : BindableObject
         }
     }
     public DateTime Time { get; set; }
+
+    [JsonIgnore]
     public string FactoredTime
     {
         get
@@ -50,6 +56,7 @@ public class MessageModel : BindableObject
             }
         }
     }
+
     private int userId;
     public int UserId
     {
@@ -67,9 +74,17 @@ public class MessageModel : BindableObject
         set { userId = value; }
     }
 
+    [JsonIgnore]
     public bool IsImageMessage { get; set; }
+    [JsonIgnore]
     public bool IsContentMessage { get; set; }
+
+    [JsonIgnore]
     public ImageSource ImageMessage { get; set; }
+
+    [JsonProperty("message_type")]
+    public string MessageType { get; set; }
+
     public int GroupId { get; set; }
     public bool IsGroup { get; set; }
 
@@ -90,22 +105,21 @@ public class MessageModel : BindableObject
     //Used by client
     public MessageModel(string message)
     {
+        BindedUser = LocalUser.UserRef;
         MessageContent = message;
         Time = DateTime.Now;
-        BindedUser = LocalUser.UserRef;
-
+        MessageType = "text";
         IsImageMessage = false;
         IsContentMessage = true;
     }
 
     public MessageModel(ImageSource imageSrc)
     {
-        Time = DateTime.Now;
         BindedUser = LocalUser.UserRef;
-
+        ImageMessage = imageSrc;
+        Time = DateTime.Now;
+        MessageType = "image";
         IsImageMessage = true;
         IsContentMessage = false;
-
-        ImageMessage = imageSrc;
     }
 }
