@@ -47,6 +47,8 @@ class CreateDatabase:
                                    sender_id INTEGER,
                                    receiver_id INTEGER,
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   message_type VARCHAR(5),
+                                   is_path BIT NOT NULL,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL
@@ -96,6 +98,8 @@ class CreateDatabase:
                                    sender_id INTEGER,
                                    group_id INTEGER,
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   message_type VARCHAR(5),
+                                   is_path BIT NOT NULL,,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   

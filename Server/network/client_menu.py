@@ -41,23 +41,29 @@ class NormalChatroom(functions.Chatroom):
                 self.connection.send_message("", MessageType.ERROR)
 
     def on_new_message(self, message: Message):
-        message_ = message.data.strip()
+        message_ = message.data["message"].strip()
+        message_type = message.data["message_type"]
         if message_ != "":
             receiver_connection = current_connections.get(self.receiver)
             if receiver_connection:
                 data = [{"user": self.connection.nick, "message": message_,
                         "time": time.time(), "user_id": self.connection.login_id,
-                         "is_group": False, "group_id": -1}]
+                         "is_group": False, "group_id": -1, "message_type": message_type}]
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-            self.save_message_in_database(message_)
+            self.save_message_in_database(message_, message_type)
 
-    def save_message_in_database(self, message):
+    def save_message_in_database(self, message: str, message_type: str):
         if not self.friends:
             handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
             self.friends = True
         else:
             handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
-        handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id, self.receiver_id)
+
+        is_path = False if message_type == "text" else True
+        if is_path:
+            functions.save_file(f"{int(time.time())}{self.receiver_id}{self.connection.login_id}", message)
+        handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
+                                  self.receiver_id, message_type, is_path)
 
 
 def search_users(client: Client, nick: str):
