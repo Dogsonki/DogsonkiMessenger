@@ -10,13 +10,13 @@
 		<AbsoluteLayout Margin="10,2,2,0">
 			<Label FontSize="Medium" x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
 		</AbsoluteLayout>
-		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElement" Refreshing="Refresh"
+		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElementAndDataTemplate" Refreshing="Refresh"
 					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"
 					  ItemsSource="{Binding Source={x:Static local:MessagePage.Messages}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
-						<Grid>
+						<Grid Margin="0,0,0,10">
 							<Grid.RowDefinitions>
 								<RowDefinition Height="*" />
 								<RowDefinition Height="*" />
@@ -35,11 +35,17 @@
 									<StackLayout Orientation="Horizontal" HorizontalOptions="Start">
 										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="19"
 											   VerticalOptions="Center" Text="{Binding Username}"/>
-										<Label Margin="10,0,0,0" FontSize="Small" HorizontalOptions="Start" TextColor="Grey" VerticalOptions="Center" Text="{Binding FactoredTime}"/>
+										<StackLayout IsVisible="{Binding BindedUser.VisibleTag}">
+											<Frame BorderColor="Transparent" Margin="5,0,0,0" BackgroundColor="Grey" HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand" HeightRequest="20">
+												<Label HeightRequest="20" HorizontalOptions="CenterAndExpand" TextColor="WhiteSmoke" Text="{Binding BindedUser.Tag}"/>
+											</Frame>
+										</StackLayout>
+										<Label Margin="10,0,0,0" FontSize="Small" HorizontalOptions="Start" TextColor="Grey" 
+											   VerticalOptions="Center" Text="{Binding FactoredTime}"/>
 									</StackLayout>
 									<StackLayout IsEnabled="{Binding IsContentMessage}" IsVisible="{Binding IsContentMessage}">
 										<Label LineHeight="1.1"  HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
-											   FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}"/>
+											   FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}" TextColor="LightGrey"/>
 									</StackLayout>
 									<StackLayout IsEnabled="{Binding IsImageMessage}" IsVisible="{Binding IsImageMessage}">
 										<Image MaximumHeightRequest="300" MaximumWidthRequest="300" Source="{Binding ImageMessage}"/>
@@ -52,7 +58,7 @@
 			</ListView.ItemTemplate>
 		</ListView>
 		<StackLayout/>
-
+		
 		<Frame CornerRadius="15" Padding="0" BackgroundColor="#161616"
 			   HeightRequest="180" x:Name="CommandsList" IsVisible="false" IsEnabled="False">
 			<StackLayout >
