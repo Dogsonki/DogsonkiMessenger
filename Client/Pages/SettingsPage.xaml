@@ -13,6 +13,7 @@
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Profile Settings"/>
 				<Button Clicked="ChangeAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
 				<Button Clicked="Logout" WidthRequest="200" BackgroundColor="#252525" Text="Logout"/>
+
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="DEBUG"/>
 
 				<Button Clicked="ShowConsole" WidthRequest="200" BackgroundColor="#252525" Text="DEBUG CONSOLE"/>

@@ -7,8 +7,8 @@
 			 BackgroundColor="#121212">
 
 	<StackLayout>
-		<AbsoluteLayout Margin="10,2,2,0">
-			<Label FontSize="Medium" x:Name="ChatUsername" Text="USER_USERNAME_CHAT" />
+		<AbsoluteLayout HorizontalOptions="Center" Margin="10,2,2,0">
+			<Label FontSize="Medium" x:Name="ChatUsername" Text="@{username}" />
 		</AbsoluteLayout>
 		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElementAndDataTemplate" Refreshing="Refresh"
 					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"
@@ -77,18 +77,15 @@
 				</ListView>
 			</StackLayout>
 		</Frame>
-		<HorizontalStackLayout>
-			<Frame WidthRequest="30" Padding="0" BackgroundColor="#191919">
-				<Frame.GestureRecognizers>
-					<TapGestureRecognizer Tapped="SendFile"/>
-				</Frame.GestureRecognizers>
-				<Image HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
-			</Frame>
+		<HorizontalStackLayout Margin="5,0,0,8">
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
-			   HeightRequest="44" WidthRequest="300">
-				<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
+			   HeightRequest="44" WidthRequest="372">
+				<HorizontalStackLayout>
+					<ImageButton VerticalOptions="Center" HorizontalOptions="Center" Clicked="SendFile" HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
+					<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
-			   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>
+				   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>
+				</HorizontalStackLayout>
 			</Frame>
 		</HorizontalStackLayout>
 

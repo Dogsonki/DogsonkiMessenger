@@ -8,9 +8,16 @@ namespace Client.Pages;
 
 public partial class SettingsPage : ContentPage
 {
+    public bool DebugSettingsVisible { get; set; } = false;
+
     public SettingsPage()
     {
         InitializeComponent();
+#if DEBUG 
+        DebugSettingsVisible = true;
+#else
+        DebugSettingsVisible = false;
+#endif
         NavigationPage.SetHasNavigationBar(this, false);
     }
 

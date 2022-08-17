@@ -40,13 +40,14 @@ public partial class MessagePage : ContentPage
         Current = this;
         Messages.Clear();
 
-        ChatUsername.Text = "@" + user.Username;
+        ChatUsername.Text = $"@{user.Username}";
+        MessageInput.Placeholder = $"Message @{user.Username}";
     }
 
     public MessagePage(Group group)
     {
-        isGroupChat = true;
         GroupChat = group;
+        isGroupChat = true;
 
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
@@ -55,6 +56,7 @@ public partial class MessagePage : ContentPage
         Messages.Clear();
 
         ChatUsername.Text = "Chatting group @" + group.Name;
+        MessageInput.Placeholder = $"Message @{group.Name}";
     }
 
     protected override bool OnBackButtonPressed()
@@ -109,35 +111,46 @@ public partial class MessagePage : ContentPage
     {
         //Android had problem with copying stream to MemoryStream 
         //TODO: redo this without copying buffer 2 times
-
-        var pickedFile = await FilePicker.PickAsync();
-        Stream? imageStream = null;
-
-        if (pickedFile is not null)
+        try
         {
-            if(pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg"))
+            var pickedFile = await FilePicker.PickAsync();
+            Stream? fileStream = null;
+
+            if (pickedFile is not null)
             {
-                imageStream = await pickedFile.OpenReadAsync();
-                if(imageStream.Length > MAX_IMAGE_SIZE)
+                if (pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg"))
                 {
-                    await imageStream.DisposeAsync();
-                    SystemAddMessage("Image is too big, max image size is 10MB");
+                    fileStream = await pickedFile.OpenReadAsync();
+                    if (fileStream.Length > MAX_IMAGE_SIZE)
+                    {
+                        await fileStream.DisposeAsync();
+                        SystemAddMessage("Image is too big, max image size is 10MB");
+                    }
+
+                    MemoryStream cpyStream = new MemoryStream();
+                    await fileStream.CopyToAsync(cpyStream, (int)fileStream.Length);
+                    ImageSource src = ImageSource.FromStream(() => new MemoryStream(cpyStream.ToArray()));
+
+                    AddImageMessage(src);
+
+                    ThreadPool.QueueUserWorkItem((padlock) =>
+                    {
+                        MessageModel message = new MessageModel(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
+                        SocketCore.Send(message, Token.SEND_MESSAGE);
+                    });
+                }
+                else
+                {
+                    SystemAddMessage("Unsupported file extension");
                 }
 
-                MemoryStream cpyStream = new MemoryStream();
-                await imageStream.CopyToAsync(cpyStream, (int)imageStream.Length);
-                ImageSource src = ImageSource.FromStream(() => new MemoryStream(cpyStream.ToArray()));
-
-                AddImageMessage(src);
-
-                ThreadPool.QueueUserWorkItem((padlock) =>
-                {
-                    MessageModel message = new MessageModel(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
-                    SocketCore.Send(message, Token.SEND_MESSAGE);
-                });
+                if(fileStream is not null) await fileStream.DisposeAsync();
             }
         }
-        if (imageStream is null || pickedFile is null) return;
+        catch(Exception ex)
+        {
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+        }
     }
     private static void ProcessCommands(string[] args)
     {
@@ -262,6 +275,7 @@ public partial class MessagePage : ContentPage
         if (string.IsNullOrEmpty(message))
             return;
         AddMessage(message);
+
         ((Entry)sender).Text = "";
     }
 

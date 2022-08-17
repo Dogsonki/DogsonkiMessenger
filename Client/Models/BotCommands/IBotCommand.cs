@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using Client.Networking;
 using Client.Networking.Core;
 
 namespace Client.Networking.Models.BotCommands;
@@ -42,7 +41,7 @@ public interface IBotCommand
                         int _;
                         if (!int.TryParse((string)PropValue, out _))
                         {
-                            error = $"{prop.Name}:{PropType} value: {PropValue} is not a {AssignedType.PropertyType.ToString()}";
+                            error = $"{prop.Name}:{PropType} value: {PropValue} is not a {AssignedType.PropertyType.Name}";
                             return false;
                         }
                     }

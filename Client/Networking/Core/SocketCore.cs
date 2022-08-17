@@ -30,13 +30,15 @@ public class SocketCore : Connection
             Logger.Push(ex, TraceType.Packet, LogLevel.Error);
         }
 
+        if (packet is null) return;
+
         if (packet.Token == (int)Token.CHAT_MESSAGE)
         {
             ReadRawBuffer(packet);
             return;
         }
 
-        ThreadPool.QueueUserWorkItem((object stateInfo) =>
+       ThreadPool.QueueUserWorkItem((object stateInfo) =>
         {
             foreach (RequestedCallback callback in RequestedCallback.Callbacks)
             {
@@ -67,6 +69,7 @@ public class SocketCore : Connection
                         continue;
 
                     LongBuffer += DecodedString;
+
                     string buff;
                     int indexDollar = 1;
 
@@ -84,6 +87,7 @@ public class SocketCore : Connection
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
                         ProcessBuffer(buff);
                     }
+
                     Stream.Flush();
                     buffer = new byte[MaxBuffer];
                 }
@@ -148,8 +152,7 @@ public class SocketCore : Connection
 
     public static bool SendCallback(Action<object> Callback, object SendingData, Token token,bool SendableOnce = true)
     {
-        if (!AbleToSend())
-            return false;
+        if (!AbleToSend()) return false;
 
         if (SendableOnce && RequestedCallback.IsAlreadyQueued(token))
         {
@@ -165,8 +168,7 @@ public class SocketCore : Connection
 
     public static bool Send(object data, Token token = Token.EMPTY)
     {
-        if (!AbleToSend())
-            return false;
+        if (!AbleToSend()) return false;
 
         Task.Run(() =>
         {
@@ -180,8 +182,13 @@ public class SocketCore : Connection
     public static bool SendCommand(IBotCommand command)
     {
         if (!AbleToSend()) return false;
-        SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
-        SocketQueue.Add(packet);
+
+        Task.Run(() =>
+        {
+            SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
+            SocketQueue.Add(packet);
+        });
+
         return true;
     }
 
