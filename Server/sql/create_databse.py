@@ -23,7 +23,7 @@ class CreateDatabase:
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    nick VARCHAR(50) NOT NULL UNIQUE,
                                    login VARCHAR(50) NOT NULL UNIQUE,
-                                   password VARCHAR(50) NOT NULL,
+                                   password VARCHAR(150) NOT NULL,
                                    warnings INTEGER NOT NULL,
                                    is_banned BIT NOT NULL,
                                    avatar MEDIUMBLOB

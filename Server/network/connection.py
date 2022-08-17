@@ -317,8 +317,9 @@ class Client(Connection):
         self.get_login_action()
 
     def set_avatar(self, avatar: str):
-        avatar = base64.b64encode(bytes(avatar, "UTF-8"))
-        handling_sql.set_user_avatar(self.db_cursor, self.login, avatar)
+        if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:  # todo test, avatar can have max 2mb
+            avatar = base64.b64encode(bytes(avatar, "UTF-8"))
+            handling_sql.set_user_avatar(self.db_cursor, self.login, avatar)
 
     def get_avatar(self, login_id: str):
         avatar = handling_sql.get_user_avatar(self.db_cursor, login_id)

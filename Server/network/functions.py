@@ -4,6 +4,7 @@ from io import BytesIO
 import base64
 
 from PIL import Image
+import bcrypt
 
 from .connection import Client, MessageType
 
@@ -58,3 +59,14 @@ def get_file(path: str, file_format: str) -> bytes:
     image.save(buffer, file_format)
     data = base64.b64encode(buffer.getvalue())
     return data
+
+
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(bytes(password), salt)
+    return str(hashed_password)
+
+
+def check_password(password: str, hashed_password: str) -> bool:
+    is_correct = bcrypt.checkpw(bytes(password), bytes(hashed_password))
+    return is_correct

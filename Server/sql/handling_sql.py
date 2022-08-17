@@ -7,6 +7,8 @@ from typing import List, Tuple, Union
 from mysql.connector.errors import IntegrityError
 from mysql.connector.cursor_cext import CMySQLCursor
 
+from ..network import functions
+
 
 @dataclass
 class ChatMessage:
@@ -50,13 +52,14 @@ def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int
 
 
 def login_user(cursor: CMySQLCursor, login: str, password: str) -> Tuple:
-    cursor.execute("""SELECT id, is_banned FROM users
-                      WHERE login = %s and password = %s;""", (login, password))
+    cursor.execute("""SELECT id, is_banned, password FROM users
+                      WHERE login = %s;""", (login, password))
     sql_data = cursor.fetchone()
     if sql_data is None:
         return False, None
     else:
-        return sql_data
+        if functions.check_password(password, sql_data[2]):
+            return sql_data[0:2]
 
 
 def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:
@@ -185,6 +188,7 @@ def save_group_message(cursor: CMySQLCursor, content: str, sender: int, group_id
 
 
 def register_user(cursor: CMySQLCursor, login: str, password: str, nick: str):
+    password = functions.hash_password(password)
     try:
         cursor.execute("""INSERT INTO users(login, password, nick, warnings, is_banned)
                           VALUES (%s, %s, %s, 0, 0);""", (login, password, nick))
@@ -282,6 +286,7 @@ def create_users_link(cursor: CMySQLCursor, user1_id: int, user2_id: int):
 
 
 def change_password(cursor: CMySQLCursor, login: str, new_password: str):
+    new_password = functions.hash_password(new_password)
     cursor.execute("""UPDATE users
                       SET password = %s
                       WHERE login = %s;""", (new_password, login))
