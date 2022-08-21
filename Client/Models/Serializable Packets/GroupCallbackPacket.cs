@@ -2,7 +2,7 @@
 
 namespace Client.Models;
 
-public class GroupCallbackModel
+public class GroupCallbackPacket
 {
     [JsonProperty("group_name")]
     public string GroupName { get; set; }
@@ -11,7 +11,7 @@ public class GroupCallbackModel
     public int GroupId { get; set; }
 
     [JsonConstructor]
-    public GroupCallbackModel(string group_name, int id)
+    public GroupCallbackPacket(string group_name, int id)
     {
         GroupName = group_name;
         GroupId = id;

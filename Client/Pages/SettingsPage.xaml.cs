@@ -21,11 +21,6 @@ public partial class SettingsPage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
     }
 
-    protected override bool OnBackButtonPressed()
-    {
-        return base.OnBackButtonPressed();
-    }
-
     private async void ChangeAvatar(object sender, EventArgs e)
     {
         try

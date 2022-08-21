@@ -3,7 +3,7 @@
 namespace Client.Models;
 
 [Serializable]
-internal class GroupChatCreateModel
+internal class GroupChatCreatePacket
 {
     [JsonProperty("group_name")]
     public string GroupName { get; set; }
@@ -13,7 +13,7 @@ internal class GroupChatCreateModel
     public int[] Users { get; set; }
 
     [JsonConstructor]
-    public GroupChatCreateModel(string group_name, int creator, int[] users) 
+    public GroupChatCreatePacket(string group_name, int creator, int[] users) 
     {
         GroupName = group_name;
         Creator = creator;

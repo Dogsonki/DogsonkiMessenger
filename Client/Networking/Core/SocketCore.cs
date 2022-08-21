@@ -64,7 +64,6 @@ public class SocketCore : Connection
                 while ((LenBuffer = Stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
                     string DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
-
                     if (string.IsNullOrEmpty(DecodedString))
                         continue;
 
@@ -105,7 +104,7 @@ public class SocketCore : Connection
                     Debug.Error("Connection stream is null");
                 }
             }
-            Thread.Sleep(10);
+            Thread.Sleep(5);
         }
     }
 

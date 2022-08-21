@@ -44,7 +44,7 @@
 											   VerticalOptions="Center" Text="{Binding FactoredTime}"/>
 									</StackLayout>
 									<StackLayout IsEnabled="{Binding IsContentMessage}" IsVisible="{Binding IsContentMessage}">
-										<Label LineHeight="1.1"  HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
+										<Label LineHeight="1.1" HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
 											   FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}" TextColor="LightGrey"/>
 									</StackLayout>
 									<StackLayout IsEnabled="{Binding IsImageMessage}" IsVisible="{Binding IsImageMessage}">
@@ -81,7 +81,7 @@
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="372">
 				<HorizontalStackLayout>
-					<ImageButton VerticalOptions="Center" HorizontalOptions="Center" Clicked="SendFile" HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
+					<ImageButton Margin="0,0,-10,2" VerticalOptions="Center" HorizontalOptions="Center" Clicked="AddFile" HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
 					<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
 				   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>

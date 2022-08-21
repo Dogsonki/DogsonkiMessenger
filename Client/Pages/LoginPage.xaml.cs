@@ -51,7 +51,7 @@ public partial class LoginPage : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
             message.ShowError("Unable to connect to the server");
             return;
@@ -59,7 +59,7 @@ public partial class LoginPage : ContentPage
     }
     public void LoginCallback(object rev)
     {
-        LoginCallbackModel login = Essential.ModelCast<LoginCallbackModel>(rev);
+        LoginCallbackPacket login = Essential.ModelCast<LoginCallbackPacket>(rev);
         switch (login.Token)
         {
             case "1":

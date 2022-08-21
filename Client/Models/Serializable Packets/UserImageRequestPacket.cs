@@ -8,36 +8,35 @@ using Newtonsoft.Json;
 namespace Client.Models;
 
 [Serializable]
-public class UserImageRequestModel
+public class UserImageRequestPacket
 {
     [JsonProperty("avatar")]
     public string ImageData { get; set; }
     [JsonProperty("login_id")]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
     [JsonConstructor]
-    public UserImageRequestModel(string avatar, int login_id)
+    public UserImageRequestPacket(string avatar, int login_id)
     {
         ImageData = avatar;
-        UserID = login_id;
+        UserId = login_id;
     }
 
     public static void ProcessImage(SocketPacket packet)
     {
         try
         {
-            UserImageRequestModel img = Essential.ModelCast<UserImageRequestModel>(packet.Data);
+            UserImageRequestPacket img = packet.ModelCast<UserImageRequestPacket>();
 
             if (string.IsNullOrEmpty(img.ImageData) || img.ImageData == " ")
             {
                 return;
             }
 
-            var user = User.GetUser(img.UserID);
+            var user = User.GetUser(img.UserId);
 
-            if (user == null)
+            if (user is null)
             {
-                Debug.Error("USER_NULL_REFRENCE");
                 return;
             }
 
@@ -45,7 +44,7 @@ public class UserImageRequestModel
             avat = avat.Substring(0, avat.Length - 1);
 
             byte[] imgBuffer = Convert.FromBase64String(avat);
-            Cache.SaveToCache(imgBuffer, "avatar" + img.UserID);
+            Cache.SaveToCache(imgBuffer, "avatar" + img.UserId);
             MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
         }
         catch(Exception ex)

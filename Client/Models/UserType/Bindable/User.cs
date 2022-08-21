@@ -20,7 +20,6 @@ public class User : BindableObject
     public bool VisibleTag { get; set; } = false;
 
     public static List<User> Users = new List<User>();
-    public List<MessageModel> CachedMessages = new List<MessageModel>();
 
     private ImageSource avatar;
     public ImageSource Avatar
@@ -66,7 +65,7 @@ public class User : BindableObject
 
     /* Username and ID will never change then don't make them as OnPropertyChanged */
     public string Username { get; set; }
-    public int Id { get; set; }
+    public int UserId { get; set; }
 
     public Command OpenChatCommand { get; set; }
 
@@ -74,11 +73,11 @@ public class User : BindableObject
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (Users.Find(x => x.Id == id) != null)
+            if (Users.Find(x => x.UserId == id) != null)
                 return;
 
             Username = username;
-            Id = id;
+            UserId = id;
             IsLocalUser = isLocalUser;
             OpenChatCommand = new Command(OpenChat);
 
@@ -114,7 +113,7 @@ public class User : BindableObject
     public static User CreateOrGet(string username, int id)
     {
         User? user;
-        if ((user = Users.Find(x => x.Id == id)) != null)
+        if ((user = Users.Find(x => x.UserId == id)) != null)
             return user;
 
         return new User(username, id, false);
@@ -149,5 +148,5 @@ public class User : BindableObject
         return systemBot != null ? systemBot : CreateSystemBot();
     }
 
-    public static User? GetUser(int id) => Users.Find(x => x.Id == id);
+    public static User? GetUser(int id) => Users.Find(x => x.UserId == id);
 }

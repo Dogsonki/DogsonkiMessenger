@@ -3,7 +3,6 @@ using System.Text;
 
 namespace Client.Networking.Model;
 
-
 public class SocketPacket
 {
     [JsonProperty("data")]
@@ -12,19 +11,6 @@ public class SocketPacket
     [JsonProperty("token")]
     public int Token { get; set; }
 
-    //Images are sent as normal packets
-
-    public object GetEncoded() => Data;
-
-    /// <summary>
-    /// Prepares packet to be sended
-    /// </summary>
-    /// <returns>Prepared packet</returns>
-    public byte[] GetPacked()
-    {
-        return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
-    }
-
     [JsonConstructor]
     public SocketPacket(object data, Token token = Client.Token.EMPTY)
     {
@@ -32,19 +18,19 @@ public class SocketPacket
         Token = (int)token;
     }
 
-    public static bool TryDeserialize(out SocketPacket packet, string buffer)
-    {
-        try
-        {
-            packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
-        }
-        catch (Exception ex)
-        {
-            packet = null;
-            Debug.Error(ex);
+    public object GetEncoded() => Data;
 
-            return false;
-        }
-        return true;
+    /// <summary>
+    /// Prepares packet to be sended
+    /// </summary>
+    /// <returns>Prepared packet</returns>
+    public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+
+    public static bool TryDeserialize(out SocketPacket? packet, string buffer)
+    {
+        packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
+        return packet is not null;
     }
+
+    public T? ModelCast<T>() => JsonConvert.DeserializeObject<T>(Data.ToString());
 }

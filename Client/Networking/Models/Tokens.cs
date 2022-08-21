@@ -5,7 +5,6 @@ using Client.Networking.Model;
 using Client.Pages;
 using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
-using Client.Pages.PasswordForgot;
 
 namespace Client;
 
@@ -78,7 +77,7 @@ public static class Tokens
                 Session.OverwriteSession(session);
                 break;
             case Token.LOGIN_SESSION:
-                LoginCallbackModel model = Essential.ModelCast<LoginCallbackModel>(packet.Data);
+                LoginCallbackPacket model = Essential.ModelCast<LoginCallbackPacket>(packet.Data);
                 if (model.Token == "1")
                 {
                     LocalUser.Login(model.Username, model.ID, model.Email);
@@ -89,7 +88,7 @@ public static class Tokens
                 }
                 break;
             case Token.AVATAR_REQUEST:
-                UserImageRequestModel.ProcessImage(packet);
+                UserImageRequestPacket.ProcessImage(packet);
                 break;
             case Token.LAST_CHATS:
                 MainPage.AddLastChats(packet);

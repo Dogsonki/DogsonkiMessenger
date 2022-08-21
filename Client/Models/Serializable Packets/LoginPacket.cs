@@ -3,20 +3,20 @@
 namespace Client.Models;
 
 [Serializable]
-public class RegisterModel
+public class LoginPacket
 {
     [JsonProperty("login")]
     public string Login { get; set; }
     [JsonProperty("password")]
     public string Password { get; set; }
-    [JsonProperty("email")]
-    public string Email { get; set; }
+    [JsonProperty("remember")]
+    public bool Remember { get; set; }
 
     [JsonConstructor]
-    public RegisterModel(string login, string password, string email)
+    public LoginPacket(string login, string password, bool remember)
     {
         Login = login;
         Password = password;
-        Email = email;
+        Remember = remember;
     }
 }

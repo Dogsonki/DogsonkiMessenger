@@ -16,19 +16,13 @@ public partial class MessagePage : ContentPage
 {
     private static MessagePage Current { get; set; }
 
-    public static ObservableCollection<MessageModel> Messages { get; set; } = new ObservableCollection<MessageModel>();
+    public static ObservableCollection<ChatMessage> Messages { get; set; } = new ObservableCollection<ChatMessage>();
 
     private static User ChatUser { get; set; }
     private static Group GroupChat { get; set; }
     private static bool isGroupChat { get; set; }
     private const int MAX_IMAGE_SIZE = 10_000_000;
     
-    private static void OnNewMessage(MessageModel? LastMessage)
-    {
-        if (LastMessage is null) return;
-        Current.MessageList.ScrollTo(LastMessage,ScrollToPosition.End,false);
-    }
-
     public MessagePage(User user)
     {
         ChatUser = user;
@@ -67,15 +61,14 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(string message)
     {
-        MessageModel? lastMessage = GetLastMessage();
+        ChatMessage? lastMessage = GetLastMessage();
 
-        MessageModel PreparedMessage = new MessageModel(message);
+        ChatMessage PreparedMessage = new ChatMessage(message);
         SocketCore.Send(message, Token.SEND_MESSAGE);
 
-        if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImageMessage)
+        if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImage)
         {
-            lastMessage.MessageContent += $"\n{message}";
-            Current.MessageList.ScrollTo(Messages[Messages.Count - 1], ScrollToPosition.End, false);
+            lastMessage.TextContent += $"\n{message}";
         }
         else
         {
@@ -88,9 +81,11 @@ public partial class MessagePage : ContentPage
         }
     }
 
-    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.UserId == LocalUser.Id;
+    private static void AddImageMessage(ImageSource src) => Messages.Add(new ChatMessage(src));
 
-    private static MessageModel? GetLastMessage()
+    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.BindedUser.UserId == LocalUser.Id;
+
+    private static ChatMessage? GetLastMessage()
     {
         if (Messages.Count > 0)
         {
@@ -102,12 +97,7 @@ public partial class MessagePage : ContentPage
         }
     }
 
-    private static void AddImageMessage(ImageSource src)
-    {
-        Messages.Add(new MessageModel(src));
-    }
-
-    private async void SendFile(object sender, EventArgs e)
+    private async void AddFile(object sender, EventArgs e)
     {
         //Android had problem with copying stream to MemoryStream 
         //TODO: redo this without copying buffer 2 times
@@ -135,7 +125,7 @@ public partial class MessagePage : ContentPage
 
                     ThreadPool.QueueUserWorkItem((padlock) =>
                     {
-                        MessageModel message = new MessageModel(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
+                        MessagePacket message = new MessagePacket(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
                         SocketCore.Send(message, Token.SEND_MESSAGE);
                     });
                 }
@@ -198,75 +188,71 @@ public partial class MessagePage : ContentPage
         }
     }
 
-    public static void SystemAddMessage(string message) => Messages.Add(new MessageModel(User.GetSystemBot(), message));
+    public static void SystemAddMessage(string message) => Messages.Add(new ChatMessage(User.GetSystemBot(), message));
 
-    public static void AddMessage(MessageModel message)
+    public static void AddMessage(ChatMessage message)
     {
-        MessageModel? lastMessage = GetLastMessage();
+        ChatMessage? lastMessage = GetLastMessage();
+
         if(lastMessage is not null)
         {
-            if(lastMessage.UserId == message.UserId)
+            if(lastMessage.BindedUser.UserId == message.BindedUser.UserId)
             {
-                lastMessage.MessageContent += $"\n{message.MessageContent}";
+                lastMessage.TextContent += $"\n{message.TextContent}";
             }
             else
             {
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     Messages.Add(message);
-                    OnNewMessage(GetLastMessage());
                 });
             }
         }
         else
         {
             Messages.Add(message);
-            OnNewMessage(GetLastMessage());
         }
-        OnNewMessage(message);
     }
 
     public static void AddMessage(SocketPacket packet)
     {
         if (!isGroupChat)
         {
-            if (ChatUser.Id == LocalUser.Id) { return; }
+            if (ChatUser.UserId == LocalUser.Id) { return; }
         }
 
-        MessageModel[] message = null;
+        MessagePacket[] messages = null;
         Task.Run(() =>
         {
-            message = Essential.ModelCast<MessageModel[]>(packet.Data);
+            messages = Essential.ModelCast<MessagePacket[]>(packet.Data);
         }).ContinueWith((w) =>
         {
-            if (message is null) return;
-            foreach (MessageModel msg in message)
+            if (messages is null) return;
+            foreach(MessagePacket message in messages)
             {
                 if (!isGroupChat)
                 {
-                    if (msg.UserId != ChatUser.Id)
+                    if (message.UserId != ChatUser.UserId)
                     {
-                        if (LocalUser.Id != msg.UserId)
+                        if (LocalUser.Id != message.UserId)
                         {
                             return; //WARNING: check if all messages are from diffrent sources
                         }
                     }
-                    if (msg.IsGroup)
-                    {
-                        continue;
-                    }
                 }
                 else
                 {
-                    if (msg.GroupId != GroupChat.Id)
+                    if (message.GroupId != GroupChat.Id)
                     {
                         return;
                     }
                 }
-                MainThread.BeginInvokeOnMainThread(() => AddMessage(msg));
+                MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
             }
         });
     }
+
+    public static void AddMessage(MessagePacket packet) => Messages.Add(new ChatMessage(packet));
 
     private void MessageInputDone(object sender, EventArgs e)
     {
@@ -279,23 +265,10 @@ public partial class MessagePage : ContentPage
         ((Entry)sender).Text = "";
     }
 
-    public static void PrependNewMessages(object packet)
+    public static void PrependNewMessages(SocketPacket packet)
     {
-        try
-        {
-            MessageModel[]? messages = ((JArray)((SocketPacket)packet).Data).ToObject<MessageModel[]>();
-            if (messages is null) return;
-
-            foreach (var msg in messages)
-            {
-                Messages.Insert(0, msg);
-            }
-            OnNewMessage(messages.Last());
-        }
-        catch(Exception ex)
-        {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
-        }
+        MessagePacket[]? messages = packet.Data.ModelCast<MessagePacket[]>();
+        if (messages is null) return;
     }
 
     private void Refresh(object sender, EventArgs e)
@@ -343,12 +316,5 @@ public partial class MessagePage : ContentPage
     private async void ChatOptions(object sender, SwipedEventArgs e)
     {
         await Navigation.PushAsync(new ChatOptionsMain(), true);
-    }
-
-    private void DebugSelected(object sender, SelectedItemChangedEventArgs e)
-    {
-        MessageModel msg = (MessageModel)e.SelectedItem;
-        Debug.Write(msg.Username);
-        Debug.Write(msg.AvatarImage.Id);
     }
 }

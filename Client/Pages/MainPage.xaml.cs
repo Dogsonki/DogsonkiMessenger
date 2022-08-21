@@ -16,20 +16,21 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
-
         NavigationPage.SetHasNavigationBar(this, false);
-        SocketCore.Send(" ", Token.LAST_CHATS);
+        //SocketCore.Send(" ", Token.LAST_CHATS);
 
         DogeCoinsCount.Text = "DogeCoins: "+LocalUser.GetDogeCoins().ToString();
-#if DEBUG
-        LastChats.Add(new AnyListBindable(new User("Test1", 1, false),true));
-#endif
+
         if (Instance is null)
         {
             Instance = this;
 
             Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
         }
+
+        LastChats.Add(new AnyListBindable(User.CreateOrGet("Piotrek", 10),true));
+        LastChats.Add(new AnyListBindable(User.CreateOrGet("Micha³", 11),true));
+
     }
 
     public static void AddLastChats(SocketPacket packet)
@@ -42,6 +43,8 @@ public partial class MainPage : ContentPage
 
             foreach (var chat in lastChats)
             {
+                if (bindable.Find(x => x.Id == chat.Id) != null) continue;
+
                 if(!chat.isGroup)
                 {       
                     User user = User.CreateOrGet(chat.Username, chat.Id);
