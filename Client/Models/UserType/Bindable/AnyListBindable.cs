@@ -34,7 +34,7 @@ public class AnyListBindable : BindableObject
                 return BindedGroup.Id;
             }
 
-            return BindedUser.Id;
+            return BindedUser.UserId;
         }
      }
     private Command input;

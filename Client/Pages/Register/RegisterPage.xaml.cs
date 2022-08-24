@@ -52,14 +52,14 @@ public partial class RegisterPage : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback(RegisterCallback, new RegisterModel(username, password, email), Token.REGISTER))
+        if (!SocketCore.SendCallback<int>(RegisterCallback, new RegisterPacket(username, password, email), Token.REGISTER))
         {
             message.ShowError("Unable to connect to the server");
             return;
         }
     }
 
-    private void RegisterCallback(object rev)
+    private void RegisterCallback(int rev)
     {
         RToken token = Tokens.CharToRToken(rev);
         switch (token)

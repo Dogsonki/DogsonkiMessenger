@@ -18,6 +18,9 @@ public class SocketPacket
         Token = (int)token;
     }
 
+    /// <summary>
+    /// Returns Data
+    /// </summary>
     public object GetEncoded() => Data;
 
     /// <summary>

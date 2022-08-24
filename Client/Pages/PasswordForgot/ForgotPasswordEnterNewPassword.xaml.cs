@@ -31,17 +31,15 @@ public partial class ForgotPasswordEnterNewPassword : ContentPage
 			return;
 		}
 
-        if (!SocketCore.SendCallback(CheckPasswordCallback, password, Token.PASSWORD_FORGOT))
+        if (!SocketCore.SendCallback<int>(CheckPasswordCallback, password, Token.PASSWORD_FORGOT))
         {
             message.ShowError("Unable to connect to server");
         }
     }
 
-	private void CheckPasswordCallback(object data)
+	private void CheckPasswordCallback(int data)
 	{
-		Debug.Write(data);
-
-		switch (int.Parse((string)data))
+		switch (data)
 		{
 			case 0:
                 MainThread.InvokeOnMainThreadAsync(async () => await Navigation.PushAsync(new LoginPage("Password changed. \n You can now login in. ")));

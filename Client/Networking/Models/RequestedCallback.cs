@@ -1,44 +1,47 @@
-﻿namespace Client.Networking.Model
+﻿using Newtonsoft.Json;
+
+namespace Client.Networking.Model
 {
     //Add lifetime to callbacks, can be used as memory leak where cannot be invoked 
-    public class RequestedCallback
+    public class RequestedCallback<T>
     {
-        public static List<RequestedCallback> Callbacks { get; set; } = new List<RequestedCallback>(5000);
-        protected Action<object> Callback;
-
-        public object ContentSend;
-        private int CallbackID;
-
-        public RequestedCallback(Action<object> callback, object data, int pretoken)
-        {
-            CallbackID = pretoken;
-            Callback = callback;
-        }
+        public static List<RequestedCallbackModel<T>> Callbacks { get; set; } = new List<RequestedCallbackModel<T>>(5000);
 
         public static bool IsAlreadyQueued(Token token) => Callbacks.Find(x => x.GetToken() == (int)token) is not null;
+        public static void AddCallback(RequestedCallbackModel<T> callback)
+        {
+            Debug.Write("added");
+            Callbacks.Add(callback);
+        }
 
-        public static void AddCallback(RequestedCallback callback) => Callbacks.Add(callback);
 
-        public int GetToken() => CallbackID;
         public static int GetCount() => Callbacks.Count;
 
-        /// <summary>
-        /// Invokes function and removes itself from list of callbacks
-        /// </summary>
-        public void Invoke(object Recived)
+        public static bool InvokeCallback(int token, string data)
         {
-            if (Callback != null)
+            T? _;
+            foreach(var callback in Callbacks)
             {
-                try
+                if(callback.GetToken() == token)
                 {
-                    MainThread.BeginInvokeOnMainThread(() => Callback.Invoke(Recived));
-                }
-                catch (Exception ex)
-                {
-                    Debug.Write(ex);
+                    if(callback.ParameterType == typeof(string) || callback.ParameterType == typeof(int))
+                    {
+                        callback.Invoke((T)Convert.ChangeType(data,typeof(T)));
+                        return true;
+                    }
+                    else
+                    {
+                        _ = JsonConvert.DeserializeObject<T>(data);
+
+                        if(_ is not null)
+                        {
+                            callback.Invoke(_);
+                            return true;
+                        }
+                    }
                 }
             }
-            Callbacks.Remove(this);
+            return false;
         }
     }
 }

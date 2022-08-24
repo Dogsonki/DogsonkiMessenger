@@ -15,7 +15,6 @@ public class LocalUser : BindableObject
 
     public static bool isCreatingGroup { get; set; } = false;
 
-
     protected static bool InstanceCreated = false;
 
     public static ImageSource avatar { get; private set; }
@@ -70,10 +69,11 @@ public class LocalUser : BindableObject
         set { email = value; OnPropertyChanged(nameof(Email)); }
     }
 
-    public static int GetDogeCoins()
-    {
-        return dogeCoins;
-    }
+    #region UI_VISIBLE
+
+    public string FactoredDogeCoinsCount => $"DogeCoins: {DogeCoins}";
+
+    #endregion
 
     public static void Logout()
     {

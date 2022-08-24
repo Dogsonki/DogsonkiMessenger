@@ -34,7 +34,7 @@
 						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 					</StackLayout>
 					<StackLayout>
-						<Label x:Name="DogeCoinsCount" Text="DogeCoins: {dogeCoins}"/>
+						<Label x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
 					</StackLayout>
 				</StackLayout>
 				<Image WidthRequest="50" HeightRequest="50" HorizontalOptions="EndAndExpand"

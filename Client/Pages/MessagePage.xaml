@@ -36,8 +36,10 @@
 										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="19"
 											   VerticalOptions="Center" Text="{Binding Username}"/>
 										<StackLayout IsVisible="{Binding BindedUser.VisibleTag}">
-											<Frame BorderColor="Transparent" Margin="5,0,0,0" BackgroundColor="Grey" HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand" HeightRequest="20">
-												<Label HeightRequest="20" HorizontalOptions="CenterAndExpand" TextColor="WhiteSmoke" Text="{Binding BindedUser.Tag}"/>
+											<Frame BorderColor="Transparent" Margin="5,0,0,0" BackgroundColor="Grey"
+												   HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand" HeightRequest="20">
+												<Label HeightRequest="20" HorizontalOptions="CenterAndExpand"
+													   TextColor="WhiteSmoke" Text="{Binding BindedUser.Tag}"/>
 											</Frame>
 										</StackLayout>
 										<Label Margin="10,0,0,0" FontSize="Small" HorizontalOptions="Start" TextColor="Grey" 

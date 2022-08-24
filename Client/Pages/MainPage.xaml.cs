@@ -17,9 +17,7 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-        //SocketCore.Send(" ", Token.LAST_CHATS);
-
-        DogeCoinsCount.Text = "DogeCoins: "+LocalUser.GetDogeCoins().ToString();
+        SocketCore.Send(" ", Token.LAST_CHATS);
 
         if (Instance is null)
         {
@@ -27,10 +25,6 @@ public partial class MainPage : ContentPage
 
             Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
         }
-
-        LastChats.Add(new AnyListBindable(User.CreateOrGet("Piotrek", 10),true));
-        LastChats.Add(new AnyListBindable(User.CreateOrGet("Micha³", 11),true));
-
     }
 
     public static void AddLastChats(SocketPacket packet)

@@ -25,7 +25,7 @@ public partial class ConfirmEmailCode : ContentPage
         {
             return;
         }
-        SocketCore.SendCallback(CodeSended, ((Entry)sender).Text, Token.REGISTER);
+        SocketCore.SendCallback<int>(CodeSended, ((Entry)sender).Text, Token.REGISTER);
     }
 
     private Label ErrorText = new Label()
@@ -45,7 +45,7 @@ public partial class ConfirmEmailCode : ContentPage
             ErrorLevel.Children.Remove(ErrorText);
     }
 
-    private void CodeSended(object rev)
+    private void CodeSended(int rev)
     {
         RToken token = Tokens.CharToRToken(rev);
         switch (token)

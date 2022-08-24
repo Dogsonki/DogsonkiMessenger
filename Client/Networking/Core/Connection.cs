@@ -10,81 +10,50 @@ public class Connection
     public static NetworkStream Stream { get; set; }
     public static SocketConfig Config { get; set; }
 
-    protected static Thread ReciveThread { get; private set; }
-    protected static Thread ManageSendingQueue { get; private set; }
-
     public static bool IsConnected { get; private set; }
     public static bool IsInitialized { get; private set; } = false;
-    public static int MaxBuffer = 1024 * 254;
+
+    public const int MAX_BUFFER_SIZE = 1024 * 10;
+
     public static bool IsConnecting { get; protected set; }
 
     private static List<Action> OnConnectionActions = new List<Action>();
 
     public static void AddOnConnection(Action action) => OnConnectionActions.Add(action);
 
-    public static void Connect()
+    public static async Task Connect()
     {
-        if (IsConnecting)
-            return;
-
-        IsConnecting = true;
         try
         {
             Config = SocketConfig.ReadConfig();
-            Client = new TcpClient(Config.Ip, Config.Port);
-            Stream = Client.GetStream();
-        }
-        catch (Exception)
-        {
-            IsConnecting = false;
-            return;
-        }
 
-        ReciveThread.Start();
-        ManageSendingQueue.Start();
+            if (Config is null) throw new Exception("SOCKET_CONFIG_READ_EXCEPTION");
 
-        IsInitialized = true;
-        IsConnected = true;
-        IsConnecting = false;
+            Client = new TcpClient();
 
-        foreach (Action act in OnConnectionActions)
-        {
-            act?.Invoke();
-        }
-    }
-
-    public Connection(ThreadStart ReciveHandler, ThreadStart SendingHandler)
-    {
-        ReciveThread = new Thread(ReciveHandler);
-        ManageSendingQueue = new Thread(SendingHandler);
-
-        try
-        {
-            Connect();
-        }
-        catch (Exception ex)
-        {
-            Type ERROR_TYPE = ex.GetType();
-            if (ERROR_TYPE == typeof(SocketException))
+            await Client.ConnectAsync(Config.Ip, Config.Port).ContinueWith((_) =>
             {
-                Logger.Push("UNABLE_TO_CONNECT",TraceType.Func,LogLevel.Error);//its ok
-            }
-            else if (ERROR_TYPE == typeof(ArgumentNullException) || ERROR_TYPE == typeof(ArgumentOutOfRangeException))
-            {
-                Logger.Push("SOCKET_CONFIG_DESERIALIZE_ERROR", TraceType.Func, LogLevel.Error);
-            }
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+                Stream = Client.GetStream();
+
+                foreach (Action act in OnConnectionActions)
+                {
+                    act?.Invoke();
+                }
+            });
+        }
+        catch (Exception ex) //Logging this exception can expose ip and port to server :/
+        {
+            Debug.Write(ex); 
         }
     }
 
     public static bool AbleToSend()
     {
-        if (Client == null || Stream == null)
+        if (Client == null || Stream == null || !Client.Connected)
         {
-            Logger.Push("Client or stream is null", TraceType.Packet, LogLevel.Error);
+            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected}", TraceType.Packet, LogLevel.Error);
             return false;
         }
-
         return true;
     }
 }

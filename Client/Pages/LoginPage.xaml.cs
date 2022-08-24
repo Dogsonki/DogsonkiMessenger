@@ -40,26 +40,26 @@ public partial class LoginPage : ContentPage
         string password = Input_Password.Text;
 
 #if DEBUG
-        if (username == "a" && password == "a")
+        if(username == "a" && password == "a")
         {
-            LocalUser.Login("uwu", "2", "wo@");
+            LocalUser.Login("TestUser", "1", "test@");
         }
 #endif
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             message.ShowError("Username or password is empty");
             return;
         }
 
-        if (!SocketCore.SendCallback(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback<LoginCallbackPacket>(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
             message.ShowError("Unable to connect to the server");
             return;
         }
     }
-    public void LoginCallback(object rev)
+
+    public void LoginCallback(LoginCallbackPacket login)
     {
-        LoginCallbackPacket login = Essential.ModelCast<LoginCallbackPacket>(rev);
         switch (login.Token)
         {
             case "1":
