@@ -2,10 +2,13 @@ import os
 import binascii
 from datetime import datetime
 from dataclasses import dataclass
+import requests
 from typing import List, Tuple, Union
 
 from mysql.connector.errors import IntegrityError
 from mysql.connector.cursor_cext import CMySQLCursor
+
+from ..network.config import config
 
 
 @dataclass
@@ -186,6 +189,9 @@ def register_user(cursor: CMySQLCursor, login: str, password: str, nick: str):
     try:
         cursor.execute("""INSERT INTO users(login, password, nick, warnings, is_banned)
                           VALUES (%s, %s, %s, 0, 0);""", (login, password, nick))
+        user_id = get_user_id(cursor, nick)
+        data = {"django_password": config.secret_key, "user_dogsonki_app_id": user_id, "nick": nick, "email": login}
+        requests.post("http://127.0.0.1:8000/casino/create_account_dm", data=data)
         return True
     except IntegrityError:
         return False

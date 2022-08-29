@@ -2,8 +2,6 @@ import sys
 import os
 import socket
 import threading
-import json
-from dataclasses import dataclass
 from typing import Tuple
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # this fixes "no module named Server"
@@ -11,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # 
 from network.client_menu import ClientMenu
 from network.connection import Client
 from sql.create_databse import CreateDatabase
+from network.config import config
 
 
 def listen_for_connections(sock: socket.socket):
@@ -28,21 +27,12 @@ def on_new_connection(connection: socket.socket, address: Tuple[str, int]):  # a
     ClientMenu(client).listening()
 
 
-@dataclass
-class Config:
-    ip: str
-    port: str
-
-
 def main():
     print("\nMADE BY DOGSON\n")
     CreateDatabase().create_all_tables()
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-    with open("config.json") as file:
-        config: Config = json.load(file, object_hook=lambda d: Config(**d))
 
     server.bind((config.ip, config.port))
     listen_for_connections(server)

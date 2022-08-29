@@ -5,6 +5,7 @@ from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
 from . import functions
 from . import group
+from . import bot
 
 
 class NormalChatroom(functions.Chatroom):
@@ -37,6 +38,8 @@ class NormalChatroom(functions.Chatroom):
                 self.send_last_messages(True)
             elif message.token == MessageType.NEW_MESSAGE:
                 self.on_new_message(message)
+            elif message.token == MessageType.BOT_COMMAND:
+                bot.check_command(self.connection, message.data)
             else:
                 self.connection.send_message("", MessageType.ERROR)
 
