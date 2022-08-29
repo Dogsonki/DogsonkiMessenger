@@ -99,7 +99,7 @@ class CreateDatabase:
                                    group_id INTEGER,
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                    message_type VARCHAR(5),
-                                   is_path BIT NOT NULL,,
+                                   is_path BIT NOT NULL,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   
