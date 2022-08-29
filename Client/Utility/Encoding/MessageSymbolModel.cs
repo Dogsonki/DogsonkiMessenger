@@ -13,5 +13,4 @@ public class MessageSymbolModel
         Encoded = encoded;
         Symbols.Add(this);
     }
-
 }

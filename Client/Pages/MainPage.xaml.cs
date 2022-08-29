@@ -2,6 +2,7 @@ using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
+using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
 using System.Collections.ObjectModel;
 
@@ -11,6 +12,20 @@ public partial class MainPage : ContentPage
 {
     public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
     public static MainPage Instance;
+
+    public MainPage()
+    {
+        InitializeComponent();
+        NavigationPage.SetHasNavigationBar(this, false);
+        SocketCore.Send(" ", Token.LAST_CHATS);
+
+        if (Instance is null)
+        {
+            Instance = this;
+
+            Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
+        }
+    }
 
     public static void AddLastChats(SocketPacket packet)
     {
@@ -22,7 +37,9 @@ public partial class MainPage : ContentPage
 
             foreach (var chat in lastChats)
             {
-                if(chat.Type == "user")
+                if (bindable.Find(x => x.Id == chat.Id) != null) continue;
+
+                if(!chat.isGroup)
                 {       
                     User user = User.CreateOrGet(chat.Username, chat.Id);
                     bindable.Add(new AnyListBindable(user,true));
@@ -41,25 +58,15 @@ public partial class MainPage : ContentPage
         });
     }
 
+    private async void CreateGroup(object sender, EventArgs e)
+    {
+       await Navigation.PushAsync(new GroupChatCreator());
+    }
+
     protected override bool OnBackButtonPressed()
     {
         view.ScrollToAsync(0d, 0d, true);
         return true;
-    }
-
-    public MainPage()
-    {
-        InitializeComponent();
-
-        NavigationPage.SetHasNavigationBar(this, false);
-        SocketCore.Send(" ", Token.LAST_CHATS);
-
-        if (Instance is null)
-        {
-            Instance = this;
-
-            Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
-        }
     }
 
     private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());

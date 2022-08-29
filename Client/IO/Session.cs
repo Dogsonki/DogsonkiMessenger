@@ -35,7 +35,7 @@ public class Session : IStorage
         if (SessionExist)
         {
             string ses = File.ReadAllText(AndroidFileService.GetPersonalDir("session.json"));
-            Session session = JsonConvert.DeserializeObject<Session>(ses);
+            Session? session = JsonConvert.DeserializeObject<Session>(ses);
             if (session != null && !string.IsNullOrEmpty(ses))
             {
                 if (session.SessionKey != null)

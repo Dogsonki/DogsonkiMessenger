@@ -21,6 +21,15 @@
     <MauiXaml Update="Pages\MessagePage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
+    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterCode.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterEmail.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterNewPassword.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
     <MauiXaml Update="Pages\SettingsPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
@@ -34,6 +43,9 @@
       <SubType>Designer</SubType>
     </MauiXaml>
     <MauiXaml Update="Pages\TemporaryPages\ChangingAvatarPage.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
     <MauiXaml Update="Pages\TemporaryPages\GroupChat\GroupChatCreator.xaml">

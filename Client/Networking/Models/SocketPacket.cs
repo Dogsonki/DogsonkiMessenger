@@ -3,7 +3,6 @@ using System.Text;
 
 namespace Client.Networking.Model;
 
-
 public class SocketPacket
 {
     [JsonProperty("data")]
@@ -12,45 +11,29 @@ public class SocketPacket
     [JsonProperty("token")]
     public int Token { get; set; }
 
-    //Images are sent as normal packets
+    [JsonConstructor]
+    public SocketPacket(object data, Token token = Client.Token.EMPTY)
+    {
+        Data = data;
+        Token = (int)token;
+    }
 
+    /// <summary>
+    /// Returns Data
+    /// </summary>
     public object GetEncoded() => Data;
 
     /// <summary>
     /// Prepares packet to be sended
     /// </summary>
     /// <returns>Prepared packet</returns>
-    public byte[] GetPacked()
+    public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+
+    public static bool TryDeserialize(out SocketPacket? packet, string buffer)
     {
-        return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+        packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
+        return packet is not null;
     }
 
-    [JsonConstructor]
-    public SocketPacket(object data, Token token = Client.Token.EMPTY, bool isImage = false)
-    {
-        Data = data;
-        Token = (int)token;
-    }
-
-    public SocketPacket(object data, bool isImage, bool isLastPacket, Token token)
-    {
-        Data = data;
-        Token = (int)token;
-    }
-
-    public static bool TryDeserialize(out SocketPacket packet, string buffer)
-    {
-        try
-        {
-            packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
-        }
-        catch (Exception ex)
-        {
-            packet = null;
-            Debug.Error(ex);
-
-            return false;
-        }
-        return true;
-    }
+    public T? ModelCast<T>() => JsonConvert.DeserializeObject<T>(Data.ToString());
 }

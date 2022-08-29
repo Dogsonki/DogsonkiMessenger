@@ -13,9 +13,7 @@ public class LocalUser : BindableObject
     public static User UserRef { get; set; }
     public static LocalOptions Settings { get; set; }
 
-    /*  */
     public static bool isCreatingGroup { get; set; } = false;
-
 
     protected static bool InstanceCreated = false;
 
@@ -24,6 +22,11 @@ public class LocalUser : BindableObject
     {
         get
         {
+            if(avatar is not null)
+            {
+                Debug.Write(avatar.Id);
+            }
+          
             return avatar;
         }
         set { avatar = value; OnPropertyChanged(nameof(Avatar)); }
@@ -34,6 +37,13 @@ public class LocalUser : BindableObject
     {
         get { return username; }
         set { username = value; OnPropertyChanged(nameof(Username)); }
+    }
+
+    public static int dogeCoins { get; private set; }
+    public int DogeCoins
+    {
+        get { return dogeCoins; }
+        set { dogeCoins = value; OnPropertyChanged(nameof(DogeCoins)); }
     }
 
     public static string id { get; private set; }
@@ -58,6 +68,12 @@ public class LocalUser : BindableObject
         get { return email; }
         set { email = value; OnPropertyChanged(nameof(Email)); }
     }
+
+    #region UI_VISIBLE
+
+    public string FactoredDogeCoinsCount => $"DogeCoins: {DogeCoins}";
+
+    #endregion
 
     public static void Logout()
     {

@@ -39,7 +39,7 @@ public partial class SearchPage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                if(user.Type == "user")
+                if(!user.isGroup)
                 {
                     UsersFound.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.Id), true));
                 }

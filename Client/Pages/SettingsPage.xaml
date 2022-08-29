@@ -10,15 +10,14 @@
 			<StackLayout Spacing="10">
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Experimental"/>
 
-				<Button Clicked="CreateGroup" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Create Group"/>
-
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Profile Settings"/>
-				<Button Clicked="ChangeAvatar" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
-				<Button Clicked="Logout" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="Logout"/>
+				<Button Clicked="ChangeAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
+				<Button Clicked="Logout" WidthRequest="200" BackgroundColor="#252525" Text="Logout"/>
+
 				<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="DEBUG"/>
 
-				<Button Clicked="ShowConsole" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="DEBUG CONSOLE"/>
-				<Button Clicked="ClearCache" TextColor="White" WidthRequest="200" BackgroundColor="#252525" Text="CLEAR CACHE"/>
+				<Button Clicked="ShowConsole" WidthRequest="200" BackgroundColor="#252525" Text="DEBUG CONSOLE"/>
+				<Button Clicked="ClearCache" WidthRequest="200" BackgroundColor="#252525" Text="CLEAR CACHE"/>
 
 			</StackLayout>
 			<StackLayout Padding="15">
@@ -29,8 +28,8 @@
 					</Grid.ColumnDefinitions>
 
 					<StackLayout Spacing="0" Grid.Row="0" VerticalOptions="Center">
-						<Label FontSize="Large" TextColor="White" Text="Use logger" />
-						<Label FontSize="Small"  TextColor="WhiteSmoke" Text="Logs all packets and function" />
+						<Label FontSize="Large" Text="Use logger" />
+						<Label FontSize="Small" TextColor="WhiteSmoke" Text="Logs all packets and function" />
 					</StackLayout>
 
 					<StackLayout VerticalOptions="Center" Grid.Column="1" >

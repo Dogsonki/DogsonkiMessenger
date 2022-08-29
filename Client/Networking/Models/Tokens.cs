@@ -28,7 +28,8 @@ public enum Token : int
     PASSWORD_FORGOT = 13,
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
-    GROUP_CHAT_INIT = 17
+    GROUP_CHAT_INIT = 17,
+    BOT_COMMAND = 20
 }
 
 /// <summary>
@@ -72,12 +73,11 @@ public static class Tokens
                 MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
-
                 Session session = Essential.ModelCast<Session>(packet.Data);
                 Session.OverwriteSession(session);
                 break;
             case Token.LOGIN_SESSION:
-                LoginCallbackModel model = Essential.ModelCast<LoginCallbackModel>(packet.Data);
+                LoginCallbackPacket model = Essential.ModelCast<LoginCallbackPacket>(packet.Data);
                 if (model.Token == "1")
                 {
                     LocalUser.Login(model.Username, model.ID, model.Email);
@@ -88,7 +88,7 @@ public static class Tokens
                 }
                 break;
             case Token.AVATAR_REQUEST:
-                UserImageRequestModel.ProcessImage(packet);
+                UserImageRequestPacket.ProcessImage(packet);
                 break;
             case Token.LAST_CHATS:
                 MainPage.AddLastChats(packet);

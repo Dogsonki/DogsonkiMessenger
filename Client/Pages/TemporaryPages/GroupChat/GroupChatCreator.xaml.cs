@@ -16,7 +16,11 @@ public partial class GroupChatCreator : ContentPage
         Invited.Clear();
         UsersFound.Clear();
 
-        Invited.Add(new AnyListBindable(LocalUser.UserRef));
+        if(LocalUser.UserRef != null)
+        {
+            Invited.Add(new AnyListBindable(LocalUser.UserRef));
+        }
+      
         LocalUser.isCreatingGroup = true;
 
         InitializeComponent();
@@ -84,6 +88,6 @@ public partial class GroupChatCreator : ContentPage
             }
         }
 
-        SocketCore.Send(new GroupChatCreateModel(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),Token.GROUP_CHAT_CREATE);
+        SocketCore.Send(new GroupChatCreatePacket(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),Token.GROUP_CHAT_CREATE);
     }
 }

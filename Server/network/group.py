@@ -77,7 +77,8 @@ class GroupChatroom(functions.Chatroom):
                 self.connection.send_message("", MessageType.ERROR)
 
     def on_new_message(self, message: Message):
-        message_ = message.data.strip()
+        message_ = message.data["message"].strip()
+        message_type = message.data["message_type"]
         if message_ != "":
             for i in self.group_members:
                 if i != self.connection.nick:
@@ -85,11 +86,14 @@ class GroupChatroom(functions.Chatroom):
                     if receiver_connection:
                         data = [{"user": self.connection.nick, "message": message_,
                                 "time": time.time(), "user_id": self.connection.login_id,
-                                 "is_group": True, "group_id": self.group_id}]
+                                 "is_group": True, "group_id": self.group_id, "message_type": message_type}]
                         receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-            self.save_message_in_database(message_)
+            self.save_message_in_database(message_, message_type)
 
-    def save_message_in_database(self, message):
+    def save_message_in_database(self, message: str, message_type: str):
+        is_path = False if message_type == "text" else True
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
-                                        int(self.group_id))
+                                        int(self.group_id), message_type, is_path)
+        if is_path:
+            functions.save_file(f"{int(time.time())}{self.group_id}{self.connection.login_id}", message)
         handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id)

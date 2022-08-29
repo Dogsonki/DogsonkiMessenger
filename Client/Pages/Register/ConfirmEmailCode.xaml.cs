@@ -25,7 +25,7 @@ public partial class ConfirmEmailCode : ContentPage
         {
             return;
         }
-        SocketCore.SendCallback(CodeSended, ((Entry)sender).Text, Token.REGISTER);
+        SocketCore.SendCallback<int>(CodeSended, ((Entry)sender).Text, Token.REGISTER);
     }
 
     private Label ErrorText = new Label()
@@ -45,7 +45,7 @@ public partial class ConfirmEmailCode : ContentPage
             ErrorLevel.Children.Remove(ErrorText);
     }
 
-    private void CodeSended(object rev)
+    private void CodeSended(int rev)
     {
         RToken token = Tokens.CharToRToken(rev);
         switch (token)
@@ -59,14 +59,14 @@ public partial class ConfirmEmailCode : ContentPage
                 MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     RegisterPage rg = new RegisterPage();
-                    rg.message.ShowError("Max attemps used. Please try again later!");
+                    rg.message.ShowError("Max attemps used. \n Please try again later!");
                     Navigation.PushAsync(rg);
                 });
                 break;
             case RToken.ACCEPT:
                 MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    Navigation.PushAsync(new LoginPage("Your accout has been activated \n You can now login to your account"));
+                    Navigation.PushAsync(new LoginPage("Your accout has been activated. \n You can now login to your account"));
                 });
                 break;
             default:

@@ -2,11 +2,11 @@
 
 namespace Client.Utility
 {
-    public class Essential
+    public static class Essential
     {
-        public static byte[] StreamToBuffer(Stream stream, long maxBuffer = 12 * 1024)
+        public static byte[] StreamToBuffer(this Stream stream)
         {
-            byte[] buffer = new byte[maxBuffer];
+            byte[] buffer = new byte[stream.Length];
             using (MemoryStream ms = new MemoryStream())
             {
                 int read;
@@ -18,7 +18,7 @@ namespace Client.Utility
             }
         }
 
-        public static T ModelCast<T>(object data)
+        public static T ModelCast<T>(this object data)
         {
             T dest = default;
             try

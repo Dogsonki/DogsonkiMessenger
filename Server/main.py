@@ -31,7 +31,7 @@ def main():
     print("\nMADE BY DOGSON\n")
     CreateDatabase().create_all_tables()
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # todo make secure connection (ssl)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     server.bind((config.ip, config.port))

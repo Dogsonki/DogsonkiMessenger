@@ -9,6 +9,7 @@ from mysql.connector.errors import IntegrityError
 from mysql.connector.cursor_cext import CMySQLCursor
 
 from ..network.config import config
+from ..network import functions
 
 
 @dataclass
@@ -17,12 +18,14 @@ class ChatMessage:
     sender: str
     time: datetime
     sender_id: int
+    message_type: str
+    is_path: bool
 
 
 def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
                                        number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u1.nick, time, sender_id FROM ((messages
+    cursor.execute("""SELECT content, u1.nick, time, sender_id, message_type, is_path FROM ((messages
                       INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                       INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
@@ -38,7 +41,7 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
 def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
                                              number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u.nick, time, sender_id FROM ((groups_messages
+    cursor.execute("""SELECT content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
                       INNER JOIN users AS u ON groups_messages.sender_id = u.id)
                       INNER JOIN groups_ AS g ON groups_messages.group_id = g.id)
                       WHERE group_id = %s
@@ -51,13 +54,14 @@ def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int
 
 
 def login_user(cursor: CMySQLCursor, login: str, password: str) -> Tuple:
-    cursor.execute("""SELECT id, is_banned FROM users
-                      WHERE login = %s and password = %s;""", (login, password))
+    cursor.execute("""SELECT id, is_banned, password FROM users
+                      WHERE login = %s;""", (login, password))
     sql_data = cursor.fetchone()
     if sql_data is None:
         return False, None
     else:
-        return sql_data
+        if functions.check_password(password, sql_data[2]):
+            return sql_data[0:2]
 
 
 def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:
@@ -175,17 +179,18 @@ def get_group_members(cursor: CMySQLCursor, group_id: int) -> List:
     return [i[0] for i in sql_data]
 
 
-def save_message(cursor: CMySQLCursor, content: str, sender: int, receiver: int):
-    cursor.execute("""INSERT INTO messages(content, sender_id, receiver_id)
-                      VALUES (%s, %s, %s);""", (content, sender, receiver))
+def save_message(cursor: CMySQLCursor, content: str, sender: int, receiver: int, message_type: str, is_path: bool):
+    cursor.execute("""INSERT INTO messages(content, sender_id, receiver_id, message_type, is_path)
+                      VALUES (%s, %s, %s, %s, %s);""", (content, sender, receiver, message_type, is_path))
 
 
-def save_group_message(cursor: CMySQLCursor, content: str, sender: int, group_id: int):
-    cursor.execute("""INSERT INTO groups_messages(content, sender_id, group_id)
-                      VALUES (%s, %s, %s);""", (content, sender, group_id))
+def save_group_message(cursor: CMySQLCursor, content: str, sender: int, group_id: int, message_type: str, is_path: bool):
+    cursor.execute("""INSERT INTO groups_messages(content, sender_id, group_id, message_type, is_path)
+                      VALUES (%s, %s, %s, %s, %s);""", (content, sender, group_id, message_type, is_path))
 
 
 def register_user(cursor: CMySQLCursor, login: str, password: str, nick: str):
+    password = functions.hash_password(password)
     try:
         cursor.execute("""INSERT INTO users(login, password, nick, warnings, is_banned)
                           VALUES (%s, %s, %s, 0, 0);""", (login, password, nick))
@@ -286,6 +291,7 @@ def create_users_link(cursor: CMySQLCursor, user1_id: int, user2_id: int):
 
 
 def change_password(cursor: CMySQLCursor, login: str, new_password: str):
+    new_password = functions.hash_password(new_password)
     cursor.execute("""UPDATE users
                       SET password = %s
                       WHERE login = %s;""", (new_password, login))

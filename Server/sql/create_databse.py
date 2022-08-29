@@ -23,7 +23,7 @@ class CreateDatabase:
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    nick VARCHAR(50) NOT NULL UNIQUE,
                                    login VARCHAR(50) NOT NULL UNIQUE,
-                                   password VARCHAR(50) NOT NULL,
+                                   password VARCHAR(150) NOT NULL,
                                    warnings INTEGER NOT NULL,
                                    is_banned BIT NOT NULL,
                                    avatar MEDIUMBLOB
@@ -47,6 +47,8 @@ class CreateDatabase:
                                    sender_id INTEGER,
                                    receiver_id INTEGER,
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   message_type VARCHAR(5),
+                                   is_path BIT NOT NULL,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL
@@ -96,6 +98,8 @@ class CreateDatabase:
                                    sender_id INTEGER,
                                    group_id INTEGER,
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   message_type VARCHAR(5),
+                                   is_path BIT NOT NULL,,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   

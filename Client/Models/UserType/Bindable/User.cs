@@ -8,8 +8,18 @@ namespace Client.Models.UserType.Bindable;
 [Bindable(BindableSupport.Yes)]
 public class User : BindableObject
 {
+    /*WIP*/
+    private string? tag;
+    public string Tag
+    {
+        get { return "System"; }
+        set { tag = value; }
+    }
+
+    public bool isBot { get; set; }
+    public bool VisibleTag { get; set; } = false;
+
     public static List<User> Users = new List<User>();
-    public List<MessageModel> CachedMessages = new List<MessageModel>();
 
     private ImageSource avatar;
     public ImageSource Avatar
@@ -36,12 +46,26 @@ public class User : BindableObject
         }
     }
 
+    private int dogeCoins;
+    public int DogeCoins
+    {
+        get
+        {
+            return dogeCoins;
+        }
+        set
+        {
+            dogeCoins = value;
+            OnPropertyChanged(nameof(DogeCoins));
+        }
+    }
+
     /* As LocalUser have his own binding but User reuse it LocalUser have to be binding as LocalUser.<BindableObject> */
     public bool IsLocalUser = false;
 
     /* Username and ID will never change then don't make them as OnPropertyChanged */
     public string Username { get; set; }
-    public int Id { get; set; }
+    public int UserId { get; set; }
 
     public Command OpenChatCommand { get; set; }
 
@@ -49,18 +73,16 @@ public class User : BindableObject
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (Users.Find(x => x.Id == id) != null)
+            if (Users.Find(x => x.UserId == id) != null)
                 return;
 
             Username = username;
-            Id = id;
+            UserId = id;
             IsLocalUser = isLocalUser;
             OpenChatCommand = new Command(OpenChat);
 
             Users.Add(this);
         });
-
-        Debug.Write($"Getting avatar: username: {username} id: {Id}");
         byte[] AvatarCacheBuffer = Cache.ReadCache("avatar" + id);
 
         if (AvatarCacheBuffer is not null)
@@ -73,7 +95,6 @@ public class User : BindableObject
         }
         else
         {
-            Debug.Write("REQUESTING AVATAR");
             SocketCore.Send(id, Token.AVATAR_REQUEST);
         }
     }
@@ -91,8 +112,8 @@ public class User : BindableObject
 
     public static User CreateOrGet(string username, int id)
     {
-        User user;
-        if ((user = Users.Find(x => x.Id == id)) != null)
+        User? user;
+        if ((user = Users.Find(x => x.UserId == id)) != null)
             return user;
 
         return new User(username, id, false);
@@ -100,8 +121,32 @@ public class User : BindableObject
 
     public static User CreateLocalUser(string username, int id)
     {
+        CreateSystemBot();
         return new User(username, id, true);
     }
 
-    public static User GetUser(uint id) => Users.Find(x => x.Id == id);
+    /// <summary>
+    /// User "bot" that is visible only for client, sends messages with errors and warnings to client
+    /// </summary>
+    public static User CreateSystemBot()
+    {
+        User? _;
+        if ((_ = GetUser(-100)) is not null) return _;
+
+        User systemBot = new User("System", -100)
+        {
+            isBot = true,
+            Tag = "System",
+            VisibleTag = true
+        };
+        return systemBot;
+    }
+
+    public static User GetSystemBot()
+    {
+        User? systemBot = GetUser(-100);
+        return systemBot != null ? systemBot : CreateSystemBot();
+    }
+
+    public static User? GetUser(int id) => Users.Find(x => x.UserId == id);
 }

@@ -10,7 +10,7 @@ public partial class LoginPage : ContentPage
 {
     public static LoginPage Current;
     public MessagePopPage message;
-
+    
     public LoginPage(string info = null)
     {
         InitializeComponent();
@@ -29,32 +29,37 @@ public partial class LoginPage : ContentPage
         await Navigation.PushAsync(new RegisterPage());
     }
 
+    private async void RedirectToForgotPassword(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new PasswordForgot.ForgotPasswordEnterEmail());
+    }
+
     private void LoginDone(object sender, EventArgs e)
     {
         string username = Input_Username.Text;
         string password = Input_Password.Text;
 
 #if DEBUG
-        if (username == "a" && password == "a")
+        if(username == "a" && password == "a")
         {
-            LocalUser.Login("uwu", "2", "wo@");
+            LocalUser.Login("TestUser", "1", "test@");
         }
 #endif
-        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             message.ShowError("Username or password is empty");
             return;
         }
 
-        if (!SocketCore.SendCallback(LoginCallback, new LoginModel(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback<LoginCallbackPacket>(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
             message.ShowError("Unable to connect to the server");
             return;
         }
     }
-    public void LoginCallback(object rev)
+
+    public void LoginCallback(LoginCallbackPacket login)
     {
-        LoginCallbackModel login = Essential.ModelCast<LoginCallbackModel>(rev);
         switch (login.Token)
         {
             case "1":

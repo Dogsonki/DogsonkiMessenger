@@ -3,7 +3,7 @@
 namespace Client.Models;
 
 [Serializable]
-public class LoginCallbackModel
+public class LoginCallbackPacket
 {
     [JsonProperty("nick")]
     public string Username { get; set; }
@@ -15,7 +15,7 @@ public class LoginCallbackModel
     public string Email { get; set; }
 
     [JsonConstructor]
-    public LoginCallbackModel(string nick, string login_id, string token, string email)
+    public LoginCallbackPacket(string nick, string login_id, string token, string email)
     {
         Username = nick;
         ID = login_id;

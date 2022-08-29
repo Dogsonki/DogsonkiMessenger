@@ -6,18 +6,15 @@ namespace Client;
 
 public partial class App : Application
 {
-    private static LoginPage CurrentLoginPage;
-
     public App()
     {
         InitializeComponent();
         try
         {
-            CurrentLoginPage = new LoginPage();
-            MainPage = new NavigationPage(CurrentLoginPage);
-
             Connection.AddOnConnection(Session.ReadSession);
-            SocketCore.Init(); //TODO: if throw redirect login with error 
+            Task.Factory.StartNew(SocketCore.Start);
+
+            MainPage = new NavigationPage(new LoginPage());
         }
         catch(Exception ex)
         {

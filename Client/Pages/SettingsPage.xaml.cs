@@ -8,15 +8,17 @@ namespace Client.Pages;
 
 public partial class SettingsPage : ContentPage
 {
+    public bool DebugSettingsVisible { get; set; } = false;
+
     public SettingsPage()
     {
         InitializeComponent();
+#if DEBUG 
+        DebugSettingsVisible = true;
+#else
+        DebugSettingsVisible = false;
+#endif
         NavigationPage.SetHasNavigationBar(this, false);
-    }
-
-    protected override bool OnBackButtonPressed()
-    {
-        return base.OnBackButtonPressed();
     }
 
     private async void ChangeAvatar(object sender, EventArgs e)
@@ -34,7 +36,7 @@ public partial class SettingsPage : ContentPage
             byte[] ImageBuffer;
 
             Stream stream = await image.OpenReadAsync();
-            ImageBuffer = Essential.StreamToBuffer(stream, stream.Length);
+            ImageBuffer = stream.StreamToBuffer();
 
             SocketCore.Send(ImageBuffer, Token.CHANGE_AVATAR);
 
@@ -67,11 +69,6 @@ public partial class SettingsPage : ContentPage
     private void ClearCache(object sender, EventArgs e)
     {
         Cache.ClearAbsoluteCache();
-    }
-
-    private async void CreateGroup(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new GroupChatCreator());
     }
 
     private void UseLoggerSwitched(object sender, EventArgs e)

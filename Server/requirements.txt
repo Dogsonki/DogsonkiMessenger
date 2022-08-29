@@ -1,3 +1,5 @@
 mysql-connector-python
 email-validator
 requests
+pillow
+bcrypt

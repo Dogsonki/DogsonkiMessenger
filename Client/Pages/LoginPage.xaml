@@ -4,25 +4,15 @@
              x:Class="Client.Pages.LoginPage"
 			 BackgroundColor="#121212">
 
-	<StackLayout Padding="20" Spacing="15">
-		<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="30" FontAttributes="Bold" Text="Login"/>
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text=" or "/>
-			<Label TextColor="White" HorizontalOptions="Center" FontSize="25" Text="Register">
-				<Label.GestureRecognizers>
-					<TapGestureRecognizer Tapped="RedirectToRegister"/>
-				</Label.GestureRecognizers>
-			</Label>
-		</StackLayout>
-		<Line HorizontalOptions="Center" Stroke="White" X1="100" X2="300"/>
-
+	<StackLayout Padding="10" Spacing="15">
+		<Label VerticalOptions="Center" HorizontalOptions="Center" FontSize="Title" Text="Login to Dogsonki"/>
 		<StackLayout>
 			<Frame BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="15" 
 			   HeightRequest="44" WidthRequest="300">
 				<Entry x:Name="Input_Username" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       IsTextPredictionEnabled="True" TextColor="White" PlaceholderColor="White" Placeholder="Email"
-				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+			       IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Email"
+				   Keyboard="Plain"/>
 			</Frame>
 		</StackLayout>
 
@@ -31,26 +21,37 @@
 			   HeightRequest="44" WidthRequest="300">
 				<Entry x:Name="Input_Password" Focused="LoginFocused" WidthRequest="287" Margin="10,0,0,0" IsPassword="true"
 				   HeightRequest="50" FontSize="17" HorizontalOptions="Start"
-			       TextColor="White" PlaceholderColor="White" Placeholder="Password"
-				   Keyboard="Plain" FontFamily="OpenSansRegular"/>
+			       PlaceholderColor="White" Placeholder="Password"
+				   Keyboard="Plain"/>
 			</Frame>
 		</StackLayout>
-		
+
 		<StackLayout IsVisible="false" x:Name="InfoLevel" VerticalOptions="Center" HorizontalOptions="Center"/>
 
 		<StackLayout WidthRequest="340" HorizontalOptions="Center" VerticalOptions="Center">
 			<StackLayout IsVisible="true" WidthRequest="300"  HorizontalOptions="Center" VerticalOptions="Center" x:Name="ErrorLevel"/>
 
 			<StackLayout Orientation="Horizontal">
-				<CheckBox x:Name="CheckRemember" Color="#706f6d" ></CheckBox>
-				<Label TextColor="White" Padding="10" Text="Remember me"/>
-				<Label TextColor="White" VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand" Padding="10" Text="Forgot Password"/>
+				<CheckBox x:Name="CheckRemember" Color="#706f6d"/>
+				<Label Padding="10" Text="Remember me"/>
+				<StackLayout VerticalOptions="EndAndExpand" HorizontalOptions="EndAndExpand">
+					<StackLayout.GestureRecognizers>
+						<TapGestureRecognizer Tapped="RedirectToForgotPassword"/>
+					</StackLayout.GestureRecognizers>
+					<Label Padding="10" Text="Forgot Password"/>
+				</StackLayout>
 			</StackLayout>
 
 			<StackLayout Padding="15">
-				<Button TextColor="White" BackgroundColor="#FF252525" BorderWidth="0" 
+				<Button BackgroundColor="#FF252525" BorderWidth="0" 
 						WidthRequest="250" Clicked="LoginDone" Text="Login" CornerRadius="15"
 						FontFamily="OpenSansSemibold"/>
+			</StackLayout>
+			<StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+				<StackLayout.GestureRecognizers>
+					<TapGestureRecognizer Tapped="RedirectToRegister"/>
+				</StackLayout.GestureRecognizers>
+				<Label Text="Sign in"/>
 			</StackLayout>
 		</StackLayout>
 	</StackLayout>

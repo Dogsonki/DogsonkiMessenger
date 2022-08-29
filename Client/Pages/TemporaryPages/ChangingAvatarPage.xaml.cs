@@ -18,9 +18,8 @@ public partial class ChangingAvatarPage : ContentPage
         });
 
         Stream stream = await image.OpenReadAsync();
-        ImageBuffer = Essential.StreamToBuffer(stream, stream.Length);
+        ImageBuffer = stream.StreamToBuffer();
 
         ImageSource src = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
-
     }
 }
