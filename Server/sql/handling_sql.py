@@ -55,13 +55,12 @@ def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int
 
 def login_user(cursor: CMySQLCursor, login: str, password: str) -> Tuple:
     cursor.execute("""SELECT id, is_banned, password FROM users
-                      WHERE login = %s;""", (login, password))
+                      WHERE login = %s;""", (login,))
     sql_data = cursor.fetchone()
-    if sql_data is None:
-        return False, None
-    else:
+    if sql_data is not None:
         if functions.check_password(password, sql_data[2]):
             return sql_data[0:2]
+    return False, None
 
 
 def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:

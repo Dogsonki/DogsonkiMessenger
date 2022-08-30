@@ -63,10 +63,10 @@ def get_file(path: str, file_format: str) -> bytes:
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(bytes(password), salt)
-    return str(hashed_password)
+    hashed_password = str(bcrypt.hashpw(password.encode("UTF-8"), salt), "UTF-8")
+    return hashed_password
 
 
 def check_password(password: str, hashed_password: str) -> bool:
-    is_correct = bcrypt.checkpw(bytes(password), bytes(hashed_password))
+    is_correct = bcrypt.checkpw(password.encode("UTF-8"), hashed_password.encode("UTF-8"))
     return is_correct
