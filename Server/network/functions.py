@@ -53,12 +53,12 @@ def save_file(name: str, image_data: str):
         image.save(f"./media/{name}.webp", format="webp")
 
 
-def get_file(path: str, file_format: str) -> bytes:
+def get_file(path: str, file_format: str) -> str:
     image = Image.open(path)
     buffer = BytesIO()
     image.save(buffer, file_format)
     data = base64.b64encode(buffer.getvalue())
-    return data
+    return str(data)
 
 
 def hash_password(password: str) -> str:

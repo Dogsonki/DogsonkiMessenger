@@ -92,8 +92,10 @@ class GroupChatroom(functions.Chatroom):
 
     def save_message_in_database(self, message: str, message_type: str):
         is_path = False if message_type == "text" else True
+        if is_path:
+            filename = f"{int(time.time())}{self.group_id}{self.connection.login_id}"
+            functions.save_file(filename, message)
+            message = f"./media/{filename}.webp"
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
-        if is_path:
-            functions.save_file(f"{int(time.time())}{self.group_id}{self.connection.login_id}", message)
         handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id)

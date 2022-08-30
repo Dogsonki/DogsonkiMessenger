@@ -64,7 +64,9 @@ class NormalChatroom(functions.Chatroom):
 
         is_path = False if message_type == "text" else True
         if is_path:
-            functions.save_file(f"{int(time.time())}{self.receiver_id}{self.connection.login_id}", message)
+            filename = f"{int(time.time())}{self.receiver_id}{self.connection.login_id}"
+            functions.save_file(filename, message)
+            message = f"./media/{filename}.webp"
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
 
