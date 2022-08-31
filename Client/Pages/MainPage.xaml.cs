@@ -1,4 +1,3 @@
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
@@ -18,6 +17,8 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         SocketCore.Send(" ", Token.LAST_CHATS);
+
+        LastChats.Add(new AnyListBindable(User.CreateOrGet("michal",11),true));
     }
 
     public static void AddLastChats(SocketPacket packet)
@@ -26,7 +27,10 @@ public partial class MainPage : ContentPage
         {
             List<AnyListBindable> bindable = new List<AnyListBindable>();
 
-            SearchModel[] lastChats = Essential.ModelCast<SearchModel[]>(packet.Data);
+            SearchModel[]? lastChats = Essential.ModelCast<SearchModel[]>(packet.Data);
+
+            if (lastChats is null || lastChats.Length == 0)
+                return;
 
             foreach (var chat in lastChats)
             {

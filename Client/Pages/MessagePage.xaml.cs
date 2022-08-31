@@ -214,12 +214,9 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        if (!isGroupChat)
-        {
-            if (ChatUser.UserId == LocalUser.Id) { return; }
-        }
+        if (ChatUser.UserId == LocalUser.Id && !isGroupChat) { return; }
 
-        List<MessagePacket> messages = null;
+        List<MessagePacket>? messages = null;
         Task.Run(() =>
         {
             messages = Essential.ModelCast<List<MessagePacket>>(packet.Data);
@@ -233,22 +230,32 @@ public partial class MessagePage : ContentPage
             {
                 if (!isGroupChat)
                 {
-                    if (message.UserId != ChatUser.UserId)
-                    {
-                        if (LocalUser.Id != message.UserId)
-                        {
-                            return; //WARNING: check if all messages are from diffrent sources
-                        }
-                    }
-                }
-                else
-                {
-                    if (message.GroupId != GroupChat.Id)
+                    if (message.UserId != ChatUser.UserId && LocalUser.Id != message.UserId)
                     {
                         return;
                     }
+                    else
+                    {
+                        //TODO: Notification 
+                    }
                 }
-                MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
+                else if(message.GroupId != GroupChat.Id)
+                {
+                    return;
+                }
+
+                ChatMessage? lastMessage = GetLastMessage();
+
+                if (lastMessage is null) continue;
+
+                if (lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText)
+                {
+                    MainThread.BeginInvokeOnMainThread(() => lastMessage.textContent += message.ContentString);
+                }
+                else
+                {
+                    MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
+                }
             }
         });
     }
@@ -257,14 +264,15 @@ public partial class MessagePage : ContentPage
 
     private void MessageInputDone(object sender, EventArgs e)
     {
-        string message = ((Entry)sender).Text;
+        Entry input = (Entry)sender;
+        string message = input.Text;
 
         if (string.IsNullOrEmpty(message))
             return;
 
         AddMessage(message);
 
-        ((Entry)sender).Text = "";
+        input.Text = "";
     }
 
     public static void PrependNewMessages(SocketPacket packet)
