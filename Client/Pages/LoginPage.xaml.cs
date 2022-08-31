@@ -1,8 +1,10 @@
 using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Packets;
 using Client.Pages.Helpers;
 using Client.Utility;
+using Newtonsoft.Json;
 
 namespace Client.Pages;
 
@@ -11,28 +13,25 @@ public partial class LoginPage : ContentPage
     public static LoginPage Current;
     public MessagePopPage message;
     
-    public LoginPage(string info = null)
+    public LoginPage(string info = "")
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
+
         message = new MessagePopPage(this);
 
         Current = this;
 
         if (!string.IsNullOrEmpty(info)) message.ShowInfo(info);
+
+
     }
 
     private void LoginFocused(object sender, FocusEventArgs e) => message.Clear(PopType.Error);
 
-    private async void RedirectToRegister(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new RegisterPage());
-    }
+    private async void RedirectToRegister(object sender, EventArgs e) => await Navigation.PushAsync(new RegisterPage());
 
-    private async void RedirectToForgotPassword(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new PasswordForgot.ForgotPasswordEnterEmail());
-    }
+    private async void RedirectToForgotPassword(object sender, EventArgs e) => await Navigation.PushAsync(new PasswordForgot.ForgotPasswordEnterEmail());
 
     private void LoginDone(object sender, EventArgs e)
     {
@@ -45,21 +44,22 @@ public partial class LoginPage : ContentPage
             LocalUser.Login("TestUser", "1", "test@");
         }
 #endif
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             message.ShowError("Username or password is empty");
             return;
         }
 
-        if (!SocketCore.SendCallback<LoginCallbackPacket>(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
         {
             message.ShowError("Unable to connect to the server");
             return;
         }
     }
 
-    public void LoginCallback(LoginCallbackPacket login)
+    public void LoginCallback(object _login)
     {
+        LoginCallbackPacket login = JsonConvert.DeserializeObject<LoginCallbackPacket>((string)_login);
         switch (login.Token)
         {
             case "1":

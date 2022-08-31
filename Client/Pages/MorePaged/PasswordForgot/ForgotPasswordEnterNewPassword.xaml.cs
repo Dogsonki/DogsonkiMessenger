@@ -31,13 +31,13 @@ public partial class ForgotPasswordEnterNewPassword : ContentPage
 			return;
 		}
 
-        if (!SocketCore.SendCallback<int>(CheckPasswordCallback, password, Token.PASSWORD_FORGOT))
+        if (!SocketCore.SendCallback(CheckPasswordCallback, password, Token.PASSWORD_FORGOT))
         {
             message.ShowError("Unable to connect to server");
         }
     }
 
-	private void CheckPasswordCallback(int data)
+	private void CheckPasswordCallback(object data)
 	{
 		switch (data)
 		{

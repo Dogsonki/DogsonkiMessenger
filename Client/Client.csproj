@@ -88,34 +88,43 @@
 	  <MauiXaml Update="Pages\MessagePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterCode.xaml">
+	  <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterCode.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterEmail.xaml">
+	  <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterEmail.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterNewPassword.xaml">
+	  <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterNewPassword.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\MorePaged\Settings\AdvancedSettings.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\MorePaged\Settings\ChatCommands.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\MorePaged\Settings\ProfileSettings.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\Register\ConfirmEmailCode.xaml">
+	  <MauiXaml Update="Pages\MorePaged\Register\ConfirmEmailCode.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\Register\RegisterPage.xaml">
+	  <MauiXaml Update="Pages\MorePaged\Register\RegisterPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Pages\SearchPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\TemporaryPages\ChangingAvatarPage.xaml">
+	  <MauiXaml Update="Pages\MorePaged\TemporaryPages\ChangingAvatarPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
+	  <MauiXaml Update="Pages\MorePaged\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\TemporaryPages\GroupChat\GroupChatCreator.xaml">
+	  <MauiXaml Update="Pages\MorePaged\TemporaryPages\GroupChat\GroupChatCreator.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

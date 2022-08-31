@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Client.Pages.Settings.AdvancedSettings"
+             Title="AdvancedSettings">
+    <VerticalStackLayout>
+		<StackLayout Padding="15">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<StackLayout Spacing="0" Grid.Row="0" VerticalOptions="Center">
+					<Label FontSize="Large" Text="Use logger" />
+					<Label FontSize="Small" TextColor="WhiteSmoke" Text="Logs all packets and function" />
+				</StackLayout>
+
+				<StackLayout VerticalOptions="Center" Grid.Column="1" >
+					<StackLayout.GestureRecognizers>
+						
+					</StackLayout.GestureRecognizers>
+					<Switch IsToggled="False"/>
+				</StackLayout>
+			</Grid>
+		</StackLayout>
+
+	</VerticalStackLayout>
+</ContentPage>

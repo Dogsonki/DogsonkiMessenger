@@ -3,6 +3,7 @@ using Client.Networking.Core;
 using Client.Pages.Helpers;
 using Client.Pages.Register;
 using System.Net.Mail;
+using Client.Networking.Packets;
 
 namespace Client.Pages;
 
@@ -17,10 +18,7 @@ public partial class RegisterPage : ContentPage
         message = new MessagePopPage(this);
     }
 
-    private async void RedirectToLogin(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new LoginPage());
-    }
+    private async void RedirectToLogin(object sender, EventArgs e) => await Navigation.PushAsync(new LoginPage());
 
     private readonly char[] IllegalCharacters = { '$', '{', '}', '@', ':' };
 
@@ -52,14 +50,14 @@ public partial class RegisterPage : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback<int>(RegisterCallback, new RegisterPacket(username, password, email), Token.REGISTER))
+        if (!SocketCore.SendCallback(RegisterCallback, new RegisterPacket(username, password, email), Token.REGISTER, false))
         {
             message.ShowError("Unable to connect to the server");
             return;
         }
     }
 
-    private void RegisterCallback(int rev)
+    private void RegisterCallback(object rev)
     {
         RToken token = Tokens.CharToRToken(rev);
         switch (token)

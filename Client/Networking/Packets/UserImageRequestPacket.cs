@@ -2,10 +2,9 @@
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
-using Client.Utility;
 using Newtonsoft.Json;
 
-namespace Client.Models;
+namespace Client.Networking.Packets;
 
 [Serializable]
 public class UserImageRequestPacket
@@ -26,9 +25,9 @@ public class UserImageRequestPacket
     {
         try
         {
-            UserImageRequestPacket img = packet.ModelCast<UserImageRequestPacket>();
+            UserImageRequestPacket? img = packet.ModelCast<UserImageRequestPacket>();
 
-            if (string.IsNullOrEmpty(img.ImageData) || img.ImageData == " ")
+            if (img is null || string.IsNullOrEmpty(img.ImageData) || img.ImageData == " ")
             {
                 return;
             }
@@ -40,17 +39,24 @@ public class UserImageRequestPacket
                 return;
             }
 
-            string avat = img.ImageData.Substring(2);
-            avat = avat.Substring(0, avat.Length - 1);
-
-            byte[] imgBuffer = Convert.FromBase64String(avat);
-            Cache.SaveToCache(imgBuffer, "avatar" + img.UserId);
-            MainThread.BeginInvokeOnMainThread(() => user.Avatar = ImageSource.FromStream(() => new MemoryStream(imgBuffer)));
+            byte[] buffer;
+            ImageSource imgS = GetImageSource(out buffer, img.ImageData);
+            Cache.SaveToCache(buffer, "avatar" + img.UserId);
+            MainThread.BeginInvokeOnMainThread(() => user.Avatar = imgS);
         }
         catch(Exception ex)
         {
             SocketCore.Send(ex);
             Debug.Error(ex);
         }
+    }
+
+    public static ImageSource GetImageSource(out byte[] buffer, string imageBuffer)
+    {
+        string avat = imageBuffer.Substring(2);
+        avat = avat.Substring(0, avat.Length - 1);
+        byte[] imgBuffer = Convert.FromBase64String(avat);
+        buffer = imgBuffer;
+        return ImageSource.FromStream(() => new MemoryStream(imgBuffer));
     }
 }

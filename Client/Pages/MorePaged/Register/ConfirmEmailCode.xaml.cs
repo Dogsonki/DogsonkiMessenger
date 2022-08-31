@@ -1,4 +1,5 @@
 using Client.Networking.Core;
+using Client.Pages.Helpers;
 using System.Diagnostics;
 
 namespace Client.Pages.Register;
@@ -9,12 +10,15 @@ public partial class ConfirmEmailCode : ContentPage
     private const int RESENDCOOLDOWN = 60;
     private const int MAX_CODE_ATTEMPS = 5;
     private int CheckAttemps = 0;
+    public MessagePopPage message;
 
     public ConfirmEmailCode(string email)
     {
         InitializeComponent();
-        CheckAttemps = 0;
         NavigationPage.SetHasNavigationBar(this, false);
+
+        message = new MessagePopPage(this);
+        CheckAttemps = 0;
         ResendCooldownTimer.Start();
         noteEmail.Text = $"We've sent a code to {email} and type code to window below";
     }
@@ -25,7 +29,7 @@ public partial class ConfirmEmailCode : ContentPage
         {
             return;
         }
-        SocketCore.SendCallback<int>(CodeSended, ((Entry)sender).Text, Token.REGISTER);
+        SocketCore.SendCallback(CodeSended, ((Entry)sender).Text, Token.REGISTER, false);
     }
 
     private Label ErrorText = new Label()
@@ -45,9 +49,10 @@ public partial class ConfirmEmailCode : ContentPage
             ErrorLevel.Children.Remove(ErrorText);
     }
 
-    private void CodeSended(int rev)
+    private void CodeSended(object rev)
     {
         RToken token = Tokens.CharToRToken(rev);
+
         switch (token)
         {
             case RToken.WRONG_CODE:

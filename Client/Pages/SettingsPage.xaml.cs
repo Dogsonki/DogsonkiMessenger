@@ -1,8 +1,6 @@
 using Client.IO;
 using Client.Models.UserType.Bindable;
-using Client.Networking.Core;
-using Client.Pages.TemporaryPages.GroupChat;
-using Client.Utility;
+using Client.Pages.Settings;
 
 namespace Client.Pages;
 
@@ -21,41 +19,9 @@ public partial class SettingsPage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
     }
 
-    private async void ChangeAvatar(object sender, EventArgs e)
-    {
-        try
-        {
-            var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
-            {
-                Title = "Pick avatar"
-            });
-
-            if (image == null)
-                return;
-
-            byte[] ImageBuffer;
-
-            Stream stream = await image.OpenReadAsync();
-            ImageBuffer = stream.StreamToBuffer();
-
-            SocketCore.Send(ImageBuffer, Token.CHANGE_AVATAR);
-
-            LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
-
-            Cache.SaveToCache(ImageBuffer, "avatar" + LocalUser.id);
-
-            stream.Close();
-        }
-        catch (Exception ex)
-        {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
-        }
-    }
-
-    private async void ShowConsole(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new DebugOnly.LoggingPage());
-    }
+    private async void ShowProfileSettings(object sender, EventArgs e) => await Navigation.PushAsync(new ProfileSettings());
+    private async void ShowAdvancedSettings(object sender, EventArgs e) => await Navigation.PushAsync(new AdvancedSettings());
+    private async void ShowCommandsList(object sender, EventArgs e) => await Navigation.PushAsync(new ChatCommands());
 
     private void Logout(object sender, EventArgs e)
     {

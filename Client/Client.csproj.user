@@ -6,6 +6,7 @@
     <ActiveDebugProfile>vivo V2028 (Android 12.0 - API 31)</ActiveDebugProfile>
     <SelectedPlatformGroup>PhysicalDevice</SelectedPlatformGroup>
     <DefaultDevice>pixel_5_-_api_31</DefaultDevice>
+    <SelectedDevice>pixel_5_-_api_31</SelectedDevice>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-android|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
@@ -21,34 +22,43 @@
     <MauiXaml Update="Pages\MessagePage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterCode.xaml">
+    <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterCode.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterEmail.xaml">
+    <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterEmail.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\PasswordForgot\ForgotPasswordEnterNewPassword.xaml">
+    <MauiXaml Update="Pages\MorePaged\PasswordForgot\ForgotPasswordEnterNewPassword.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\MorePaged\Settings\AdvancedSettings.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\MorePaged\Settings\ChatCommands.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\MorePaged\Settings\ProfileSettings.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
     <MauiXaml Update="Pages\SettingsPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\Register\ConfirmEmailCode.xaml">
+    <MauiXaml Update="Pages\MorePaged\Register\ConfirmEmailCode.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\Register\RegisterPage.xaml">
+    <MauiXaml Update="Pages\MorePaged\Register\RegisterPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
     <MauiXaml Update="Pages\SearchPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\TemporaryPages\ChangingAvatarPage.xaml">
+    <MauiXaml Update="Pages\MorePaged\TemporaryPages\ChangingAvatarPage.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
+    <MauiXaml Update="Pages\MorePaged\TemporaryPages\ChatOptions\ChatOptionsMain.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
-    <MauiXaml Update="Pages\TemporaryPages\GroupChat\GroupChatCreator.xaml">
+    <MauiXaml Update="Pages\MorePaged\TemporaryPages\GroupChat\GroupChatCreator.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
   </ItemGroup>

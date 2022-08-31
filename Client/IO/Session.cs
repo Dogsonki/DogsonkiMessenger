@@ -7,10 +7,17 @@ namespace Client.IO;
 public class Session : IStorage
 {
     [JsonProperty("session_key")]
-    public string SessionKey { get; set; } = string.Empty;
+    public string SessionKey { get; set; }
 
     [JsonProperty("login_id")]
-    public string LoginID { get; set; } = string.Empty;
+    public string LoginId { get; set; }
+
+    [JsonConstructor]
+    public Session(string session_key, string login_id)
+    {
+        SessionKey = session_key;
+        LoginId = login_id;
+    }
 
     public static void OverwriteSession(Session session)
     {
@@ -20,19 +27,12 @@ public class Session : IStorage
 #endif
     }
 
-    [JsonConstructor]
-    public Session(string session_key, string login_id)
-    {
-        SessionKey = session_key;
-        LoginID = login_id;
-    }
-
     public static void ReadSession()
     {
-#if ANDROID
+#if ANDROID 
         AndroidFileService wr = new();
-        bool SessionExist = wr.CreateFileIfNotExist("session.json");
-        if (SessionExist)
+        bool sessionExists = wr.CreateFileIfNotExist("session.json");
+        if (sessionExists)
         {
             string ses = File.ReadAllText(AndroidFileService.GetPersonalDir("session.json"));
             Session? session = JsonConvert.DeserializeObject<Session>(ses);

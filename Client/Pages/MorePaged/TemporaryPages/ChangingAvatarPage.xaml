@@ -3,7 +3,4 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.TemporaryPages.ChangingAvatarPage"
              Title="ChangingAvatarPage">
-    <VerticalStackLayout>
-		<Image x:Username="NewAvatar"/>
-	</VerticalStackLayout>
 </ContentPage>

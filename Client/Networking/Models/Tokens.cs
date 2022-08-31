@@ -2,9 +2,12 @@
 using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Model;
+using Client.Networking.Packets;
 using Client.Pages;
 using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Client;
 
@@ -29,7 +32,8 @@ public enum Token : int
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
     GROUP_CHAT_INIT = 17,
-    BOT_COMMAND = 20
+    BOT_COMMAND = 20,
+    CHAT_IMAGE_REQUEST = 21
 }
 
 /// <summary>
@@ -53,6 +57,17 @@ public static class Tokens
 {
     public static RToken CharToRToken(object rev) => (RToken)int.Parse(rev.ToString()); //Get string and get char but don't convert as special
 
+    private static JsonSerializerSettings JsonSettings;
+
+    static Tokens()
+    {
+        JsonSettings = new JsonSerializerSettings()
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
+    }
+
     public static void Process(SocketPacket packet)
     {
         switch ((Token)packet.Token)
@@ -73,19 +88,28 @@ public static class Tokens
                 MessagePage.PrependNewMessages(packet);
                 break;
             case Token.SESSION_INFO:
-                Session session = Essential.ModelCast<Session>(packet.Data);
+                Session? session = ((JObject)packet.Data).ModelCast<Session>();
+
+                if (session is null)
+                    return;
+
                 Session.OverwriteSession(session);
                 break;
             case Token.LOGIN_SESSION:
-                LoginCallbackPacket model = Essential.ModelCast<LoginCallbackPacket>(packet.Data);
-                if (model.Token == "1")
+                LoginCallbackPacket? login = ((JObject)packet.Data).ModelCast<LoginCallbackPacket>(); 
+
+                if (login is null)
+                    break;
+
+                if (login.Token == "1")
                 {
-                    LocalUser.Login(model.Username, model.ID, model.Email);
+                    LocalUser.Login(login.Username, login.ID, login.Email);
                 }
-                else if (model.Token == "-1")
+                else if (login.Token == "-1")
                 {
                     LoginPage.Current.message.ShowError("User is banned");
                 }
+
                 break;
             case Token.AVATAR_REQUEST:
                 UserImageRequestPacket.ProcessImage(packet);

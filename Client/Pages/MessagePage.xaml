@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MessagePage"
              xmlns:local="clr-namespace:Client.Pages"
-			 xmlns:CommandList="clr-namespace:Client.Networking.Models.BotCommands"
+			 xmlns:CommandList="clr-namespace:Client.Commands"
 			 BackgroundColor="#121212">
 
 	<StackLayout>
@@ -28,13 +28,13 @@
 							<StackLayout VerticalOptions="Start"  Grid.Row="0" Grid.Column="0"  Orientation="Horizontal">
 								<Frame VerticalOptions="Start" Grid.Row="0" Grid.Column="0" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
 									<Image Grid.Row="0" Grid.Column="0" Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
-										   Source="{Binding AvatarImage}">
+										   Source="{Binding BindedUser.Avatar}">
 									</Image>
 								</Frame>
 								<StackLayout HorizontalOptions="Start" Margin="5,0,0,0" Grid.Column="1" Orientation="Vertical">
 									<StackLayout Orientation="Horizontal" HorizontalOptions="Start">
 										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="19"
-											   VerticalOptions="Center" Text="{Binding Username}"/>
+											   VerticalOptions="Center" Text="{Binding BindedUser.Username}"/>
 										<StackLayout IsVisible="{Binding BindedUser.VisibleTag}">
 											<Frame BorderColor="Transparent" Margin="5,0,0,0" BackgroundColor="Grey"
 												   HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand" HeightRequest="20">
@@ -45,12 +45,12 @@
 										<Label Margin="10,0,0,0" FontSize="Small" HorizontalOptions="Start" TextColor="Grey" 
 											   VerticalOptions="Center" Text="{Binding FactoredTime}"/>
 									</StackLayout>
-									<StackLayout IsEnabled="{Binding IsContentMessage}" IsVisible="{Binding IsContentMessage}">
+									<StackLayout IsEnabled="{Binding IsText}" IsVisible="{Binding IsText}">
 										<Label LineHeight="1.1" HorizontalOptions="StartAndExpand" MaximumWidthRequest="300" 
-											   FontSize="16" VerticalOptions="Center" Text="{Binding MessageContent}" TextColor="LightGrey"/>
+											   FontSize="16" VerticalOptions="Center" Text="{Binding TextContent}" TextColor="LightGrey"/>
 									</StackLayout>
-									<StackLayout IsEnabled="{Binding IsImageMessage}" IsVisible="{Binding IsImageMessage}">
-										<Image MaximumHeightRequest="300" MaximumWidthRequest="300" Source="{Binding ImageMessage}"/>
+									<StackLayout IsEnabled="{Binding IsImage}" IsVisible="{Binding IsImage}">
+										<Image MaximumHeightRequest="300" MaximumWidthRequest="300" Source="{Binding Image}"/>
 									</StackLayout>
 								</StackLayout>
 							</StackLayout>
@@ -65,7 +65,7 @@
 			   HeightRequest="180" x:Name="CommandsList" IsVisible="false" IsEnabled="False">
 			<StackLayout >
 				<ListView SelectionMode="None" SeparatorVisibility="None" 
-						  ItemsSource="{Binding Source={x:Static CommandList:BotCommandList.Commands}}">
+						  ItemsSource="{Binding Source={x:Static CommandList:CommandList.Commands}}">
 					<ListView.ItemTemplate>
 						<DataTemplate>
 							<ViewCell>
@@ -83,7 +83,8 @@
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="372">
 				<HorizontalStackLayout>
-					<ImageButton Margin="0,0,-10,2" VerticalOptions="Center" HorizontalOptions="Center" Clicked="AddFile" HeightRequest="50" WidthRequest="50" Source="filesend.png"/>
+					<ImageButton Margin="0,0,-10,2" VerticalOptions="Center" HorizontalOptions="Center" Clicked="AddFile" HeightRequest="50"
+								 WidthRequest="50" Source="filesend.png"/>
 					<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
 				   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>

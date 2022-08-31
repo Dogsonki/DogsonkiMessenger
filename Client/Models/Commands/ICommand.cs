@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using Client.Networking.Core;
 
-namespace Client.Networking.Models.BotCommands;
+namespace Client.Commands;
 
-public interface IBotCommand
+public interface ICommand
 {
     public string Command { get; set; }
 
@@ -52,7 +52,7 @@ public interface IBotCommand
         return true;
     }
 
-    public static bool PrepareAndSend(IBotCommand command, out string error)
+    public static bool PrepareAndSend(ICommand command, out string error)
     {
         if (CheckProperties(command, out error))
         {

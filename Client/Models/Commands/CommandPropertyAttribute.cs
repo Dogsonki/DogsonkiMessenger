@@ -1,4 +1,4 @@
-﻿namespace Client.Networking.Models.BotCommands;
+﻿namespace Client.Commands;
 
 public class CommandProperty : Attribute
 {

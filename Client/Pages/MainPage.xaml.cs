@@ -5,26 +5,19 @@ using Client.Networking.Model;
 using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
 using System.Collections.ObjectModel;
+using Client.Networking.Packets;
 
 namespace Client.Pages;
 
 public partial class MainPage : ContentPage
 {
     public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
-    public static MainPage Instance;
 
     public MainPage()
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         SocketCore.Send(" ", Token.LAST_CHATS);
-
-        if (Instance is null)
-        {
-            Instance = this;
-
-            Logger.Push("Main page initialized", TraceType.Func, LogLevel.Debug);
-        }
     }
 
     public static void AddLastChats(SocketPacket packet)
@@ -58,10 +51,8 @@ public partial class MainPage : ContentPage
         });
     }
 
-    private async void CreateGroup(object sender, EventArgs e)
-    {
-       await Navigation.PushAsync(new GroupChatCreator());
-    }
+    private async void CreateGroup(object sender, EventArgs e) => await Navigation.PushAsync(new GroupChatCreator());
+    private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
 
     protected override bool OnBackButtonPressed()
     {
@@ -69,23 +60,13 @@ public partial class MainPage : ContentPage
         return true;
     }
 
-    private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
-
     private async void SearchPressed(object sender, EventArgs e)
     {
-        try
-        {
-            string SearchInput = ((Entry)sender).Text;
-            if (string.IsNullOrEmpty(SearchInput))
-            {
-                return;
-            }
-            SocketCore.Send(SearchInput, Token.SEARCH_USER);
-            await Navigation.PushAsync(new SearchPage(SearchInput));
-        }
-        catch (Exception ex)
-        {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
-        }
+        string SearchInput = ((Entry)sender).Text;
+
+        if (string.IsNullOrEmpty(SearchInput)) return;
+
+        SocketCore.Send(SearchInput, Token.SEARCH_USER);
+        await Navigation.PushAsync(new SearchPage(SearchInput));
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Client.Utility;
 using Newtonsoft.Json;
 
-namespace Client.Models;
+namespace Client.Networking.Packets;
 
 [Serializable]
 public class SearchModel

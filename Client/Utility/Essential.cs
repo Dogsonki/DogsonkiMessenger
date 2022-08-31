@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Client.Utility
 {
@@ -18,23 +19,28 @@ namespace Client.Utility
             }
         }
 
-        public static T ModelCast<T>(this object data)
+        public static T? ModelCast<T>(this object data)
         {
             T dest = default;
+            Type dataType = data.GetType();
             try
             {
-                if (data.GetType() == typeof(JObject))
+                if (dataType == typeof(JObject))
                 {
                     dest = ((JObject)data).ToObject<T>();
                 }
-                else if (data.GetType() == typeof(JArray))
+                else if (dataType == typeof(JArray))
                 {
                     dest = ((JArray)data).ToObject<T>();
+                }
+                else if(dataType == typeof(string))
+                {
+                    data = JsonConvert.DeserializeObject<T>((string)data);
                 }
             }
             catch (Exception ex)
             {
-                Debug.Error(ex);
+                Logger.Push(ex,TraceType.Func,LogLevel.Error);
             }
             return dest;
         }

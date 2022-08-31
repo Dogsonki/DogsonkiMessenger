@@ -1,14 +1,11 @@
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
-using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
-using Client.Networking.Models.BotCommands;
-using Newtonsoft.Json;
-using System.Text;
+using Client.Commands;
+using Client.Networking.Packets;
 
 namespace Client.Pages;
 
@@ -63,8 +60,8 @@ public partial class MessagePage : ContentPage
     {
         ChatMessage? lastMessage = GetLastMessage();
 
-        ChatMessage PreparedMessage = new ChatMessage(message);
-        SocketCore.Send(message, Token.SEND_MESSAGE);
+        MessagePacket packet = new MessagePacket(message);
+        SocketCore.Send(packet, Token.SEND_MESSAGE);
 
         if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImage)
         {
@@ -72,6 +69,8 @@ public partial class MessagePage : ContentPage
         }
         else
         {
+            ChatMessage PreparedMessage = new ChatMessage(message);
+
             Messages.Add(PreparedMessage);
         }
 
@@ -125,7 +124,7 @@ public partial class MessagePage : ContentPage
 
                     ThreadPool.QueueUserWorkItem((padlock) =>
                     {
-                        MessagePacket message = new MessagePacket(cpyStream.ToArray(), pickedFile.FileName.Substring(pickedFile.FileName.Length - 3));
+                        MessagePacket message = new MessagePacket(cpyStream.ToArray(), "jpeg");
                         SocketCore.Send(message, Token.SEND_MESSAGE);
                     });
                 }
@@ -152,23 +151,22 @@ public partial class MessagePage : ContentPage
             switch (command)
             {
                 case "!daily":
-                    SocketCore.SendCommand(new Daily(command));
-                    IBotCommand.PrepareAndSend(new Daily(command), out error);
+                    ICommand.PrepareAndSend(new Daily(command), out error);
                     break;
                 case "!bet":
                     if (!Bet.HasArgs(args.Length)) return;
-                    IBotCommand.PrepareAndSend(new Bet(command, args[1], args[2]), out error);
+                    ICommand.PrepareAndSend(new Bet(command, args[1], args[2]), out error);
                     break;
                 case "!jackpotbuy":
                     if (!JackpotBuy.HasArgs(args.Length)) return;
-                    IBotCommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error);
+                    ICommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error);
                     break;
                 case "!zdrapka":
                     SocketCore.SendCommand(new Scratchcard(command));
                     break;
                 case "!sklep":
                     if (!Shop.HasArgs(args.Length)) return;
-                    IBotCommand.PrepareAndSend(new Shop(command, args[1]), out error);
+                    ICommand.PrepareAndSend(new Shop(command, args[1]), out error);
                     break;
                 case "!slots":
                     SocketCore.SendCommand(new Slots(command));
@@ -221,13 +219,16 @@ public partial class MessagePage : ContentPage
             if (ChatUser.UserId == LocalUser.Id) { return; }
         }
 
-        MessagePacket[] messages = null;
+        List<MessagePacket> messages = null;
         Task.Run(() =>
         {
-            messages = Essential.ModelCast<MessagePacket[]>(packet.Data);
+            messages = Essential.ModelCast<List<MessagePacket>>(packet.Data);
         }).ContinueWith((w) =>
         {
             if (messages is null) return;
+
+            messages.Sort((x, y) => DateTime.Compare(y.Time, x.Time));
+
             foreach(MessagePacket message in messages)
             {
                 if (!isGroupChat)
@@ -260,6 +261,7 @@ public partial class MessagePage : ContentPage
 
         if (string.IsNullOrEmpty(message))
             return;
+
         AddMessage(message);
 
         ((Entry)sender).Text = "";
@@ -287,20 +289,20 @@ public partial class MessagePage : ContentPage
             {
                 CommandsList.IsEnabled = true;
                 CommandsList.IsVisible = true;
-                BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands);
+                CommandList.Commands.ReplaceRange(CommandList.AllCommands);
             }
             else
             {
-                if (BotCommandList.Commands.Count > 1 && _lastMessageLen <= MessageInput.Text.Length)
+                if (CommandList.Commands.Count > 1 && _lastMessageLen <= MessageInput.Text.Length)
                 {
-                    BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
+                    CommandList.Commands.ReplaceRange(CommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
                 }
                 else if (_lastMessageLen > MessageInput.Text.Length)
                 {
-                    var _ = BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text));
+                    var _ = CommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text));
                     if(_.Count() > 0)
                     {
-                        BotCommandList.Commands.ReplaceRange(BotCommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
+                        CommandList.Commands.ReplaceRange(CommandList.AllCommands.Where(x => x.CommandName.StartsWith(MessageInput.Text)));
                     }
                 }
             }
@@ -313,8 +315,5 @@ public partial class MessagePage : ContentPage
         _lastMessageLen = MessageInput.Text.Length;
     }
 
-    private async void ChatOptions(object sender, SwipedEventArgs e)
-    {
-        await Navigation.PushAsync(new ChatOptionsMain(), true);
-    }
+    private async void ChatOptions(object sender, SwipedEventArgs e) => await Navigation.PushAsync(new ChatOptionsMain(), true);
 }

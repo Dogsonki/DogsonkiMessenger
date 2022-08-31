@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Client.Models;
+namespace Client.Networking.Packets;
 
 public class GroupCallbackPacket
 {

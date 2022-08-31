@@ -1,18 +1,15 @@
 ﻿namespace Client.Networking.Model;
 
-public class RequestedCallbackModel<T>
+public class RequestedCallbackModel
 {
-    protected Action<T> CallbackAction;
+    protected Action<object> CallbackAction;
 
     protected int CallbackToken { get; init; }
 
-    public Type ParameterType { get; init; }
-
-    public RequestedCallbackModel(Action<T> callback, int pretoken)
+    public RequestedCallbackModel(Action<object> callback, int pretoken)
     {
         CallbackToken = pretoken;
         CallbackAction = callback;
-        ParameterType = typeof(T);
     }
 
     public int GetToken() => CallbackToken;
@@ -20,7 +17,7 @@ public class RequestedCallbackModel<T>
     /// <summary>
     /// Invokes function and removes itself from list of callbacks
     /// </summary>
-    public void Invoke(T Recived)
+    public void Invoke(object Recived)
     {
         if (CallbackAction != null)
         {

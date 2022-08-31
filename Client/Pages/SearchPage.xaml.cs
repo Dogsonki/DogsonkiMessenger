@@ -3,6 +3,7 @@ using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
+using Client.Networking.Packets;
 
 namespace Client.Pages;
 

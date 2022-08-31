@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 
-namespace Client.Networking.Models.BotCommands;
+namespace Client.Commands;
 
 [Serializable]
-public class Daily : IBotCommand
+public class Daily : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -14,11 +14,11 @@ public class Daily : IBotCommand
         Command = command;
     }
 
-    public bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Daily), ProvidedArgs);
+    public bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Daily), ProvidedArgs);
 }
 
 [Serializable]
-public class Bet : IBotCommand
+public class Bet : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -39,10 +39,10 @@ public class Bet : IBotCommand
         WinPercent = winPercent;
     }
 
-    public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Bet), ProvidedArgs);
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Bet), ProvidedArgs);
 }
 
-public class JackpotBuy : IBotCommand
+public class JackpotBuy : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -58,10 +58,10 @@ public class JackpotBuy : IBotCommand
         Count = count;
     }
 
-    public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(JackpotBuy), ProvidedArgs);
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(JackpotBuy), ProvidedArgs);
 }
 
-public class Scratchcard : IBotCommand
+public class Scratchcard : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -72,10 +72,10 @@ public class Scratchcard : IBotCommand
         Command = command;
     }
 
-    public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Scratchcard), ProvidedArgs);
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Scratchcard), ProvidedArgs);
 }
 
-public class Shop : IBotCommand
+public class Shop : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -91,10 +91,10 @@ public class Shop : IBotCommand
         ItemId = itemId;
     }
 
-    public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Shop), ProvidedArgs);
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Shop), ProvidedArgs);
 }
 
-public class Slots : IBotCommand
+public class Slots : ICommand
 {
     [JsonProperty("command")]
     [CommandProperty(typeof(string))]
@@ -105,5 +105,5 @@ public class Slots : IBotCommand
         Command = command;
     }
 
-    public static bool HasArgs(int ProvidedArgs) => IBotCommand.HasAgrs(typeof(Slots), ProvidedArgs);
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Slots), ProvidedArgs);
 }

@@ -1,10 +1,7 @@
-﻿using Client.Networking.Models.BotCommands;
+﻿using Client.Commands;
 using Client.Networking.Model;
-using Client.Pages;
 using Client.Utility;
-using System.Runtime.CompilerServices;
 using System.Text;
-using Client.Networking.Models;
 
 namespace Client.Networking.Core;
 
@@ -16,8 +13,8 @@ public class SocketCore : Connection
         {
             if (!AbleToSend()) return;
 
-            await Recive();
-        });
+            await Receive();
+        });  
     }
 
     private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
@@ -47,15 +44,15 @@ public class SocketCore : Connection
             return;
         }
 
-        ThreadPool.QueueUserWorkItem((object stateInfo) =>
+        ThreadPool.QueueUserWorkItem((_) =>
         {
-            if (!RequestedCallback<SocketPacket>.InvokeCallback(packet.Token, (string)packet.Data)) return;
+            if (!RequestedCallback.InvokeCallback(packet.Token, Convert.ToString(packet.Data))) return;
 
             ReadRawBuffer(packet);
         });
     }
 
-    private static async Task Recive()
+    private static async Task Receive()
     {
         byte[] buffer = new byte[MAX_BUFFER_SIZE];
         int LenBuffer;
@@ -122,7 +119,6 @@ public class SocketCore : Connection
             if (packet is null) throw new Exception("SEND_PACKET_NULL");
 
             if (!AbleToSend()) return;
-
             byte[] buffer = packet.GetPacked();
             await Stream.WriteAsync(buffer, 0, buffer.Length);
         }
@@ -132,17 +128,17 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool SendCallback<T>(Action<T> Callback, object SendingData, Token token, bool SendableOnce = true)
+    public static bool SendCallback(Action<object> Callback, object SendingData, Token token, bool SendableOnce = true)
     {
         if (!AbleToSend()) return false;
-        Debug.Write("Sending callback");
-        if (SendableOnce && RequestedCallback<T>.IsAlreadyQueued(token))
+
+        if (SendableOnce && RequestedCallback.IsAlreadyQueued(token))
         {
+            Debug.Write("Token AlreadyQueued");
             return true;
         }
 
-        Debug.Write("adding ");
-        RequestedCallback<T>.AddCallback(new RequestedCallbackModel<T>(Callback, (int)token));
+        RequestedCallback.AddCallback(new RequestedCallbackModel(Callback, (int)token));
 
         Send(SendingData, token);
 
@@ -161,8 +157,8 @@ public class SocketCore : Connection
 
         return true;
     }
-
-    public static bool SendCommand(IBotCommand command)
+    
+    public static bool SendCommand(ICommand command)
     {
         if (!AbleToSend()) return false;
 

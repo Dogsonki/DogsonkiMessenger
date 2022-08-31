@@ -1,6 +1,8 @@
-﻿using Client.Utility;
+﻿using Client.IO;
+using Client.Networking.Core;
 using System.ComponentModel;
 using System.Text;
+using Client.Networking.Packets;
 
 namespace Client.Models.UserType.Bindable;
 
@@ -11,8 +13,9 @@ public class ChatMessage : BindableObject
     
     private DateTime Time { get; init; }
 
-    public bool IsImage { get; set; } = false;
-    public bool IsText { get { return !IsImage; } }
+    public bool IsImage { get; } = false;
+
+    public bool IsText { get; }
 
     public ImageSource Avatar
     {
@@ -22,8 +25,23 @@ public class ChatMessage : BindableObject
         }
     }
 
-    public ImageSource? Image { get; init; }
-    public string? TextContent { get; set; }
+    public ImageSource? Image { get; set; }
+
+    public string textContent;
+    public string? TextContent
+    {
+        get
+        {
+            return textContent;
+        }
+        set
+        {
+            textContent = value;
+            OnPropertyChanged(nameof(TextContent));
+        }
+    }
+
+    private string Path { get; set; }
 
     public string FactoredTime
     {
@@ -45,28 +63,71 @@ public class ChatMessage : BindableObject
     {
         TextContent = message;
         BindedUser = LocalUser.UserRef;
+        Time = DateTime.Now;
+
+        IsText = true;
+        IsImage = false;
     }
 
     public ChatMessage(ImageSource image)
     {
         Image = image;
         BindedUser = LocalUser.UserRef;
+        Time = DateTime.Now;
+
+        IsText = false;
+        IsImage = true;
     } 
 
     public ChatMessage(MessagePacket packet)
     {
         BindedUser = User.CreateOrGet(packet.Username,packet.UserId);
-
         if (packet.MessageType == "text") 
         {
-            TextContent = packet.Content;
+            TextContent = packet.ContentString;
+            IsImage = false;
+            IsText = true;
         }
         else
         {
-            Image = ImageSource.FromStream(() => new MemoryStream(Encoding.UTF8.GetBytes(packet.Content)));
+            Path = packet.ContentString.Substring(9);
+            byte[] CacheBuffer = Cache.ReadCache(Path);
+
+            if(CacheBuffer is null || CacheBuffer.Length == 0)
+            {
+                Debug.Write("CALLBACK_IMAGE");
+                ChatImagePacket ImagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
+                SocketCore.SendCallback(GetImage, ImagePacket, Token.CHAT_IMAGE_REQUEST);
+            }
+            else
+            {
+                Debug.Write("CACHE_IMAGE");
+                ImageSource src = ImageSource.FromStream(() => new MemoryStream(CacheBuffer));
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    Image = src;
+                });
+            }
+
             IsImage = true;
+            IsText = false;
         }
 
         Time = packet.Time;
+    }
+
+    public void GetImage(object packet)
+    {
+        string bufferString = (string)packet;
+
+        byte[] buffer;
+        ImageSource src = UserImageRequestPacket.GetImageSource(out buffer, bufferString);
+
+        Cache.SaveToCache(buffer, Path);
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Image = src;
+        });
     }
 }

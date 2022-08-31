@@ -3,30 +3,29 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
 
-namespace Client.IO
+namespace Client.IO;
+
+public static class EmbededStorage
 {
-    public static class EmbededStorage
+    public static T Read<T>(Type type, string Path)
     {
-        public static T Read<T>(Type type, string Path)
+        try
         {
-            try
+            var assembly = IntrospectionExtensions.GetTypeInfo(type).Assembly;
+            Stream stream = assembly.GetManifestResourceStream(Path);
+            using (var reader = new StreamReader(stream))
             {
-                var assembly = IntrospectionExtensions.GetTypeInfo(type).Assembly;
-                Stream stream = assembly.GetManifestResourceStream(Path);
-                using (var reader = new StreamReader(stream))
-                {
-                    var DesT = JsonConvert.DeserializeObject(reader.ReadToEnd());
-                    return (T)((JObject)DesT).ToObject(typeof(T));
-                }
+                var DesT = JsonConvert.DeserializeObject(reader.ReadToEnd());
+                return (T)((JObject)DesT).ToObject(typeof(T));
             }
-            catch (Exception ex)
+        }
+        catch (Exception ex)
+        {
+            if (ex.GetType() == typeof(NullReferenceException))
             {
-                if (ex.GetType() == typeof(NullReferenceException))
-                {
-                    Logger.Push(ex, TraceType.Func, LogLevel.Error);
-                }
-                return default;
+                Logger.Push(ex, TraceType.Func, LogLevel.Error);
             }
+            return default;
         }
     }
 }

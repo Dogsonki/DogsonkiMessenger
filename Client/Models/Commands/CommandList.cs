@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace Client.Networking.Models.BotCommands;
+namespace Client.Commands;
 
 public struct CommandModel
 {
@@ -15,9 +15,9 @@ public struct CommandModel
     }
 }
 
-public static class BotCommandList
+public static class CommandList
 {
-    public static ObservableBotCommand<CommandModel> Commands { get; set; } = new ObservableBotCommand<CommandModel>();
+    public static ObservableCommandList<CommandModel> Commands { get; set; } = new ObservableCommandList<CommandModel>();
 
     public static Collection<CommandModel> AllCommands { get; set; } = new Collection<CommandModel>()
     {
@@ -31,7 +31,7 @@ public static class BotCommandList
     };
 }
 
-public class ObservableBotCommand<T> : ObservableCollection<T>
+public class ObservableCommandList<T> : ObservableCollection<T>
 {
     public void ReplaceRange(IEnumerable<T> collection)
     {
