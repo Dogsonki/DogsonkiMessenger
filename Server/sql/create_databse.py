@@ -1,13 +1,13 @@
 from mysql.connector.cursor_cext import CMySQLCursor
 
-from .connection import get_cursor
+from .connection import sql_con
 
 
 class CreateDatabase:
     cursor: CMySQLCursor
 
     def create_all_tables(self):
-        self.cursor = get_cursor()
+        self.cursor = sql_con.get_cursor()
         self.create_users_table()
         self.create_users_link_table()
         self.create_messages_table()

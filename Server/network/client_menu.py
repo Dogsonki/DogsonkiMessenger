@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+import base64
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
@@ -40,6 +41,8 @@ class NormalChatroom(functions.Chatroom):
                 self.on_new_message(message)
             elif message.token == MessageType.BOT_COMMAND:
                 bot.check_command(self.connection, message.data)
+            elif message.token == MessageType.GET_CHAT_FILE:
+                self.send_image(message.data)
             else:
                 self.connection.send_message("", MessageType.ERROR)
 
@@ -66,7 +69,7 @@ class NormalChatroom(functions.Chatroom):
         if is_path:
             filename = f"{int(time.time())}{self.receiver_id}{self.connection.login_id}"
             functions.save_file(filename, message)
-            message = f"./media/{filename}.webp"
+            message = base64.b64encode(f"./media/{filename}.webp".encode("UTF_8"))
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
 
