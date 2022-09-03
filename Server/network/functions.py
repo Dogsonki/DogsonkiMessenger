@@ -34,8 +34,6 @@ class Chatroom(metaclass=abc.ABCMeta):
         if message_history:
             message_list = []
             for i in message_history:
-                if i.is_path:
-                    i.content = get_file(str(i.content), i.message_type)
                 data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
                         "user_id": i.sender_id, "is_group": is_group, "group_id": group_id,
                         "message_type": i.message_type}
@@ -45,6 +43,10 @@ class Chatroom(metaclass=abc.ABCMeta):
     def send_message(self, message_data: list, old: bool):
         token = MessageType.GET_OLD_MESSAGES if old else MessageType.CHAT_MESSAGE
         self.connection.send_message(message_data, token)
+
+    def send_image(self, message):
+        image = get_file(message["path"], message["file_format"])
+        self.connection.send_message(image, MessageType.GET_CHAT_FILE)
 
 
 def save_file(name: str, image_data: str):

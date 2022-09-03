@@ -10,7 +10,7 @@ from mysql.connector.cursor_cext import CMySQLCursor
 from email_validator import validate_email, EmailNotValidError
 
 from Server.sql import handling_sql
-from Server.sql.connection import get_cursor
+from Server.sql.connection import sql_con
 from Server.network.email_handling import SmptConnection, get_confirmation_code
 
 current_connections = {}
@@ -41,6 +41,7 @@ class MessageType(Enum):
     GET_GROUP_AVATAR = 18
     SET_GROUP_AVATAR = 19
     BOT_COMMAND = 20
+    GET_CHAT_FILE = 21
 
 
 @dataclass
@@ -97,7 +98,7 @@ class Connection:
         self.login = ""
         self.password = ""
         self.nick = ""
-        self.db_cursor = get_cursor()
+        self.db_cursor = sql_con.get_cursor()
         self.delimiter = b"$"
 
     def send_message(self, message, token: MessageType):

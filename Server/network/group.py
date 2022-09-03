@@ -73,6 +73,8 @@ class GroupChatroom(functions.Chatroom):
                 self.on_new_message(message)
             elif message.token == MessageType.BOT_COMMAND:
                 bot.check_command(self.connection, message.data)
+            elif message.token == MessageType.GET_CHAT_FILE:
+                self.send_image(message.data)
             else:
                 self.connection.send_message("", MessageType.ERROR)
 
@@ -95,7 +97,7 @@ class GroupChatroom(functions.Chatroom):
         if is_path:
             filename = f"{int(time.time())}{self.group_id}{self.connection.login_id}"
             functions.save_file(filename, message)
-            message = f"./media/{filename}.webp"
+            message = base64.b64encode(f"./media/{filename}.webp".encode("UTF-8"))
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
         handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id)
