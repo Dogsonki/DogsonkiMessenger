@@ -2,8 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.Settings.AdvancedSettings"
-             Title="AdvancedSettings">
-    <VerticalStackLayout>
+             BackgroundColor="#121212">
+
+	<VerticalStackLayout>
 		<StackLayout Padding="15">
 			<Grid>
 				<Grid.ColumnDefinitions>
@@ -17,13 +18,13 @@
 				</StackLayout>
 
 				<StackLayout VerticalOptions="Center" Grid.Column="1" >
-					<StackLayout.GestureRecognizers>
-						
-					</StackLayout.GestureRecognizers>
 					<Switch IsToggled="False"/>
 				</StackLayout>
 			</Grid>
 		</StackLayout>
+
+		<Button Clicked="ClearCache" WidthRequest="200" BackgroundColor="#252525" Text="Clear Cache"/>
+
 
 	</VerticalStackLayout>
 </ContentPage>

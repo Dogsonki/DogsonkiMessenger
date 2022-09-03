@@ -9,10 +9,7 @@ namespace Client.Networking.Core
 
         public static bool IsAlreadyQueued(Token token) => Callbacks.Find(x => x.GetToken() == (int)token) is not null;
 
-        public static void AddCallback(RequestedCallbackModel callback)
-        {
-            Callbacks.Add(callback);
-        }
+        public static void AddCallback(RequestedCallbackModel callback) => Callbacks.Add(callback);
 
         public static int GetCount() => Callbacks.Count;
 
@@ -22,11 +19,13 @@ namespace Client.Networking.Core
             {
                 if (callback.GetToken() == token)
                 {
+                    Callbacks.Remove(Callbacks.Find(x => x.GetToken() == token));
                     callback.Invoke(data);
                     return false;
                 }
             }
             return true;
         }
+
     }
 }

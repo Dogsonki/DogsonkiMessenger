@@ -46,7 +46,6 @@ public class UserImageRequestPacket
         }
         catch(Exception ex)
         {
-            SocketCore.Send(ex);
             Debug.Error(ex);
         }
     }

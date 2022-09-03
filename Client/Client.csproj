@@ -63,10 +63,7 @@
 
 	<ItemGroup>
 	    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-	    <PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
 		<PackageReference Include="VijayAnand.MauiToolkit" Version="1.0.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0-preview4" />
 	</ItemGroup>
 
 	<ItemGroup>

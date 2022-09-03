@@ -1,6 +1,7 @@
 ﻿using Client.IO;
 using Client.Networking.Core;
 using System.ComponentModel;
+using Android.Icu.Util;
 using Client.Networking.Packets;
 
 namespace Client.Models.UserType.Bindable;
@@ -24,7 +25,20 @@ public class ChatMessage : BindableObject
         }
     }
 
-    public ImageSource? Image { get; set; }
+    private ImageSource? image;
+
+    public ImageSource? Image
+    {
+        get
+        {
+            return image;
+        }
+        set
+        {
+            image = value;
+            OnPropertyChanged(nameof(Image));
+        }
+    }
 
     public string textContent;
     public string? TextContent
@@ -89,18 +103,19 @@ public class ChatMessage : BindableObject
         }
         else
         {
-            Path = packet.ContentString.Substring(9);
+            Debug.Write($"Adding image {packet.ContentString}");
+            Path = packet.ContentString.Substring(9); // 9 to remove server folder path
             byte[] CacheBuffer = Cache.ReadCache(Path);
 
             if(CacheBuffer is null || CacheBuffer.Length == 0)
             {
-                Debug.Write("CALLBACK_IMAGE");
-                ChatImagePacket ImagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
-                SocketCore.SendCallback(GetImage, ImagePacket, Token.CHAT_IMAGE_REQUEST);
+                Debug.Write("Image is not in cache, requesting imagine to server");
+                ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
+                SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
+                ImageRequestQueue.AddRequest(imagePacket,this);
             }
             else
             {
-                Debug.Write("CACHE_IMAGE");
                 ImageSource src = ImageSource.FromStream(() => new MemoryStream(CacheBuffer));
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -117,8 +132,10 @@ public class ChatMessage : BindableObject
 
     public void GetImage(object packet)
     {
-        string bufferString = (string)packet;
+        Debug.Write("Getting image, and removing it from queue");
+        ImageRequestQueue.RemoveRequest(this);
 
+        string bufferString = (string)packet;
         byte[] buffer;
         ImageSource src = UserImageRequestPacket.GetImageSource(out buffer, bufferString);
 

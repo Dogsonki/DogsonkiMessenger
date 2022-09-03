@@ -17,8 +17,6 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
         SocketCore.Send(" ", Token.LAST_CHATS);
-
-        LastChats.Add(new AnyListBindable(User.CreateOrGet("michal",11),true));
     }
 
     public static void AddLastChats(SocketPacket packet)

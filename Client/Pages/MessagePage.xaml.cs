@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
 using Client.Commands;
 using Client.Networking.Packets;
+using Newtonsoft.Json.Linq;
 
 namespace Client.Pages;
 
@@ -29,7 +30,6 @@ public partial class MessagePage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
 
         Current = this;
-        Messages.Clear();
 
         ChatUsername.Text = $"@{user.Username}";
         MessageInput.Placeholder = $"Message @{user.Username}";
@@ -44,7 +44,6 @@ public partial class MessagePage : ContentPage
         NavigationPage.SetHasNavigationBar(this, false);
 
         Current = this;
-        Messages.Clear();
 
         ChatUsername.Text = "Chatting group @" + group.Name;
         MessageInput.Placeholder = $"Message @{group.Name}";
@@ -53,6 +52,7 @@ public partial class MessagePage : ContentPage
     protected override bool OnBackButtonPressed()
     {
         SocketCore.Send(" ", Token.END_CHAT);
+        Messages.Clear();
         return base.OnBackButtonPressed();
     }
 
@@ -219,12 +219,22 @@ public partial class MessagePage : ContentPage
         List<MessagePacket>? messages = null;
         Task.Run(() =>
         {
-            messages = Essential.ModelCast<List<MessagePacket>>(packet.Data);
+            JArray r = (JArray)packet.Data;
+            messages = r.ToObject<List<MessagePacket>>();
         }).ContinueWith((w) =>
         {
-            if (messages is null) return;
+            if (messages is null)
+            {
+                Logger.Push($"Messages are null: {packet.Data}",TraceType.Func,LogLevel.Error);
+                return;
+            }
+            else if (messages.Count == 0)
+            {
+                Logger.Push($"No messages: {packet.Data}",TraceType.Func,LogLevel.Debug);
+                return;
+            }
 
-            messages.Sort((x, y) => DateTime.Compare(y.Time, x.Time));
+            messages.Sort((x, y) => DateTime.Compare(x.Time,y.Time));
 
             foreach(MessagePacket message in messages)
             {
@@ -246,9 +256,7 @@ public partial class MessagePage : ContentPage
 
                 ChatMessage? lastMessage = GetLastMessage();
 
-                if (lastMessage is null) continue;
-
-                if (lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText)
+                if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText)
                 {
                     MainThread.BeginInvokeOnMainThread(() => lastMessage.textContent += message.ContentString);
                 }

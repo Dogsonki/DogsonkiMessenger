@@ -34,16 +34,13 @@ public interface ICommand
 
             if (PropType is not null && AssignedType is not null)
             {
-                if (PropType != AssignedType.PropertyType)
+                if (PropType != AssignedType.PropertyType && AssignedType.PropertyType == typeof(int))
                 {
-                    if (AssignedType.PropertyType == typeof(int))
+                    int _;
+                    if (!int.TryParse((string)PropValue, out _))
                     {
-                        int _;
-                        if (!int.TryParse((string)PropValue, out _))
-                        {
-                            error = $"{prop.Name}:{PropType} value: {PropValue} is not a {AssignedType.PropertyType.Name}";
-                            return false;
-                        }
+                        error = $"{prop.Name}:{PropType} value: {PropValue} is not a {AssignedType.PropertyType.Name}";
+                        return false;
                     }
                 }
             }

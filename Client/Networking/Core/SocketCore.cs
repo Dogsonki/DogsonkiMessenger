@@ -149,6 +149,9 @@ public class SocketCore : Connection
     {
         if (!AbleToSend()) return false;
 
+        if (token == Token.EMPTY)
+            return true;
+
         Task.Run(async () =>
         {
             SocketPacket packet = new SocketPacket(data, token);
