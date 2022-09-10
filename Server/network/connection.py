@@ -105,7 +105,8 @@ class Connection:
         message = json.dumps({"data": message, "token": token.value}, ensure_ascii=False).encode("UTF-8")+self.delimiter
         try:
             self.client.send(message)
-        except socket.error:
+        except socket.error as e:
+            print(e)
             self.close_connection()
 
     def receive_message(self) -> Message:
@@ -117,7 +118,8 @@ class Connection:
                 else:
                     message = Message.deserialize(received_message)
                     return message
-            except socket.error:
+            except socket.error as e:
+                print(e)
                 self.close_connection()
 
     def close_connection(self):
