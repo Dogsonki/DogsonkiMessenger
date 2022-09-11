@@ -140,3 +140,4 @@ dmypy.json
 *.keystore
 /Client/TODO.txt
 /Client/bin/Debug
+*.pem
