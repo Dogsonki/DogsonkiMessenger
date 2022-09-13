@@ -13,13 +13,15 @@ namespace Client.Networking.Core
 
         public static int GetCount() => Callbacks.Count;
 
+        private static void RemoveCallback(int token) => Callbacks.Remove(Callbacks.Find(x => x.GetToken() == token));
+
         public static bool InvokeCallback(int token, string data)
         {
             foreach (var callback in Callbacks)
             {
                 if (callback.GetToken() == token)
                 {
-                    Callbacks.Remove(Callbacks.Find(x => x.GetToken() == token));
+                    RemoveCallback(token);
                     callback.Invoke(data);
                     return false;
                 }

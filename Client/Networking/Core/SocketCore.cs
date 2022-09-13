@@ -60,7 +60,6 @@ public class SocketCore : Connection
         while (true)
         {
             if (!AbleToSend() || Stream is null) continue;
-
             try
             {
                 while ((LenBuffer = await Stream.ReadAsync(buffer, 0, buffer.Length)) != 0)

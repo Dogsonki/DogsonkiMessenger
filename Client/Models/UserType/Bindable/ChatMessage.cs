@@ -1,7 +1,6 @@
 ﻿using Client.IO;
 using Client.Networking.Core;
 using System.ComponentModel;
-using Android.Icu.Util;
 using Client.Networking.Packets;
 
 namespace Client.Models.UserType.Bindable;

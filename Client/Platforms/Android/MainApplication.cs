@@ -3,7 +3,7 @@ using Android.Runtime;
 
 namespace Client;
 
-[Application]
+[Application(UsesCleartextTraffic = false)]
 public class MainApplication : MauiApplication
 {
     public MainApplication(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
