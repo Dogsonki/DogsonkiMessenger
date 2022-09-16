@@ -30,22 +30,6 @@ class NormalChatroom(functions.Chatroom):
         else:
             self._send_last_messages(message_history, old, False)
 
-    def receive_messages(self):
-        while True:
-            message = self.connection.receive_message()
-            if message.token == MessageType.END_CHAT:
-                break
-            elif message.token == MessageType.GET_OLD_MESSAGES:
-                self.send_last_messages(True)
-            elif message.token == MessageType.NEW_MESSAGE:
-                self.on_new_message(message)
-            elif message.token == MessageType.BOT_COMMAND:
-                bot.check_command(self.connection, message.data)
-            elif message.token == MessageType.GET_CHAT_FILE:
-                self.send_image(message.data)
-            else:
-                self.connection.send_message("", MessageType.ERROR)
-
     def on_new_message(self, message: Message):
         message_ = message.data["message"].strip()
         message_type = message.data["message_type"]

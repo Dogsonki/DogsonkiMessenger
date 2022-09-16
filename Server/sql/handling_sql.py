@@ -69,8 +69,7 @@ def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:
     sql_data = cursor.fetchone()
     if sql_data is None:
         return 0
-    else:
-        return sql_data[0]
+    return sql_data[0]
 
 
 def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
@@ -170,12 +169,18 @@ def get_is_admin(cursor: CMySQLCursor, login_id: int, group_id: int) -> bool:
     return sql_data
 
 
-def get_group_members(cursor: CMySQLCursor, group_id: int) -> List:
-    cursor.execute("""SELECT u.nick FROM group_user_link_table
+@dataclass
+class GroupMember:
+    id: int
+    nick: str
+    is_admin: bool
+
+def get_group_members(cursor: CMySQLCursor, group_id: int) -> List[GroupMember]:
+    cursor.execute("""SELECT u.id, u.nick, is_admin FROM group_user_link_table
                       INNER JOIN users AS u ON group_user_link_table.user_id = u.id
                       WHERE group_id=%s;""", (group_id,))
     sql_data = cursor.fetchall()
-    return [i[0] for i in sql_data]
+    return [GroupMember(*i) for i in sql_data]
 
 
 def save_message(cursor: CMySQLCursor, content: str, sender: int, receiver: int, message_type: str, is_path: bool):

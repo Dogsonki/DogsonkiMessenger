@@ -1,5 +1,6 @@
 import time
 import base64
+import dataclasses
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
@@ -16,7 +17,7 @@ def create_group(client: Client, data: dict):
     handling_sql.make_admin(client.db_cursor, creator, group_id)
     for i in users:
         add_to_group(client, {"group_id": group_id, "added_person_id": i})
-    client.send_message(group_id, MessageType.CREATE_GROUP)
+    client.send_message({"group_id": group_id, "group_name": group_name}, MessageType.CREATE_GROUP)
 
 
 def add_to_group(client: Client, data: dict):
@@ -55,6 +56,16 @@ class GroupChatroom(functions.Chatroom):
         super().__init__(connection)
         self.group_id = int(group_id)
         self.group_members = handling_sql.get_group_members(self.connection.db_cursor, self.group_id)
+        self.chat_actions.update({
+            MessageType.ADD_TO_GROUP: self.add_to_group,
+            MessageType.GET_GROUP_MEMBERS: self.send_group_members
+        })
+
+    def add_to_group(self, message: dict):
+        add_to_group(self.connection, message)
+
+    def send_group_members(self, *args):
+        self.connection.send_message([dataclasses.asdict(i) for i in self.group_members], MessageType.GET_GROUP_MEMBERS)
 
     def send_last_messages(self, old: bool = False):
         message_history = handling_sql.get_last_30_messages_from_group_chatroom(self.connection.db_cursor,
@@ -62,29 +73,13 @@ class GroupChatroom(functions.Chatroom):
                                                                                 self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old, True, self.group_id)
 
-    def receive_messages(self):
-        while True:
-            message = self.connection.receive_message()
-            if message.token == MessageType.END_CHAT:
-                break
-            elif message.token == MessageType.GET_OLD_MESSAGES:
-                self.send_last_messages(True)
-            elif message.token == MessageType.NEW_MESSAGE:
-                self.on_new_message(message)
-            elif message.token == MessageType.BOT_COMMAND:
-                bot.check_command(self.connection, message.data)
-            elif message.token == MessageType.GET_CHAT_FILE:
-                self.send_image(message.data)
-            else:
-                self.connection.send_message("", MessageType.ERROR)
-
     def on_new_message(self, message: Message):
         message_ = message.data["message"].strip()
         message_type = message.data["message_type"]
         if message_ != "":
             for i in self.group_members:
-                if i != self.connection.nick:
-                    receiver_connection = current_connections.get(i)
+                if i.nick != self.connection.nick:
+                    receiver_connection = current_connections.get(i.nick)
                     if receiver_connection:
                         data = [{"user": self.connection.nick, "message": message_,
                                 "time": time.time(), "user_id": self.connection.login_id,

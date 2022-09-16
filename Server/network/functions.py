@@ -7,27 +7,45 @@ from PIL import Image
 import bcrypt
 
 from .connection import Client, MessageType
+from . import bot
 
 
 class Chatroom(metaclass=abc.ABCMeta):
     connection: Client
     number_of_sent_last_messages: int
+    listening: bool
 
     def __init__(self, connection: Client):
         self.connection = connection
         self.number_of_sent_last_messages = 0
+        self.listening = True
+        self.chat_actions = {
+            MessageType.END_CHAT: self.stop_listening,
+            MessageType.GET_OLD_MESSAGES: self.send_last_old_messages,
+            MessageType.NEW_MESSAGE: self.on_new_message,
+            MessageType.BOT_COMMAND: self.bot_command,
+            MessageType.GET_CHAT_FILE: self.send_image
+        }
 
     def init_chatroom(self):
         self.send_last_messages()
         self.receive_messages()
 
     @abc.abstractmethod
-    def send_last_messages(self):
+    def on_new_message(self, message: dict):
         pass
 
     @abc.abstractmethod
-    def receive_messages(self):
+    def send_last_messages(self, old: bool = False):
         pass
+
+    def receive_messages(self):
+        while self.listening:
+            message = self.connection.receive_message()
+            self.chat_actions[message.token](message.data)
+
+    def bot_command(self, message: dict):
+        bot.check_command(self.connection, message)
 
     def _send_last_messages(self, message_history: list, old: bool, is_group: bool, group_id: int = -1):
         self.number_of_sent_last_messages += 30
@@ -44,9 +62,15 @@ class Chatroom(metaclass=abc.ABCMeta):
         token = MessageType.GET_OLD_MESSAGES if old else MessageType.CHAT_MESSAGE
         self.connection.send_message(message_data, token)
 
-    def send_image(self, message):
+    def send_image(self, message: dict):
         image = get_file(message["path"], message["file_format"])
         self.connection.send_message(image, MessageType.GET_CHAT_FILE)
+
+    def stop_listening(self, *args):
+        self.listening = False
+
+    def send_last_old_messages(self, *args):
+        self.send_last_messages(True)
 
 
 def save_file(name: str, image_data: str):

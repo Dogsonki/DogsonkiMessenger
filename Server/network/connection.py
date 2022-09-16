@@ -42,6 +42,7 @@ class MessageType(Enum):
     SET_GROUP_AVATAR = 19
     BOT_COMMAND = 20
     GET_CHAT_FILE = 21
+    GET_GROUP_MEMBERS = 22
 
 
 @dataclass
@@ -117,6 +118,8 @@ class Connection:
                     self.close_connection()
                 else:
                     message = Message.deserialize(received_message)
+                    if message.token == MessageType.ERROR:
+                        print(message.data)
                     return message
             except socket.error as e:
                 print(e)
