@@ -1,12 +1,10 @@
 import time
 from datetime import datetime
-import base64
 
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
 from . import functions
 from . import group
-from . import bot
 
 
 class NormalChatroom(functions.Chatroom):
@@ -51,20 +49,17 @@ class NormalChatroom(functions.Chatroom):
 
         is_path = False if message_type == "text" else True
         if is_path:
-            filename = f"{int(time.time())}{self.receiver_id}{self.connection.login_id}"
-            functions.save_file(filename, message)
-            message = base64.b64encode(f"./media/{filename}.webp".encode("UTF_8"))
+            message = self._save_file(self.receiver_id, message)
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
 
 
 def search_users(client: Client, nick: str):
     data = []
-
     groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     for i in groups:
         if i[0].startswith(nick):
-            data.append({"name": i[0], "id": i[1], "type": "group"})
+            data.append({"name": i.name, "id": i.id, "type": "group"})
 
     first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
     for i in first_logins:
@@ -105,15 +100,24 @@ def send_last_chats(client: Client, data: str):
     chats = []
     if user_chats:
         for i in user_chats:
-            if client.login_id == i[2]:
-                chats.append({"name": i[1], "id": i[0], "last_message_time": datetime.timestamp(i[4]), "type": "user"})
+            if client.login_id == i.u2_id:
+                chats.append({"name": i.u1_nick,
+                              "id": i.u1_id,
+                              "last_message_time": datetime.timestamp(i.last_message_time),
+                              "type": "user"})
             else:
-                chats.append({"name": i[3], "id": i[2], "last_message_time": datetime.timestamp(i[4]), "type": "user"})
+                chats.append({"name": i.u2_nick,
+                              "id": i.u2_id,
+                              "last_message_time": datetime.timestamp(i.last_message_time),
+                              "type": "user"})
 
     user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     if user_group_chats:
         for i in user_group_chats:
-            chats.append({"name": i[0], "id": i[1], "last_message_time": datetime.timestamp(i[2]), "type": "group"})
+            chats.append({"name": i.name,
+                          "id": i.id,
+                          "last_message_time": datetime.timestamp(i.last_message_time),
+                          "type": "group"})
 
     client.send_message(chats, MessageType.LAST_CHATS)
 

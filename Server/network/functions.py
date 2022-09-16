@@ -2,6 +2,7 @@ import abc
 from datetime import datetime
 from io import BytesIO
 import base64
+import time
 
 from PIL import Image
 import bcrypt
@@ -71,6 +72,12 @@ class Chatroom(metaclass=abc.ABCMeta):
 
     def send_last_old_messages(self, *args):
         self.send_last_messages(True)
+
+    def _save_file(self, second_id: int, message: str):
+        filename = f"{int(time.time())}{second_id}{self.connection.login_id}"
+        save_file(filename, message)
+        message = base64.b64encode(f"./media/{filename}.webp".encode("UTF_8"))
+        return message
 
 
 def save_file(name: str, image_data: str):

@@ -81,7 +81,15 @@ def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
     return logins
 
 
-def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
+@dataclass
+class UserChats:
+    u1_id: int
+    u1_nick: str
+    u2_id: int
+    u2_nick: str
+    last_message_time: datetime
+
+def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserChats]]:
     cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, last_message_time FROM ((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id) 
@@ -89,7 +97,10 @@ def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, Tuple]:
     chats = cursor.fetchall()
     if chats is None:
         return False
-    return chats
+    user_chats = []
+    for i in chats:
+        user_chats.append(UserChats(*i))
+    return user_chats
 
 
 def get_user_avatar(cursor: CMySQLCursor, login_id: str) -> Union[Tuple, None]:
@@ -152,14 +163,23 @@ def get_nick(cursor: CMySQLCursor, login_id: int) -> str:
     return sql_data[0]
 
 
-def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[Tuple, bool]:
+@dataclass
+class UserGroups:
+    name: str
+    id: int
+    last_message_time: datetime
+
+def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[List[UserGroups], bool]:
     cursor.execute("""SELECT g.name, g.id, last_message_time FROM group_user_link_table
                       INNER JOIN groups_ AS g ON group_user_link_table.group_id = g.id
                       WHERE user_id=%s;""", (login_id,))
     sql_data = cursor.fetchall()
     if sql_data is None:
         return False
-    return sql_data
+    group_chats = []
+    for i in sql_data:
+        group_chats.append(UserGroups(*i))
+    return group_chats
 
 
 def get_is_admin(cursor: CMySQLCursor, login_id: int, group_id: int) -> bool:

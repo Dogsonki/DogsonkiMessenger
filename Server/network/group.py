@@ -5,7 +5,6 @@ import dataclasses
 from Server.sql import handling_sql
 from .connection import Client, MessageType, current_connections, Message
 from . import functions
-from . import bot
 
 
 def create_group(client: Client, data: dict):
@@ -90,9 +89,7 @@ class GroupChatroom(functions.Chatroom):
     def save_message_in_database(self, message: str, message_type: str):
         is_path = False if message_type == "text" else True
         if is_path:
-            filename = f"{int(time.time())}{self.group_id}{self.connection.login_id}"
-            functions.save_file(filename, message)
-            message = base64.b64encode(f"./media/{filename}.webp".encode("UTF-8"))
+            message = self._save_file(self.group_id, message)
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
         handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id)
