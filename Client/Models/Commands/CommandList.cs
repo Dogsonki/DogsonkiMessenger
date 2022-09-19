@@ -28,6 +28,7 @@ public static class CommandList
         new CommandModel("!zdrapka","Gives you a scratchcard!"),
         new CommandModel("!slots","Try your luck at slots!"),
         new CommandModel("!clear","Clears all visible messages"),
+        new CommandModel("!invite","Invite person to group"),
     };
 }
 

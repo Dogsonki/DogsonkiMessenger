@@ -54,7 +54,6 @@ public class Connection
                     action.Invoke();
                 }
             }
-
         }
         catch (Exception ex) //Logging this exception can expose ip and port to server :/
         {

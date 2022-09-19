@@ -33,7 +33,8 @@ public enum Token : int
     GROUP_CHAT_CREATE = 15,
     GROUP_CHAT_INIT = 17,
     BOT_COMMAND = 20,
-    CHAT_IMAGE_REQUEST = 21
+    CHAT_IMAGE_REQUEST = 21,
+    GET_GROUP_INFO = 22
 }
 
 /// <summary>

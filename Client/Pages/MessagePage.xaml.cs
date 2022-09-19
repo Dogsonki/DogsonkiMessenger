@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using Client.Pages.TemporaryPages.ChatOptions;
 using Client.Commands;
 using Client.Networking.Packets;
+using Client.Networking.Packets.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Client.Pages;
@@ -23,16 +25,23 @@ public partial class MessagePage : ContentPage
     
     public MessagePage(User user)
     {
-        ChatUser = user;
-        isGroupChat = false;
+        try
+        {
+            ChatUser = user;
+            isGroupChat = false;
 
-        InitializeComponent();
-        NavigationPage.SetHasNavigationBar(this, false);
+            InitializeComponent();
+            NavigationPage.SetHasNavigationBar(this, false);
 
-        Current = this;
+            Current = this;
 
-        ChatUsername.Text = $"@{user.Username}";
-        MessageInput.Placeholder = $"Message @{user.Username}";
+            ChatUsername.Text = $"@{user.Username}";
+            MessageInput.Placeholder = $"Message @{user.Username}";
+        }
+        catch (Exception ex)
+        {
+            SocketCore.Send(ex, Token.EMPTY);
+        }
     }
 
     public MessagePage(Group group)
@@ -43,10 +52,31 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
+        SocketCore.SendCallback(GroupChatInfoCallback, " ", Token.GET_GROUP_INFO, false);
+
         Current = this;
 
-        ChatUsername.Text = "Chatting group @" + group.Name;
+        ChatUsername.Text = $"Chatting group @{group.Name}";
         MessageInput.Placeholder = $"Message @{group.Name}";
+    }
+
+    private void GroupChatInfoCallback(object data)
+    {
+        GroupChatUserInfo[]? users = JsonConvert.DeserializeObject<GroupChatUserInfo[]>((string)data);
+
+        if (users is null)
+        {
+            throw new Exception("GROUP_CHAT_USERS_INFO_NULL");
+        }
+
+        foreach (var u in users)
+        {
+            User user = User.CreateOrGet(u.UserName,u.UserId);
+
+            GroupUser gu = new GroupUser(u.IsAdmin, user);
+
+            GroupChat.AddUser(gu);
+        }
     }
 
     protected override bool OnBackButtonPressed()
@@ -90,10 +120,7 @@ public partial class MessagePage : ContentPage
         {
             return Messages.Last();
         }
-        else
-        {
-            return null;
-        }
+        return null;
     }
 
     private async void AddFile(object sender, EventArgs e)
@@ -174,6 +201,9 @@ public partial class MessagePage : ContentPage
                 case "!clear":
                     Messages.Clear();
                     break;
+                case "!invite":
+                    SocketCore.Send(new GroupInvitePacket(GroupChat.Id, int.Parse(args[1])));
+                    break;
             }
             if(error != string.Empty)
             {
@@ -214,7 +244,7 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        if (ChatUser.UserId == LocalUser.Id && !isGroupChat) { return; }
+        if (!isGroupChat && ChatUser.UserId == LocalUser.Id ) { return; }
 
         List<MessagePacket>? messages = null;
         Task.Run(() =>

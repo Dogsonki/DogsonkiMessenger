@@ -2,18 +2,18 @@
 
 namespace Client.Networking.Packets;
 
-public class GroupCallbackPacket
+[Serializable]
+public class GroupChatCreateCallbackPacket
 {
     [JsonProperty("group_name")]
     public string GroupName { get; set; }
-
-    [JsonProperty("id")]
+    [JsonProperty("group_id")]
     public int GroupId { get; set; }
 
     [JsonConstructor]
-    public GroupCallbackPacket(string group_name, int id)
+    public GroupChatCreateCallbackPacket(string group_name, int group_id)
     {
         GroupName = group_name;
-        GroupId = id;
+        GroupId = group_id;
     }
 }

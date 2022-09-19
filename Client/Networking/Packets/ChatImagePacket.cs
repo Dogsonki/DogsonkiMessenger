@@ -2,11 +2,11 @@
 
 namespace Client.Networking.Packets;
 
+[Serializable]
 public class ChatImagePacket
 {
     [JsonProperty("path")]
     public string Path { get; set; }
-
     [JsonProperty("file_format")]
     public string FileFormat { get; set; }
 

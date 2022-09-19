@@ -131,7 +131,6 @@
 	  <Folder Include="Platforms\Android\Resources\cert\" />
 	  <Folder Include="Resources\AppIcon\" />
 	  <Folder Include="Resources\Splash\" />
-	  <Folder Include="Resources\xml\" />
 	</ItemGroup>
 
 	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionClientHideInfoBar="True" XamarinHotReloadGenericExceptionInfoBarClientHideInfoBar="True" /></VisualStudio></ProjectExtensions>

@@ -4,6 +4,8 @@ using Client.Networking.Core;
 using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;
+using Client.Utility;
+using Newtonsoft.Json;
 
 namespace Client.Pages.TemporaryPages.GroupChat;
 
@@ -81,7 +83,7 @@ public partial class GroupChatCreator : ContentPage
 
         for(int i = 0; i < Invited.Count; i++)
         {
-            int id = (int)Invited[i].Id;
+            int id = Invited[i].Id;
 
             if (id != LocalUser.Id)
             {
@@ -89,6 +91,28 @@ public partial class GroupChatCreator : ContentPage
             }
         }
 
-        SocketCore.Send(new GroupChatCreatePacket(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),Token.GROUP_CHAT_CREATE);
+        SocketCore.SendCallback(
+            CreateGroupCallback,
+            new GroupChatCreatePacket(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),
+            Token.GROUP_CHAT_CREATE);
+    }
+
+    private void CreateGroupCallback(object data)
+    {
+        GroupChatCreateCallbackPacket? groupPacket = JsonConvert.DeserializeObject<GroupChatCreateCallbackPacket>((string)data);
+
+        if (groupPacket is null)
+        {
+            Logger.Push("GroupCreatePacket_NULL",TraceType.Func,LogLevel.Error);
+            return;
+        }
+
+        Group group = Group.CreateOrGet(groupPacket.GroupName,groupPacket.GroupId);
+
+        SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            StaticNavigator.Push(new MessagePage(group));
+        });
     }
 }

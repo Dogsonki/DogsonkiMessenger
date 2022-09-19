@@ -3,7 +3,6 @@
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
 /// </summary>
-
 public class AnyListBindable : BindableObject
 {
     private readonly User BindedUser;
@@ -80,8 +79,8 @@ public class AnyListBindable : BindableObject
 
     public AnyListBindable(Group group, bool useGroupInput = false, Command input = null)
     {
-        BindedGroup = group;
         type = BindType.Group;
+        BindedGroup = group;
         UseGroupInput= useGroupInput;
         Input = input;
     }
