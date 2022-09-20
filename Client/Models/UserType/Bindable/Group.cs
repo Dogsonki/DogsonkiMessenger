@@ -14,13 +14,10 @@ public class Group : BindableObject
     public string Name { get; set; }
     public int Id { get; set; }
 
-    public Command OpenChatCommand { get; set; }
-
     public Group(string groupName, int groupId)
     {
         Name = groupName;
         Id = groupId;
-        OpenChatCommand = new Command(OpenChat);
     }
 
     public static Group CreateOrGet(string name, int Id)
@@ -43,12 +40,12 @@ public class Group : BindableObject
         Users.Add(groupUser);
     }
 
-    private void OpenChat()
+    public static void OpenChat(Group group)
     {
-        SocketCore.Send($"{Id}", Token.GROUP_CHAT_INIT);
+        SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            StaticNavigator.Push(new MessagePage(this));
+            StaticNavigator.Push(new MessagePage(group));
         });
     }
 

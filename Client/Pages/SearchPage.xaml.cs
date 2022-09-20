@@ -9,10 +9,12 @@ namespace Client.Pages;
 
 public partial class SearchPage : ContentPage
 {
+    private static SearchPage Current;
     public static ObservableCollection<AnyListBindable> UsersFound { get; set; } = new ObservableCollection<AnyListBindable>();
 
     public SearchPage(string preInputText)
     {
+        Current = this;
         UsersFound.Clear();
 
         InitializeComponent();
@@ -36,17 +38,27 @@ public partial class SearchPage : ContentPage
     {
         List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
 
+        if (users is null || users?.Count == 0)
+        {
+            Current.NoResultsMessage.IsVisible = true;
+            return;
+        }
+
+        Current.NoResultsMessage.IsVisible = false;
+
         foreach (var user in users)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 if(!user.isGroup)
                 {
-                    UsersFound.Add(new AnyListBindable(User.CreateOrGet(user.Username, user.Id), true));
+                    User _ = User.CreateOrGet(user.Username, user.Id);
+                    UsersFound.Add(new AnyListBindable(_,new Command(() => User.OpenChat(_))));
                 }
                 else
                 {
-                    UsersFound.Add(new AnyListBindable(Group.CreateOrGet(user.Username, user.Id),true));
+                    Group _ = Group.CreateOrGet(user.Username, user.Id);
+                    UsersFound.Add(new AnyListBindable(_,new Command(() => Group.OpenChat(_))));
                 }
             });
         }

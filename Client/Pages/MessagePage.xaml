@@ -63,7 +63,7 @@
 		
 		<Frame CornerRadius="15" Padding="0" BackgroundColor="#161616"
 			   HeightRequest="180" x:Name="CommandsList" IsVisible="false" IsEnabled="False">
-			<StackLayout >
+			<StackLayout>
 				<ListView SelectionMode="None" SeparatorVisibility="None" 
 						  ItemsSource="{Binding Source={x:Static CommandList:CommandList.Commands}}">
 					<ListView.ItemTemplate>

@@ -4,15 +4,17 @@
              x:Class="Client.Pages.MainPage"
 			 xmlns:local="clr-namespace:Client.Pages"
 			 xmlns:user="clr-namespace:Client.Models.UserType.Bindable"
-			 BackgroundColor="#121212">
+			 BackgroundColor="{StaticResource BgColor}">
 
 	<ContentPage.BindingContext>
 		<user:LocalUser></user:LocalUser>
 	</ContentPage.BindingContext>
 
 	<ScrollView x:Name="view" HorizontalScrollBarVisibility="Never">
+
 		<StackLayout>
-			<StackLayout  Margin="0,0,0,20">
+
+			<StackLayout Margin="0,0,0,20">
 				<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">
 					<Entry WidthRequest="287" Margin="10,0,0,0" x:Name="SearchInput"
@@ -21,32 +23,41 @@
 				   Keyboard="Plain" Completed="SearchPressed"/>
 				</Frame>
 			</StackLayout>
-			<StackLayout Orientation="Horizontal" Margin="0,0,0,20" >
+
+			<StackLayout Orientation="Horizontal" Margin="0,0,0,20">
+
 				<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
-						   CornerRadius="40" HeightRequest="80" WidthRequest="80">
+				       CornerRadius="40" HeightRequest="80" WidthRequest="80">
 					<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
 							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
 				</Frame>
+
 				<StackLayout Padding="5" WidthRequest="270">
+
 					<StackLayout Spacing="0" Orientation="Horizontal">
 						<Label FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
 						<Label VerticalOptions="Center" FontSize="Small" Text="#" />
 						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 					</StackLayout>
+
 					<StackLayout>
 						<Label x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
 					</StackLayout>
+
 				</StackLayout>
+
 				<Image WidthRequest="50" HeightRequest="50" HorizontalOptions="EndAndExpand"
 					   VerticalOptions="End" Source="settings.png">
 					<Image.GestureRecognizers>
 						<TapGestureRecognizer Tapped="SettingsTapped"/>
 					</Image.GestureRecognizers>
 				</Image>
+
 			</StackLayout>
 		
 			<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
-			<StackLayout HorizontalOptions="Center" Orientation="Horizontal">
+
+			<StackLayout x:Name="CreateGroupButton" HorizontalOptions="Center" Orientation="Horizontal">
 				<StackLayout.GestureRecognizers>
 					<TapGestureRecognizer Tapped="CreateGroup"/>
 				</StackLayout.GestureRecognizers>
@@ -54,6 +65,15 @@
 					   HorizontalOptions="Fill" VerticalOptions="Fill" Source="creategroup.png"/>
 				<Label VerticalOptions="Center" HorizontalOptions="Center" Text="Create Group"/>
 			</StackLayout>
+
+			<VerticalStackLayout Padding="20" x:Name="NoChatsMessage" Spacing="5" HorizontalOptions="Center" IsVisible="False" IsEnabled="False">
+				<Label HorizontalTextAlignment="Center" TextColor="White" FontSize="25" Text="This Section Is Empty :("/>
+				<StackLayout>
+					<Label HorizontalTextAlignment="Center" TextColor="Grey" Text="Looks like you have no recent chats."/>
+					<Label HorizontalTextAlignment="Center" TextColor="Grey" Text="Try to message someone."/>
+				</StackLayout>
+			</VerticalStackLayout>
+
 			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
 				<BindableLayout.ItemTemplate>
 					<DataTemplate>

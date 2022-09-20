@@ -2,6 +2,7 @@
 using Client.Networking.Core;
 using Client.Pages;
 using System.ComponentModel;
+using Client.Utility;
 
 namespace Client.Models.UserType.Bindable;
 
@@ -67,8 +68,6 @@ public class User : BindableObject
     public string Username { get; set; }
     public int UserId { get; set; }
 
-    public Command OpenChatCommand { get; set; }
-
     public User(string username, int id, bool isLocalUser = false)
     {
         MainThread.BeginInvokeOnMainThread(() =>
@@ -79,7 +78,6 @@ public class User : BindableObject
             Username = username;
             UserId = id;
             IsLocalUser = isLocalUser;
-            OpenChatCommand = new Command(OpenChat);
 
             Users.Add(this);
         });
@@ -101,12 +99,12 @@ public class User : BindableObject
 
     public static void ClearUsers() => Users.Clear();
 
-    private void OpenChat()
+    public static void OpenChat(User user)
     {
-        SocketCore.Send($"{Username}", Token.INIT_CHAT);
+        SocketCore.Send($"{user.Username}", Token.INIT_CHAT);
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            StaticNavigator.Push(new MessagePage(this));
+            StaticNavigator.Push(new MessagePage(user));
         });
     }
 

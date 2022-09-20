@@ -5,8 +5,8 @@
 /// </summary>
 public class AnyListBindable : BindableObject
 {
-    private readonly User BindedUser;
-    private readonly Group BindedGroup;
+    private readonly User? BindedUser;
+    private readonly Group? BindedGroup;
     private readonly bool UseUserInput;
     private readonly bool UseGroupInput;
 
@@ -36,19 +36,12 @@ public class AnyListBindable : BindableObject
             return BindedUser.UserId;
         }
      }
-    private Command input;
-    public Command Input
+
+    private Command? input;
+    public Command? Input
     {
         get
         {
-            if (UseUserInput)
-            {
-                return BindedUser.OpenChatCommand;
-            }
-            if (UseGroupInput)
-            {
-                return BindedGroup.OpenChatCommand;
-            } 
             return input;
         }
         set
@@ -69,19 +62,18 @@ public class AnyListBindable : BindableObject
         }
     }
 
-    public AnyListBindable(User user, bool useUserInput = false, Command input = null)
+    public AnyListBindable(User user, Command input = null)
     {
         type = BindType.User;
         BindedUser = user;
-        UseUserInput = useUserInput;
+
         Input = input;
     }
 
-    public AnyListBindable(Group group, bool useGroupInput = false, Command input = null)
+    public AnyListBindable(Group group, Command input = null)
     {
         type = BindType.Group;
         BindedGroup = group;
-        UseGroupInput= useGroupInput;
         Input = input;
     }
 }

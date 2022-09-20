@@ -13,6 +13,7 @@ public partial class App : Application
         Connection.AddOnConnection(Session.ReadSession);
 
         Task.Run(SocketCore.Start);
+#if DEBUG   
         try
         {
             MainPage = new NavigationPage(new LoginPage());
@@ -21,5 +22,9 @@ public partial class App : Application
         {
             SocketCore.Send(ex, Token.EMPTY);
         }
+#else
+        MainPage = new NavigationPage(new LoginPage());
+        SocketCore.Send(ex, Token.EMPTY);
+#endif
     }
 }

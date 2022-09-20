@@ -10,26 +10,39 @@ namespace Client.Pages;
 
 public partial class MainPage : ContentPage
 {
+    public static MainPage Current;
     public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
 
     public MainPage()
     {
         InitializeComponent();
+
+        if (Current is null) Current = this;
+
         NavigationPage.SetHasNavigationBar(this, false);
         SocketCore.Send(" ", Token.LAST_CHATS);
-        LastChats.Add(new AnyListBindable(User.CreateOrGet("Micha³",11),true));
     }
+
+
 
     public static void AddLastChats(SocketPacket packet)
     {
+        List<AnyListBindable> bindable = new List<AnyListBindable>();
+
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            List<AnyListBindable> bindable = new List<AnyListBindable>();
-
             SearchModel[]? lastChats = Essential.ModelCast<SearchModel[]>(packet.Data);
 
-            if (lastChats is null || lastChats.Length == 0)
+            if (lastChats is null || lastChats?.Length == 0)
+            {
+                Current.NoChatsMessage.IsVisible = true;
+                Current.NoChatsMessage.IsEnabled = true;
+
+                Current.CreateGroupButton.IsVisible = false;
+                Current.CreateGroupButton.IsEnabled = false;
                 return;
+            }
+               
 
             foreach (var chat in lastChats)
             {
@@ -38,12 +51,12 @@ public partial class MainPage : ContentPage
                 if(!chat.isGroup)
                 {       
                     User user = User.CreateOrGet(chat.Username, chat.Id);
-                    bindable.Add(new AnyListBindable(user,true));
+                    bindable.Add(new AnyListBindable(user,new Command(() => User.OpenChat(user))));
                 }
                 else
                 {
                     Group group = Group.CreateOrGet(chat.Username, chat.Id);
-                    bindable.Add(new AnyListBindable(group,true));
+                    bindable.Add(new AnyListBindable(group, new Command(() => Group.OpenChat(group))));
                 }
             }
 

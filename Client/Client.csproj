@@ -128,7 +128,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Platforms\Android\Resources\cert\" />
 	  <Folder Include="Resources\AppIcon\" />
 	  <Folder Include="Resources\Splash\" />
 	</ItemGroup>

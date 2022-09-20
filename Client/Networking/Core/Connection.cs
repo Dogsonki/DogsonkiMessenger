@@ -65,7 +65,7 @@ public class Connection
     {
         if (Client is null || Stream is null || !Stream.IsAuthenticated|| !Client.Connected)
         {
-            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected} Auth: {Stream.IsAuthenticated}", TraceType.Packet, LogLevel.Error);
+            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected} Auth: {Stream?.IsAuthenticated}", TraceType.Packet, LogLevel.Error);
             return false;
         }
         return true;

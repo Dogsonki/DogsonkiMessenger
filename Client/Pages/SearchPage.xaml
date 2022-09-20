@@ -4,8 +4,9 @@
              x:Class="Client.Pages.SearchPage"
              xmlns:local="clr-namespace:Client.Pages"
              Title="SearchPage"
-			 BackgroundColor="#121212">
-    <StackLayout>
+			 BackgroundColor="{StaticResource BgColor}">
+
+	<StackLayout>
 		<StackLayout  Margin="0,0,0,20">
 			<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">
@@ -15,6 +16,15 @@
 				   Keyboard="Plain" Completed="SearchPressed"/>
 			</Frame>
 		</StackLayout>
+
+		<VerticalStackLayout Padding="20" x:Name="NoResultsMessage" Spacing="5" HorizontalOptions="Center" IsVisible="False" IsEnabled="False">
+			<Label HorizontalTextAlignment="Center" TextColor="White" FontSize="25" Text="No One Here :8"/>
+			<StackLayout>
+				<Label HorizontalTextAlignment="Center" TextColor="Grey" Text="Looks like results are empty."/>
+				<Label HorizontalTextAlignment="Center" TextColor="Grey" Text="Try searching something else!"/>
+			</StackLayout>
+		</VerticalStackLayout>
+
 		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:SearchPage.UsersFound}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
