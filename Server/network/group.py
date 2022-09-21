@@ -72,9 +72,9 @@ class GroupChatroom(functions.Chatroom):
                                                                                 self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old, True, self.group_id)
 
-    def on_new_message(self, message: Message):
-        message_ = message.data["message"].strip()
-        message_type = message.data["message_type"]
+    def on_new_message(self, message: dict):
+        message_ = message["message"].strip()
+        message_type = message["message_type"]
         if message_ != "":
             for i in self.group_members:
                 if i.nick != self.connection.nick:
