@@ -43,6 +43,7 @@ class MessageType(Enum):
     BOT_COMMAND = 20
     GET_CHAT_FILE = 21
     GET_GROUP_MEMBERS = 22
+    DELETE_FROM_GROUP = 23
 
 
 @dataclass
