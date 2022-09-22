@@ -1,6 +1,7 @@
 ﻿using Client.Networking.Core;
 using Client.Pages;
 using System.ComponentModel;
+using Client.IO;
 
 namespace Client.Models.UserType.Bindable;
 
@@ -13,11 +14,27 @@ public class Group : BindableObject
 
     public string Name { get; set; }
     public int Id { get; set; }
+    public ImageSource Avatar;
 
     public Group(string groupName, int groupId)
     {
         Name = groupName;
         Id = groupId;
+
+        byte[] AvatarCacheBuffer = Cache.ReadCache("group_avatar" + Id);
+
+        if (AvatarCacheBuffer is not null)
+        {
+            ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Avatar = src;
+            });
+        }
+        else
+        {
+            SocketCore.Send(Id, Token.GROUP_AVATAR_REQUEST);
+        }
     }
 
     public static Group CreateOrGet(string name, int Id)

@@ -81,10 +81,12 @@ public class User : BindableObject
 
             Users.Add(this);
         });
-        byte[] AvatarCacheBuffer = Cache.ReadCache("avatar" + id);
+
+        byte[] AvatarCacheBuffer = Cache.ReadCache("user_avatar" + id);
 
         if (AvatarCacheBuffer is not null)
         {
+            Logger.Push("avatar in cache", TraceType.Func, LogLevel.Debug);
             ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -93,7 +95,8 @@ public class User : BindableObject
         }
         else
         {
-            SocketCore.Send(id, Token.AVATAR_REQUEST);
+            Logger.Push("requesting avatar",TraceType.Func,LogLevel.Debug);
+            SocketCore.Send(id, Token.USER_AVATAR_REQUEST);
         }
     }
 
@@ -119,7 +122,7 @@ public class User : BindableObject
 
     public static User CreateLocalUser(string username, int id)
     {
-        CreateSystemBot();
+        //CreateSystemBot();
         return new User(username, id, true);
     }
 

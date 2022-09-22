@@ -5,8 +5,8 @@
 /// </summary>
 public class AnyListBindable : BindableObject
 {
-    private readonly User? BindedUser;
-    private readonly Group? BindedGroup;
+    public User? BindedUser { get; set; }
+    public Group? BindedGroup { get; set; }
     private readonly bool UseUserInput;
     private readonly bool UseGroupInput;
 
@@ -50,13 +50,13 @@ public class AnyListBindable : BindableObject
         }
     }
 
-    public ImageSource Avatar
+    public ImageSource BindedAvatar
     {
         get
         {
             if(type == BindType.Group)
             {
-                return null;
+                return BindedGroup.Avatar;
             }
             return BindedUser.Avatar;
         }

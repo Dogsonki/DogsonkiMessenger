@@ -26,15 +26,19 @@ public enum Token : int
     CHANGE_AVATAR = 8,
     SESSION_INFO = 9,
     LOGIN_SESSION = 10,
-    AVATAR_REQUEST = 11,
+    USER_AVATAR_REQUEST = 11,
     LAST_CHATS = 12,
     PASSWORD_FORGOT = 13,
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
+    GROUP_INVITE = 16,
     GROUP_CHAT_INIT = 17,
+    GROUP_AVATAR_REQUEST = 18,
+    GROUP_AVATAR_SET = 19,
     BOT_COMMAND = 20,
     CHAT_IMAGE_REQUEST = 21,
-    GET_GROUP_INFO = 22
+    GET_GROUP_INFO = 22,
+    GROUP_USER_KICK = 23,
 }
 
 /// <summary>
@@ -76,12 +80,6 @@ public static class Tokens
             case Token.ERROR:
                 Debug.Error(packet.Data + "TOKEN -2");
                 break;
-            case Token.SEARCH_USER:
-                if (!LocalUser.isCreatingGroup)
-                    SearchPage.ParseFound(packet.Data);
-                else
-                    GroupChatCreator.ParseFound(packet.Data);
-                break;
             case Token.CHAT_MESSAGE:
                 MessagePage.AddMessage(packet);
                 break;
@@ -112,11 +110,8 @@ public static class Tokens
                 }
 
                 break;
-            case Token.AVATAR_REQUEST:
+            case Token.USER_AVATAR_REQUEST:
                 UserImageRequestPacket.ProcessImage(packet);
-                break;
-            case Token.LAST_CHATS:
-                MainPage.AddLastChats(packet);
                 break;
             default:
                 Debug.Write("TOKEN_UNRECOGNIZED: " + packet.Data);

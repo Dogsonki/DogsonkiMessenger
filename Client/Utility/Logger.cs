@@ -18,7 +18,7 @@ public class Logger
             case TraceType.Packet: PacketLoggerStack.Add(trace.ToString()); break;
             case TraceType.Func: FuncLoggerStack.Add(trace.ToString()); break;
         }
-        // LoggerStack.Add(new LogTemplate(trace.ToString(), level));
+         LoggerStack.Add(new LogTemplate(trace.ToString(), level));
     }
 }
 

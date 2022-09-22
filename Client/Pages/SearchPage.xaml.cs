@@ -1,9 +1,8 @@
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
-using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;
+using Newtonsoft.Json;
 
 namespace Client.Pages;
 
@@ -20,6 +19,8 @@ public partial class SearchPage : ContentPage
         InitializeComponent();
         SearchInput.Text = preInputText;
         NavigationPage.SetHasNavigationBar(this, false);
+
+        SocketCore.SendCallback(ParseFound, preInputText, Token.SEARCH_USER);
     }
 
     private void SearchPressed(object sender, EventArgs e)
@@ -30,15 +31,15 @@ public partial class SearchPage : ContentPage
 
         if (!string.IsNullOrEmpty(input))
         {
-            SocketCore.Send(input, Token.SEARCH_USER);
+            SocketCore.SendCallback(ParseFound, input, Token.SEARCH_USER);
         }
     }
 
-    public static void ParseFound(object req)
+    public void ParseFound(object req)
     {
-        List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
+        SearchModel[]? users = JsonConvert.DeserializeObject<SearchModel[]>((string)req);
 
-        if (users is null || users?.Count == 0)
+        if (users is null || users?.Length == 0)
         {
             Current.NoResultsMessage.IsVisible = true;
             return;

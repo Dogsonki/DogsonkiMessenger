@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Client.Networking.Packets;
 
-public class GroupChatInfoPacket
+public class GroupChatInfoPacketPacket
 {
 
 }

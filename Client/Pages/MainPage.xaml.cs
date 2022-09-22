@@ -5,6 +5,7 @@ using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;
+using Newtonsoft.Json;
 
 namespace Client.Pages;
 
@@ -20,18 +21,17 @@ public partial class MainPage : ContentPage
         if (Current is null) Current = this;
 
         NavigationPage.SetHasNavigationBar(this, false);
-        SocketCore.Send(" ", Token.LAST_CHATS);
+
+        SocketCore.SendCallback(AddLastChatsCallback, " ", Token.LAST_CHATS);
     }
 
-
-
-    public static void AddLastChats(SocketPacket packet)
+    public static void AddLastChatsCallback(object packet)
     {
         List<AnyListBindable> bindable = new List<AnyListBindable>();
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            SearchModel[]? lastChats = Essential.ModelCast<SearchModel[]>(packet.Data);
+            SearchModel[]? lastChats = JsonConvert.DeserializeObject<SearchModel[]>((string)packet);
 
             if (lastChats is null || lastChats?.Length == 0)
             {
@@ -42,7 +42,6 @@ public partial class MainPage : ContentPage
                 Current.CreateGroupButton.IsEnabled = false;
                 return;
             }
-               
 
             foreach (var chat in lastChats)
             {
@@ -82,7 +81,6 @@ public partial class MainPage : ContentPage
 
         if (string.IsNullOrEmpty(SearchInput)) return;
 
-        SocketCore.Send(SearchInput, Token.SEARCH_USER);
         await Navigation.PushAsync(new SearchPage(SearchInput));
     }
 }

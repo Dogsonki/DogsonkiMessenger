@@ -23,6 +23,7 @@ public class UserImageRequestPacket
 
     public static void ProcessImage(SocketPacket packet)
     {
+        SocketCore.Send("process");
         try
         {
             UserImageRequestPacket? img = packet.ModelCast<UserImageRequestPacket>();
@@ -36,12 +37,13 @@ public class UserImageRequestPacket
 
             if (user is null)
             {
+                SocketCore.Send("user image null");
                 return;
             }
-
+            SocketCore.Send("buffer");
             byte[] buffer;
             ImageSource imgS = GetImageSource(out buffer, img.ImageData);
-            Cache.SaveToCache(buffer, "avatar" + img.UserId);
+            Cache.SaveToCache(buffer, "user_avatar" + img.UserId);
             MainThread.BeginInvokeOnMainThread(() => user.Avatar = imgS);
         }
         catch(Exception ex)

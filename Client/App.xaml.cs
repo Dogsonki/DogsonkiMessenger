@@ -20,11 +20,10 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            SocketCore.Send(ex, Token.EMPTY);
+            SocketCore.Send(ex.ToString(), Token.EMPTY);
         }
 #else
         MainPage = new NavigationPage(new LoginPage());
-        SocketCore.Send(ex, Token.EMPTY);
 #endif
     }
 }

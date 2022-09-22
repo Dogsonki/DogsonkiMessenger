@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using Client.Networking.Packets;
 using Client.Utility;
 using Newtonsoft.Json;
+using Client.IO;
 
 namespace Client.Pages.TemporaryPages.GroupChat;
 
@@ -13,6 +14,8 @@ public partial class GroupChatCreator : ContentPage
 {
     public static ObservableCollection<AnyListBindable> Invited { get; set; } = new ObservableCollection<AnyListBindable>();
     public static ObservableCollection<AnyListBindable> UsersFound { get; set; } = new ObservableCollection<AnyListBindable>();
+
+    private byte[] GroupAvatarBuffer;
 
     public GroupChatCreator()
     {
@@ -114,5 +117,38 @@ public partial class GroupChatCreator : ContentPage
         {
             StaticNavigator.Push(new MessagePage(group));
         });
+
+        if (GroupAvatarBuffer is not null && GroupAvatarBuffer.Length > 0)
+        {
+            SocketCore.Send(GroupAvatarBuffer, Token.GROUP_AVATAR_SET);
+        }
+    }
+
+    private async void GroupImageChange(object? sender, EventArgs e)
+    {
+        try
+        {
+            var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Pick Group Image"
+            });
+
+            if (image is null) return;
+
+            Stream stream = await image.OpenReadAsync();
+            byte[] imageBuffer = stream.StreamToBuffer();
+
+            GroupAvatarBuffer = new byte[imageBuffer.Length];
+
+            Array.Copy(imageBuffer,GroupAvatarBuffer,imageBuffer.Length);
+
+            GroupImage.Source = ImageSource.FromStream(() => new MemoryStream(imageBuffer));
+
+            stream.Close();
+        }
+        catch (Exception ex)
+        {
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+        }
     }
 }

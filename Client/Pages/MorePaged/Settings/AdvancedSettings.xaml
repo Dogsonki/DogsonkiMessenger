@@ -23,6 +23,9 @@
 			</Grid>
 		</StackLayout>
 
+		<Button Clicked="SendLogs" WidthRequest="200" BackgroundColor="#252525" Text="Clear Cache"/>
+	
+
 		<Button Clicked="ClearCache" WidthRequest="200" BackgroundColor="#252525" Text="Clear Cache"/>
 
 

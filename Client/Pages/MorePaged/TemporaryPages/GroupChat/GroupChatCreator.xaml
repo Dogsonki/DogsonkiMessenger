@@ -10,11 +10,24 @@
 	<ScrollView>
 		<StackLayout>
 			<Label Text="Chat Group Creator" FontSize="Medium" HorizontalOptions="Center" VerticalOptions="Center"/>
-			<StackLayout Padding="10"/>
+
+			<StackLayout Margin="0,20,0,0" HorizontalOptions="Center">
+				<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start" 
+				       CornerRadius="60" HeightRequest="120" WidthRequest="120">
+
+					<Frame.GestureRecognizers>
+						<TapGestureRecognizer Tapped="GroupImageChange"/>
+					</Frame.GestureRecognizers>
+
+					<Image x:Name="GroupImage" Aspect="Fill" WidthRequest="120"
+					       HeightRequest="120" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+				</Frame>
+				
+			</StackLayout>
+
 			<StackLayout>
-				<StackLayout Orientation="Horizontal">
-					<Label FontSize="Small" HorizontalOptions="Center" VerticalOptions="Center" Text="Group Name: "/>
-					<Entry FontSize="Small" HorizontalOptions="Center" VerticalOptions="Center" x:Name="GroupName" />
+				<StackLayout HorizontalOptions="Center">
+					<Entry FontSize="Small" x:Name="GroupName" Placeholder="GroupName"/>
 				</StackLayout>
 			
 				<StackLayout Padding="10"/>

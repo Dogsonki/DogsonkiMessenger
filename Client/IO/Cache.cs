@@ -12,16 +12,16 @@ internal class Cache
     /// </summary>
     public static void SaveToCache(object obj, string name)
     {
-        if (!CheckCacheSize())
-        {
-            Debug.Write("Checking cache");
-            ControlCache();
-        }
-
-        if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
-
         try
         {
+            if (!CheckCacheSize())
+            {
+                ControlCache();
+            }
+
+            if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
+
+
             if (obj.GetType() == typeof(byte[]))
             {
 #if ANDROID
@@ -51,6 +51,11 @@ internal class Cache
     {
         try
         {
+            if (!Directory.Exists(CachePath))
+            {
+                Directory.CreateDirectory(CachePath);
+            }
+
             string cachePath = CachePath;
             if (!File.Exists(cachePath + name))
             {

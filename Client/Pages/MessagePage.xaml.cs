@@ -27,10 +27,11 @@ public partial class MessagePage : ContentPage
     {
         try
         {
+            InitializeComponent();
+
             ChatUser = user;
             isGroupChat = false;
 
-            InitializeComponent();
             NavigationPage.SetHasNavigationBar(this, false);
 
             Current = this;
@@ -40,7 +41,7 @@ public partial class MessagePage : ContentPage
         }
         catch (Exception ex)
         {
-            SocketCore.Send(ex, Token.EMPTY);
+            SocketCore.Send(ex.ToString(), Token.EMPTY);
         }
     }
 
@@ -202,7 +203,10 @@ public partial class MessagePage : ContentPage
                     Messages.Clear();
                     break;
                 case "!invite":
-                    SocketCore.Send(new GroupInvitePacket(GroupChat.Id, int.Parse(args[1])));
+                    SocketCore.Send(new GroupChatUserInvitePacket(GroupChat.Id, int.Parse(args[1])),Token.GROUP_INVITE);
+                    break;
+                case "!remove":
+                    SocketCore.Send(new GroupChatUserRemovePacket(GroupChat.Id, int.Parse(args[1])), Token.GROUP_USER_KICK);
                     break;
             }
             if(error != string.Empty)
@@ -244,58 +248,49 @@ public partial class MessagePage : ContentPage
 
     public static void AddMessage(SocketPacket packet)
     {
-        if (!isGroupChat && ChatUser.UserId == LocalUser.Id ) { return; }
-
-        List<MessagePacket>? messages = null;
-        Task.Run(() =>
+        try
         {
-            JArray r = (JArray)packet.Data;
-            messages = r.ToObject<List<MessagePacket>>();
-        }).ContinueWith((w) =>
-        {
-            if (messages is null)
+            List<MessagePacket>? messages = null;
+            Task.Run(() =>
             {
-                Logger.Push($"Messages are null: {packet.Data}",TraceType.Func,LogLevel.Error);
-                return;
-            }
-            else if (messages.Count == 0)
+                JArray r = (JArray)packet.Data;
+                messages = r.ToObject<List<MessagePacket>>();
+            }).ContinueWith((w) =>
             {
-                Logger.Push($"No messages: {packet.Data}",TraceType.Func,LogLevel.Debug);
-                return;
-            }
-
-            messages.Sort((x, y) => DateTime.Compare(x.Time,y.Time));
-
-            foreach(MessagePacket message in messages)
-            {
-                if (!isGroupChat)
+                if (messages is null)
                 {
-                    if (message.UserId != ChatUser.UserId && LocalUser.Id != message.UserId)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        //TODO: Notification 
-                    }
+                    Logger.Push($"Messages are null: {packet.Data}", TraceType.Func, LogLevel.Error);
+                    return;
                 }
-                else if(message.GroupId != GroupChat.Id)
+                else if (messages.Count == 0)
                 {
+                    Logger.Push($"No messages: {packet.Data}", TraceType.Func, LogLevel.Debug);
                     return;
                 }
 
-                ChatMessage? lastMessage = GetLastMessage();
+                messages.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
 
-                if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText)
+                foreach (MessagePacket message in messages)
                 {
-                    MainThread.BeginInvokeOnMainThread(() => lastMessage.textContent += message.ContentString);
+                    ChatMessage? lastMessage = GetLastMessage();
+
+                    if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId &&
+                        lastMessage.IsText)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() => lastMessage.textContent += message.ContentString);
+                    }
+                    else
+                    {
+                        Debug.Write("ADding");
+                        MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
+                    }
                 }
-                else
-                {
-                    MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
-                }
-            }
-        });
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.Write(ex);
+        }
     }
 
     public static void AddMessage(MessagePacket packet) => Messages.Add(new ChatMessage(packet));
