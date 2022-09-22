@@ -28,9 +28,9 @@ class NormalChatroom(functions.Chatroom):
         else:
             self._send_last_messages(message_history, old, False)
 
-    def on_new_message(self, message: Message):
-        message_ = message.data["message"].strip()
-        message_type = message.data["message_type"]
+    def on_new_message(self, message: dict):
+        message_ = message["message"].strip()
+        message_type = message["message_type"]
         if message_ != "":
             receiver_connection = current_connections.get(self.receiver)
             if receiver_connection:
@@ -58,7 +58,7 @@ def search_users(client: Client, nick: str):
     data = []
     groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     for i in groups:
-        if i[0].startswith(nick):
+        if i.name.startswith(nick):
             data.append({"name": i.name, "id": i.id, "type": "group"})
 
     first_logins = handling_sql.search_by_nick(client.db_cursor, nick)

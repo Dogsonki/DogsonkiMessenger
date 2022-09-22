@@ -30,6 +30,17 @@ def add_to_group(client: Client, data: dict):
     client.send_message(message, MessageType.ADD_TO_GROUP)
 
 
+def delete_from_group(client: Client, data: dict):
+    group_id = data["group_id"]
+    removed_user_id = data["removed_person_id"]
+    if handling_sql.get_is_admin(client.db_cursor, client.login_id, group_id):
+        handling_sql.delete_from_group(client.db_cursor, removed_user_id, group_id)
+        message = "0"  # 0 -> user has been removed from group
+    else:
+        message = "1"  # 1 -> removing person is not a group admin
+    client.send_message(message, MessageType.DELETE_FROM_GROUP)
+
+
 def get_avatar(client: Client, group_id: int):
     avatar = handling_sql.get_group_avatar(client.db_cursor, group_id)
     try:
@@ -57,8 +68,16 @@ class GroupChatroom(functions.Chatroom):
         self.group_members = handling_sql.get_group_members(self.connection.db_cursor, self.group_id)
         self.chat_actions.update({
             MessageType.ADD_TO_GROUP: self.add_to_group,
-            MessageType.GET_GROUP_MEMBERS: self.send_group_members
+            MessageType.DELETE_FROM_GROUP: self.delete_from_group,
+            MessageType.GET_GROUP_MEMBERS: self.send_group_members,
+            MessageType.GET_AVATAR: self.get_avatar
         })
+
+    def delete_from_group(self, message: dict):
+        delete_from_group(self.connection, message)
+
+    def get_avatar(self, message: str):
+        self.connection.get_avatar(message)
 
     def add_to_group(self, message: dict):
         add_to_group(self.connection, message)
@@ -72,9 +91,9 @@ class GroupChatroom(functions.Chatroom):
                                                                                 self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old, True, self.group_id)
 
-    def on_new_message(self, message: Message):
-        message_ = message.data["message"].strip()
-        message_type = message.data["message_type"]
+    def on_new_message(self, message: dict):
+        message_ = message["message"].strip()
+        message_type = message["message_type"]
         if message_ != "":
             for i in self.group_members:
                 if i.nick != self.connection.nick:
