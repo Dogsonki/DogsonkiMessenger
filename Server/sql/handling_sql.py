@@ -95,7 +95,7 @@ def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserCha
     cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, m.time, m.content, m.message_type FROM (((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id)
-                      INNER JOIN messages as m ON users_link_table.message_id = m.id) 
+                      LEFT JOIN messages as m ON users_link_table.message_id = m.id) 
                       WHERE u1.login=%s OR u2.login=%s;""", (login, login))
     chats = cursor.fetchall()
     if chats is None:
@@ -177,10 +177,11 @@ class UserGroups:
 
 def get_user_groups(cursor: CMySQLCursor, login_id: int) -> Union[List[UserGroups], bool]:
     cursor.execute("""SELECT g.name, g.id, m.time, m.content, m.message_type, u.nick FROM((( group_user_link_table
+                      LEFT JOIN groups_messages AS m ON group_user_link_table.message_id = m.id)
                       INNER JOIN groups_ AS g ON group_user_link_table.group_id = g.id)
-                      INNER JOIN groups_messages AS m ON group_user_link_table.message_id = m.id)
-                      INNER JOIN users AS u ON m.sender_id = u.id)
+                      LEFT JOIN users AS u ON m.sender_id = u.id)
                       WHERE user_id=%s;""", (login_id,))
+
     sql_data = cursor.fetchall()
     if sql_data is None:
         return False
@@ -331,12 +332,12 @@ def change_password(cursor: CMySQLCursor, login: str, new_password: str):
 
 def update_last_time_message(cursor: CMySQLCursor, user1_id: int, user2_id: int, message_id: int):
     cursor.execute("""UPDATE users_link_table
-                      SET message_id=?
+                      SET message_id=%s
                       WHERE (user1_id=%s AND user2_id=%s) OR (user2_id=%s AND user1_id=%s);""",
                    (message_id, user1_id, user2_id, user2_id, user1_id))
 
 
 def update_last_time_message_group(cursor: CMySQLCursor, group_id: int, message_id: int):
     cursor.execute("""UPDATE group_user_link_table
-                      SET message_id=?
+                      SET message_id=%s
                       WHERE group_id=%s;""", (message_id, group_id))

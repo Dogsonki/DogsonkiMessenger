@@ -124,9 +124,13 @@ def send_last_chats(client: Client, data: str):
     user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     if user_group_chats:
         for i in user_group_chats:
+            try:
+                last_message_time = datetime.timestamp(i.last_message_time)
+            except TypeError:
+                last_message_time = None
             chats.append({"name": i.name,
                           "id": i.id,
-                          "last_message_time": datetime.timestamp(i.last_message_time),
+                          "last_message_time": last_message_time,
                           "type": "group",
                           "message_type": i.message_type,
                           "message": i.message,
