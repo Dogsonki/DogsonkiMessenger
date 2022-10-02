@@ -9,13 +9,13 @@ class CreateDatabase:
     def create_all_tables(self):
         self.cursor = sql_con.get_cursor()
         self.create_users_table()
-        self.create_users_link_table()
         self.create_messages_table()
+        self.create_users_link_table()
         self.create_session_table()
         self.create_confirmation_mail_table()
         self.create_group_table()
-        self.create_group_user_link_table()
         self.create_group_messages_table()
+        self.create_group_user_link_table()
         self.cursor.close()
 
     def create_users_table(self):
@@ -34,10 +34,11 @@ class CreateDatabase:
                                   user1_id INTEGER NOT NULL,
                                   user2_id INTEGER NOT NULL,
                                   is_friend BIT DEFAULT 0,
-                                  last_message_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  message_id INTEGER DEFAULT NULL,
 
                                   FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
-                                  FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE
+                                  FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE,
+                                  FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
                                   );""")
 
     def create_messages_table(self):
@@ -85,10 +86,11 @@ class CreateDatabase:
                                   group_id INTEGER NOT NULL,
                                   is_admin BIT DEFAULT 0,
                                   is_accepted_by_user BIT DEFAULT 0,
-                                  last_message_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  message_id INTEGER DEFAULT NULL,
                                
                                   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-                                  FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE
+                                  FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE CASCADE,
+                                  FOREIGN KEY (message_id) REFERENCES groups_messages(id) ON DELETE CASCADE
                                   );""")
 
     def create_group_messages_table(self):

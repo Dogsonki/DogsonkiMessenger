@@ -111,4 +111,5 @@ class GroupChatroom(functions.Chatroom):
             message = self._save_file(self.group_id, message)
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
-        handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id)
+        handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id,
+                                                    self.connection.db_cursor.lastrowid)

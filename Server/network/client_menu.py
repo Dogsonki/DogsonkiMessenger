@@ -41,17 +41,19 @@ class NormalChatroom(functions.Chatroom):
             self.save_message_in_database(message_, message_type)
 
     def save_message_in_database(self, message: str, message_type: str):
-        if not self.friends:
-            handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
-            self.friends = True
-        else:
-            handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
-
         is_path = False if message_type == "text" else True
         if is_path:
             message = self._save_file(self.receiver_id, message)
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
+        message_id = self.connection.db_cursor.lastrowid
+        if not self.friends:
+            handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
+            self.friends = True
+        else:
+            handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id,
+                                                  message_id)
+
 
 
 def search_users(client: Client, message_data: dict):
@@ -108,12 +110,16 @@ def send_last_chats(client: Client, data: str):
                 chats.append({"name": i.u1_nick,
                               "id": i.u1_id,
                               "last_message_time": datetime.timestamp(i.last_message_time),
-                              "type": "user"})
+                              "type": "user",
+                              "message_type": i.message_type,
+                              "message": i.message})
             else:
                 chats.append({"name": i.u2_nick,
                               "id": i.u2_id,
                               "last_message_time": datetime.timestamp(i.last_message_time),
-                              "type": "user"})
+                              "type": "user",
+                              "message_type": i.message_type,
+                              "message": i.message})
 
     user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     if user_group_chats:
@@ -121,7 +127,10 @@ def send_last_chats(client: Client, data: str):
             chats.append({"name": i.name,
                           "id": i.id,
                           "last_message_time": datetime.timestamp(i.last_message_time),
-                          "type": "group"})
+                          "type": "group",
+                          "message_type": i.message_type,
+                          "message": i.message,
+                          "sender": i.sender})
 
     client.send_message(chats, MessageType.LAST_CHATS)
 
