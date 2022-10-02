@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 
 from Server.sql import handling_sql
-from .connection import Client, MessageType, current_connections, Message
+from .connection import Client, MessageType, current_connections
 from . import functions
 from . import group
 
@@ -54,12 +54,16 @@ class NormalChatroom(functions.Chatroom):
                                   self.receiver_id, message_type, is_path)
 
 
-def search_users(client: Client, nick: str):
+def search_users(client: Client, message_data: dict):
+    nick = message_data["nick"]
+    search_groups = message_data["search_groups"]
     data = []
-    groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
-    for i in groups:
-        if i.name.startswith(nick):
-            data.append({"name": i.name, "id": i.id, "type": "group"})
+
+    if search_groups:
+        groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
+        for i in groups:
+            if i.name.startswith(nick):
+                data.append({"name": i.name, "id": i.id, "type": "group"})
 
     first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
     for i in first_logins:

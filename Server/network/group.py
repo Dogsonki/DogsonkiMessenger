@@ -3,7 +3,7 @@ import base64
 import dataclasses
 
 from Server.sql import handling_sql
-from .connection import Client, MessageType, current_connections, Message
+from .connection import Client, MessageType, current_connections
 from . import functions
 
 
