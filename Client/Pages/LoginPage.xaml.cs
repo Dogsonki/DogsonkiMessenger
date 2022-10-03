@@ -1,9 +1,7 @@
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Packets;
 using Client.Pages.Helpers;
-using Client.Utility;
 using Newtonsoft.Json;
 
 namespace Client.Pages;
@@ -23,8 +21,6 @@ public partial class LoginPage : ContentPage
         Current = this;
 
         if (!string.IsNullOrEmpty(info)) message.ShowInfo(info);
-
-
     }
 
     private void LoginFocused(object sender, FocusEventArgs e) => message.Clear(PopType.Error);
@@ -38,12 +34,6 @@ public partial class LoginPage : ContentPage
         string username = Input_Username.Text;
         string password = Input_Password.Text;
 
-#if DEBUG
-        if(username == "a" && password == "a")
-        {
-            LocalUser.Login("TestUser", "1", "test@");
-        }
-#endif
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             message.ShowError("Username or password is empty");
@@ -72,7 +62,7 @@ public partial class LoginPage : ContentPage
                 message.ShowError("User is banned");
                 break;
             default:
-                message.ShowError("Samething went wrong, probably on server side ... ");
+                message.ShowError("Something went wrong, probably on server side ... ");
                 break;
         }
     }

@@ -12,6 +12,7 @@ internal class GroupChatUserInfo
     [JsonProperty("user_id")]
     public int UserId { get; set; }
 
+    [JsonConstructor]
     public GroupChatUserInfo(bool is_admin, string nick, int user_id)
     {
         IsAdmin = is_admin;

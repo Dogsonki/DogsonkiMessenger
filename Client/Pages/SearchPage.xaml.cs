@@ -2,6 +2,7 @@ using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;
+using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 
 namespace Client.Pages;
@@ -20,7 +21,7 @@ public partial class SearchPage : ContentPage
         SearchInput.Text = preInputText;
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(ParseFound, preInputText, Token.SEARCH_USER);
+        SocketCore.SendCallback(ParseFound, new SearchPacket(preInputText, true), Token.SEARCH_USER);
     }
 
     private void SearchPressed(object sender, EventArgs e)
@@ -29,9 +30,9 @@ public partial class SearchPage : ContentPage
 
         string input = ((Entry)sender).Text;
 
-        if (!string.IsNullOrEmpty(input))
+        if (!string.IsNullOrEmpty(input) && input.Length > 3)
         {
-            SocketCore.SendCallback(ParseFound, input, Token.SEARCH_USER);
+            SocketCore.SendCallback(ParseFound, new SearchPacket(input,true), Token.SEARCH_USER);
         }
     }
 

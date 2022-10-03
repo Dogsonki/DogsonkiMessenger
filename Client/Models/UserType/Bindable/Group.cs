@@ -14,18 +14,32 @@ public class Group : BindableObject
 
     public string Name { get; set; }
     public int Id { get; set; }
-    public ImageSource Avatar;
+
+    private ImageSource avatar;
+
+    public ImageSource Avatar
+    {
+        get
+        {
+            return avatar;  
+        }
+        set
+        {
+            avatar = value;
+            OnPropertyChanged(nameof(avatar));
+        }
+    }
 
     public Group(string groupName, int groupId)
     {
         Name = groupName;
         Id = groupId;
 
-        byte[] AvatarCacheBuffer = Cache.ReadCache("group_avatar" + Id);
+        byte[] avatarCacheBuffer = Cache.ReadCache("group_avatar" + Id);
 
-        if (AvatarCacheBuffer is not null)
+        if (avatarCacheBuffer is not null)
         {
-            ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
+            ImageSource src = ImageSource.FromStream(() => new MemoryStream(avatarCacheBuffer));
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Avatar = src;
@@ -37,23 +51,22 @@ public class Group : BindableObject
         }
     }
 
-    public static Group CreateOrGet(string name, int Id)
+    public static Group CreateOrGet(string name, int id)
     {
         Group group;
-        if ((group = Groups.Find(x => x.Id == Id)) != null)
+        if ((group = Groups.Find(x => x.Id == id)) != null)
             return group;
 
-        return new Group(name, Id);
+        return new Group(name, id);
     }
 
-    public static Group? Get(int Id)
+    public static Group? GetGroup(int id)
     {
-        return Groups.Find(x => x.Id == Id);
+        return Groups.Find(x => x.Id == id);
     }
 
     public void AddUser(GroupUser groupUser)
     {
-        Debug.Write($"Adding user: {groupUser.IsAdmin} {groupUser.UserRef.Username} {groupUser.UserRef.UserId}");
         Users.Add(groupUser);
     }
 

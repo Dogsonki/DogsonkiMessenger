@@ -9,11 +9,11 @@ public class SocketCore : Connection
 {
     public static async void Start() 
     {
-        await Connect().ContinueWith(async (_) =>
+        await Connect().ContinueWith((_) =>
         {
             if (!AbleToSend()) return;
-
-            await Receive();
+            Task.Run(async () => await Receive());
+            Task.Run(async () => await SendQueue());
         });  
     }
 
@@ -111,50 +111,70 @@ public class SocketCore : Connection
         }
     }
 
-    private static async Task Send(SocketPacket packet)
+    private static async Task SendQueue()
     {
-        try
+        while (true)
         {
-            if (packet is null) throw new Exception("SEND_PACKET_NULL");
+            if (Stream.CanWrite && SocketQueue.CanSend())
+            {
+                SocketQueue.IsSending = true;
+                SocketPacket packet = SocketQueue.Queue.Dequeue();
 
-            if (!AbleToSend()) return;
-            byte[] buffer = packet.GetPacked();
-            await Stream.WriteAsync(buffer, 0, buffer.Length);
+                try
+                {
+                    if (packet is null) throw new Exception("SEND_PACKET_NULL");
+
+                    if (!AbleToSend()) return;
+                    byte[] buffer = packet.GetPacked();
+
+                    await Stream.WriteAsync(buffer, 0, buffer.Length);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Push(ex, TraceType.Packet, LogLevel.Error);
+                }
+
+                SocketQueue.IsSending = false;
+            }
+            Thread.Sleep(5);
         }
-        catch(Exception ex)
-        {
-            Logger.Push(ex, TraceType.Packet, LogLevel.Error);
-        }
+
     }
 
-    public static bool SendCallback(Action<object> Callback, object SendingData, Token token, bool SendableOnce = true)
+    public static bool SendCallback(Action<object> callback, object sendingData, Token token, bool sendAbleOnce = true)
     {
         if (!AbleToSend()) return false;
 
-        if (SendableOnce && RequestedCallback.IsAlreadyQueued(token))
+        if (sendAbleOnce && RequestedCallback.IsAlreadyQueued(token))
         {
-            Debug.Write("Token AlreadyQueued");
+            Debug.Write($"Token AlreadyQueued {token}");
             return true;
         }
 
-        RequestedCallback.AddCallback(new RequestedCallbackModel(Callback, (int)token));
+        RequestedCallback.AddCallback(new RequestedCallbackModel(callback, (int)token));
 
-        Send(SendingData, token);
+        Send(sendingData, token);
 
         return true;
     }
 
-    public static bool Send(object data, Token token = Token.EMPTY)
+    public static bool Send(object data, Token token = Token.EMPTY, bool sendAbleOnce = false)
     {
         if (!AbleToSend()) return false;
 
         if (token == Token.EMPTY)
             return true;
 
+        if (sendAbleOnce && RequestedCallback.IsAlreadyQueued(token))
+        {
+            Debug.Write($"Token AlreadyQueued {token}");
+            return true;
+        }
+
         Task.Run(async () =>
         {
             SocketPacket packet = new SocketPacket(data, token);
-            await Send(packet);
+            SocketQueue.Add(packet);
         });
 
         return true;
@@ -167,7 +187,7 @@ public class SocketCore : Connection
         Task.Run(async () =>
         {
             SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
-            await Send(packet);
+            SocketQueue.Add(packet);
         });
 
         return true;

@@ -34,6 +34,7 @@ public class MessagePacket
     public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id)
     {
         ContentString = Encoding.UTF8.GetString(message);
+        Content = message;
         MessageType = message_type;
         Time = Essential.UnixToDateTime(time);
         UserId = user_id;

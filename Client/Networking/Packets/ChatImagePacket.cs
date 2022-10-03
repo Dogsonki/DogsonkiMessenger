@@ -10,6 +10,7 @@ public class ChatImagePacket
     [JsonProperty("file_format")]
     public string FileFormat { get; set; }
 
+    [JsonConstructor]
     public ChatImagePacket(string path,string file_format)
     {
         Path = path;

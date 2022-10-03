@@ -1,10 +1,9 @@
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
-using Client.Networking.Model;
 using Client.Pages.TemporaryPages.GroupChat;
-using Client.Utility;
 using System.Collections.ObjectModel;
-using Client.Networking.Packets;
+using System.Text.Json;
+using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 
 namespace Client.Pages;
@@ -22,7 +21,7 @@ public partial class MainPage : ContentPage
 
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(AddLastChatsCallback, " ", Token.LAST_CHATS);
+        SocketCore.SendCallback(AddLastChatsCallback," ", Token.LAST_CHATS);
     }
 
     public static void AddLastChatsCallback(object packet)
@@ -31,7 +30,7 @@ public partial class MainPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            SearchModel[]? lastChats = JsonConvert.DeserializeObject<SearchModel[]>((string)packet);
+            LastChatsPacket[]? lastChats = JsonConvert.DeserializeObject<LastChatsPacket[]>((string)packet);
 
             if (lastChats is null || lastChats?.Length == 0)
             {

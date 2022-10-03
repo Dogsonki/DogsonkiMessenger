@@ -1,10 +1,8 @@
 ﻿using Client.IO;
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Model;
 using Client.Networking.Packets;
 using Client.Pages;
-using Client.Pages.TemporaryPages.GroupChat;
 using Client.Utility;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

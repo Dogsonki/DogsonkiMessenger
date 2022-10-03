@@ -16,7 +16,7 @@ public class Connection
     public static bool IsConnected { get; private set; }
     public static bool IsInitialized { get; private set; } = false;
 
-    public const int MAX_BUFFER_SIZE = 1024 * 20;
+    public const int MAX_BUFFER_SIZE = 1024 * 60;
 
     public static bool IsConnecting { get; protected set; }
 

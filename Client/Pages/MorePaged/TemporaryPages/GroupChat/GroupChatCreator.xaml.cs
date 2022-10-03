@@ -1,103 +1,31 @@
-using Client.Models;
 using Client.Models.UserType.Bindable;
 using Client.Networking.Core;
-using Newtonsoft.Json.Linq;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;
+using Client.Networking.Packets.Models;
 using Client.Utility;
 using Newtonsoft.Json;
-using Client.IO;
 
 namespace Client.Pages.TemporaryPages.GroupChat;
 
 public partial class GroupChatCreator : ContentPage
 {
-    public static ObservableCollection<AnyListBindable> Invited { get; set; } = new ObservableCollection<AnyListBindable>();
-    public static ObservableCollection<AnyListBindable> UsersFound { get; set; } = new ObservableCollection<AnyListBindable>();
+    public ObservableCollection<AnyListBindable> Invited { get; set; } = new ObservableCollection<AnyListBindable>();
+
+    public ObservableCollection<AnyListBindable> PeopleFound { get; set; } = new ObservableCollection<AnyListBindable>(); 
 
     private byte[] GroupAvatarBuffer;
+    private bool IsShowingInvited = true;
 
     public GroupChatCreator()
     {
-        Invited.Clear();
-        UsersFound.Clear();
-
-        if(LocalUser.UserRef != null)
-        {
-            Invited.Add(new AnyListBindable(LocalUser.UserRef));
-        }
-      
-        LocalUser.isCreatingGroup = true;
-
-        InitializeComponent();
-
-        GroupName.Text = LocalUser.UserRef.Username + "'s Chat Group";
-
         NavigationPage.SetHasNavigationBar(this, false);
-    }
+        InitializeComponent();
+        
+        InvitedList.ItemsSource = Invited;
+        ListPeopleFound.ItemsSource = PeopleFound;
 
-    private void Search(object sender, EventArgs e)
-    {
-        UsersFound.Clear();
-
-        string input = ((Entry)sender).Text;
-
-        if (!string.IsNullOrEmpty(input))
-        {
-            SocketCore.Send(input, Token.SEARCH_USER);
-        }
-    }
-
-    public static void ParseFound(object req)
-    {
-        List<SearchModel> users = ((JArray)req).ToObject<List<SearchModel>>();
-
-        foreach (var user in users)
-        {
-            AnyListBindable br = new(User.CreateOrGet(user.Username, user.Id))
-            {
-                Input = new Command(AddToInvited)
-            };
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                UsersFound.Add(br);
-            });
-        }
-    }
-
-    public static void AddToInvited(object user)
-    {
-        AnyListBindable AddedUser = (AnyListBindable)user;
-
-        foreach(AnyListBindable u in Invited)
-        {
-            if(u.Id == AddedUser.Id)
-            {
-                return;
-            }
-        }
-        Invited.Add(AddedUser);
-    }
-
-    private void CreateGroup(object sender, EventArgs e)
-    {
-        List<int> users = new(Invited.Count);
-
-        for(int i = 0; i < Invited.Count; i++)
-        {
-            int id = Invited[i].Id;
-
-            if (id != LocalUser.Id)
-            {
-                users.Add(id);
-            }
-        }
-
-        SocketCore.SendCallback(
-            CreateGroupCallback,
-            new GroupChatCreatePacket(GroupName.Text, int.Parse(LocalUser.id), users.ToArray()),
-            Token.GROUP_CHAT_CREATE);
+        UserInvited(LocalUser.UserRef);
     }
 
     private void CreateGroupCallback(object data)
@@ -106,13 +34,14 @@ public partial class GroupChatCreator : ContentPage
 
         if (groupPacket is null)
         {
-            Logger.Push("GroupCreatePacket_NULL",TraceType.Func,LogLevel.Error);
+            Logger.Push("GroupCreatePacket_NULL", TraceType.Func, LogLevel.Error);
             return;
         }
 
         Group group = Group.CreateOrGet(groupPacket.GroupName,groupPacket.GroupId);
 
         SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
+
         MainThread.BeginInvokeOnMainThread(() =>
         {
             StaticNavigator.Push(new MessagePage(group));
@@ -150,5 +79,134 @@ public partial class GroupChatCreator : ContentPage
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
+    }
+
+    private void ShowInvited(object? sender, EventArgs e)
+    {
+        LbShowInvite.TextDecorations = TextDecorations.None;
+        LbShowInvited.TextDecorations = TextDecorations.Underline;
+
+        LbInvitedHint.IsVisible = true;
+
+        SearchInvite.IsVisible = false;
+        SearchInvite.IsEnabled = false;
+
+        if (!IsShowingInvited)
+        {
+            InvitedList.IsVisible = true;
+            InvitedList.IsEnabled = true;
+            IsShowingInvited = true;
+        }
+    }
+
+    private void ShowInvite(object? sender, EventArgs e)
+    {
+        LbShowInvite.TextDecorations = TextDecorations.Underline;
+        LbShowInvited.TextDecorations = TextDecorations.None;
+
+        LbInvitedHint.IsVisible = false;
+
+        SearchInvite.IsVisible = true;
+        SearchInvite.IsEnabled= true;
+
+        if (IsShowingInvited)
+        {
+            InvitedList.IsVisible = false;
+            InvitedList.IsEnabled = false;
+
+            IsShowingInvited = false;
+        }
+    }
+
+
+    private void SearchPressed(object? sender, EventArgs e)
+    {
+        Entry? entry = (Entry?)sender;
+        if (entry is null) return;
+
+        if(string.IsNullOrEmpty(entry.Text) || entry.Text.Length < 1)
+        {
+            return;
+        }
+
+        SocketCore.SendCallback(SearchCallback, new SearchPacket(entry.Text,false), Token.SEARCH_USER);
+    }
+
+    private void SearchCallback(object packet)
+    {
+        SearchModel[]? found = JsonConvert.DeserializeObject<SearchModel[]?>((string)packet);
+
+        if (found is null) return;
+
+        PeopleFound.Clear();
+
+        foreach (SearchModel userFound in found)
+        {
+            User user = User.CreateOrGet(userFound.Username,userFound.Id);
+
+            AnyListBindable[] f = Invited.Where(x => x.Id == user.UserId).ToArray();
+
+            if (Invited.Count > 0)
+            {
+                if (f.Length > 0 && Invited.Contains(Invited.First()))
+                {
+                    continue;
+                }
+            }
+
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PeopleFound.Add(new AnyListBindable(user,new Command(() => UserInvited(user))));
+            });
+        }
+    }
+
+    private void UserInvited(User user)
+    {
+        Invited.Add(new AnyListBindable(user,new Command(() => UserRemovedFromInvited(user))));
+
+        if (PeopleFound.Count > 0)
+        {
+            AnyListBindable? found = PeopleFound.Where(x => x.Id == user.UserId).First();
+
+            if (found is not null)
+            {
+                PeopleFound.Remove(found);
+            }
+        }
+    }
+
+    private void UserRemovedFromInvited(User user)
+    {
+        AnyListBindable invited = Invited.Where(x => x.Id == user.UserId).First();
+
+        if (invited.Id == LocalUser.Id)
+        {
+            return;
+        }
+
+        Invited.Remove(invited);
+    }
+
+    private void CreateGroupClicked(object? sender, EventArgs e)
+    {
+        string name = GroupName.Text;
+
+        if (string.IsNullOrEmpty(name) || name.Length < 1)
+        {
+            return;
+        }
+
+        List<int> Ids = new List<int>(Invited.Count);
+        foreach (AnyListBindable user in Invited)
+        {
+            if (user.Id != LocalUser.UserRef.UserId)
+            {
+                Ids.Add(user.Id);
+            }
+        }
+
+        SocketCore.SendCallback(CreateGroupCallback, new GroupChatCreatePacket(name,LocalUser.UserRef.UserId, Ids.ToArray()),Token.GROUP_CHAT_CREATE);
     }
 }

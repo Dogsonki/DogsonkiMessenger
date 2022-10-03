@@ -2,7 +2,6 @@
 using Client.Networking.Core;
 using Client.Pages;
 using System.ComponentModel;
-using Client.Utility;
 
 namespace Client.Models.UserType.Bindable;
 
@@ -42,7 +41,7 @@ public class User : BindableObject
             else
             {
                 avatar = value;
-                OnPropertyChanged(nameof(Avatar));
+                OnPropertyChanged(nameof(avatar));
             }
         }
     }
@@ -68,7 +67,7 @@ public class User : BindableObject
     public string Username { get; set; }
     public int UserId { get; set; }
 
-    public User(string username, int id, bool isLocalUser = false)
+    public User(string username, int id, bool isLocalUser = false, UserCreateFlags flags = UserCreateFlags.Default)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -82,25 +81,27 @@ public class User : BindableObject
             Users.Add(this);
         });
 
-        byte[] AvatarCacheBuffer = Cache.ReadCache("user_avatar" + id);
-
-        if (AvatarCacheBuffer is not null)
+        if (flags.HasFlag(UserCreateFlags.UseDefaultAvatar) && !flags.HasFlag(UserCreateFlags.Default) && !flags.HasFlag(UserCreateFlags.IsSystemUser))
         {
-            Logger.Push("avatar in cache", TraceType.Func, LogLevel.Debug);
-            ImageSource src = ImageSource.FromStream(() => new MemoryStream(AvatarCacheBuffer));
-            MainThread.BeginInvokeOnMainThread(() =>
+            byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar_default");
+            SetAvatar(avatarCacheBuffer);
+        }
+        else if (flags.HasFlag(UserCreateFlags.IsSystemUser) && !flags.HasFlag(UserCreateFlags.Default))
+        {
+            /*TODO: Set System Bot Avatar */
+        }
+        else 
+        {
+            byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar" + id);
+
+            if (!SetAvatar(avatarCacheBuffer))
             {
-                Avatar = src;
-            });
+                Debug.Write($"Cache avatar dose not exists {Username}:{UserId}");
+                SocketCore.Send(id, Token.USER_AVATAR_REQUEST);
+            }
         }
-        else
-        {
-            Logger.Push("requesting avatar",TraceType.Func,LogLevel.Debug);
-            SocketCore.Send(id, Token.USER_AVATAR_REQUEST);
-        }
-    }
 
-    public static void ClearUsers() => Users.Clear();
+    }
 
     public static void OpenChat(User user)
     {
@@ -111,7 +112,30 @@ public class User : BindableObject
         });
     }
 
-    public static User CreateOrGet(string username, int id)
+    /// <summary>
+    /// Sets avatar to user
+    /// </summary>
+    /// <param name="buffer"></param>
+    /// <returns>Returns false if buffer is null or empty</returns>
+    public bool SetAvatar(byte[] buffer)
+    {
+        if (buffer is not null && buffer.Length > 0)
+        {
+            ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Avatar = src;
+            });
+            Cache.SaveToCache(buffer,$"user_avatar{UserId}");
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void ClearUsers() => Users.Clear();
+
+    public static User CreateOrGet(string username, int id, UserCreateFlags flags = UserCreateFlags.Default)
     {
         User? user;
         if ((user = Users.Find(x => x.UserId == id)) != null)
@@ -122,7 +146,7 @@ public class User : BindableObject
 
     public static User CreateLocalUser(string username, int id)
     {
-        //CreateSystemBot();
+        CreateSystemBot();
         return new User(username, id, true);
     }
 
@@ -134,7 +158,7 @@ public class User : BindableObject
         User? _;
         if ((_ = GetUser(-100)) is not null) return _;
 
-        User systemBot = new User("System", -100)
+        User systemBot = new User("System", -100, flags: UserCreateFlags.IsSystemUser)
         {
             isBot = true,
             Tag = "System",
@@ -146,8 +170,16 @@ public class User : BindableObject
     public static User GetSystemBot()
     {
         User? systemBot = GetUser(-100);
-        return systemBot != null ? systemBot : CreateSystemBot();
+        return systemBot is not null ? systemBot : CreateSystemBot();
     }
 
     public static User? GetUser(int id) => Users.Find(x => x.UserId == id);
+}
+
+[Flags]
+public enum UserCreateFlags
+{
+    UseDefaultAvatar,
+    IsSystemUser,
+    Default
 }

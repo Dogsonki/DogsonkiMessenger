@@ -2,7 +2,7 @@
 
 namespace Client.Utility;
 
-public class Logger
+public static class Logger
 {
     public static ObservableCollection<LogTemplate> LoggerStack { get; set; } = new ObservableCollection<LogTemplate>();
 
@@ -12,7 +12,6 @@ public class Logger
     public static void Push(object trace, TraceType type, LogLevel level)
     {
         Debug.Write(trace);
-
         switch (type)
         {
             case TraceType.Packet: PacketLoggerStack.Add(trace.ToString()); break;

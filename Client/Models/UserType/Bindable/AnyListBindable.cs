@@ -74,6 +74,7 @@ public class AnyListBindable : BindableObject
     {
         type = BindType.Group;
         BindedGroup = group;
+
         Input = input;
     }
 }

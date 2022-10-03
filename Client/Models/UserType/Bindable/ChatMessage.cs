@@ -1,6 +1,7 @@
 ﻿using Client.IO;
 using Client.Networking.Core;
 using System.ComponentModel;
+using Android.Provider;
 using Client.Networking.Packets;
 
 namespace Client.Models.UserType.Bindable;
@@ -28,10 +29,7 @@ public class ChatMessage : BindableObject
 
     public ImageSource? Image
     {
-        get
-        {
-            return image;
-        }
+        get => image;
         set
         {
             image = value;
@@ -42,10 +40,7 @@ public class ChatMessage : BindableObject
     public string textContent;
     public string? TextContent
     {
-        get
-        {
-            return textContent;
-        }
+        get => textContent;
         set
         {
             textContent = value;
@@ -93,7 +88,9 @@ public class ChatMessage : BindableObject
 
     public ChatMessage(MessagePacket packet)
     {
+        Debug.Write($"Chat message {packet.MessageType}");
         BindedUser = User.CreateOrGet(packet.Username,packet.UserId);
+
         if (packet.MessageType == "text") 
         {
             TextContent = packet.ContentString;
@@ -102,13 +99,12 @@ public class ChatMessage : BindableObject
         }
         else
         {
-            Debug.Write($"Adding image {packet.ContentString}");
             Path = packet.ContentString.Substring(9); // 9 to remove server folder path
             byte[] CacheBuffer = Cache.ReadCache(Path);
 
             if(CacheBuffer is null || CacheBuffer.Length == 0)
             {
-                Debug.Write("Image is not in cache, requesting imagine to server");
+                Debug.Write("Requesting image");
                 ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
                 SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
                 ImageRequestQueue.AddRequest(imagePacket,this);
@@ -136,13 +132,15 @@ public class ChatMessage : BindableObject
 
         string bufferString = (string)packet;
         byte[] buffer;
-        ImageSource src = UserImageRequestPacket.GetImageSource(out buffer, bufferString);
 
-        Cache.SaveToCache(buffer, Path);
+        ImageSource src = UserImageRequestPacket.GetImageSource(out buffer, bufferString);
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            Debug.Write("GEt image> >>> ");
             Image = src;
         });
+
+        Cache.SaveToCache(buffer, Path);
     }
 }

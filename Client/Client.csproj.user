@@ -37,7 +37,13 @@
     <MauiXaml Update="Pages\MorePaged\Settings\ChatCommands.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
+    <MauiXaml Update="Pages\MorePaged\Settings\GroupChatSettings.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
     <MauiXaml Update="Pages\MorePaged\Settings\ProfileSettings.xaml">
+      <SubType>Designer</SubType>
+    </MauiXaml>
+    <MauiXaml Update="Pages\MorePaged\Settings\UserChatSettings.xaml">
       <SubType>Designer</SubType>
     </MauiXaml>
     <MauiXaml Update="Pages\SettingsPage.xaml">

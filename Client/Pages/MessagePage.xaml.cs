@@ -3,13 +3,11 @@ using Client.Networking.Core;
 using Client.Networking.Model;
 using Client.Utility;
 using System.Collections.ObjectModel;
-using Client.Pages.TemporaryPages.ChatOptions;
 using Client.Commands;
+using Client.Models;
 using Client.Networking.Packets;
-using Client.Networking.Packets.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
+using Client.Pages.Settings;
 namespace Client.Pages;
 
 public partial class MessagePage : ContentPage
@@ -17,73 +15,46 @@ public partial class MessagePage : ContentPage
     private static MessagePage Current { get; set; }
 
     public static ObservableCollection<ChatMessage> Messages { get; set; } = new ObservableCollection<ChatMessage>();
+    public static Conversation CurrentConversation { get; set; }
 
-    private static User ChatUser { get; set; }
-    private static Group GroupChat { get; set; }
     private static bool isGroupChat { get; set; }
     private const int MAX_IMAGE_SIZE = 10_000_000;
     
     public MessagePage(User user)
     {
-        try
-        {
-            InitializeComponent();
+        InitializeComponent();
+        NavigationPage.SetHasNavigationBar(this, false);
 
-            ChatUser = user;
-            isGroupChat = false;
+        CurrentConversation = new Conversation(user);
 
-            NavigationPage.SetHasNavigationBar(this, false);
+        Current = this;
 
-            Current = this;
-
-            ChatUsername.Text = $"@{user.Username}";
-            MessageInput.Placeholder = $"Message @{user.Username}";
-        }
-        catch (Exception ex)
-        {
-            SocketCore.Send(ex.ToString(), Token.EMPTY);
-        }
+        ChatUsername.Text = $"Chatting @{user.Username}";
+        MessageInput.Placeholder = $"Message @{user.Username}";
     }
 
     public MessagePage(Group group)
     {
-        GroupChat = group;
-        isGroupChat = true;
+        CurrentConversation = new Conversation(group);
 
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(GroupChatInfoCallback, " ", Token.GET_GROUP_INFO, false);
-
+        //TODO: get info only in settings page
+        
         Current = this;
 
         ChatUsername.Text = $"Chatting group @{group.Name}";
         MessageInput.Placeholder = $"Message @{group.Name}";
     }
 
-    private void GroupChatInfoCallback(object data)
-    {
-        GroupChatUserInfo[]? users = JsonConvert.DeserializeObject<GroupChatUserInfo[]>((string)data);
-
-        if (users is null)
-        {
-            throw new Exception("GROUP_CHAT_USERS_INFO_NULL");
-        }
-
-        foreach (var u in users)
-        {
-            User user = User.CreateOrGet(u.UserName,u.UserId);
-
-            GroupUser gu = new GroupUser(u.IsAdmin, user);
-
-            GroupChat.AddUser(gu);
-        }
-    }
-
     protected override bool OnBackButtonPressed()
     {
         SocketCore.Send(" ", Token.END_CHAT);
+
+        CurrentConversation = null;
         Messages.Clear();
+
         return base.OnBackButtonPressed();
     }
 
@@ -107,7 +78,7 @@ public partial class MessagePage : ContentPage
 
         if (message.StartsWith("!"))
         {
-            ProcessCommands(message.Split(" "));
+            Current.ProcessCommands(message.Split(" "));
         }
     }
 
@@ -169,7 +140,8 @@ public partial class MessagePage : ContentPage
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
     }
-    private static void ProcessCommands(string[] args)
+
+    private void ProcessCommands(string[] args)
     {
         try
         {
@@ -202,12 +174,14 @@ public partial class MessagePage : ContentPage
                 case "!clear":
                     Messages.Clear();
                     break;
+                /*
                 case "!invite":
                     SocketCore.Send(new GroupChatUserInvitePacket(GroupChat.Id, int.Parse(args[1])),Token.GROUP_INVITE);
                     break;
                 case "!remove":
                     SocketCore.Send(new GroupChatUserRemovePacket(GroupChat.Id, int.Parse(args[1])), Token.GROUP_USER_KICK);
                     break;
+                */
             }
             if(error != string.Empty)
             {
@@ -262,29 +236,50 @@ public partial class MessagePage : ContentPage
                     Logger.Push($"Messages are null: {packet.Data}", TraceType.Func, LogLevel.Error);
                     return;
                 }
-                else if (messages.Count == 0)
+
+                if (messages.Count == 0)
                 {
                     Logger.Push($"No messages: {packet.Data}", TraceType.Func, LogLevel.Debug);
                     return;
                 }
 
+
                 messages.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
+
+                List<ChatMessage> addedMessages = new List<ChatMessage>(messages.Count);
 
                 foreach (MessagePacket message in messages)
                 {
-                    ChatMessage? lastMessage = GetLastMessage();
+                    ChatMessage? lastMessage = null;
 
-                    if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId &&
-                        lastMessage.IsText)
+                    if (addedMessages.Count > 0)
                     {
-                        MainThread.BeginInvokeOnMainThread(() => lastMessage.textContent += message.ContentString);
+                        lastMessage = addedMessages.Last();
                     }
-                    else
+
+
+                    object _padlock = new object();
+
+                    lock (_padlock)
                     {
-                        Debug.Write("ADding");
-                        MainThread.BeginInvokeOnMainThread(() => AddMessage(message));
+                        if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText && message.MessageType == "text")
+                        {
+                            lastMessage.textContent += $"\n{message.ContentString}";
+                        }
+                        else
+                        {
+                            addedMessages.Add(new ChatMessage(message));
+                        }
                     }
                 }
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    foreach (ChatMessage msg in addedMessages)
+                    {
+                        Messages.Add(msg);
+                    }
+                });
             });
         }
         catch (Exception ex)
@@ -356,5 +351,15 @@ public partial class MessagePage : ContentPage
         _lastMessageLen = MessageInput.Text.Length;
     }
 
-    private async void ChatOptions(object sender, SwipedEventArgs e) => await Navigation.PushAsync(new ChatOptionsMain(), true);
+    private async void RedirectToChatSettings(object? sender, EventArgs e)
+    {
+        if (CurrentConversation.IsGroupConversation)
+        {
+            await Navigation.PushAsync(new GroupChatSettings());
+        }
+        else
+        {
+            await Navigation.PushAsync(new UserChatSettings());
+        }
+    }
 }

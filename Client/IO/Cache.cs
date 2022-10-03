@@ -6,6 +6,8 @@ internal class Cache
 {
     //Max sum of every file size in cache directory
     public const long MAX_CACHE_SIZE = 200_000_000;
+    public static string CachePath => FileSystem.Current.CacheDirectory + "/temp/";
+
 
     /// <summary>
     /// For now cache only work with avatars: (byte[] avatarCache, avatar+UserId)
@@ -44,8 +46,6 @@ internal class Cache
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
     }
-
-    public static string CachePath => FileSystem.Current.CacheDirectory + "/temp/";
 
     public static byte[] ReadCache(string name)
     {
@@ -137,6 +137,8 @@ internal class Cache
                 Logger.Push($"Deleting {file} from cache", TraceType.Func, LogLevel.Warning);
                 File.Delete(file);
             }
+
+            Logger.Push($"DELETED {CacheFiles.Length} CACHE FILES",TraceType.Func,LogLevel.Warning);
         }
         catch (Exception ex)
         {

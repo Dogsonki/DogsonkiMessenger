@@ -4,20 +4,5 @@
              x:Class="Client.Pages.DebugOnly.LoggingPage"
 			 xmlns:logger="clr-namespace:Client.Utility"
              BackgroundColor="#121212">
-	
-	<ContentPage.BindingContext>
-		<logger:Logger></logger:Logger>
-	</ContentPage.BindingContext>
-	
-	<ScrollView>
-		<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static logger:Logger.LoggerStack}}">
-			<BindableLayout.ItemTemplate>
-				<DataTemplate>
-					<StackLayout>
-						<Label TextColor="{Binding color}" Text="{Binding message}"/>
-					</StackLayout>
-				</DataTemplate>
-			</BindableLayout.ItemTemplate>
-		</StackLayout>
-	</ScrollView>
+
 </ContentPage>

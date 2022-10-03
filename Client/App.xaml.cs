@@ -1,6 +1,7 @@
 ﻿using Client.Networking.Core;
 using Client.Pages;
 using Client.IO;
+using Client.Utility;
 
 namespace Client;
 
@@ -20,7 +21,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            SocketCore.Send(ex.ToString(), Token.EMPTY);
+            Logger.Push(ex,TraceType.Func,LogLevel.Error);
         }
 #else
         MainPage = new NavigationPage(new LoginPage());

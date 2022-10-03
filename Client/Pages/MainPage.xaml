@@ -41,7 +41,7 @@
 					</StackLayout>
 
 					<StackLayout>
-						<Label x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
+						<Label TextColor="LightGray" x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
 					</StackLayout>
 
 				</StackLayout>
@@ -54,16 +54,24 @@
 				</Image>
 
 			</StackLayout>
-		
-			<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
+
+			<Label Margin="0,0,0,10" HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Chats"/>
+
+
+			<Frame BackgroundColor="#FF252525" WidthRequest="190" CornerRadius="15" HeightRequest="45">
+				<Frame.GestureRecognizers>
+					<TapGestureRecognizer Tapped="CreateGroup"/>
+				</Frame.GestureRecognizers>
+				<StackLayout HeightRequest="20" WidthRequest="190" HorizontalOptions="Start" Orientation="Horizontal">
+					<ImageButton HeightRequest="20" WidthRequest="50" Source="creategroup.png"></ImageButton>
+					<Label Text="Create Group"></Label>
+				</StackLayout>
+			</Frame>
 
 			<StackLayout x:Name="CreateGroupButton" HorizontalOptions="Center" Orientation="Horizontal">
 				<StackLayout.GestureRecognizers>
 					<TapGestureRecognizer Tapped="CreateGroup"/>
 				</StackLayout.GestureRecognizers>
-				<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
-					   HorizontalOptions="Fill" VerticalOptions="Fill" Source="creategroup.png"/>
-				<Label VerticalOptions="Center" HorizontalOptions="Center" Text="Create Group"/>
 			</StackLayout>
 
 			<VerticalStackLayout Padding="20" x:Name="NoChatsMessage" Spacing="5" HorizontalOptions="Center" IsVisible="False" IsEnabled="False">
@@ -74,10 +82,12 @@
 				</StackLayout>
 			</VerticalStackLayout>
 
+			<StackLayout Margin="0,0,0,10"></StackLayout>
+
 			<StackLayout BindableLayout.ItemsSource="{Binding Source={x:Static local:MainPage.LastChats}}">
 				<BindableLayout.ItemTemplate>
 					<DataTemplate>
-						<StackLayout>
+						<StackLayout Margin="0,0,0,10">
 							<StackLayout.GestureRecognizers>
 								<TapGestureRecognizer Command="{Binding Input}" />
 							</StackLayout.GestureRecognizers>
@@ -95,7 +105,12 @@
 										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
 											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding BindedAvatar}"/>
 									</Frame>
-									<Label VerticalOptions="Center" Text="{Binding Username}"/>
+
+									<VerticalStackLayout>
+										<Label VerticalOptions="Start" Text="{Binding Username}"/>
+										<Label TextColor="DarkGray" Text="[Username]: [Message] [Time]"/>
+									</VerticalStackLayout>
+
 								</StackLayout>
 							</Grid>
 						</StackLayout>

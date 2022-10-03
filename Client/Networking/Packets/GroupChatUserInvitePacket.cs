@@ -10,6 +10,7 @@ internal class GroupChatUserInvitePacket
     [JsonProperty("added_person_id")]
     public int AddedPersonId { get; set; }
 
+    [JsonConstructor]
     public GroupChatUserInvitePacket(int groupId, int personId)
     {
         AddedPersonId = personId;

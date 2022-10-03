@@ -7,9 +7,11 @@
 			 BackgroundColor="#121212">
 
 	<StackLayout>
-		<AbsoluteLayout HorizontalOptions="Center" Margin="10,2,2,0">
-			<Label FontSize="Medium" x:Name="ChatUsername" Text="@{username}" />
-		</AbsoluteLayout>
+		<StackLayout Orientation="Horizontal" WidthRequest="400" HeightRequest="50" Margin="0,0,0,0">
+			<Label HorizontalOptions="CenterAndExpand" HeightRequest="30" FontSize="Medium" x:Name="ChatUsername" Text="@{username}" />
+			<ImageButton WidthRequest="45" HorizontalOptions="EndAndExpand" Clicked="RedirectToChatSettings" Source="arrow_right"/>
+		</StackLayout>
+
 		<ListView x:Name="MessageList" IsPullToRefreshEnabled="True" CachingStrategy="RecycleElementAndDataTemplate" Refreshing="Refresh"
 					  HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"
 					  ItemsSource="{Binding Source={x:Static local:MessagePage.Messages}}">
@@ -87,7 +89,7 @@
 								 WidthRequest="50" Source="filesend.png"/>
 					<Entry WidthRequest="287" TextChanged="MessageInput_TextChanged" Margin="10,0,0,0" x:Name="MessageInput"
 				   HeightRequest="50" FontSize="17" Completed="MessageInputDone" HorizontalOptions="Start"
-				   IsTextPredictionEnabled="True" PlaceholderColor="White" Placeholder="Message @"/>
+				   IsTextPredictionEnabled="True" PlaceholderColor="DarkGray" Placeholder="Message @"/>
 				</HorizontalStackLayout>
 			</Frame>
 		</HorizontalStackLayout>

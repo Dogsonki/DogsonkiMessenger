@@ -1,28 +1,17 @@
-﻿using Client.Utility;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Client.Networking.Packets;
 
-[Serializable]
-public class SearchModel
+public class SearchPacket
 {
-    [JsonProperty("login")]
+    [JsonProperty("nick")]
     public string Username { get; set; }
-    [JsonProperty("login_id")]
-    public int Id { get; set; }
-    [JsonProperty("type")]
-    public string Type { get; set; }
-    [JsonProperty("last_message_time")]
-    public DateTime LastMessageTime { get; set; }
+    [JsonProperty("search_groups")]
+    public bool SearchGroup { get; set; }
 
-    public bool isGroup => Type != "user";
-
-    [JsonConstructor]
-    public SearchModel(string name, int id, string type, double last_message_time)
+    public SearchPacket(string username, bool searchGroup)
     {
-        Username = name;
-        Id = id;
-        Type = type;
-        LastMessageTime = Essential.UnixToDateTime(last_message_time);
+        Username = username;
+        SearchGroup = searchGroup;
     }
 }

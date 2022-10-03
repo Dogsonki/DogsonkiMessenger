@@ -5,18 +5,31 @@ using System.Reflection;
 
 namespace Client.IO;
 
-public static class EmbededStorage
+public static class EmbeddedStorage
 {
-    public static T Read<T>(Type type, string Path)
+    public static T Read<T>(Type type, string path)
     {
         try
         {
             var assembly = IntrospectionExtensions.GetTypeInfo(type).Assembly;
-            Stream stream = assembly.GetManifestResourceStream(Path);
+            Stream? stream = assembly.GetManifestResourceStream(path);
+
+            if (stream is null)
+            {
+                throw new Exception($"Embedded file dose not exists {type} | {path}");
+            }
+
             using (var reader = new StreamReader(stream))
             {
-                var DesT = JsonConvert.DeserializeObject(reader.ReadToEnd());
-                return (T)((JObject)DesT).ToObject(typeof(T));
+                var file = JsonConvert.DeserializeObject(reader.ReadToEnd());
+                T? deserialized = ((JObject)file).ToObject<T>();
+
+                if (deserialized is null)
+                {
+                    throw new Exception("Deserialize Embedded File Null");
+                }
+
+                return deserialized;
             }
         }
         catch (Exception ex)

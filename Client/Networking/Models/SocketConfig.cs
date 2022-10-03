@@ -20,6 +20,6 @@ public class SocketConfig
 
     public static SocketConfig ReadConfig()
     {
-        return EmbededStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
+        return EmbeddedStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
     }
 }
