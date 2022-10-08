@@ -14,6 +14,7 @@ from ..network import functions
 
 @dataclass
 class ChatMessage:
+    id: int
     content: str
     sender: str
     time: datetime
@@ -25,7 +26,7 @@ class ChatMessage:
 def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
                                        number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u1.nick, time, sender_id, message_type, is_path FROM ((messages
+    cursor.execute("""SELECT messages.id, content, u1.nick, time, sender_id, message_type, is_path FROM ((messages
                       INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                       INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
@@ -41,7 +42,7 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
 def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
                                              number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
+    cursor.execute("""SELECT messages.id, content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
                       INNER JOIN users AS u ON groups_messages.sender_id = u.id)
                       INNER JOIN groups_ AS g ON groups_messages.group_id = g.id)
                       WHERE group_id = %s
@@ -90,12 +91,14 @@ class UserChats:
     last_message_time: datetime
     message: str
     message_type: str
+    sender: str
 
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserChats]]:
-    cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, m.time, m.content, m.message_type FROM (((users_link_table
+    cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, m.time, m.content, m.message_type, s.nick FROM ((((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id)
-                      LEFT JOIN messages as m ON users_link_table.message_id = m.id) 
+                      LEFT JOIN messages as m ON users_link_table.message_id = m.id)
+                      LEFT JOIN users AS s ON m.sender_id = s.id)
                       WHERE u1.login=%s OR u2.login=%s;""", (login, login))
     chats = cursor.fetchall()
     if chats is None:
@@ -107,7 +110,7 @@ def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserCha
 
 
 def get_user_avatar(cursor: CMySQLCursor, login_id: str) -> Union[Tuple, None]:
-    cursor.execute("""SELECT avatar FROM users
+    cursor.execute("""SELECT avatar, avatar_time FROM users
                       WHERE id=%s""", (login_id, ))
     avatar = cursor.fetchone()
     return avatar
@@ -237,7 +240,7 @@ def register_user(cursor: CMySQLCursor, login: str, password: str, nick: str):
 
 def set_user_avatar(cursor: CMySQLCursor, login: str, avatar: bytes):
     cursor.execute("""UPDATE users 
-                      SET avatar = %s 
+                      SET avatar = %s, avatar_time = NOW()
                       WHERE login = %s;""", (avatar, login))
 
 
@@ -306,7 +309,7 @@ def check_if_nick_exist(cursor: CMySQLCursor, nick: str) -> Union[Tuple, None]:
 
 
 def get_group_avatar(cursor: CMySQLCursor, group_id: int) -> Union[Tuple, None]:
-    cursor.execute("""SELECT avatar FROM groups_
+    cursor.execute("""SELECT avatar, avatar_time FROM groups_
                       WHERE id=%s""", (group_id, ))
     avatar = cursor.fetchone()
     return avatar
@@ -314,7 +317,7 @@ def get_group_avatar(cursor: CMySQLCursor, group_id: int) -> Union[Tuple, None]:
 
 def set_group_avatar(cursor: CMySQLCursor, group_id: int, avatar: bytes):
     cursor.execute("""UPDATE groups_ 
-                      SET avatar = %s 
+                      SET avatar = %s, avatar_time = NOW()
                       WHERE id = %s;""", (avatar, group_id))
 
 
@@ -341,3 +344,33 @@ def update_last_time_message_group(cursor: CMySQLCursor, group_id: int, message_
     cursor.execute("""UPDATE group_user_link_table
                       SET message_id=%s
                       WHERE group_id=%s;""", (message_id, group_id))
+
+
+def get_user_avatar_time(cursor: CMySQLCursor, user_id: int) -> datetime:
+    cursor.execute("""SELECT avatar_time FROM users
+                      WHERE id=%s""", (user_id,))
+    data = cursor.fetchone()
+    return data[0]
+
+
+def get_group_avatar_time(cursor: CMySQLCursor, group_id: int) -> datetime:
+    cursor.execute("""SELECT avatar_time FROM groups_
+                      WHERE id=%s""", (group_id,))
+    data = cursor.fetchone()
+    return data[0]
+
+
+def get_last_message_id(cursor: CMySQLCursor, sender_id: int, receiver_id):
+    cursor.execute("""SELECT id FROM messages
+                      WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
+                      ORDER BY messages.id DESC LIMIT 1;""", (sender_id, receiver_id, receiver_id, sender_id))
+    sql_data = cursor.fetchone()
+    return sql_data[0]
+
+
+def get_last_group_message_id(cursor: CMySQLCursor, group_id: int) -> int:
+    cursor.execute("""SELECT message_id FROM groups_messages
+                      WHERE group_id = %s
+                      ORDER BY id DESC LIMIT 1;""", (group_id, ))
+    sql_data = cursor.fetchone()
+    return sql_data[0]

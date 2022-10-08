@@ -17,6 +17,15 @@ class NormalChatroom(functions.Chatroom):
         self.receiver = receiver
         self.friends = True
         self.receiver_id = handling_sql.get_user_id(self.connection.db_cursor, self.receiver)
+        self.chat_actions.update({
+            MessageType.GET_LAST_CHAT_MESSAGE_ID: self.get_last_message_id
+        })
+        print(self.chat_actions)
+
+    def get_last_message_id(self, message: str):
+        last_message_id = handling_sql.get_last_message_id(self.connection.db_cursor, self.connection.login_id,
+                                                           self.receiver_id)
+        self.connection.send_message(last_message_id, MessageType.GET_LAST_CHAT_MESSAGE_ID)
 
     def send_last_messages(self, old: bool = False):
         message_history = handling_sql.get_last_30_messages_from_chatroom(self.connection.db_cursor,
@@ -32,15 +41,15 @@ class NormalChatroom(functions.Chatroom):
         message_ = message["message"].strip()
         message_type = message["message_type"]
         if message_ != "":
+            message_id = self.save_message_in_database(message_, message_type)
             receiver_connection = current_connections.get(self.receiver)
             if receiver_connection:
-                data = [{"user": self.connection.nick, "message": message_,
+                data = [{"user": self.connection.nick, "message": message_, "id": message_id,
                         "time": time.time(), "user_id": self.connection.login_id,
                          "is_group": False, "group_id": -1, "message_type": message_type}]
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-            self.save_message_in_database(message_, message_type)
 
-    def save_message_in_database(self, message: str, message_type: str):
+    def save_message_in_database(self, message: str, message_type: str) -> int:
         is_path = False if message_type == "text" else True
         if is_path:
             message = self._save_file(self.receiver_id, message)
@@ -50,10 +59,9 @@ class NormalChatroom(functions.Chatroom):
         if not self.friends:
             handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
             self.friends = True
-        else:
-            handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id,
-                                                  message_id)
-
+        handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id,
+                                              message_id)
+        return message_id
 
 
 def search_users(client: Client, message_data: dict):
@@ -112,14 +120,16 @@ def send_last_chats(client: Client, data: str):
                               "last_message_time": datetime.timestamp(i.last_message_time),
                               "type": "user",
                               "message_type": i.message_type,
-                              "message": i.message})
+                              "message": i.message,
+                              "sender": i.sender})
             else:
                 chats.append({"name": i.u2_nick,
                               "id": i.u2_id,
                               "last_message_time": datetime.timestamp(i.last_message_time),
                               "type": "user",
                               "message_type": i.message_type,
-                              "message": i.message})
+                              "message": i.message,
+                              "sender": i.sender})
 
     user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
     if user_group_chats:
@@ -152,7 +162,9 @@ class ClientMenu:
         MessageType.INIT_GROUP_CHAT: start_group_chatroom,
         MessageType.GET_GROUP_AVATAR: get_group_avatar,
         MessageType.SET_GROUP_AVATAR: set_group_avatar,
-        MessageType.LAST_CHATS: send_last_chats
+        MessageType.LAST_CHATS: send_last_chats,
+        MessageType.GET_USER_AVATAR_TIME: functions.get_user_avatar_time,
+        MessageType.GET_GROUP_AVATAR_TIME: functions.get_group_avatar_time
     }
 
     def __init__(self, client: Client):

@@ -46,11 +46,14 @@ def get_avatar(client: Client, group_id: int):
     try:
         if avatar[0]:
             avatar = str(base64.b64decode(avatar[0]))
+            avatar_time = avatar[1]
         else:
             avatar = " "
+            avatar_time = ""
     except (IndexError, TypeError):
         avatar = " "
-    client.send_message({"avatar": avatar, "group_id": group_id}, MessageType.GET_AVATAR)
+        avatar_time = ""
+    client.send_message({"avatar": avatar, "group_id": group_id, "avatar_time": avatar_time}, MessageType.GET_AVATAR)
 
 
 def set_avatar(client: Client, data: dict):
@@ -70,8 +73,13 @@ class GroupChatroom(functions.Chatroom):
             MessageType.ADD_TO_GROUP: self.add_to_group,
             MessageType.DELETE_FROM_GROUP: self.delete_from_group,
             MessageType.GET_GROUP_MEMBERS: self.send_group_members,
-            MessageType.GET_AVATAR: self.get_avatar
+            MessageType.GET_AVATAR: self.get_avatar,
+            MessageType.GET_LAST_GROUP_CHAT_MESSAGE_ID: self.get_last_chat_message_id
         })
+
+    def get_last_chat_message_id(self, message: str):
+        last_message_id = handling_sql.get_last_group_message_id(self.connection.db_cursor, self.group_id)
+        self.connection.send_message(last_message_id, MessageType.GET_LAST_GROUP_CHAT_MESSAGE_ID)
 
     def delete_from_group(self, message: dict):
         delete_from_group(self.connection, message)
@@ -95,21 +103,22 @@ class GroupChatroom(functions.Chatroom):
         message_ = message["message"].strip()
         message_type = message["message_type"]
         if message_ != "":
+            message_id = self.save_message_in_database(message_, message_type)
             for i in self.group_members:
                 if i.nick != self.connection.nick:
                     receiver_connection = current_connections.get(i.nick)
                     if receiver_connection:
-                        data = [{"user": self.connection.nick, "message": message_,
+                        data = [{"user": self.connection.nick, "message": message_, "id": message_id,
                                 "time": time.time(), "user_id": self.connection.login_id,
                                  "is_group": True, "group_id": self.group_id, "message_type": message_type}]
                         receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
-            self.save_message_in_database(message_, message_type)
 
-    def save_message_in_database(self, message: str, message_type: str):
+    def save_message_in_database(self, message: str, message_type: str) -> int:
         is_path = False if message_type == "text" else True
         if is_path:
             message = self._save_file(self.group_id, message)
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
-        handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id,
-                                                    self.connection.db_cursor.lastrowid)
+        message_id = self.connection.db_cursor.lastrowid
+        handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id, message_id)
+        return message_id

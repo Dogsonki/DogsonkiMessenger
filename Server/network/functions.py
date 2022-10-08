@@ -7,8 +7,18 @@ import time
 from PIL import Image
 import bcrypt
 
-from .connection import Client, MessageType
+from .connection import Client, MessageType, handling_sql
 from . import bot
+
+
+def get_user_avatar_time(client: Client, data: int):
+    u_time = handling_sql.get_user_avatar_time(client.db_cursor, data)
+    client.send_message(u_time, MessageType.GET_USER_AVATAR_TIME)
+
+
+def get_group_avatar_time(client: Client, data: int):
+    u_time = handling_sql.get_group_avatar_time(client.db_cursor, data)
+    client.send_message(u_time, MessageType.GET_GROUP_AVATAR_TIME)
 
 
 class Chatroom(metaclass=abc.ABCMeta):
@@ -25,7 +35,9 @@ class Chatroom(metaclass=abc.ABCMeta):
             MessageType.GET_OLD_MESSAGES: self.send_last_old_messages,
             MessageType.NEW_MESSAGE: self.on_new_message,
             MessageType.BOT_COMMAND: self.bot_command,
-            MessageType.GET_CHAT_FILE: self.send_image
+            MessageType.GET_CHAT_FILE: self.send_image,
+            MessageType.GET_USER_AVATAR_TIME: get_user_avatar_time,
+            MessageType.GET_GROUP_AVATAR_TIME: get_group_avatar_time
         }
 
     def init_chatroom(self):
@@ -55,7 +67,7 @@ class Chatroom(metaclass=abc.ABCMeta):
             for i in message_history:
                 data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
                         "user_id": i.sender_id, "is_group": is_group, "group_id": group_id,
-                        "message_type": i.message_type}
+                        "message_type": i.message_type, "id": i.id}
                 message_list.append(data)
             self.send_message(message_list, old)
 

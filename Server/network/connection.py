@@ -44,6 +44,10 @@ class MessageType(Enum):
     GET_CHAT_FILE = 21
     GET_GROUP_MEMBERS = 22
     DELETE_FROM_GROUP = 23
+    GET_USER_AVATAR_TIME = 24
+    GET_GROUP_AVATAR_TIME = 25
+    GET_LAST_CHAT_MESSAGE_ID = 26
+    GET_LAST_GROUP_CHAT_MESSAGE_ID = 27
 
 
 @dataclass
@@ -325,20 +329,27 @@ class Client(Connection):
         self.get_login_action()
 
     def set_avatar(self, avatar: str):
-        if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:  # todo test, avatar can have max 2mb
+        if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:
             avatar = base64.b64encode(bytes(avatar, "UTF-8"))
             handling_sql.set_user_avatar(self.db_cursor, self.login, avatar)
+            changed = 1
+        else:
+            changed = 0
+        self.send_message(changed, MessageType.CHANGE_AVATAR)
 
     def get_avatar(self, login_id: str):
         avatar = handling_sql.get_user_avatar(self.db_cursor, login_id)
         try:
             if avatar[0]:
                 avatar = str(base64.b64decode(avatar[0]))
+                avatar_time = avatar[1]
             else:
                 avatar = " "
+                avatar_time = " "
         except (IndexError, TypeError):
             avatar = " "
-        self.send_message({"avatar": avatar, "login_id": login_id}, MessageType.GET_AVATAR)
+            avatar_time = " "
+        self.send_message({"avatar": avatar, "login_id": login_id, "avatar_time": avatar_time}, MessageType.GET_AVATAR)
 
     def validate_login_data(self) -> bool:
         if 2 <= len(self.login) <= 50 and 2 <= len(self.password) <= 50:

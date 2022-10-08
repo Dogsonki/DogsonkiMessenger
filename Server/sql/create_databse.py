@@ -26,7 +26,8 @@ class CreateDatabase:
                                    password VARCHAR(150) NOT NULL,
                                    warnings INTEGER NOT NULL,
                                    is_banned BIT NOT NULL,
-                                   avatar MEDIUMBLOB
+                                   avatar MEDIUMBLOB,
+                                   avatar_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                                    );""")
 
     def create_users_link_table(self):
@@ -77,7 +78,8 @@ class CreateDatabase:
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS groups_ (
                                    id INTEGER PRIMARY KEY AUTO_INCREMENT,
                                    name VARCHAR(50),
-                                   avatar MEDIUMBLOB
+                                   avatar MEDIUMBLOB,
+                                   avatar_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                                    );""")
 
     def create_group_user_link_table(self):
