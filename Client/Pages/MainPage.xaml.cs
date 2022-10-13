@@ -1,8 +1,7 @@
-using Client.Models.UserType.Bindable;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Pages.TemporaryPages.GroupChat;
 using System.Collections.ObjectModel;
-using System.Text.Json;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 
@@ -11,7 +10,7 @@ namespace Client.Pages;
 public partial class MainPage : ContentPage
 {
     public static MainPage Current;
-    public static ObservableCollection<AnyListBindable> LastChats { get; set; } = new ObservableCollection<AnyListBindable>();
+    public static ObservableCollection<BindableLastChat> LastChats { get; set; } = new ObservableCollection<BindableLastChat>();
 
     public MainPage()
     {
@@ -24,9 +23,36 @@ public partial class MainPage : ContentPage
         SocketCore.SendCallback(AddLastChatsCallback," ", Token.LAST_CHATS);
     }
 
+    public static void AddLastChat(User user)
+    {
+        /*
+        if (LastChats.Count > 0)
+        {
+            if(!LastChats.Any(x => x.Id == user.UserId && !x.IsGroup))
+            {
+                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new AnyListBindable(user, new Command(() => User.OpenChat(user)))));
+            }
+        }
+        */
+    }
+
+    public static void AddLastChat(Group group)
+    {
+        /*
+        if (LastChats.Count > 0)
+        {
+            if (!LastChats.Any(x => x.Id == group.Id && x.IsGroup))
+            {
+                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new AnyListBindable(group, new Command(() => Group.OpenChat(group)))));
+            }
+        }
+        */
+    }
+
+
     public static void AddLastChatsCallback(object packet)
     {
-        List<AnyListBindable> bindable = new List<AnyListBindable>();
+        List<BindableLastChat> bindable = new List<BindableLastChat>();
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -44,21 +70,22 @@ public partial class MainPage : ContentPage
 
             foreach (var chat in lastChats)
             {
-                if (bindable.Find(x => x.Id == chat.Id) != null) continue;
+                BindableLastChat bindableLastChat = new BindableLastChat(chat.Name, chat.Type,
+                    chat.LastMessage, chat.LastMessageTime, chat.MessageType, chat.Id, chat.Sender);
 
-                if(!chat.isGroup)
+                if (!chat.isGroup)
                 {       
-                    User user = User.CreateOrGet(chat.Username, chat.Id);
-                    bindable.Add(new AnyListBindable(user,new Command(() => User.OpenChat(user))));
+                    User user = User.CreateOrGet(chat.Name, chat.Id);
+                    bindable.Add(bindableLastChat);
                 }
                 else
                 {
-                    Group group = Group.CreateOrGet(chat.Username, chat.Id);
-                    bindable.Add(new AnyListBindable(group, new Command(() => Group.OpenChat(group))));
+                    Group group = Group.CreateOrGet(chat.Name, chat.Id);
+                    bindable.Add(bindableLastChat);
                 }
             }
 
-            foreach (AnyListBindable bind in bindable)
+            foreach (BindableLastChat bind in bindable)
             {
                 LastChats.Add(bind);
             }

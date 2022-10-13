@@ -2,7 +2,7 @@
 using Client.Pages;
 using System.ComponentModel;
 
-namespace Client.Models.UserType.Bindable;
+namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
 public class LocalUser : BindableObject

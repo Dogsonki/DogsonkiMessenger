@@ -1,11 +1,6 @@
-﻿using Client.IO;
-using Client.Models.UserType.Bindable;
-using Client.Networking.Model;
+﻿using Client.Networking.Model;
 using Client.Networking.Packets;
-using Client.Pages;
-using Client.Utility;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Client;
 
@@ -37,6 +32,9 @@ public enum Token : int
     CHAT_IMAGE_REQUEST = 21,
     GET_GROUP_INFO = 22,
     GROUP_USER_KICK = 23,
+    GET_LAST_MESSAGE_TIME = 26,
+    GROUP_GET_LAST_MESSAGE_TIME = 27,
+    GET_INIT_MESSAGES = 28
 }
 
 /// <summary>
@@ -78,41 +76,11 @@ public static class Tokens
             case Token.ERROR:
                 Debug.Error(packet.Data + "TOKEN -2");
                 break;
-            case Token.CHAT_MESSAGE:
-                MessagePage.AddMessage(packet);
-                break;
-            case Token.GET_MORE_MESSAGES:
-                MessagePage.PrependNewMessages(packet);
-                break;
-            case Token.SESSION_INFO:
-                Session? session = ((JObject)packet.Data).ModelCast<Session>();
-
-                if (session is null)
-                    return;
-
-                Session.OverwriteSession(session);
-                break;
-            case Token.LOGIN_SESSION:
-                LoginCallbackPacket? login = ((JObject)packet.Data).ModelCast<LoginCallbackPacket>(); 
-
-                if (login is null)
-                    break;
-
-                if (login.Token == "1")
-                {
-                    LocalUser.Login(login.Username, login.ID, login.Email);
-                }
-                else if (login.Token == "-1")
-                {
-                    LoginPage.Current.message.ShowError("User is banned");
-                }
-
-                break;
             case Token.USER_AVATAR_REQUEST:
                 UserImageRequestPacket.ProcessImage(packet);
                 break;
             default:
-                Debug.Write("TOKEN_UNRECOGNIZED: " + packet.Data);
+                Debug.Write($"TOKEN_UNRECOGNIZED: {packet.Token} {packet.Data}");
                 break;
         }
     }

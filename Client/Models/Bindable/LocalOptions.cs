@@ -1,4 +1,4 @@
-﻿namespace Client.Models.UserType;
+﻿namespace Client.Models.Bindable;
 
 public class LocalOptions
 {

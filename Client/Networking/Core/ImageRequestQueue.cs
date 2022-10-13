@@ -1,4 +1,4 @@
-﻿using Client.Models.UserType.Bindable;
+﻿using Client.Models.Bindable;
 using Client.Networking.Models;
 using Client.Networking.Packets;
 
@@ -18,13 +18,11 @@ internal static class ImageRequestQueue
 
     public static void RemoveRequest(ChatMessage message)
     {
-        Debug.Write("Removing request");
         ImageRequestModel? model = _queue.Find(x => x.Message == message);
         if(model is not null) _queue.Remove(model);
 
         if (_queue.Count > 0)
         {
-            Debug.Write("Adding next image to callback");
             RequestImageCallback(_queue.Last());
         }
     }
@@ -33,7 +31,6 @@ internal static class ImageRequestQueue
     {
         if (!RequestedCallback.IsAlreadyQueued(Token.CHAT_IMAGE_REQUEST))
         {
-            Debug.Write("Sending image with callback");
             SocketCore.SendCallback(model.Message.GetImage, model.Packet, Token.CHAT_IMAGE_REQUEST);
         }
     }

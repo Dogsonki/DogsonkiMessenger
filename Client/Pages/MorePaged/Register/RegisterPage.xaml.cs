@@ -1,4 +1,3 @@
-using Client.Models;
 using Client.Networking.Core;
 using Client.Pages.Helpers;
 using Client.Pages.Register;

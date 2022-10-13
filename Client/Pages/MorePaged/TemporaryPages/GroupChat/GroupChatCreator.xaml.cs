@@ -1,4 +1,4 @@
-using Client.Models.UserType.Bindable;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets;

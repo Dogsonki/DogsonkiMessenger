@@ -1,21 +1,27 @@
-﻿using Client.IO;
-using Client.Networking.Core;
+﻿using Client.Networking.Core;
 using System.ComponentModel;
-using Android.Provider;
+using Client.Utility;
 using Client.Networking.Packets;
+using Client.IO.Cache;
+using Client.IO.Cache.Models;
 
-namespace Client.Models.UserType.Bindable;
+namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
 public class ChatMessage : BindableObject
 {
     public User BindedUser { get; init; }
     
-    private DateTime Time { get; init; }
+    public DateTime Time { get; init; }
 
     public bool IsImage { get; } = false;
 
     public bool IsText { get; }
+
+    public long TimeInTicks
+    {
+        get => Time.Ticks;
+    }
 
     public ImageSource Avatar
     {
@@ -37,7 +43,7 @@ public class ChatMessage : BindableObject
         }
     }
 
-    public string textContent;
+    private string textContent;
     public string? TextContent
     {
         get => textContent;
@@ -47,6 +53,8 @@ public class ChatMessage : BindableObject
             OnPropertyChanged(nameof(TextContent));
         }
     }
+
+    public uint MessageId { get; init; }
 
     private string Path { get; set; }
 
@@ -60,10 +68,14 @@ public class ChatMessage : BindableObject
         }
     }
 
-    public ChatMessage(User user,string message)
+    public ChatMessage(User user, string message)
     {
-        BindedUser = user;
         TextContent = message;
+        BindedUser = user;
+        Time = DateTime.Now;
+
+        IsText = true;
+        IsImage = false;
     }
 
     public ChatMessage(string message)
@@ -84,12 +96,26 @@ public class ChatMessage : BindableObject
 
         IsText = false;
         IsImage = true;
-    } 
+    }
 
-    public ChatMessage(MessagePacket packet)
+    public ChatMessage(ChatMessageCacheModel cachedMessage)
     {
-        Debug.Write($"Chat message {packet.MessageType}");
+        BindedUser = User.GetUser(cachedMessage.UserId);
+
+        if (cachedMessage.IsText)
+        {
+            IsText = true;
+            IsImage = false;
+
+            Time = new DateTime((long)cachedMessage.Date);
+            TextContent = cachedMessage.Message;
+        }
+    }
+
+    public ChatMessage(MessagePacket packet, bool checkCache = true, bool isNewMessage = false, bool isCacheAble = false)
+    {
         BindedUser = User.CreateOrGet(packet.Username,packet.UserId);
+
 
         if (packet.MessageType == "text") 
         {
@@ -99,27 +125,41 @@ public class ChatMessage : BindableObject
         }
         else
         {
-            Path = packet.ContentString.Substring(9); // 9 to remove server folder path
-            byte[] CacheBuffer = Cache.ReadCache(Path);
+            IsImage = true;
+            IsText = false;
 
-            if(CacheBuffer is null || CacheBuffer.Length == 0)
+
+            //Check cache only if getting messages when entering to chat
+            if (checkCache)
             {
-                Debug.Write("Requesting image");
+                Path = packet.ContentString.Substring(9); // 9 to remove server folder path
+                byte[] CacheBuffer = Cache.ReadCache(Path);
+
+                if (CacheBuffer is null || CacheBuffer.Length == 0)
+                {
+                    Logger.Push("Cache buffer is null", TraceType.Func, LogLevel.Warning);
+
+                    ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
+                    SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
+                    ImageRequestQueue.AddRequest(imagePacket, this);
+                    return;
+                }
+
+                ImageSource src = ImageSource.FromStream(() => new MemoryStream(CacheBuffer));
+                MainThread.BeginInvokeOnMainThread(() => { Image = src; });
+            }
+            else if(!checkCache && !isNewMessage)
+            {
                 ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
                 SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
-                ImageRequestQueue.AddRequest(imagePacket,this);
+                ImageRequestQueue.AddRequest(imagePacket, this);
             }
             else
             {
-                ImageSource src = ImageSource.FromStream(() => new MemoryStream(CacheBuffer));
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Image = src;
-                });
+                ImageSource imageSrc =
+                    ImageSource.FromStream(() => new MemoryStream(packet.Content));
+                MainThread.BeginInvokeOnMainThread(() => Image = imageSrc);
             }
-
-            IsImage = true;
-            IsText = false;
         }
 
         Time = packet.Time;
@@ -127,7 +167,6 @@ public class ChatMessage : BindableObject
 
     public void GetImage(object packet)
     {
-        Debug.Write("Getting image, and removing it from queue");
         ImageRequestQueue.RemoveRequest(this);
 
         string bufferString = (string)packet;
@@ -137,7 +176,6 @@ public class ChatMessage : BindableObject
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Debug.Write("GEt image> >>> ");
             Image = src;
         });
 

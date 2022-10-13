@@ -7,6 +7,8 @@ namespace Client.Networking.Core;
 
 public class SocketCore : Connection
 {
+    private static readonly Dictionary<Token, Action<object>> OnTokenReceived = new Dictionary<Token, Action<object>>();
+
     public static async void Start() 
     {
         await Connect().ContinueWith((_) =>
@@ -18,7 +20,6 @@ public class SocketCore : Connection
     }
 
     private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
-
 
     private static string LongBuffer = "";
 
@@ -38,9 +39,11 @@ public class SocketCore : Connection
 
         if (packet is null) return;
 
-        if (packet.Token == (int)Token.CHAT_MESSAGE)
+        //Don't convert packet.Data to JObject
+        if (OnTokenReceived.ContainsKey((Token)packet.Token))
         {
-            ReadRawBuffer(packet);
+            Logger.Push($"Invoking token action {packet.Token}", TraceType.Func, LogLevel.Debug);
+            OnTokenReceived[(Token)packet.Token].Invoke(Convert.ToString(packet.Data));
             return;
         }
 
@@ -87,7 +90,7 @@ public class SocketCore : Connection
 
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
 
-                        ProcessBuffer (buff);
+                        ProcessBuffer(buff);
                     }
 
                     Stream.Flush();
@@ -115,7 +118,7 @@ public class SocketCore : Connection
     {
         while (true)
         {
-            if (Stream.CanWrite && SocketQueue.CanSend())
+            if (Stream.CanWrite && SocketQueue.CanSend() && AbleToSend())
             {
                 SocketQueue.IsSending = true;
                 SocketPacket packet = SocketQueue.Queue.Dequeue();
@@ -124,7 +127,8 @@ public class SocketCore : Connection
                 {
                     if (packet is null) throw new Exception("SEND_PACKET_NULL");
 
-                    if (!AbleToSend()) return;
+                    Debug.Write($"{packet.Data} {packet.Token}");
+
                     byte[] buffer = packet.GetPacked();
 
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
@@ -138,7 +142,6 @@ public class SocketCore : Connection
             }
             Thread.Sleep(5);
         }
-
     }
 
     public static bool SendCallback(Action<object> callback, object sendingData, Token token, bool sendAbleOnce = true)
@@ -171,11 +174,8 @@ public class SocketCore : Connection
             return true;
         }
 
-        Task.Run(async () =>
-        {
-            SocketPacket packet = new SocketPacket(data, token);
-            SocketQueue.Add(packet);
-        });
+        SocketPacket packet = new SocketPacket(data, token);
+        SocketQueue.Add(packet);
 
         return true;
     }
@@ -184,12 +184,26 @@ public class SocketCore : Connection
     {
         if (!AbleToSend()) return false;
 
-        Task.Run(async () =>
-        {
-            SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
-            SocketQueue.Add(packet);
-        });
+        SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
+        SocketQueue.Add(packet);
 
         return true;
+    }
+
+    /// <summary>
+    /// Invokes function when client received specific token from server
+    /// </summary>
+    public static void OnToken(Token token, Action<object> callback)
+    {
+        if (OnTokenReceived.ContainsKey(token))
+        {
+            Logger.Push("Changing action on token received",TraceType.Func,LogLevel.Warning);
+
+            OnTokenReceived[token] = callback;
+        }
+        else
+        {
+            OnTokenReceived.Add(token,callback);
+        }
     }
 }

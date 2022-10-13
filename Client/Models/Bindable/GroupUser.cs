@@ -1,4 +1,4 @@
-﻿namespace Client.Models.UserType.Bindable;
+﻿namespace Client.Models.Bindable;
 
 public class GroupUser
 {

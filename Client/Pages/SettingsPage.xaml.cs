@@ -1,5 +1,5 @@
-using Client.IO;
-using Client.Models.UserType.Bindable;
+using Client.IO.Cache;
+using Client.Models.Bindable;
 using Client.Pages.Settings;
 
 namespace Client.Pages;

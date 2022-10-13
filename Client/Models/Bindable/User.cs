@@ -1,9 +1,9 @@
-﻿using Client.IO;
+﻿using Client.IO.Cache;
 using Client.Networking.Core;
-using Client.Pages;
 using System.ComponentModel;
+using Client.Utility;
 
-namespace Client.Models.UserType.Bindable;
+namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
 public class User : BindableObject
@@ -103,15 +103,6 @@ public class User : BindableObject
 
     }
 
-    public static void OpenChat(User user)
-    {
-        SocketCore.Send($"{user.Username}", Token.INIT_CHAT);
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            StaticNavigator.Push(new MessagePage(user));
-        });
-    }
-
     /// <summary>
     /// Sets avatar to user
     /// </summary>
@@ -121,12 +112,16 @@ public class User : BindableObject
     {
         if (buffer is not null && buffer.Length > 0)
         {
+            Cache.RemoveFromCache($"user_avatar{UserId}");
             ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Avatar = src;
             });
             Cache.SaveToCache(buffer,$"user_avatar{UserId}");
+
+            Logger.Push($"User avatar set {UserId}",TraceType.Func,LogLevel.Debug);
+
             return true;
         }
 

@@ -30,8 +30,11 @@ public class MessagePacket
     [JsonIgnore]
     public DateTime Time;
 
+    [JsonIgnore]
+    public uint MessageId;
+
     [JsonConstructor]
-    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id)
+    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id, uint id)
     {
         ContentString = Encoding.UTF8.GetString(message);
         Content = message;
@@ -41,6 +44,7 @@ public class MessagePacket
         IsGroup = is_group;
         GroupId = group_id;
         Username = username;
+        MessageId = id;
     }
 
     public MessagePacket(byte[] imageBuffer, string extension)

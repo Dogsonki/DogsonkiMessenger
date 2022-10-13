@@ -1,6 +1,11 @@
 ﻿using Client.IO.Interfaces;
+using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Packets;
+using Client.Pages;
+using Client.Utility;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Client.IO;
 
@@ -41,10 +46,39 @@ public class Session : IStorage
             {
                 if (session.SessionKey != string.Empty)
                 {
-                    SocketCore.Send(session, Token.SESSION_INFO);
+                    SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
+                    SocketCore.SendCallback(GetSessionInfoCallback,session, Token.SESSION_INFO);
                 }
             }
         }
 #endif
+    }
+
+    private static void GetSessionInfoCallback(object packet)
+    {
+        Session? session = JsonConvert.DeserializeObject<Session?>((string)packet);
+
+        if (session is null)
+            return;
+
+        OverwriteSession(session);
+    }
+
+    private static void LoginBySessionCallback(object packet)
+    {
+        Debug.Write("LOGINN ?");
+        LoginCallbackPacket? login = JsonConvert.DeserializeObject<LoginCallbackPacket>((string)packet);
+
+        if (login is null)
+            return;
+
+        if (login.Token == "1")
+        {
+            LocalUser.Login(login.Username, login.ID, login.Email);
+        }
+        else if (login.Token == "-1")
+        {
+            LoginPage.Current.message.ShowError("User is banned");
+        }
     }
 }

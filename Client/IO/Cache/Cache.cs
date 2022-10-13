@@ -1,6 +1,7 @@
-﻿using Client.Utility;
+﻿using System.Text;
+using Client.Utility;
 
-namespace Client.IO;
+namespace Client.IO.Cache;
 
 internal class Cache
 {
@@ -23,28 +24,44 @@ internal class Cache
 
             if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
 
+            Task.Run(async () =>
+            {
+                PermissionStatus status = await Permissions.RequestAsync<Permissions.StorageRead>();
+            });
 
             if (obj.GetType() == typeof(byte[]))
             {
 #if ANDROID
-                Task.Run(async () =>
-                {
-                    PermissionStatus status = await Permissions.RequestAsync<Permissions.StorageRead>();
-                });
 
                 if (!Directory.Exists(CachePath))
                 {
                     Directory.CreateDirectory(CachePath);
                 }
 
-                File.WriteAllBytes(CachePath + name, (byte[])obj);
+                Task.Run(async () =>
+                {
+                    await File.WriteAllBytesAsync(CachePath + name, (byte[])obj);
+                });
 #endif
+            }
+            else if(obj.GetType() == typeof(string))
+            {
+                Task.Run(async() =>
+                {
+                    byte[] encoded = Encoding.UTF8.GetBytes((string)obj);
+                    await File.WriteAllBytesAsync(CachePath + name, encoded);
+                });
             }
         }
         catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
+    }
+
+    public static void RemoveFromCache(string name)
+    {
+        File.Delete(CachePath+name);
     }
 
     public static byte[] ReadCache(string name)
@@ -56,15 +73,14 @@ internal class Cache
                 Directory.CreateDirectory(CachePath);
             }
 
-            string cachePath = CachePath;
-            if (!File.Exists(cachePath + name))
+            if (!File.Exists(CachePath + name))
             {
                 Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
                 return null;
             }
             Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
 
-            return File.ReadAllBytes(cachePath + name);
+            return File.ReadAllBytes(CachePath + name);
         }
         catch (Exception ex)
         {
@@ -78,23 +94,23 @@ internal class Cache
     {
         try
         {
-            Dictionary<string,long> Files = new Dictionary<string, long>();
+            Dictionary<string, long> Files = new Dictionary<string, long>();
             string[] CacheFiles = Directory.GetFiles(CachePath);
             foreach (var file in CacheFiles)
             {
                 Debug.Write($"Adding {file} to check");
-                Files.Add(file,new FileInfo(file).Length);
+                Files.Add(file, new FileInfo(file).Length);
             }
 
             var l = Files.OrderBy(i => i.Value);
 
-            for (int i = Math.Abs(l.Count()/2) - 1; i >= 0; i--)
+            for (int i = Math.Abs(l.Count() / 2) - 1; i >= 0; i--)
             {
                 Debug.Write($"Deleting {Files.ElementAt(i).Key}");
                 File.Delete(l.ElementAt(i).Key);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
@@ -113,13 +129,13 @@ internal class Cache
         long sumSize = 0;
         string[] CacheFiles = Directory.GetFiles(CachePath);
 
-        foreach(var file in CacheFiles)
+        foreach (var file in CacheFiles)
         {
             long size = new FileInfo(file).Length;
             sumSize += size;
         }
 
-        if(sumSize > MAX_CACHE_SIZE)
+        if (sumSize > MAX_CACHE_SIZE)
         {
             return false;
         }
@@ -138,7 +154,7 @@ internal class Cache
                 File.Delete(file);
             }
 
-            Logger.Push($"DELETED {CacheFiles.Length} CACHE FILES",TraceType.Func,LogLevel.Warning);
+            Logger.Push($"DELETED {CacheFiles.Length} CACHE FILES", TraceType.Func, LogLevel.Warning);
         }
         catch (Exception ex)
         {

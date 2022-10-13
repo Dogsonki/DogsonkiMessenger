@@ -1,4 +1,4 @@
-﻿namespace Client.Models.UserType.Bindable;
+﻿namespace Client.Models.Bindable;
 
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
@@ -61,6 +61,8 @@ public class AnyListBindable : BindableObject
             return BindedUser.Avatar;
         }
     }
+
+    public bool IsGroup => BindedGroup is not null;
 
     public AnyListBindable(User user, Command input = null)
     {

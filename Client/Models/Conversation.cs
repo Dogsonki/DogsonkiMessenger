@@ -1,8 +1,9 @@
 ﻿#nullable enable
 
-using Client.Models.UserType.Bindable;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Packets.Models;
+using Client.Pages;
 using Newtonsoft.Json;
 
 namespace Client.Models;
@@ -66,5 +67,36 @@ public class Conversation
 
             _group.AddUser(groupUser);
         }
+    }
+
+    public static void OpenChat(User user)
+    {
+        MessagePage chatPage = new MessagePage(user);
+
+        SocketCore.Send(user.Username, Token.INIT_CHAT);
+        SocketCore.SendCallback(chatPage.GetChatMessagesCallback, " ", Token.GET_INIT_MESSAGES);
+
+        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.GetChatMessagesCallback);
+        SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            StaticNavigator.Push(chatPage);
+        });
+    }
+
+    public static void OpenChat(Group group)
+    {
+        MessagePage chatPage = new MessagePage(group);
+
+        SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
+
+        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.GetChatMessagesCallback);
+        SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            StaticNavigator.Push(chatPage);
+        });
     }
 }

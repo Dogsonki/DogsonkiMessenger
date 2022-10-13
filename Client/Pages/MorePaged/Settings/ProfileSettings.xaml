@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.Settings.ProfileSettings"
              Title="ProfileSettings"
-			 xmlns:user="clr-namespace:Client.Models.UserType.Bindable"
+			 xmlns:user="clr-namespace:Client.Models.Bindable"
 			 BackgroundColor="#121212">
 
 	<ContentPage.BindingContext>

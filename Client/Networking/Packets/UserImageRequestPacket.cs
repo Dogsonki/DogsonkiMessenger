@@ -1,5 +1,5 @@
-﻿using Client.IO;
-using Client.Models.UserType.Bindable;
+﻿using Client.IO.Cache;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
 using Newtonsoft.Json;
@@ -43,8 +43,10 @@ public class UserImageRequestPacket
             SocketCore.Send("buffer");
             byte[] buffer;
             ImageSource imgS = GetImageSource(out buffer, img.ImageData);
+
             Cache.SaveToCache(buffer, "user_avatar" + img.UserId);
-            MainThread.BeginInvokeOnMainThread(() => user.Avatar = imgS);
+
+            user.SetAvatar(buffer);
         }
         catch(Exception ex)
         {

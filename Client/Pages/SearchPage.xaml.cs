@@ -1,6 +1,7 @@
-using Client.Models.UserType.Bindable;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using System.Collections.ObjectModel;
+using Client.Models;
 using Client.Networking.Packets;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
@@ -55,12 +56,12 @@ public partial class SearchPage : ContentPage
                 if(!user.isGroup)
                 {
                     User _ = User.CreateOrGet(user.Username, user.Id);
-                    UsersFound.Add(new AnyListBindable(_,new Command(() => User.OpenChat(_))));
+                    UsersFound.Add(new AnyListBindable(_,new Command(() => Conversation.OpenChat(_))));
                 }
                 else
                 {
                     Group _ = Group.CreateOrGet(user.Username, user.Id);
-                    UsersFound.Add(new AnyListBindable(_,new Command(() => Group.OpenChat(_))));
+                    UsersFound.Add(new AnyListBindable(_,new Command(() => Conversation.OpenChat(_))));
                 }
             });
         }

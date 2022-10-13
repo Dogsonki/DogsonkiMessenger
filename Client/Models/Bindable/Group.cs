@@ -1,9 +1,8 @@
 ﻿using Client.Networking.Core;
-using Client.Pages;
 using System.ComponentModel;
-using Client.IO;
+using Client.IO.Cache;
 
-namespace Client.Models.UserType.Bindable;
+namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
 public class Group : BindableObject
@@ -69,14 +68,4 @@ public class Group : BindableObject
     {
         Users.Add(groupUser);
     }
-
-    public static void OpenChat(Group group)
-    {
-        SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            StaticNavigator.Push(new MessagePage(group));
-        });
-    }
-
 }

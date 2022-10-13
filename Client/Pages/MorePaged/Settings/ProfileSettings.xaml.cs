@@ -1,5 +1,5 @@
-using Client.IO;
-using Client.Models.UserType.Bindable;
+using Client.IO.Cache;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Utility;
 
@@ -26,14 +26,19 @@ public partial class ProfileSettings : ContentPage
 
             byte[] ImageBuffer;
 
+            Cache.RemoveFromCache("user_avatar"+LocalUser.id);
+
             Stream stream = await image.OpenReadAsync();
             ImageBuffer = stream.StreamToBuffer();
 
             SocketCore.Send(ImageBuffer, Token.CHANGE_AVATAR);
 
-            LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                LocalUser.Current.Avatar = ImageSource.FromStream(() => new MemoryStream(ImageBuffer));
+            });
 
-            Cache.SaveToCache(ImageBuffer, "avatar" + LocalUser.id);
+            Cache.SaveToCache(ImageBuffer, "user_avatar" + LocalUser.id);
 
             stream.Close();
         }

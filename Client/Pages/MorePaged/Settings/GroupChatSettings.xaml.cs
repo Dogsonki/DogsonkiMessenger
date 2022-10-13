@@ -1,5 +1,5 @@
 using Client.Models;
-using Client.Models.UserType.Bindable;
+using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Utility;
 
