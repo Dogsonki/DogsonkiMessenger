@@ -31,7 +31,7 @@ internal static class ImageRequestQueue
     {
         if (!RequestedCallback.IsAlreadyQueued(Token.CHAT_IMAGE_REQUEST))
         {
-            SocketCore.SendCallback(model.Message.GetImage, model.Packet, Token.CHAT_IMAGE_REQUEST);
+            SocketCore.SendCallback(model.Packet, Token.CHAT_IMAGE_REQUEST, model.Message.GetImage);
         }
     }
 }

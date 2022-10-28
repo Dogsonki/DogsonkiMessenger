@@ -29,7 +29,7 @@ public partial class ConfirmEmailCode : ContentPage
         {
             return;
         }
-        SocketCore.SendCallback(CodeSended, ((Entry)sender).Text, Token.REGISTER, false);
+        SocketCore.SendCallback(((Entry)sender).Text, Token.REGISTER, CodeSended,false);
     }
 
     private Label ErrorText = new Label()

@@ -94,13 +94,14 @@ public class User : BindableObject
         {
             byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar" + id);
 
+            SocketCore.SendCallback(UserId, Token.GET_USER_AVATAR_TIME, (object _) => Debug.Write("Data: " + _));
+
             if (!SetAvatar(avatarCacheBuffer))
             {
                 Debug.Write($"Cache avatar dose not exists {Username}:{UserId}");
                 SocketCore.Send(id, Token.USER_AVATAR_REQUEST);
             }
         }
-
     }
 
     /// <summary>
@@ -114,10 +115,12 @@ public class User : BindableObject
         {
             Cache.RemoveFromCache($"user_avatar{UserId}");
             ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
+
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 Avatar = src;
             });
+
             Cache.SaveToCache(buffer,$"user_avatar{UserId}");
 
             Logger.Push($"User avatar set {UserId}",TraceType.Func,LogLevel.Debug);

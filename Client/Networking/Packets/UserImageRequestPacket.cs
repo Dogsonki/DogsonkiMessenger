@@ -23,7 +23,6 @@ public class UserImageRequestPacket
 
     public static void ProcessImage(SocketPacket packet)
     {
-        SocketCore.Send("process");
         try
         {
             UserImageRequestPacket? img = packet.ModelCast<UserImageRequestPacket>();
@@ -40,12 +39,12 @@ public class UserImageRequestPacket
                 SocketCore.Send("user image null");
                 return;
             }
-            SocketCore.Send("buffer");
-            byte[] buffer;
-            ImageSource imgS = GetImageSource(out buffer, img.ImageData);
+
+            byte[] buffer = GetImageBuffer(img.ImageData);
 
             Cache.SaveToCache(buffer, "user_avatar" + img.UserId);
 
+            AvatarCacheStorage.SaveAvatarCache(DateTime.Now.Ticks, img.UserId);
             user.SetAvatar(buffer);
         }
         catch(Exception ex)
@@ -61,5 +60,13 @@ public class UserImageRequestPacket
         byte[] imgBuffer = Convert.FromBase64String(avat);
         buffer = imgBuffer;
         return ImageSource.FromStream(() => new MemoryStream(imgBuffer));
+    }
+
+    public static byte[] GetImageBuffer(string imageBuffer)
+    {
+        string avat = imageBuffer.Substring(2);
+        avat = avat.Substring(0, avat.Length - 1);
+        byte[] imgBuffer = Convert.FromBase64String(avat);
+        return imgBuffer;
     }
 }

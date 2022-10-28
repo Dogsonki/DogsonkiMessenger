@@ -22,7 +22,7 @@ public partial class SearchPage : ContentPage
         SearchInput.Text = preInputText;
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(ParseFound, new SearchPacket(preInputText, true), Token.SEARCH_USER);
+        SocketCore.SendCallback(new SearchPacket(preInputText, true), Token.SEARCH_USER, ParseFound);
     }
 
     private void SearchPressed(object sender, EventArgs e)
@@ -33,7 +33,7 @@ public partial class SearchPage : ContentPage
 
         if (!string.IsNullOrEmpty(input) && input.Length > 3)
         {
-            SocketCore.SendCallback(ParseFound, new SearchPacket(input,true), Token.SEARCH_USER);
+            SocketCore.SendCallback(new SearchPacket(input,true), Token.SEARCH_USER, ParseFound);
         }
     }
 

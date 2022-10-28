@@ -28,7 +28,7 @@ public class Conversation
         _group = group;
         IsGroupConversation = true;
 
-        SocketCore.SendCallback(GroupChatInfoCallback, " ", Token.GET_GROUP_INFO, false);
+        SocketCore.SendCallback(" ", Token.GET_GROUP_INFO, GroupChatInfoCallback, false);
 
         Current = this;
     }
@@ -73,10 +73,12 @@ public class Conversation
     {
         MessagePage chatPage = new MessagePage(user);
 
-        SocketCore.Send(user.Username, Token.INIT_CHAT);
-        SocketCore.SendCallback(chatPage.GetChatMessagesCallback, " ", Token.GET_INIT_MESSAGES);
+        MessagePage.Messages.Clear();
 
-        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.GetChatMessagesCallback);
+        SocketCore.Send(user.Username, Token.INIT_CHAT);
+        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, chatPage.GetChatMessagesCallback);
+
+        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.RealTimeMessageCallback);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
 
         MainThread.BeginInvokeOnMainThread(() =>

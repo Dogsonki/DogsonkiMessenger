@@ -20,7 +20,7 @@ public partial class MainPage : ContentPage
 
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(AddLastChatsCallback," ", Token.LAST_CHATS);
+        SocketCore.SendCallback(" ", Token.LAST_CHATS, AddLastChatsCallback);
     }
 
     public static void AddLastChat(User user)

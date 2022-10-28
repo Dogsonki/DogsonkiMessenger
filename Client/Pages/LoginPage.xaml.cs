@@ -40,7 +40,7 @@ public partial class LoginPage : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback(LoginCallback, new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN))
+        if (!SocketCore.SendCallback(new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN, LoginCallback))
         {
             message.ShowError("Unable to connect to the server");
             return;

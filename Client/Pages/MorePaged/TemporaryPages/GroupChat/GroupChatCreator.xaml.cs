@@ -129,7 +129,7 @@ public partial class GroupChatCreator : ContentPage
             return;
         }
 
-        SocketCore.SendCallback(SearchCallback, new SearchPacket(entry.Text,false), Token.SEARCH_USER);
+        SocketCore.SendCallback(new SearchPacket(entry.Text,false), Token.SEARCH_USER, SearchCallback);
     }
 
     private void SearchCallback(object packet)
@@ -207,6 +207,6 @@ public partial class GroupChatCreator : ContentPage
             }
         }
 
-        SocketCore.SendCallback(CreateGroupCallback, new GroupChatCreatePacket(name,LocalUser.UserRef.UserId, Ids.ToArray()),Token.GROUP_CHAT_CREATE);
+        SocketCore.SendCallback( new GroupChatCreatePacket(name,LocalUser.UserRef.UserId, Ids.ToArray()),Token.GROUP_CHAT_CREATE, CreateGroupCallback);
     }
 }
