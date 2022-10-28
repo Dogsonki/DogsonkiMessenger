@@ -104,14 +104,13 @@ class GroupChatroom(functions.Chatroom):
         message_type = message["message_type"]
         if message_ != "":
             message_id = self.save_message_in_database(message_, message_type)
+            data = [{"user": self.connection.nick, "message": message_, "id": message_id,
+                     "time": time.time(), "user_id": self.connection.login_id,
+                     "is_group": True, "group_id": self.group_id, "message_type": message_type}]
             for i in self.group_members:
-                if i.nick != self.connection.nick:
-                    receiver_connection = current_connections.get(i.nick)
-                    if receiver_connection:
-                        data = [{"user": self.connection.nick, "message": message_, "id": message_id,
-                                "time": time.time(), "user_id": self.connection.login_id,
-                                 "is_group": True, "group_id": self.group_id, "message_type": message_type}]
-                        receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
+                receiver_connection = current_connections.get(i.nick)
+                if receiver_connection:
+                    receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
     def save_message_in_database(self, message: str, message_type: str) -> int:
         is_path = False if message_type == "text" else True

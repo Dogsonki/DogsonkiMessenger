@@ -37,11 +37,11 @@ class Chatroom(metaclass=abc.ABCMeta):
             MessageType.BOT_COMMAND: self.bot_command,
             MessageType.GET_CHAT_FILE: self.send_image,
             MessageType.GET_USER_AVATAR_TIME: get_user_avatar_time,
-            MessageType.GET_GROUP_AVATAR_TIME: get_group_avatar_time
+            MessageType.GET_GROUP_AVATAR_TIME: get_group_avatar_time,
+            MessageType.GET_FIRST_MESSAGES: self.send_first_messages
         }
 
     def init_chatroom(self):
-        self.send_last_messages()
         self.receive_messages()
 
     @abc.abstractmethod
@@ -72,7 +72,7 @@ class Chatroom(metaclass=abc.ABCMeta):
             self.send_message(message_list, old)
 
     def send_message(self, message_data: list, old: bool):
-        token = MessageType.GET_OLD_MESSAGES if old else MessageType.CHAT_MESSAGE
+        token = MessageType.GET_OLD_MESSAGES if old else MessageType.GET_FIRST_MESSAGES
         self.connection.send_message(message_data, token)
 
     def send_image(self, message: dict):
@@ -84,6 +84,9 @@ class Chatroom(metaclass=abc.ABCMeta):
 
     def send_last_old_messages(self, *args):
         self.send_last_messages(True)
+        
+    def send_first_messages(self, *args):
+        self.send_last_messages(False)
 
     def _save_file(self, second_id: int, message: str):
         filename = f"{int(time.time())}{second_id}{self.connection.login_id}"
