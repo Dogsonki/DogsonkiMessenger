@@ -37,7 +37,7 @@ public partial class ForgotPasswordEnterCode : ContentPage
 			message.ShowError("Code is too short");
 			return;
 		}
-		if(!SocketCore.SendCallback(CheckCodeCallback, code, Token.PASSWORD_FORGOT))
+		if(!SocketCore.SendCallback(code, Token.PASSWORD_FORGOT, CheckCodeCallback))
 		{
             message.ShowError("Unable to connect to server");
         }

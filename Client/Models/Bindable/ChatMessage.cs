@@ -140,7 +140,7 @@ public class ChatMessage : BindableObject
                     Logger.Push("Cache buffer is null", TraceType.Func, LogLevel.Warning);
 
                     ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
-                    SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
+                    SocketCore.SendCallback(imagePacket, Token.CHAT_IMAGE_REQUEST, GetImage);
                     ImageRequestQueue.AddRequest(imagePacket, this);
                     return;
                 }
@@ -151,7 +151,7 @@ public class ChatMessage : BindableObject
             else if(!checkCache && !isNewMessage)
             {
                 ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
-                SocketCore.SendCallback(GetImage, imagePacket, Token.CHAT_IMAGE_REQUEST);
+                SocketCore.SendCallback(imagePacket, Token.CHAT_IMAGE_REQUEST, GetImage);
                 ImageRequestQueue.AddRequest(imagePacket, this);
             }
             else

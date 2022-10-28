@@ -17,7 +17,7 @@ public class BindableLastChat : BindableObject
     {
         get
         {
-            if (IsGroup) return BindedGroup.Avatar;
+            if (IsGroup && BindedGroup is not null) return BindedGroup.Avatar;
             else return BindedUser.Avatar;
         }
     }
@@ -83,6 +83,7 @@ public class BindableLastChat : BindableObject
             HasLastMessage = true;
         }
 
+        MessageType = messageType;
         Id = id.ToString();
     }
 
@@ -90,15 +91,7 @@ public class BindableLastChat : BindableObject
     {
         if (MessageType == "text")
         {
-            string EncodedMessage = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(Message));
-            if (EncodedMessage.Length > 20)
-            {
-                return EncodedMessage.Substring(0, 20);
-            }
-            else
-            {
-                return EncodedMessage;
-            }
+            return Encoding.UTF8.GetString(Encoding.UTF8.GetBytes(Message));
         }
         else
         {

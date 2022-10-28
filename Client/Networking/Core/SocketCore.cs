@@ -127,7 +127,7 @@ public class SocketCore : Connection
                 {
                     if (packet is null) throw new Exception("SEND_PACKET_NULL");
 
-                    Debug.Write($"{packet.Data} {packet.Token}");
+                    Debug.Write($"Sending: {packet.Data} {packet.Token}");
 
                     byte[] buffer = packet.GetPacked();
 
@@ -144,7 +144,7 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool SendCallback(Action<object> callback, object sendingData, Token token, bool sendAbleOnce = true)
+    public static bool SendCallback(object sendingData, Token token, Action<object> callback, bool sendAbleOnce = true)
     {
         if (!AbleToSend()) return false;
 
@@ -197,7 +197,7 @@ public class SocketCore : Connection
     {
         if (OnTokenReceived.ContainsKey(token))
         {
-            Logger.Push("Changing action on token received",TraceType.Func,LogLevel.Warning);
+            Logger.Push("Changing action on token received", TraceType.Func, LogLevel.Warning);
 
             OnTokenReceived[token] = callback;
         }

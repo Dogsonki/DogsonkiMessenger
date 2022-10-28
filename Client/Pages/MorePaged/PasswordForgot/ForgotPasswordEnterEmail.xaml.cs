@@ -37,7 +37,7 @@ public partial class ForgotPasswordEnterEmail : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback(CheckEmailCallback, Input_Email.Text, Token.PASSWORD_FORGOT))
+        if (!SocketCore.SendCallback(Input_Email.Text, Token.PASSWORD_FORGOT, CheckEmailCallback))
 		{
 			message.ShowError("Unable to connect to server");
 		}

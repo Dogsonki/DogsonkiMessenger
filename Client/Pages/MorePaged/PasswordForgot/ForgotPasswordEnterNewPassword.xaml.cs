@@ -31,7 +31,7 @@ public partial class ForgotPasswordEnterNewPassword : ContentPage
 			return;
 		}
 
-        if (!SocketCore.SendCallback(CheckPasswordCallback, password, Token.PASSWORD_FORGOT))
+        if (!SocketCore.SendCallback(password, Token.PASSWORD_FORGOT, CheckPasswordCallback))
         {
             message.ShowError("Unable to connect to server");
         }

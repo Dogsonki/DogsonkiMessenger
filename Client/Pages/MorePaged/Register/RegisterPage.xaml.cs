@@ -49,7 +49,7 @@ public partial class RegisterPage : ContentPage
             return;
         }
 
-        if (!SocketCore.SendCallback(RegisterCallback, new RegisterPacket(username, password, email), Token.REGISTER, false))
+        if (!SocketCore.SendCallback(new RegisterPacket(username, password, email), Token.REGISTER, RegisterCallback, false))
         {
             message.ShowError("Unable to connect to the server");
             return;

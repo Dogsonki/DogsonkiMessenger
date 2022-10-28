@@ -44,7 +44,7 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(GetChatMessagesCallback, " ", Token.GET_INIT_MESSAGES);
+        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, GetChatMessagesCallback);
 
         //TODO: get info only in settings page
 
@@ -52,10 +52,6 @@ public partial class MessagePage : ContentPage
 
         ChatUsername.Text = $"Chatting group @{group.Name}";
         MessageInput.Placeholder = $"Message @{group.Name}";
-
-        SocketCore.SendCallback((_) =>
-        {
-        }, " ", Token.GROUP_GET_LAST_MESSAGE_TIME);
     }
 
     protected override bool OnBackButtonPressed()
@@ -84,19 +80,6 @@ public partial class MessagePage : ContentPage
         else
         {
             MainPage.AddLastChat(CurrentConversation.GetCurrentUserChat());
-        }
-
-        _allMessages.Add(new ChatMessage(message));
-
-        if (IsLastMessageFromLocalUser && lastMessage is not null && !lastMessage.IsImage)
-        {
-            lastMessage.TextContent += $"\n{message}";
-        }
-        else
-        {
-            ChatMessage PreparedMessage = new ChatMessage(message);
-
-            Messages.Add(PreparedMessage);
         }
 
         if (message.StartsWith("!"))
@@ -227,33 +210,42 @@ public partial class MessagePage : ContentPage
         });
     }
 
-    public static void AddMessage(ChatMessage message)
+    public void RealTimeMessageCallback(object packet)
     {
+        MessagePacket[]? message = JsonConvert.DeserializeObject<MessagePacket[]>((string)packet);
+
+        if (message is null)
+        {
+            throw new Exception("Realtime message is null");
+        }
+
         ChatMessage? lastMessage = GetLastMessage();
 
-        if(lastMessage is not null)
+        if (lastMessage is null)
         {
-            if(lastMessage.BindedUser.UserId == message.BindedUser.UserId)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                lastMessage.TextContent += $"\n{message.TextContent}";
-            }
-            else
+                Messages.Add(new ChatMessage(message[0]));
+            });
+        }
+        else if(lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && lastMessage.IsText)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Messages.Add(message);
-                });
-            }
+                lastMessage.TextContent += $"\n{message[0].ContentString}";
+            });
         }
         else
         {
-            Messages.Add(message);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Messages.Add(new ChatMessage(message[0]));
+            });
         }
     }
 
     public void GetChatMessagesCallback(object packet)
     {
-        Debug.Write("messages");
         try
         {
             List<MessagePacket>? messages = null;
@@ -279,56 +271,38 @@ public partial class MessagePage : ContentPage
                     messages.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
                 }
 
-                List<ChatMessage> addedMessages = new List<ChatMessage>(messages.Count);
+                List<ChatMessage> messageView = new List<ChatMessage>();
 
                 foreach (MessagePacket message in messages)
                 {
                     ChatMessage? lastMessage = null;
 
-                    if (addedMessages.Count > 0)
+                    if (messageView.Count > 0)
                     {
-                        lastMessage = addedMessages.Last();
+                        lastMessage = messageView.Last();
                     }
 
-                    object _padlock = new object();
-                    _allMessages.Add(new ChatMessage(message,false,false,true));
-                    lock (_padlock)
+                    if (lastMessage is null)
                     {
-                        if (lastMessage is not null && lastMessage.BindedUser.UserId == message.UserId && lastMessage.IsText && message.MessageType == "text")
-                        {
-                            lastMessage.TextContent += $"\n{message.ContentString}";
-                        }
-                        else
-                        {
-                            addedMessages.Add(new ChatMessage(message,true,false));
-                        }
+                        messageView.Add(new ChatMessage(message, true, true));
+                    }
+                    else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId)
+                    {
+                        lastMessage.TextContent += $"\n{message.ContentString}";
+                    }
+                    else
+                    {
+                        messageView.Add(new ChatMessage(message,true,true));
                     }
                 }
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    foreach (ChatMessage msg in addedMessages)
+                    foreach (var msg in messageView)
                     {
                         Messages.Add(msg);
                     }
                 });
-                return;
-
-                ChatMessage[]? cachedMessages = ChatCache.ReadCacheChat(Conversation.Current.GetCurrentUserChat());
-
-                if (cachedMessages is not null && cachedMessages.Length > 0)
-                {
-                    SocketCore.SendCallback((_) =>
-                    {
-                        Debug.Write("Adding messages");
-                        //Measure times here
-                        foreach (var msg in cachedMessages)
-                        {
-                            Messages.Add(msg);
-                        }
-
-                    }, " ", Token.GET_LAST_MESSAGE_TIME);
-                }
             });
         }
         catch (Exception ex)
