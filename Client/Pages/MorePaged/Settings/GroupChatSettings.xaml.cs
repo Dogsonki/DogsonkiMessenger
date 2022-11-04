@@ -1,7 +1,10 @@
+using System.Text;
 using Client.Models;
 using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Packets;
 using Client.Utility;
+using Newtonsoft.Json;
 
 namespace Client.Pages.Settings;
 
@@ -18,7 +21,7 @@ public partial class GroupChatSettings : ContentPage
 		SocketCore.Send($"{LocalUser.Id}", Token.GROUP_USER_KICK);
 	}
 
-    private async void ChangeGroupIcon(object? sender, EventArgs e)
+    private async void ChangeGroupAvatar(object? sender, EventArgs e)
     {
         try
         {
@@ -30,15 +33,19 @@ public partial class GroupChatSettings : ContentPage
             if (image is null) return;
 
             Stream stream = await image.OpenReadAsync();
-            byte[] imageBuffer = stream.StreamToBuffer();
+            byte[] avatarBuffer = stream.StreamToBuffer();
 
             Group group = Conversation.Current.GetCurrentGroupChat();
 
+            GroupImageRequestPacket packet = new GroupImageRequestPacket(avatarBuffer, group.Id);
+
+            SocketCore.Send(packet, Token.GROUP_AVATAR_SET, false);
+
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                group.Avatar = ImageSource.FromStream(() => new MemoryStream(imageBuffer));
+                group.Avatar = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
             });
-            
+
             stream.Close();
         }
         catch (Exception ex)
@@ -46,5 +53,4 @@ public partial class GroupChatSettings : ContentPage
             Logger.Push(ex, TraceType.Func, LogLevel.Error);
         }
     }
-
 }

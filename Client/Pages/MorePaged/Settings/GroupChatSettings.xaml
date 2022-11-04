@@ -7,7 +7,7 @@
 	<VerticalStackLayout Spacing="15">
 		<Label HorizontalOptions="Center" FontSize="Large" FontAttributes="Bold" Text="Group Chat Settings"/>
 
-		<Button Clicked="ChangeGroupIcon" WidthRequest="200" BackgroundColor="#252525" Text="Change Group Icon"/>
+		<Button Clicked="ChangeGroupAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Group Avatar"/>
 
 		<Button WidthRequest="200" BackgroundColor="#252525" Text="Members"/>
 

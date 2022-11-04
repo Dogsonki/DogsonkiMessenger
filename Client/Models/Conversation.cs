@@ -28,8 +28,6 @@ public class Conversation
         _group = group;
         IsGroupConversation = true;
 
-        SocketCore.SendCallback(" ", Token.GET_GROUP_INFO, GroupChatInfoCallback, false);
-
         Current = this;
     }
 
@@ -89,9 +87,11 @@ public class Conversation
 
     public static void OpenChat(Group group)
     {
+        SocketCore.Send(group.Id, Token.GROUP_CHAT_INIT);
+
         MessagePage chatPage = new MessagePage(group);
 
-        SocketCore.Send($"{group.Id}", Token.GROUP_CHAT_INIT);
+        MessagePage.Messages.Clear();
 
         SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.GetChatMessagesCallback);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);

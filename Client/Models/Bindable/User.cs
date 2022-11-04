@@ -1,7 +1,7 @@
 ﻿using Client.IO.Cache;
 using Client.Networking.Core;
 using System.ComponentModel;
-using Client.Utility;
+using Client.IO;
 
 namespace Client.Models.Bindable;
 
@@ -84,6 +84,7 @@ public class User : BindableObject
         if (flags.HasFlag(UserCreateFlags.UseDefaultAvatar) && !flags.HasFlag(UserCreateFlags.Default) && !flags.HasFlag(UserCreateFlags.IsSystemUser))
         {
             byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar_default");
+
             SetAvatar(avatarCacheBuffer);
         }
         else if (flags.HasFlag(UserCreateFlags.IsSystemUser) && !flags.HasFlag(UserCreateFlags.Default))
@@ -92,14 +93,11 @@ public class User : BindableObject
         }
         else 
         {
-            byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar" + id);
+            byte[] avatarCacheBuffer = AvatarManager.ReadUserAvatar(id);
 
-            SocketCore.SendCallback(UserId, Token.GET_USER_AVATAR_TIME, (object _) => Debug.Write("Data: " + _));
-
-            if (!SetAvatar(avatarCacheBuffer))
+            if (!AvatarManager.SetUserAvatar(this, avatarCacheBuffer))
             {
-                Debug.Write($"Cache avatar dose not exists {Username}:{UserId}");
-                SocketCore.Send(id, Token.USER_AVATAR_REQUEST);
+                SocketCore.Send(UserId, Token.USER_AVATAR_REQUEST);
             }
         }
     }
@@ -111,24 +109,14 @@ public class User : BindableObject
     /// <returns>Returns false if buffer is null or empty</returns>
     public bool SetAvatar(byte[] buffer)
     {
-        if (buffer is not null && buffer.Length > 0)
+        ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
+
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            Cache.RemoveFromCache($"user_avatar{UserId}");
-            ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
+            Avatar = src;
+        });
 
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Avatar = src;
-            });
-
-            Cache.SaveToCache(buffer,$"user_avatar{UserId}");
-
-            Logger.Push($"User avatar set {UserId}",TraceType.Func,LogLevel.Debug);
-
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     public static void ClearUsers() => Users.Clear();

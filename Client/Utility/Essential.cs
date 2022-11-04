@@ -51,5 +51,13 @@ namespace Client.Utility
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
+
+        public static byte[] GetImageBuffer(string imageBuffer)
+        {
+            string avat = imageBuffer.Substring(2);
+            avat = avat.Substring(0, avat.Length - 1);
+            byte[] imgBuffer = Convert.FromBase64String(avat);
+            return imgBuffer;
+        }
     }
 }

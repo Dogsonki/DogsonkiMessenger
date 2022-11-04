@@ -2,6 +2,7 @@
 using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Model;
+using Client.Utility;
 using Newtonsoft.Json;
 
 namespace Client.Networking.Packets;
@@ -40,7 +41,7 @@ public class UserImageRequestPacket
                 return;
             }
 
-            byte[] buffer = GetImageBuffer(img.ImageData);
+            byte[] buffer = Essential.GetImageBuffer(img.ImageData);
 
             Cache.SaveToCache(buffer, "user_avatar" + img.UserId);
 
@@ -60,13 +61,5 @@ public class UserImageRequestPacket
         byte[] imgBuffer = Convert.FromBase64String(avat);
         buffer = imgBuffer;
         return ImageSource.FromStream(() => new MemoryStream(imgBuffer));
-    }
-
-    public static byte[] GetImageBuffer(string imageBuffer)
-    {
-        string avat = imageBuffer.Substring(2);
-        avat = avat.Substring(0, avat.Length - 1);
-        byte[] imgBuffer = Convert.FromBase64String(avat);
-        return imgBuffer;
     }
 }

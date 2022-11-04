@@ -1,6 +1,11 @@
 ﻿using Client.Networking.Core;
 using System.ComponentModel;
+using System.Text;
+using Client.IO;
 using Client.IO.Cache;
+using Client.Networking.Packets;
+using Client.Utility;
+using Newtonsoft.Json;
 
 namespace Client.Models.Bindable;
 
@@ -25,29 +30,45 @@ public class Group : BindableObject
         set
         {
             avatar = value;
-            OnPropertyChanged(nameof(avatar));
+            OnPropertyChanged(nameof(Avatar));
         }
     }
 
     public Group(string groupName, int groupId)
     {
+        Debug.Write("Creating avatar group");
         Name = groupName;
         Id = groupId;
 
-        byte[] avatarCacheBuffer = Cache.ReadCache("group_avatar" + Id);
+        byte[] avatarCacheBuffer = AvatarManager.ReadGroupAvatar(groupId);
 
-        if (avatarCacheBuffer is not null)
+     
+        if (!AvatarManager.SetGroupAvatar(this, avatarCacheBuffer))
         {
-            ImageSource src = ImageSource.FromStream(() => new MemoryStream(avatarCacheBuffer));
-            MainThread.BeginInvokeOnMainThread(() =>
+            SocketCore.SendCallback(groupId, Token.GROUP_AVATAR_REQUEST, (_) =>
             {
-                Avatar = src;
+                GroupImageRequestPacket? image = JsonConvert.DeserializeObject<GroupImageRequestPacket>((string)_);
+                if (image is null) return;
+
+                LocalUser.UserRef.SetAvatar(image.ImageData);
+
+                Avatar = LocalUser.avatar;
+
+                SetAvatar(image.ImageData);
             });
         }
-        else
+
+        Groups.Add(this);
+    }
+
+    public void SetAvatar(byte[] buffer)
+    {
+        ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
+
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            SocketCore.Send(Id, Token.GROUP_AVATAR_REQUEST);
-        }
+            Avatar = src;
+        });
     }
 
     public static Group CreateOrGet(string name, int id)

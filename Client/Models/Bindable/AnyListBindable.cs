@@ -1,10 +1,15 @@
-﻿namespace Client.Models.Bindable;
+﻿using System.Collections.Specialized;
+using System.ComponentModel;
+
+namespace Client.Models.Bindable;
 
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
 /// </summary>
-public class AnyListBindable : BindableObject
+public class AnyListBindable : INotifyCollectionChanged
 {
+    public event PropertyChangedEventHandler PropertyChanged;
+
     public User? BindedUser { get; set; }
     public Group? BindedGroup { get; set; }
     private readonly bool UseUserInput;

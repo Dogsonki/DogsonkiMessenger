@@ -118,7 +118,6 @@ public partial class GroupChatCreator : ContentPage
         }
     }
 
-
     private void SearchPressed(object? sender, EventArgs e)
     {
         Entry? entry = (Entry?)sender;

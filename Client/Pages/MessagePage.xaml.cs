@@ -44,7 +44,7 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
-        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, GetChatMessagesCallback);
+        //SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, GetChatMessagesCallback);
 
         //TODO: get info only in settings page
 

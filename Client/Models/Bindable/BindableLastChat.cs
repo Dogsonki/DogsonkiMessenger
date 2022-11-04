@@ -17,8 +17,8 @@ public class BindableLastChat : BindableObject
     {
         get
         {
-            if (IsGroup && BindedGroup is not null) return BindedGroup.Avatar;
-            else return BindedUser.Avatar;
+            return BindedGroup.Avatar;
+            //else return BindedUser.Avatar;
         }
     }
 
