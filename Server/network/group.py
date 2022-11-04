@@ -53,12 +53,15 @@ def get_avatar(client: Client, group_id: int):
     except (IndexError, TypeError):
         avatar = " "
         avatar_time = ""
-    client.send_message({"avatar": avatar, "group_id": group_id, "avatar_time": avatar_time}, MessageType.GET_AVATAR)
+    client.send_message({"avatar": avatar, "group_id": group_id, "avatar_time": avatar_time},
+                        MessageType.GET_GROUP_AVATAR)
 
 
 def set_avatar(client: Client, data: dict):
-    avatar = base64.b64encode(bytes(data["avatar"], "UTF-8"))
-    handling_sql.set_group_avatar(client.db_cursor, data["group_id"], avatar)
+    avatar = data["avatar"]
+    if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:
+        avatar = base64.b64encode(bytes(avatar, "UTF-8"))
+        handling_sql.set_group_avatar(client.db_cursor, data["group_id"], avatar)
 
 
 class GroupChatroom(functions.Chatroom):
@@ -73,8 +76,9 @@ class GroupChatroom(functions.Chatroom):
             MessageType.ADD_TO_GROUP: self.add_to_group,
             MessageType.DELETE_FROM_GROUP: self.delete_from_group,
             MessageType.GET_GROUP_MEMBERS: self.send_group_members,
-            MessageType.GET_AVATAR: self.get_avatar,
-            MessageType.GET_LAST_GROUP_CHAT_MESSAGE_ID: self.get_last_chat_message_id
+            MessageType.GET_GROUP_AVATAR: self.get_avatar,
+            MessageType.GET_LAST_GROUP_CHAT_MESSAGE_ID: self.get_last_chat_message_id,
+            MessageType.SET_GROUP_AVATAR: self.set_avatar
         })
 
     def get_last_chat_message_id(self, message: str):
@@ -86,6 +90,9 @@ class GroupChatroom(functions.Chatroom):
 
     def get_avatar(self, message: str):
         self.connection.get_avatar(message)
+        
+    def set_avatar(self, message: dict):
+        set_avatar(self.connection, message)
 
     def add_to_group(self, message: dict):
         add_to_group(self.connection, message)

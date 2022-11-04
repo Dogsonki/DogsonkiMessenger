@@ -360,7 +360,7 @@ def get_group_avatar_time(cursor: CMySQLCursor, group_id: int) -> datetime:
     return data[0]
 
 
-def get_last_message_id(cursor: CMySQLCursor, sender_id: int, receiver_id):
+def get_last_message_id(cursor: CMySQLCursor, sender_id: int, receiver_id: int):
     cursor.execute("""SELECT id FROM messages
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
                       ORDER BY messages.id DESC LIMIT 1;""", (sender_id, receiver_id, receiver_id, sender_id))
