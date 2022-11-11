@@ -70,8 +70,7 @@ public partial class MainPage : ContentPage
 
             foreach (var chat in lastChats)
             {
-                BindableLastChat bindableLastChat = new BindableLastChat(chat.Name, chat.Type,
-                    chat.LastMessage, chat.LastMessageTime, chat.MessageType, chat.Id, chat.Sender);
+                BindableLastChat bindableLastChat = new BindableLastChat(chat.Name, chat.Type, chat.LastMessage, chat.LastMessageTime, chat.MessageType, chat.Id, chat.Sender);
 
                 if (!chat.isGroup)
                 {       

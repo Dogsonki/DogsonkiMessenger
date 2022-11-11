@@ -31,8 +31,6 @@ internal class Cache
 
             if (obj.GetType() == typeof(byte[]))
             {
-#if ANDROID
-
                 if (!Directory.Exists(CachePath))
                 {
                     Directory.CreateDirectory(CachePath);
@@ -42,7 +40,6 @@ internal class Cache
                 {
                     await File.WriteAllBytesAsync(CachePath + name, (byte[])obj);
                 });
-#endif
             }
             else if(obj.GetType() == typeof(string))
             {
@@ -64,7 +61,7 @@ internal class Cache
         File.Delete(CachePath+name);
     }
 
-    public static byte[] ReadCache(string name)
+    public static byte[] ReadFileBytesCache(string name)
     {
         try
         {
@@ -81,6 +78,31 @@ internal class Cache
             Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
 
             return File.ReadAllBytes(CachePath + name);
+        }
+        catch (Exception ex)
+        {
+            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            return null;
+        }
+    }
+
+    public static string ReadFileCache(string name)
+    {
+        try
+        {
+            if (!Directory.Exists(CachePath))
+            {
+                Directory.CreateDirectory(CachePath);
+            }
+
+            if (!File.Exists(CachePath + name))
+            {
+                Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
+                return null;
+            }
+            Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
+
+            return File.ReadAllText(CachePath + name);
         }
         catch (Exception ex)
         {

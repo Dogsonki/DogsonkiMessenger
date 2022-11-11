@@ -1,3 +1,4 @@
+using Client.IO;
 using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Packets;
@@ -40,6 +41,14 @@ public partial class LoginPage : ContentPage
             return;
         }
 
+        if (CheckRemember.IsChecked)
+        {
+            SocketCore.OnToken(Token.SESSION_INFO, (_) =>
+            {
+                Debug.Write(_);
+            });
+        }
+
         if (!SocketCore.SendCallback(new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN, LoginCallback))
         {
             message.ShowError("Unable to connect to the server");
@@ -50,6 +59,7 @@ public partial class LoginPage : ContentPage
     public void LoginCallback(object _login)
     {
         LoginCallbackPacket login = JsonConvert.DeserializeObject<LoginCallbackPacket>((string)_login);
+
         switch (login.Token)
         {
             case "1":

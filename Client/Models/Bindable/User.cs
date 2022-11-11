@@ -1,13 +1,18 @@
 ﻿using Client.IO.Cache;
 using Client.Networking.Core;
-using System.ComponentModel;
 using Client.IO;
+using System.ComponentModel;
 
 namespace Client.Models.Bindable;
 
-[Bindable(BindableSupport.Yes)]
-public class User : BindableObject
+public class User : IBindableType, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public BindableType Type { get; set; }
+    public string Name { get; set; }
+    public int Id { get; set; }
+
     /*WIP*/
     private string? tag;
     public string Tag
@@ -41,7 +46,7 @@ public class User : BindableObject
             else
             {
                 avatar = value;
-                OnPropertyChanged(nameof(avatar));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Avatar)));
             }
         }
     }
@@ -56,7 +61,6 @@ public class User : BindableObject
         set
         {
             dogeCoins = value;
-            OnPropertyChanged(nameof(DogeCoins));
         }
     }
 
@@ -83,7 +87,7 @@ public class User : BindableObject
 
         if (flags.HasFlag(UserCreateFlags.UseDefaultAvatar) && !flags.HasFlag(UserCreateFlags.Default) && !flags.HasFlag(UserCreateFlags.IsSystemUser))
         {
-            byte[] avatarCacheBuffer = Cache.ReadCache("user_avatar_default");
+            byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("user_avatar_default");
 
             SetAvatar(avatarCacheBuffer);
         }

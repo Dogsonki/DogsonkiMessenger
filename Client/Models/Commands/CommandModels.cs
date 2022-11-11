@@ -3,6 +3,20 @@
 namespace Client.Commands;
 
 [Serializable]
+public class Mem : ICommand
+{
+    [JsonProperty("command")]
+    [CommandProperty(typeof(string))]
+    public string Command { get; set; }
+
+    public Mem(string command)
+    {
+        Command = command;
+    }
+    public bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Mem), ProvidedArgs);
+}
+
+[Serializable]
 public class Daily : ICommand
 {
     [JsonProperty("command")]

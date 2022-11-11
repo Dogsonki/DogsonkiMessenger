@@ -3,7 +3,9 @@ using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Packets;
 using Client.Pages;
+using Client.Utility;
 using Newtonsoft.Json;
+using System.Security;
 
 namespace Client.IO;
 
@@ -25,30 +27,28 @@ public class Session : IStorage
 
     public static void OverwriteSession(Session session)
     {
-#if ANDROID
-        AndroidFileService wr = new AndroidFileService();
-        wr.WriteToFile(JsonConvert.SerializeObject(session), "session.json");
-#endif
+        Cache.Cache.SaveToCache(JsonConvert.SerializeObject(session), "session.json");
+        Logger.Push("Overwriting session to cache", TraceType.Func, LogLevel.Warning);
     }
 
     public static void ReadSession()
     {
-#if ANDROID 
-        AndroidFileService wr = new();
-        bool sessionExists = wr.CreateFileIfNotExist(FileName);
-        if (sessionExists)
+        string cache = Cache.Cache.ReadFileCache("session.json");
+
+        if (cache == null || cache.Length == 0)
         {
-            string ses = File.ReadAllText(AndroidFileService.GetPersonalDir(FileName));
-            Session? session = JsonConvert.DeserializeObject<Session>(ses);
-            if (session is not null && !string.IsNullOrEmpty(ses))
-            {
-                if (session.SessionKey != string.Empty)
-                {
-                    SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
-                    SocketCore.SendCallback(session, Token.SESSION_INFO, GetSessionInfoCallback);
-                }
-            }
+            Logger.Push("Session info was null", TraceType.Func, LogLevel.Warning);
+            return;
         }
+
+        Session? session = JsonConvert.DeserializeObject<Session>(cache);
+
+        if (session is null || string.IsNullOrEmpty(session.SessionKey)) return;
+
+        SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
+        SocketCore.SendCallback(session, Token.SESSION_INFO, GetSessionInfoCallback);
+#if ANDROID 
+        
 #endif
     }
 

@@ -10,7 +10,7 @@ internal class AvatarCacheStorage
 
     public static void SaveAvatarCache(double ticks, int userId)
     {
-        byte[]? avatarCacheStorage = Cache.ReadCache(AvatarCacheFileName);
+        byte[]? avatarCacheStorage = Cache.ReadFileBytesCache(AvatarCacheFileName);
 
         if (avatarCacheStorage is null || avatarCacheStorage.Length == 0)
         {

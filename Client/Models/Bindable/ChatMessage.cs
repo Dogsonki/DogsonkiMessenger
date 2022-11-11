@@ -133,7 +133,7 @@ public class ChatMessage : BindableObject
             if (checkCache)
             {
                 Path = packet.ContentString.Substring(9); // 9 to remove server folder path
-                byte[] CacheBuffer = Cache.ReadCache(Path);
+                byte[] CacheBuffer = Cache.ReadFileBytesCache(Path);
 
                 if (CacheBuffer is null || CacheBuffer.Length == 0)
                 {

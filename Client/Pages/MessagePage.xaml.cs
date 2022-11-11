@@ -182,16 +182,19 @@ public partial class MessagePage : ContentPage
                 case "!clear":
                     Messages.Clear();
                     break;
-                /*
-                case "!invite":
-                    SocketCore.Send(new GroupChatUserInvitePacket(GroupChat.Id, int.Parse(args[1])),Token.GROUP_INVITE);
+                case "!mem":
+                    ICommand.PrepareAndSend(new Daily(command), out error);
                     break;
-                case "!remove":
-                    SocketCore.Send(new GroupChatUserRemovePacket(GroupChat.Id, int.Parse(args[1])), Token.GROUP_USER_KICK);
-                    break;
-                */
+                    /*
+                    case "!invite":
+                        SocketCore.Send(new GroupChatUserInvitePacket(GroupChat.Id, int.Parse(args[1])),Token.GROUP_INVITE);
+                        break;
+                    case "!remove":
+                        SocketCore.Send(new GroupChatUserRemovePacket(GroupChat.Id, int.Parse(args[1])), Token.GROUP_USER_KICK);
+                        break;
+                    */
             }
-            if(error != string.Empty)
+            if (error != string.Empty)
             {
                 SystemAddMessage(error);
             } 

@@ -30,6 +30,7 @@ public static class CommandList
         new CommandModel("!clear","Clears all visible messages"),
         new CommandModel("!invite","Usage: !invite {User Id}"),
         new CommandModel("!remove","Usage: !remove {User Id}"),
+        new CommandModel("!mem","Sends funny meme to chat"),
     };
 }
 

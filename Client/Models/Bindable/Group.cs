@@ -1,17 +1,18 @@
 ﻿using Client.Networking.Core;
 using System.ComponentModel;
-using System.Text;
 using Client.IO;
-using Client.IO.Cache;
 using Client.Networking.Packets;
-using Client.Utility;
 using Newtonsoft.Json;
 
 namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
-public class Group : BindableObject
+public class Group : IBindableType, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public BindableType Type { get; set; }
+
     public static List<Group> Groups = new List<Group>();
 
     public List<GroupUser> Users = new List<GroupUser>();
@@ -30,13 +31,12 @@ public class Group : BindableObject
         set
         {
             avatar = value;
-            OnPropertyChanged(nameof(Avatar));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Avatar)));
         }
     }
 
     public Group(string groupName, int groupId)
     {
-        Debug.Write("Creating avatar group");
         Name = groupName;
         Id = groupId;
 

@@ -46,7 +46,7 @@ internal class ChatCache
 
     public static ChatMessage[]? ReadCacheChat(User user)
     {
-        byte[] cachedChat = Cache.ReadCache($"cache_chat_{user.UserId}");
+        byte[] cachedChat = Cache.ReadFileBytesCache($"cache_chat_{user.UserId}");
 
         if (cachedChat is null || cachedChat.Length == 0)
         {

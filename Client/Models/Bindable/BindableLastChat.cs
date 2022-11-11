@@ -4,21 +4,27 @@ using System.Text;
 
 namespace Client.Models.Bindable;
 
-[Bindable(BindableSupport.Yes)]
-public class BindableLastChat : BindableObject
+public class BindableLastChat : INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     private readonly User? BindedUser;
     private readonly Group? BindedGroup;
 
     private readonly bool IsGroup;
 
+    public ImageSource avatar;
+
     public ImageSource Avatar
     {
         get
         {
-            return BindedGroup.Avatar;
-            //else return BindedUser.Avatar;
+            return avatar;
+        }
+        set
+        {
+            avatar = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Avatar)));
         }
     }
 
@@ -55,8 +61,17 @@ public class BindableLastChat : BindableObject
         }
     }
 
-    public BindableLastChat(string name, string type, string message, double? messageTime, string messageType, int id, string senderUsername)
+    public BindableLastChat(string name, string type, byte[] message, double? messageTime, string messageType, int id, string senderUsername)
     {
+        if(message != null)
+        {
+            Message = Encoding.UTF8.GetString(message);
+        }
+        else
+        {
+            Message = "";
+        }
+
         if (type == "user")
         {
             IsGroup = false;
@@ -68,6 +83,7 @@ public class BindableLastChat : BindableObject
             IsGroup = true;
             BindedGroup = Group.CreateOrGet(name, id);
             Input = new Command(() => Conversation.OpenChat(BindedGroup));
+            avatar = BindedGroup.Avatar;
         }
 
         //Chat doesn't have any messages
@@ -79,7 +95,6 @@ public class BindableLastChat : BindableObject
             else FactoredTime = $"{time.Day}/{time.Month}/{time.Year}";
 
             Sender = senderUsername;
-            Message = message;
             HasLastMessage = true;
         }
 
