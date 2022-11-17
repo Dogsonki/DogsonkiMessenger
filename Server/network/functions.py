@@ -7,7 +7,7 @@ import time
 from PIL import Image
 import bcrypt
 
-from .connection import Client, MessageType, handling_sql
+from .connection import Client, MessageType, handling_sql, current_connections
 from . import bot
 
 
@@ -27,6 +27,7 @@ class Chatroom(metaclass=abc.ABCMeta):
     listening: bool
 
     def __init__(self, connection: Client):
+        self.is_group: bool
         self.connection = connection
         self.number_of_sent_last_messages = 0
         self.listening = True
@@ -52,13 +53,26 @@ class Chatroom(metaclass=abc.ABCMeta):
     def send_last_messages(self, old: bool = False):
         pass
 
+    @abc.abstractmethod
+    def save_message_in_database(self, message: str, message_type: str, save: bool):
+        pass
+
     def receive_messages(self):
         while self.listening:
             message = self.connection.receive_message()
             self.chat_actions[message.token](message.data)
 
     def bot_command(self, message: dict):
-        bot.check_command(self.connection, message)
+        message = bot.check_command(self.connection, message)
+        message_id = self.save_message_in_database(message[0]["message"], message[0]["message_type"], False)
+        message[0]["id"] = message_id
+        if self.is_group:
+            for i in self.group_members:
+                receiver_connection = current_connections.get(i.nick)
+                if receiver_connection:
+                    receiver_connection.send_message(message, MessageType.CHAT_MESSAGE)
+        else:
+            self.connection.send_message(message, MessageType.CHAT_MESSAGE)
 
     def _send_last_messages(self, message_history: list, old: bool, is_group: bool, group_id: int = -1):
         self.number_of_sent_last_messages += 30

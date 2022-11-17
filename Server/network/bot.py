@@ -1,4 +1,5 @@
 from .connection import Client, MessageType
+import time
 from . import casino
 
 
@@ -8,11 +9,15 @@ COMMANDS: dict = {
     "jackpotbuy": casino.jackpotbuy,
     "!zdrapka": casino.zdrapka,
     "!sklep": casino.sklep,
-    "!slots": casino.slots
+    "!slots": casino.slots,
+    "!mem": casino.mem
 }
 
 
-def check_command(client: Client, data: dict):
+def check_command(client: Client, data: dict) -> list[dict]:
     data["user_dogsonki_app_id"] = client.login_id
-    response = COMMANDS[data["command"]](data)
-    client.send_message(response, MessageType.BOT_COMMAND)
+    response, message_type = COMMANDS[data["command"]](data)
+    data = [{"user": None, "message": response, "time": time.time(),
+             "user_id": None, "is_group": None, "group_id": None,
+             "message_type": message_type, "id": None}]
+    return data

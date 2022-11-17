@@ -17,6 +17,7 @@ class NormalChatroom(functions.Chatroom):
         self.receiver = receiver
         self.friends = True
         self.receiver_id = handling_sql.get_user_id(self.connection.db_cursor, self.receiver)
+        self.is_group = False
         self.chat_actions.update({
             MessageType.GET_LAST_CHAT_MESSAGE_ID: self.get_last_message_id
         })
@@ -49,9 +50,9 @@ class NormalChatroom(functions.Chatroom):
             if receiver_connection:
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
-    def save_message_in_database(self, message: str, message_type: str) -> int:
+    def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
         is_path = False if message_type == "text" else True
-        if is_path:
+        if is_path and save:
             message = self._save_file(self.receiver_id, message)
         handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)

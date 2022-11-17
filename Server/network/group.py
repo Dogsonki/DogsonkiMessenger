@@ -72,6 +72,7 @@ class GroupChatroom(functions.Chatroom):
         super().__init__(connection)
         self.group_id = int(group_id)
         self.group_members = handling_sql.get_group_members(self.connection.db_cursor, self.group_id)
+        self.is_group = False
         self.chat_actions.update({
             MessageType.ADD_TO_GROUP: self.add_to_group,
             MessageType.DELETE_FROM_GROUP: self.delete_from_group,
@@ -119,9 +120,9 @@ class GroupChatroom(functions.Chatroom):
                 if receiver_connection:
                     receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
-    def save_message_in_database(self, message: str, message_type: str) -> int:
+    def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
         is_path = False if message_type == "text" else True
-        if is_path:
+        if is_path and save:
             message = self._save_file(self.group_id, message)
         handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
