@@ -41,14 +41,6 @@ public partial class LoginPage : ContentPage
             return;
         }
 
-        if (CheckRemember.IsChecked)
-        {
-            SocketCore.OnToken(Token.SESSION_INFO, (_) =>
-            {
-                Debug.Write(_);
-            });
-        }
-
         if (!SocketCore.SendCallback(new LoginPacket(username, password, CheckRemember.IsChecked), Token.LOGIN, LoginCallback))
         {
             message.ShowError("Unable to connect to the server");

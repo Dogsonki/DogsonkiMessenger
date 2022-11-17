@@ -18,7 +18,7 @@ public class LastChatsPacket
 
     public bool isGroup => Type != "user";
 
-    public LastChatsPacket(string name, int id, double? last_message_time, string type, string message_type, byte[] message, string sender)
+    public LastChatsPacket(string name, int id, double? last_message_time, string? type, string? message_type, byte[]? message, string? sender)
     {
         Name = name;
         if (last_message_time != null)

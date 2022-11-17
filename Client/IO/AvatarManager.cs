@@ -8,7 +8,7 @@ public static class AvatarManager
 {
     public static byte[] ReadUserAvatar(int userId)
     {
-        byte[] avatarCacheBuffer = Cache.Cache.ReadFileBytesCache("user_avatar" + userId);
+        byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("user_avatar" + userId);
 
         if (avatarCacheBuffer is null || avatarCacheBuffer.Length == 0)
         {
@@ -20,7 +20,7 @@ public static class AvatarManager
 
     public static byte[] ReadGroupAvatar(int groupId)
     {
-        byte[] avatarCacheBuffer = Cache.Cache.ReadFileBytesCache("group_avatar" + groupId);
+        byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("group_avatar" + groupId);
 
         if (avatarCacheBuffer is null || avatarCacheBuffer.Length == 0)
         {
@@ -32,7 +32,7 @@ public static class AvatarManager
 
     private static int ReadUserAvatarInfo(int userId)
     {
-        byte[] time = Cache.Cache.ReadFileBytesCache("user_avatar_info" + userId);
+        byte[] time = Cache.ReadFileBytesCache("user_avatar_info" + userId);
 
         if (time is null || time.Length == 0)
         {
@@ -44,7 +44,7 @@ public static class AvatarManager
 
     private static int ReadGroupAvatarInfo(int groupId)
     {
-        byte[] time = Cache.Cache.ReadFileBytesCache("user_avatar_info" + groupId);
+        byte[] time = Cache.ReadFileBytesCache("user_avatar_info" + groupId);
 
         if (time is null || time.Length == 0)
         {
@@ -57,14 +57,14 @@ public static class AvatarManager
     private static bool SaveUserAvatarInfo(int time, int userId)
     {
         byte[] info = Encoding.ASCII.GetBytes(time.ToString());
-        Cache.Cache.SaveToCache(info, "user_avatar_info" + userId);
+        Cache.SaveToCache(info, "user_avatar_info" + userId);
         return true;
     }
 
     private static bool SaveGroupAvatarInfo(int time, int groupId)
     {
         byte[] info = Encoding.ASCII.GetBytes(time.ToString());
-        Cache.Cache.SaveToCache(info, "group_avatar_info" + groupId);
+        Cache.SaveToCache(info, "group_avatar_info" + groupId);
         return true;
     }
 

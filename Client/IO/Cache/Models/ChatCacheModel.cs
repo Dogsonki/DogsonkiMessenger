@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Client.IO.Cache.Models;
+namespace Client.IO.Models;
 
 [Serializable]
 public class ChatCacheModel

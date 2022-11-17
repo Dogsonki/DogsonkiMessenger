@@ -2,8 +2,8 @@
 using System.ComponentModel;
 using Client.Utility;
 using Client.Networking.Packets;
-using Client.IO.Cache;
-using Client.IO.Cache.Models;
+using Client.IO;
+using Client.IO.Models;
 
 namespace Client.Models.Bindable;
 

@@ -25,15 +25,23 @@ public class Session : IStorage
         LoginId = login_id;
     }
 
-    public static void OverwriteSession(Session session)
+    private static void OverwriteSession(object session)
     {
-        Cache.Cache.SaveToCache(JsonConvert.SerializeObject(session), "session.json");
+        Cache.SaveToCache(JsonConvert.SerializeObject(session), "session.json");
         Logger.Push("Overwriting session to cache", TraceType.Func, LogLevel.Warning);
     }
 
-    public static void ReadSession()
+    public static void Init()
     {
-        string cache = Cache.Cache.ReadFileCache("session.json");
+        SocketCore.OnToken(Token.SESSION_INFO, GetSessionInfoCallback);
+        SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
+
+        ReadSession();
+    }
+
+    private static void ReadSession()
+    {
+        string cache = Cache.ReadFileCache("session.json");
 
         if (cache == null || cache.Length == 0)
         {
@@ -45,11 +53,7 @@ public class Session : IStorage
 
         if (session is null || string.IsNullOrEmpty(session.SessionKey)) return;
 
-        SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
-        SocketCore.SendCallback(session, Token.SESSION_INFO, GetSessionInfoCallback);
-#if ANDROID 
-        
-#endif
+        SocketCore.Send(session, Token.SESSION_INFO);
     }
 
     private static void GetSessionInfoCallback(object packet)

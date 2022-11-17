@@ -47,6 +47,7 @@ public class Group : IBindableType, INotifyPropertyChanged
         {
             SocketCore.SendCallback(groupId, Token.GROUP_AVATAR_REQUEST, (_) =>
             {
+                return;
                 GroupImageRequestPacket? image = JsonConvert.DeserializeObject<GroupImageRequestPacket>((string)_);
                 if (image is null) return;
 

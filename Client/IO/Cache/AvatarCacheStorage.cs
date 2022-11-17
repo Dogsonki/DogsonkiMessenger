@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using Client.IO.Cache.Models;
 using Newtonsoft.Json;
+using Client.IO.Models;
 
-namespace Client.IO.Cache;
+namespace Client.IO;
 
 internal class AvatarCacheStorage
 {

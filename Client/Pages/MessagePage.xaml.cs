@@ -7,7 +7,7 @@ using Client.Models.Bindable;
 using Client.Networking.Packets;
 using Client.Pages.Settings;
 using Newtonsoft.Json;
-using Client.IO.Cache;
+using Client.IO;
 
 namespace Client.Pages;
 
@@ -183,7 +183,7 @@ public partial class MessagePage : ContentPage
                     Messages.Clear();
                     break;
                 case "!mem":
-                    ICommand.PrepareAndSend(new Daily(command), out error);
+                    ICommand.PrepareAndSend(new Mem(command), out error);
                     break;
                     /*
                     case "!invite":

@@ -21,7 +21,7 @@ public class SocketCore : Connection
 
     private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
 
-    private static string LongBuffer = "";
+    private static string LongBuffer = string.Empty;
 
     private static void ProcessBuffer(string buffer)
     {

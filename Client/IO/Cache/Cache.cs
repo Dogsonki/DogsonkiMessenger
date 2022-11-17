@@ -1,14 +1,13 @@
 ﻿using System.Text;
 using Client.Utility;
 
-namespace Client.IO.Cache;
+namespace Client.IO;    
 
 internal class Cache
 {
     //Max sum of every file size in cache directory
     public const long MAX_CACHE_SIZE = 200_000_000;
     public static string CachePath => FileSystem.Current.CacheDirectory + "/temp/";
-
 
     /// <summary>
     /// For now cache only work with avatars: (byte[] avatarCache, avatar+UserId)

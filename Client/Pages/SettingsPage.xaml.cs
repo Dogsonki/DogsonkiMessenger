@@ -1,4 +1,4 @@
-using Client.IO.Cache;
+using Client.IO;
 using Client.Models.Bindable;
 using Client.Pages.Settings;
 

@@ -1,4 +1,4 @@
-﻿namespace Client.IO.Cache.Models;
+﻿namespace Client.IO.Models;
 
 internal class AvatarCacheStorageModel
 {

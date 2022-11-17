@@ -1,9 +1,9 @@
-﻿using Client.IO.Cache.Models;
-using Client.Models.Bindable;
+﻿using Client.Models.Bindable;
 using Newtonsoft.Json;
 using System.Text;
+using Client.IO.Models;
 
-namespace Client.IO.Cache;
+namespace Client.IO;
 
 internal class ChatCache
 {
