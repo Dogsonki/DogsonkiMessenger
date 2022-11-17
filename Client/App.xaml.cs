@@ -12,7 +12,7 @@ public partial class App : Application
         InitializeComponent();
 
         Connection.AddOnConnection(Session.Init);
-
+      
         Task.Run(SocketCore.Start);
 #if DEBUG   
         try

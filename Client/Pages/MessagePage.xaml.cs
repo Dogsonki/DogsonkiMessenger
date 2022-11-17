@@ -153,47 +153,10 @@ public partial class MessagePage : ContentPage
     {
         try
         {
-            string command = args[0];
             string error = string.Empty;
 
-            switch (command)
-            {
-                case "!daily":
-                    ICommand.PrepareAndSend(new Daily(command), out error);
-                    break;
-                case "!bet":
-                    if (!Bet.HasArgs(args.Length)) return;
-                    ICommand.PrepareAndSend(new Bet(command, args[1], args[2]), out error);
-                    break;
-                case "!jackpotbuy":
-                    if (!JackpotBuy.HasArgs(args.Length)) return;
-                    ICommand.PrepareAndSend(new JackpotBuy(command, args[1]), out error);
-                    break;
-                case "!zdrapka":
-                    SocketCore.SendCommand(new Scratchcard(command));
-                    break;
-                case "!sklep":
-                    if (!Shop.HasArgs(args.Length)) return;
-                    ICommand.PrepareAndSend(new Shop(command, args[1]), out error);
-                    break;
-                case "!slots":
-                    SocketCore.SendCommand(new Slots(command));
-                    break;
-                case "!clear":
-                    Messages.Clear();
-                    break;
-                case "!mem":
-                    ICommand.PrepareAndSend(new Mem(command), out error);
-                    break;
-                    /*
-                    case "!invite":
-                        SocketCore.Send(new GroupChatUserInvitePacket(GroupChat.Id, int.Parse(args[1])),Token.GROUP_INVITE);
-                        break;
-                    case "!remove":
-                        SocketCore.Send(new GroupChatUserRemovePacket(GroupChat.Id, int.Parse(args[1])), Token.GROUP_USER_KICK);
-                        break;
-                    */
-            }
+            CommandProcess.Invoke(args[0], args, out error);
+
             if (error != string.Empty)
             {
                 SystemAddMessage(error);

@@ -13,9 +13,17 @@ namespace Client.Networking.Core
 
         public static int GetCount() => Callbacks.Count;
 
-        private static void RemoveCallback(int token) => Callbacks.Remove(Callbacks.Find(x => x.GetToken() == token));
+        private static void RemoveCallback(int token)
+        {
+            RequestedCallbackModel? model = Callbacks.Find(x => x.GetToken() == token);
+            if(model is null)
+            {
+                return;
+            }
+            Callbacks.Remove(model);
+        }
 
-        public static bool InvokeCallback(int token, string data)
+        public static bool InvokeCallback(int token, object data)
         {
             foreach (var callback in Callbacks)
             {
@@ -23,11 +31,10 @@ namespace Client.Networking.Core
                 {
                     RemoveCallback(token);
                     callback.Invoke(data);
-                    return false;
+                    return true;
                 }
             }
-            return true;
+            return false;
         }
-
     }
 }

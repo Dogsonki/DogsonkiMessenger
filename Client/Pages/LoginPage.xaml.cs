@@ -1,4 +1,3 @@
-using Client.IO;
 using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Packets;
@@ -12,9 +11,10 @@ public partial class LoginPage : ContentPage
     public static LoginPage Current;
     public MessagePopPage message;
     
-    public LoginPage(string info = "")
+    public LoginPage(string? info = null)
     {
         InitializeComponent();
+
         NavigationPage.SetHasNavigationBar(this, false);
 
         message = new MessagePopPage(this);

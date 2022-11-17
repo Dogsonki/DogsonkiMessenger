@@ -1,10 +1,13 @@
-﻿namespace Client.Networking.Model;
+﻿using Client.Utility;
+using System.Reflection;
+
+namespace Client.Networking.Model;
 
 public class RequestedCallbackModel
 {
-    protected Action<object> CallbackAction;
+    private Action<object> CallbackAction;
 
-    protected int CallbackToken { get; init; }
+    private int CallbackToken { get; init; }
 
     public RequestedCallbackModel(Action<object> callback, int pretoken)
     {
@@ -21,14 +24,17 @@ public class RequestedCallbackModel
     {
         if (CallbackAction != null)
         {
-            try
+            MainThread.BeginInvokeOnMainThread(() => 
             {
-                MainThread.BeginInvokeOnMainThread(() => CallbackAction.Invoke(Recived));
-            }
-            catch (Exception ex)
-            {
-                Debug.Write(ex);
-            }
+                try
+                {
+                    CallbackAction.Invoke(Recived);
+                }
+                catch(TargetInvocationException exception)
+                {
+                    Logger.Push(exception, TraceType.Func, LogLevel.Error);
+                }
+            });
         }
     }
 }

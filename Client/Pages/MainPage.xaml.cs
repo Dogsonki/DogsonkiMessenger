@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 using System.Text;
+using Client.Pages.Settings;
 
 namespace Client.Pages;
 
@@ -50,7 +51,6 @@ public partial class MainPage : ContentPage
         */
     }
 
-
     public static void AddLastChatsCallback(object packet)
     {
         List<BindableLastChat> bindable = new List<BindableLastChat>();
@@ -95,6 +95,7 @@ public partial class MainPage : ContentPage
 
     private async void CreateGroup(object sender, EventArgs e) => await Navigation.PushAsync(new GroupChatCreator());
     private async void SettingsTapped(object sender, EventArgs e) => await Navigation.PushAsync(new SettingsPage());
+    private async void ProfileImageTapped(object sender, EventArgs e) => await Navigation.PushAsync(new ProfileSettings());
 
     protected override bool OnBackButtonPressed()
     {

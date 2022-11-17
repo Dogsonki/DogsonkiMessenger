@@ -28,6 +28,11 @@
 
 				<Frame BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
 				       CornerRadius="40" HeightRequest="80" WidthRequest="80">
+
+					<Frame.GestureRecognizers>
+						<TapGestureRecognizer Tapped="ProfileImageTapped"/>
+					</Frame.GestureRecognizers>
+
 					<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
 							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
 				</Frame>

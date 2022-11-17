@@ -49,7 +49,7 @@ public class SocketCore : Connection
 
         ThreadPool.QueueUserWorkItem((_) =>
         {
-            if (!RequestedCallback.InvokeCallback(packet.Token, Convert.ToString(packet.Data))) return;
+            if (RequestedCallback.InvokeCallback(packet.Token, Convert.ToString(packet.Data))) return;
 
             ReadRawBuffer(packet);
         });
@@ -140,7 +140,7 @@ public class SocketCore : Connection
 
                 SocketQueue.IsSending = false;
             }
-            Thread.Sleep(5);
+            Thread.Sleep(3);
         }
     }
 

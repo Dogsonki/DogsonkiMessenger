@@ -5,7 +5,6 @@ using Client.Networking.Packets;
 using Client.Pages;
 using Client.Utility;
 using Newtonsoft.Json;
-using System.Security;
 
 namespace Client.IO;
 
@@ -14,9 +13,9 @@ public class Session : IStorage
 {
     private const string FileName = "session.json";
 
-    [JsonProperty("session_key")] public string SessionKey { get; set; } = "";
+    [JsonProperty("session_key")] public string SessionKey { get; set; } = string.Empty;
 
-    [JsonProperty("login_id")] public string LoginId { get; set; } = "";
+    [JsonProperty("login_id")] public string LoginId { get; set; } = string.Empty;
 
     [JsonConstructor]
     public Session(string session_key, string login_id)
@@ -43,7 +42,7 @@ public class Session : IStorage
     {
         string cache = Cache.ReadFileCache("session.json");
 
-        if (cache == null || cache.Length == 0)
+        if (string.IsNullOrWhiteSpace(cache))
         {
             Logger.Push("Session info was null", TraceType.Func, LogLevel.Warning);
             return;

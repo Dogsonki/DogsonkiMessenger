@@ -5,14 +5,23 @@ namespace Client.Commands;
 
 public interface ICommand
 {
+    /// <summary>
+    /// Name of command, names have to match in client and server
+    /// </summary>
     public string Command { get; set; }
+
+    /// <summary>
+    /// True if command will be sended to server
+    /// </summary>
+    public bool Sendable { get; set; }
+
+    /*Sendable is property but is not being sended to server*/
 
     /// <summary>
     /// Checks if parameters from user has the same count as command properties
     /// </summary>
-    public static bool HasAgrs(Type command, int ProvidedArgs) => command.GetProperties().Length == ProvidedArgs;
+    public static bool HasAgrs(Type command, int ProvidedArgs) => command.GetProperties().Length-1 == ProvidedArgs;
 
-    //For now it doesn't do much but will be useful when command will need Classes
     /// <summary>
     /// Checks if values of properties type have assigned types
     /// </summary>
@@ -55,9 +64,6 @@ public interface ICommand
         {
             return SocketCore.SendCommand(command);
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 }
