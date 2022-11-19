@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Client.Utility;
 using System.Text;
+using Client.Pages;
 
 namespace Client.Models.Bindable;
 
@@ -11,7 +12,7 @@ public class BindableLastChat : INotifyPropertyChanged
     private readonly User? BindedUser;
     private readonly Group? BindedGroup;
 
-    private readonly bool IsGroup;
+    public readonly bool IsGroup;
 
     public ImageSource avatar;
 
@@ -45,6 +46,9 @@ public class BindableLastChat : INotifyPropertyChanged
     private string MessageType { get; init; }
     public Command Input { get; init; }
 
+    public static void AddLastChat(Group group) => MainPage.AddLastChat(group);
+    public static void AddLastChat(User user) => MainPage.AddLastChat(user);
+
     public string FactoredLastMessage
     {
         get
@@ -69,7 +73,7 @@ public class BindableLastChat : INotifyPropertyChanged
         }
         else
         {
-            Message = "";
+            Message = string.Empty;
         }
 
         if (type == "user")
@@ -100,6 +104,22 @@ public class BindableLastChat : INotifyPropertyChanged
 
         MessageType = messageType;
         Id = id.ToString();
+    }
+
+    public BindableLastChat(Group group)
+    {
+        IsGroup = true;
+        BindedGroup = group;
+        Input = new Command(() => Conversation.OpenChat(group));
+        Id = group.Id.ToString();
+    }
+
+    public BindableLastChat(User user)
+    {
+        IsGroup = false;
+        BindedUser = user;
+        Input = new Command(() => Conversation.OpenChat(user));
+        Id = user.Id.ToString();
     }
 
     private string GetMessage()

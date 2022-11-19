@@ -10,11 +10,6 @@ public static class AvatarManager
     {
         byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("user_avatar" + userId);
 
-        if (avatarCacheBuffer is null || avatarCacheBuffer.Length == 0)
-        {
-            Debug.Write($"User Id: {userId} has null avatar");
-        }
-
         return avatarCacheBuffer;
     }
 
@@ -72,9 +67,10 @@ public static class AvatarManager
     {
         if (avatar is null || avatar.Length == 0)
         {
-            Debug.Error("Cannot set null avatar");
             return false;
         }
+
+        user.SetAvatar(avatar);
 
         SocketCore.SendCallback(user.UserId, Token.GET_USER_AVATAR_TIME, (object _) =>
         {
@@ -91,12 +87,7 @@ public static class AvatarManager
             {
                 if (newTime > time)
                 {
-                    Debug.Write($"Time {newTime} > {time}");
                     SocketCore.Send(user.UserId, Token.USER_AVATAR_REQUEST);
-                }
-                else
-                {
-                    user.SetAvatar(avatar);
                 }
             }
         });

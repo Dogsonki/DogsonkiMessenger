@@ -131,6 +131,8 @@ public class SocketCore : Connection
 
                     byte[] buffer = packet.GetPacked();
 
+                    Debug.Write(Encoding.UTF8.GetString(buffer));
+
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }
                 catch (Exception ex)

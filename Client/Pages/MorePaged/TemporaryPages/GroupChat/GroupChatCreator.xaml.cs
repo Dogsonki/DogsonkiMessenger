@@ -51,6 +51,8 @@ public partial class GroupChatCreator : ContentPage
         {
             SocketCore.Send(GroupAvatarBuffer, Token.GROUP_AVATAR_SET);
         }
+
+        BindableLastChat.AddLastChat(group);
     }
 
     private async void GroupImageChange(object? sender, EventArgs e)
@@ -206,6 +208,6 @@ public partial class GroupChatCreator : ContentPage
             }
         }
 
-        SocketCore.SendCallback( new GroupChatCreatePacket(name,LocalUser.UserRef.UserId, Ids.ToArray()),Token.GROUP_CHAT_CREATE, CreateGroupCallback);
+        SocketCore.SendCallback(new GroupChatCreatePacket(name,LocalUser.UserRef.UserId, Ids.ToArray()),Token.GROUP_CHAT_CREATE, CreateGroupCallback);
     }
 }

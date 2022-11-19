@@ -4,8 +4,8 @@ using Client.Pages.TemporaryPages.GroupChat;
 using System.Collections.ObjectModel;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
-using System.Text;
 using Client.Pages.Settings;
+using Client.Models;
 
 namespace Client.Pages;
 
@@ -40,15 +40,13 @@ public partial class MainPage : ContentPage
 
     public static void AddLastChat(Group group)
     {
-        /*
         if (LastChats.Count > 0)
         {
-            if (!LastChats.Any(x => x.Id == group.Id && x.IsGroup))
+            if (!LastChats.Any(x => x.Id == group.Id.ToString() && x.IsGroup))
             {
-                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new AnyListBindable(group, new Command(() => Group.OpenChat(group)))));
+                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new BindableLastChat(group)));
             }
         }
-        */
     }
 
     public static void AddLastChatsCallback(object packet)
@@ -57,7 +55,7 @@ public partial class MainPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            return;
+            Debug.Write((string)packet);
             LastChatsPacket[]? lastChats = JsonConvert.DeserializeObject<LastChatsPacket[]>(Convert.ToString(packet));
 
             if (lastChats is null || lastChats?.Length == 0)

@@ -11,6 +11,9 @@ public class SocketPacket
     [JsonProperty("token")]
     public int Token { get; set; }
 
+    [JsonIgnore]
+    private const char EndOfPacket = '$';
+
     [JsonConstructor]
     public SocketPacket(object data, Token token = Client.Token.EMPTY)
     {
@@ -19,7 +22,7 @@ public class SocketPacket
     }
 
     /// <summary>
-    /// Returns Data
+    /// Returns Encoded Data
     /// </summary>
     public object GetEncoded() => Data;
 
@@ -27,7 +30,7 @@ public class SocketPacket
     /// Prepares packet to be sended
     /// </summary>
     /// <returns>Prepared packet</returns>
-    public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + "$");
+    public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + EndOfPacket);
 
     public static bool TryDeserialize(out SocketPacket? packet, string buffer)
     {

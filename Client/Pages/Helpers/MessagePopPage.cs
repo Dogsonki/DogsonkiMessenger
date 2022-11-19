@@ -50,6 +50,12 @@ namespace Client.Pages.Helpers
             });
         }
 
+        public void Clear()
+        {
+            Clear(PopType.Error);
+            Clear(PopType.Info);
+        }
+
         public void Clear(PopType type)
         {
             switch (type)

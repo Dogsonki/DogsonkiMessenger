@@ -19,11 +19,6 @@ public partial class ForgotPasswordEnterEmail : ContentPage
 	{
 		string ProvidedEmail = Input_Email.Text;
 
-		if(Input_Email.Text == "a")
-		{
-            MainThread.BeginInvokeOnMainThread(() => StaticNavigator.Push(new ForgotPasswordEnterCode()));
-        }
-
 		if (string.IsNullOrEmpty(ProvidedEmail))
 		{
 			message.ShowError("Email is empty");
@@ -31,21 +26,23 @@ public partial class ForgotPasswordEnterEmail : ContentPage
 		}
 
         MailAddress _tempAdr;
+
         if (!MailAddress.TryCreate(ProvidedEmail, out _tempAdr))
         {
             message.ShowError("Invalid email");
             return;
         }
 
-        if (!SocketCore.SendCallback(Input_Email.Text, Token.PASSWORD_FORGOT, CheckEmailCallback))
+        if (!SocketCore.SendCallback(Input_Email.Text, Token.PASSWORD_FORGOT, CheckEmailCallback, false))
 		{
 			message.ShowError("Unable to connect to server");
 		}
 	}
 
-	public void CheckEmailCallback(object data)
+    public void CheckEmailCallback(object data)
 	{
-		switch (data)
+		int code = int.Parse((string)data);
+        switch (code)
 		{
 			case 1:
 				message.ShowError("Cannot send email");

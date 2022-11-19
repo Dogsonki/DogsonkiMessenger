@@ -84,24 +84,11 @@ public class User : IBindableType, INotifyPropertyChanged
             Users.Add(this);
         });
 
-        if (flags.HasFlag(UserCreateFlags.UseDefaultAvatar) && !flags.HasFlag(UserCreateFlags.Default) && !flags.HasFlag(UserCreateFlags.IsSystemUser))
-        {
-            byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("user_avatar_default");
+        byte[] avatarCacheBuffer = AvatarManager.ReadUserAvatar(id);
 
-            SetAvatar(avatarCacheBuffer);
-        }
-        else if (flags.HasFlag(UserCreateFlags.IsSystemUser) && !flags.HasFlag(UserCreateFlags.Default))
+        if (!AvatarManager.SetUserAvatar(this, avatarCacheBuffer))
         {
-            /*TODO: Set System Bot Avatar */
-        }
-        else 
-        {
-            byte[] avatarCacheBuffer = AvatarManager.ReadUserAvatar(id);
-
-            if (!AvatarManager.SetUserAvatar(this, avatarCacheBuffer))
-            {
-                SocketCore.Send(UserId, Token.USER_AVATAR_REQUEST);
-            }
+            SocketCore.Send(UserId, Token.USER_AVATAR_REQUEST);
         }
     }
 

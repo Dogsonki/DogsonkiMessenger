@@ -66,13 +66,14 @@ public class LocalUser : BindableObject
 
     #region UI_VISIBLE
 
-    public string FactoredDogeCoinsCount => $"DogeCoins: {DogeCoins}";
+    public string FactoredDogeCoinsCount => $"Doge Coins: {DogeCoins}";
+    public string FactoredLegendaryDogeCoinsCount => $"Legendary Doge Coins: {DogeCoins}";
 
     #endregion
 
     public static void Logout()
     {
-        SocketCore.Send(" ", 0);
+        SocketCore.Send(" ", Token.LOGOUT);
         ToDefault();
     }
 
@@ -113,7 +114,7 @@ public class LocalUser : BindableObject
         Current.Username = "NOT_LOGGED_USER";
         Current.ID = 0xffffffff.ToString();
         isLoggedIn = false;
-        Current.Avatar = null;
+        Current.Avatar = default;
 
         MainPage.LastChats.Clear();
         Bindable.User.ClearUsers();

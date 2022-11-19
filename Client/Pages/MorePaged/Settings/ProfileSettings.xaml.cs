@@ -13,6 +13,11 @@ public partial class ProfileSettings : ContentPage
 		NavigationPage.SetHasNavigationBar(this, false);
 	}
 
+    private async void ChangePassword(object sender, EventArgs e)
+    {
+
+    }
+
     private async void ChangeAvatar(object sender, EventArgs e)
     {
         try

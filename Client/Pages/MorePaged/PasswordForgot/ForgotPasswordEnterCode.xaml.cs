@@ -18,13 +18,12 @@ public partial class ForgotPasswordEnterCode : ContentPage
 
 	private void CheckCode(object sender, EventArgs e)
 	{
-		message.Clear(PopType.Error);
-		message.Clear(PopType.Info);
+		message.Clear();
 
 		int code;
 		if(Attempts == MAX_ATTEMPTS)
 		{
-			MainThread.InvokeOnMainThreadAsync(async () => await Navigation.PushAsync(new LoginPage("You used all attemps. Please try again ")));
+			MainThread.InvokeOnMainThreadAsync(async () => await Navigation.PushAsync(new LoginPage("You used all attemps. Please try again later")));
 			return;
 		}
 		if(!int.TryParse(CodeInput.Text,out code))
@@ -43,7 +42,13 @@ public partial class ForgotPasswordEnterCode : ContentPage
         }
 	}
 
-	private void CheckCodeCallback(object data)
+    protected override bool OnBackButtonPressed()
+    {
+		SocketCore.Send("b", Token.PASSWORD_FORGOT);
+        return base.OnBackButtonPressed();
+    }
+
+    private void CheckCodeCallback(object data)
 	{
 		switch (data)
 		{

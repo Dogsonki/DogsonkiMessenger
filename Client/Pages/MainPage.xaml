@@ -40,13 +40,14 @@
 				<StackLayout Padding="5" WidthRequest="270">
 
 					<StackLayout Spacing="0" Orientation="Horizontal">
-						<Label FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
+						<Label VerticalOptions="Center" FontAttributes="Bold" FontSize="Large" Text="{Binding User.Username}" />
 						<Label VerticalOptions="Center" FontSize="Small" Text="#" />
 						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 					</StackLayout>
 
 					<StackLayout>
 						<Label TextColor="LightGray" x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
+						<Label TextColor="LightGray" x:Name="LegendaryDogeCoinsCount" Text="{Binding User.FactoredLegendaryDogeCoinsCount}"/>
 					</StackLayout>
 
 				</StackLayout>

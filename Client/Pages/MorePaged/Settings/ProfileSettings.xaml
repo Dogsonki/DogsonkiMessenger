@@ -12,7 +12,7 @@
 
 	<VerticalStackLayout>
 		<StackLayout  Margin="0,0,0,20"/>
-		
+
 		<StackLayout Orientation="Horizontal" Margin="0,0,0,20">
 			<Frame Padding="15" BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
 						   CornerRadius="40" HeightRequest="80" WidthRequest="80">
@@ -25,13 +25,13 @@
 					<Label VerticalOptions="Center" FontSize="Small" Text="#" />
 					<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
 				</StackLayout>
-				<StackLayout>
-					<Label x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
-				</StackLayout>
 			</StackLayout>
 		</StackLayout>
-
-		<Button Clicked="ChangeAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
+		
+		<StackLayout Spacing="15">
+			<Button Clicked="ChangeAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
+			<Button Clicked="ChangePassword" WidthRequest="200" BackgroundColor="#0047ab" Text="Change Password"/>
+		</StackLayout>
 
 	</VerticalStackLayout>
 </ContentPage>
