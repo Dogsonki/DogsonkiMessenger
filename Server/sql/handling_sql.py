@@ -54,7 +54,7 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
 def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
                                              number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT messages.id, content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
+    cursor.execute("""SELECT groups_messages.id, content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
                       INNER JOIN users AS u ON groups_messages.sender_id = u.id)
                       INNER JOIN groups_ AS g ON groups_messages.group_id = g.id)
                       WHERE group_id = %s
