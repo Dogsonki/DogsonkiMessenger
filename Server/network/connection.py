@@ -176,12 +176,12 @@ class Client(Connection):
         """
         self.login_id = session_data.data["login_id"]
         session_key = session_data.data["session_key"]
-        self.login_id = handling_sql.check_session(self.db_cursor, self.login_id, session_key)
+        self.login_id = handling_sql.check_session(self, self.login_id, session_key)
         if not self.login_id:
             self.send_message({"token": 0, "email": None, "login_id": None, "nick": None},
                               MessageType.AUTOMATICALLY_LOGGED)
             return False
-        self.login, self.password, self.nick, is_banned = handling_sql.get_user(self.db_cursor, self.login_id)
+        self.login, self.password, self.nick, is_banned = handling_sql.get_user(self, self.login_id)
         token, callback = [-1, False] if is_banned else [1, True]
         self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                           MessageType.AUTOMATICALLY_LOGGED)
@@ -197,9 +197,9 @@ class Client(Connection):
         self.login = login_data.data["login"]
         self.password = login_data.data["password"]
         remember = login_data.data["remember"]
-        self.login_id, is_banned = handling_sql.login_user(self.db_cursor, self.login, self.password)
+        self.login_id, is_banned = handling_sql.login_user(self, self.login, self.password)
         if self.login_id:
-            self.nick = handling_sql.get_nick(self.db_cursor, self.login_id)
+            self.nick = handling_sql.get_nick(self, self.login_id)
             token, callback = [-1, False] if is_banned else [1, True]
             self.send_message({"token": token, "email": self.login, "login_id": self.login_id, "nick": self.nick},
                               MessageType.LOGIN)
@@ -211,7 +211,7 @@ class Client(Connection):
         return False
 
     def create_session(self):
-        session_key = handling_sql.create_session(self.db_cursor, self.login_id)
+        session_key = handling_sql.create_session(self, self.login_id)
         self.send_message({"login_id": self.login_id, "session_key": session_key}, MessageType.SESSION_INFO)
 
     def register_user(self, register_data):
@@ -233,14 +233,14 @@ class Client(Connection):
         if not self.validate_login_data():
             self.send_message("8", MessageType.REGISTER)
             return
-        if handling_sql.check_if_nick_exist(self.db_cursor, nick):
+        if handling_sql.check_if_nick_exist(self, nick):
             self.send_message("7", MessageType.REGISTER)
             return
-        if handling_sql.check_if_login_exist(self.db_cursor, self.login):
+        if handling_sql.check_if_login_exist(self, self.login):
             self.send_message("3", MessageType.REGISTER)
 
         code = get_confirmation_code()
-        created = handling_sql.create_confirmation_code(self.db_cursor, self.login, code)
+        created = handling_sql.create_confirmation_code(self, self.login, code)
         if created is not True:
             code = created
             self.send_message("6", MessageType.REGISTER)
@@ -253,7 +253,7 @@ class Client(Connection):
 
         if not confirmed:
             return
-        handling_sql.register_user(self.db_cursor, self.login, self.password, nick)
+        handling_sql.register_user(self, self.login, self.password, nick)
         self.send_message("0", MessageType.REGISTER)
 
     def confirm_email(self, code: int, type_: MessageType) -> bool:
@@ -265,7 +265,7 @@ class Client(Connection):
             if code_from_user.data == "b":
                 return False
 
-            confirmed = handling_sql.check_email_confirmation(self.db_cursor, self.login, int(code_from_user.data))
+            confirmed = handling_sql.check_email_confirmation(self, self.login, int(code_from_user.data))
             if confirmed is True:
                 return True
             else:
@@ -293,13 +293,13 @@ class Client(Connection):
             9 - wrong confirmation code
             10 - max attempts during writing code from email, try again
         """
-        if not handling_sql.check_if_login_exist(self.db_cursor, login):
+        if not handling_sql.check_if_login_exist(self, login):
             self.send_message("2", MessageType.FORGOT_PASSWORD)
             return
 
         code = get_confirmation_code()
         self.login = login
-        created = handling_sql.create_confirmation_code(self.db_cursor, login, code)
+        created = handling_sql.create_confirmation_code(self, login, code)
         if created is not True:
             code = created
         else:
@@ -317,29 +317,29 @@ class Client(Connection):
                     break
                 else:
                     self.send_message("3", MessageType.FORGOT_PASSWORD)
-            handling_sql.change_password(self.db_cursor, login, new_password)
-            handling_sql.delete_session(self.db_cursor, self.login_id)
+            handling_sql.change_password(self, login, new_password)
+            handling_sql.delete_session(self, self.login_id)
             self.send_message("0", MessageType.FORGOT_PASSWORD)
 
     def logout(self):
         del current_connections[self.nick]
         self.login = ""
         self.password = ""
-        handling_sql.delete_session(self.db_cursor, self.login_id)
+        handling_sql.delete_session(self, self.login_id)
         self.login_id = -1
         self.get_login_action()
 
     def set_avatar(self, avatar: str):
         if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:
             avatar = base64.b64encode(bytes(avatar, "UTF-8"))
-            handling_sql.set_user_avatar(self.db_cursor, self.login, avatar)
+            handling_sql.set_user_avatar(self, self.login, avatar)
             changed = 1
         else:
             changed = 0
         self.send_message(changed, MessageType.CHANGE_AVATAR)
 
     def get_avatar(self, login_id: str):
-        avatar = handling_sql.get_user_avatar(self.db_cursor, login_id)
+        avatar = handling_sql.get_user_avatar(self, login_id)
         try:
             if avatar[0]:
                 avatar = str(base64.b64decode(avatar[0]))

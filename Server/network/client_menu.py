@@ -16,19 +16,19 @@ class NormalChatroom(functions.Chatroom):
         super().__init__(connection)
         self.receiver = receiver
         self.friends = True
-        self.receiver_id = handling_sql.get_user_id(self.connection.db_cursor, self.receiver)
+        self.receiver_id = handling_sql.get_user_id(self.connection, self.receiver)
         self.is_group = False
         self.chat_actions.update({
             MessageType.GET_LAST_CHAT_MESSAGE_ID: self.get_last_message_id
         })
 
     def get_last_message_id(self, message: str):
-        last_message_id = handling_sql.get_last_message_id(self.connection.db_cursor, self.connection.login_id,
+        last_message_id = handling_sql.get_last_message_id(self.connection, self.connection.login_id,
                                                            self.receiver_id)
         self.connection.send_message(last_message_id, MessageType.GET_LAST_CHAT_MESSAGE_ID)
 
     def send_last_messages(self, old: bool = False):
-        message_history = handling_sql.get_last_30_messages_from_chatroom(self.connection.db_cursor,
+        message_history = handling_sql.get_last_30_messages_from_chatroom(self.connection,
                                                                           self.connection.login_id,
                                                                           self.receiver_id,
                                                                           self.number_of_sent_last_messages)
@@ -54,13 +54,13 @@ class NormalChatroom(functions.Chatroom):
         is_path = False if message_type == "text" else True
         if is_path and save:
             message = self._save_file(self.receiver_id, message)
-        handling_sql.save_message(self.connection.db_cursor, message, self.connection.login_id,
+        handling_sql.save_message(self.connection, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
         message_id = self.connection.db_cursor.lastrowid
         if not self.friends:
-            handling_sql.create_users_link(self.connection.db_cursor, self.connection.login_id, self.receiver_id)
+            handling_sql.create_users_link(self.connection, self.connection.login_id, self.receiver_id)
             self.friends = True
-        handling_sql.update_last_time_message(self.connection.db_cursor, self.connection.login_id, self.receiver_id,
+        handling_sql.update_last_time_message(self.connection, self.connection.login_id, self.receiver_id,
                                               message_id)
         return message_id
 
@@ -71,12 +71,12 @@ def search_users(client: Client, message_data: dict):
     data = []
 
     if search_groups:
-        groups = handling_sql.get_user_groups(client.db_cursor, client.login_id)
+        groups = handling_sql.get_user_groups(client, client.login_id)
         for i in groups:
             if i.name.startswith(nick):
                 data.append({"name": i.name, "id": i.id, "type": "group"})
 
-    first_logins = handling_sql.search_by_nick(client.db_cursor, nick)
+    first_logins = handling_sql.search_by_nick(client, nick)
     for i in first_logins:
         data.append({"name": i[1], "id": i[0], "type": "user"})
     client.send_message(data, MessageType.SEARCH_USERS)
@@ -111,7 +111,7 @@ def set_group_avatar(client: Client, data: dict):
 
 
 def send_last_chats(client: Client, data: str):
-    user_chats = handling_sql.get_user_chats(client.db_cursor, client.login)
+    user_chats = handling_sql.get_user_chats(client, client.login)
     chats = []
     if user_chats:
         for i in user_chats:
@@ -132,7 +132,7 @@ def send_last_chats(client: Client, data: str):
                               "message": i.message,
                               "sender": i.sender})
 
-    user_group_chats = handling_sql.get_user_groups(client.db_cursor, client.login_id)
+    user_group_chats = handling_sql.get_user_groups(client, client.login_id)
     if user_group_chats:
         for i in user_group_chats:
             try:

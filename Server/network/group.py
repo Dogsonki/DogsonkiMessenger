@@ -11,9 +11,9 @@ def create_group(client: Client, data: dict):
     group_name = data["group_name"]
     creator = data["creator"]
     users = data["users"]
-    group_id = handling_sql.create_group(client.db_cursor, group_name)
-    handling_sql.add_to_group(client.db_cursor, creator, group_id)
-    handling_sql.make_admin(client.db_cursor, creator, group_id)
+    group_id = handling_sql.create_group(client, group_name)
+    handling_sql.add_to_group(client, creator, group_id)
+    handling_sql.make_admin(client, creator, group_id)
     for i in users:
         add_to_group(client, {"group_id": group_id, "added_person_id": i})
     client.send_message({"group_id": group_id, "group_name": group_name}, MessageType.CREATE_GROUP)
@@ -22,8 +22,8 @@ def create_group(client: Client, data: dict):
 def add_to_group(client: Client, data: dict):
     group_id = data["group_id"]
     added_user_id = data["added_person_id"]
-    if handling_sql.get_is_admin(client.db_cursor, client.login_id, group_id):
-        handling_sql.add_to_group(client.db_cursor, added_user_id, group_id)
+    if handling_sql.get_is_admin(client, client.login_id, group_id):
+        handling_sql.add_to_group(client, added_user_id, group_id)
         message = "0"  # 0 -> user has been added
     else:
         message = "1"  # 1 -> adding person is not a group admin
@@ -33,8 +33,8 @@ def add_to_group(client: Client, data: dict):
 def delete_from_group(client: Client, data: dict):
     group_id = data["group_id"]
     removed_user_id = data["removed_person_id"]
-    if handling_sql.get_is_admin(client.db_cursor, client.login_id, group_id):
-        handling_sql.delete_from_group(client.db_cursor, removed_user_id, group_id)
+    if handling_sql.get_is_admin(client, client.login_id, group_id):
+        handling_sql.delete_from_group(client, removed_user_id, group_id)
         message = "0"  # 0 -> user has been removed from group
     else:
         message = "1"  # 1 -> removing person is not a group admin
@@ -42,7 +42,7 @@ def delete_from_group(client: Client, data: dict):
 
 
 def get_avatar(client: Client, group_id: int):
-    avatar = handling_sql.get_group_avatar(client.db_cursor, group_id)
+    avatar = handling_sql.get_group_avatar(client, group_id)
     try:
         if avatar[0]:
             avatar = str(base64.b64decode(avatar[0]))
@@ -61,7 +61,7 @@ def set_avatar(client: Client, data: dict):
     avatar = data["avatar"]
     if (len(avatar) * 3) / 4 - avatar.count("=", -2) < 2000000:
         avatar = base64.b64encode(bytes(avatar, "UTF-8"))
-        handling_sql.set_group_avatar(client.db_cursor, data["group_id"], avatar)
+        handling_sql.set_group_avatar(client, data["group_id"], avatar)
 
 
 class GroupChatroom(functions.Chatroom):
@@ -71,7 +71,7 @@ class GroupChatroom(functions.Chatroom):
     def __init__(self, connection: Client, group_id: str):
         super().__init__(connection)
         self.group_id = int(group_id)
-        self.group_members = handling_sql.get_group_members(self.connection.db_cursor, self.group_id)
+        self.group_members = handling_sql.get_group_members(self.connection, self.group_id)
         self.is_group = False
         self.chat_actions.update({
             MessageType.ADD_TO_GROUP: self.add_to_group,
@@ -83,7 +83,7 @@ class GroupChatroom(functions.Chatroom):
         })
 
     def get_last_chat_message_id(self, message: str):
-        last_message_id = handling_sql.get_last_group_message_id(self.connection.db_cursor, self.group_id)
+        last_message_id = handling_sql.get_last_group_message_id(self.connection, self.group_id)
         self.connection.send_message(last_message_id, MessageType.GET_LAST_GROUP_CHAT_MESSAGE_ID)
 
     def delete_from_group(self, message: dict):
@@ -102,7 +102,7 @@ class GroupChatroom(functions.Chatroom):
         self.connection.send_message([dataclasses.asdict(i) for i in self.group_members], MessageType.GET_GROUP_MEMBERS)
 
     def send_last_messages(self, old: bool = False):
-        message_history = handling_sql.get_last_30_messages_from_group_chatroom(self.connection.db_cursor,
+        message_history = handling_sql.get_last_30_messages_from_group_chatroom(self.connection,
                                                                                 self.group_id,
                                                                                 self.number_of_sent_last_messages)
         self._send_last_messages(message_history, old, True, self.group_id)
@@ -124,8 +124,8 @@ class GroupChatroom(functions.Chatroom):
         is_path = False if message_type == "text" else True
         if is_path and save:
             message = self._save_file(self.group_id, message)
-        handling_sql.save_group_message(self.connection.db_cursor, message, self.connection.login_id,
+        handling_sql.save_group_message(self.connection, message, self.connection.login_id,
                                         int(self.group_id), message_type, is_path)
         message_id = self.connection.db_cursor.lastrowid
-        handling_sql.update_last_time_message_group(self.connection.db_cursor, self.group_id, message_id)
+        handling_sql.update_last_time_message_group(self.connection, self.group_id, message_id)
         return message_id

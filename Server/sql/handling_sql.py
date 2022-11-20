@@ -9,16 +9,20 @@ from mysql.connector.errors import IntegrityError
 from mysql.connector.cursor_cext import CMySQLCursor
 
 from ..network.config import config
-from ..network import functions
+from ..network import functions, connection
+from .connection import sql_con
 
 
 def connection_checking(function):
-    def check_cursor_connection(cursor: CMySQLCursor, *args):
+    def check_cursor_connection(client: connection.Client, *args):
         try:
-            data = function(cursor, *args)
+            data = function(client.db_cursor, *args)
         except AttributeError:
-            cursor.ping(reconnect=True)
-            data = function(cursor, *args)
+            if client.db_cursor is None:
+                client.db_cursor = sql_con.get_cursor()
+            else:
+                client.db_cursor.ping(reconnect=True)
+            data = function(client.db_cursor, *args)
         return data
     return check_cursor_connection
 
