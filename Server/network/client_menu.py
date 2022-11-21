@@ -43,11 +43,10 @@ class NormalChatroom(functions.Chatroom):
         if message_ != "":
             message_id = self.save_message_in_database(message_, message_type)
             receiver_connection = current_connections.get(self.receiver)
-            data = [{"user": self.connection.nick, "message": message_, "id": message_id,
-                     "time": time.time(), "user_id": self.connection.login_id,
-                     "is_group": False, "group_id": -1, "message_type": message_type}]
-            self.connection.send_message(data, MessageType.CHAT_MESSAGE)
             if receiver_connection:
+                data = {"user": self.connection.nick, "message": message_, "id": message_id,
+                        "time": time.time(), "user_id": self.connection.login_id,
+                        "is_group": False, "group_id": -1, "message_type": message_type}
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
     def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
