@@ -45,7 +45,7 @@ def get_avatar(client: Client, group_id: int):
     avatar = handling_sql.get_group_avatar(client, group_id)
     try:
         if avatar[0]:
-            avatar = str(base64.b64decode(avatar[0]))
+            avatar = str(base64.b64decode(avatar[0]))[2:-1]
             avatar_time = avatar[1]
         else:
             avatar = " "

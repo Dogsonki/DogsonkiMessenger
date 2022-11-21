@@ -342,7 +342,7 @@ class Client(Connection):
         avatar = handling_sql.get_user_avatar(self, login_id)
         try:
             if avatar[0]:
-                avatar = str(base64.b64decode(avatar[0]))
+                avatar = str(base64.b64decode(avatar[0]))[2:-1]
                 avatar_time = avatar[1]
             else:
                 avatar = " "
