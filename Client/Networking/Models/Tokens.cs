@@ -13,7 +13,7 @@ public enum Token : int
     REGISTER = 2,
     INIT_CHAT = 3,
     SEARCH_USER = 4,
-    CHAT_MESSAGE = 5,
+    CHAT_MESSAGE = 5, //Kind of realtime messages
     GET_MORE_MESSAGES = 6,
     END_CHAT = 7,
     CHANGE_AVATAR = 8,

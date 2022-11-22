@@ -86,8 +86,10 @@ public class SocketCore : Connection
 
                         buff = LongBuffer.Substring(0, indexDollar);
 
+                        /* Visual studio have rate limit in console buffer, images longer than 1mb will crash your visual studio */
+#if DEBUG
                         Logger.Push(buff, TraceType.Packet, LogLevel.Debug);
-
+#endif
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
 
                         ProcessBuffer(buff);

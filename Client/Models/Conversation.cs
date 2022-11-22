@@ -69,15 +69,16 @@ public class Conversation
 
     public static void OpenChat(User user)
     {
-        MessagePage chatPage = new MessagePage(user);
+        SocketCore.Send(user.Username, Token.INIT_CHAT);
 
         MessagePage.Messages.Clear();
 
-        SocketCore.Send(user.Username, Token.INIT_CHAT);
-        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, chatPage.GetChatMessagesCallback);
+        MessagePage chatPage = new MessagePage(user);
 
         SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.RealTimeMessageCallback);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
+
+        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, chatPage.GetChatMessagesCallback, false);
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -89,12 +90,14 @@ public class Conversation
     {
         SocketCore.Send(group.Id, Token.GROUP_CHAT_INIT);
 
-        MessagePage chatPage = new MessagePage(group);
-
         MessagePage.Messages.Clear();
 
-        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.GetChatMessagesCallback);
+        MessagePage chatPage = new MessagePage(group);
+
+        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.RealTimeMessageCallback);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
+
+        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, chatPage.GetChatMessagesCallback, false);
 
         MainThread.BeginInvokeOnMainThread(() =>
         {

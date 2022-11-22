@@ -4,6 +4,7 @@ using Client.Utility;
 using Client.Networking.Packets;
 using Client.IO;
 using Client.IO.Models;
+using System.Text;
 
 namespace Client.Models.Bindable;
 
@@ -116,7 +117,6 @@ public class ChatMessage : BindableObject
     {
         BindedUser = User.CreateOrGet(packet.Username,packet.UserId);
 
-
         if (packet.MessageType == "text") 
         {
             TextContent = packet.ContentString;
@@ -138,6 +138,7 @@ public class ChatMessage : BindableObject
                 if (CacheBuffer is null || CacheBuffer.Length == 0)
                 {
                     Logger.Push("Cache buffer is null", TraceType.Func, LogLevel.Warning);
+                    Debug.Write($"Deserializing message {packet.MessageType} {Encoding.UTF8.GetString(packet.Content)}");
 
                     ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
                     SocketCore.SendCallback(imagePacket, Token.CHAT_IMAGE_REQUEST, GetImage);
@@ -169,14 +170,11 @@ public class ChatMessage : BindableObject
     {
         ImageRequestQueue.RemoveRequest(this);
 
-        string bufferString = (string)packet;
-        byte[] buffer;
-
-        ImageSource src = UserImageRequestPacket.GetImageSource(out buffer, bufferString);
+        byte[] buffer = Essential.GetImageBuffer((string)packet);
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Image = src;
+            Image = ImageSource.FromStream(() => new MemoryStream(buffer));
         });
 
         Cache.SaveToCache(buffer, Path);

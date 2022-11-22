@@ -44,10 +44,6 @@ public partial class MessagePage : ContentPage
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
-        //SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, GetChatMessagesCallback);
-
-        //TODO: get info only in settings page
-
         Current = this;
 
         ChatUsername.Text = $"Chatting group @{group.Name}";
@@ -66,11 +62,12 @@ public partial class MessagePage : ContentPage
         return base.OnBackButtonPressed();
     }
 
-    public static void AddMessage(string message)
+    public void AddMessage(string message)
     {
-        ChatMessage? lastMessage = GetLastMessage();
+        AddClientMessage(message);
 
         MessagePacket packet = new MessagePacket(message);
+
         SocketCore.Send(packet, Token.SEND_MESSAGE);
 
         if (CurrentConversation.IsGroupConversation)
@@ -87,8 +84,6 @@ public partial class MessagePage : ContentPage
             Current.ProcessCommands(message.Split(" "));
         }
     }
-
-    private static void AddImageMessage(ImageSource src) => Messages.Add(new ChatMessage(src));
 
     private static bool IsLastMessageFromLocalUser => GetLastMessage()?.BindedUser.UserId == LocalUser.Id;
 
@@ -112,7 +107,7 @@ public partial class MessagePage : ContentPage
 
             if (pickedFile is not null)
             {
-                if (pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg"))
+                if (pickedFile.FileName.EndsWith(".png") || pickedFile.FileName.EndsWith(".jpg") || pickedFile.FileName.EndsWith(".jpeg"))
                 {
                     fileStream = await pickedFile.OpenReadAsync();
 
@@ -127,7 +122,7 @@ public partial class MessagePage : ContentPage
                     await fileStream.CopyToAsync(cpyStream, (int)fileStream.Length);
                     ImageSource src = ImageSource.FromStream(() => new MemoryStream(cpyStream.ToArray()));
 
-                    AddImageMessage(src);
+                    AddClientMessage(src);
 
                     ThreadPool.QueueUserWorkItem((padlock) =>
                     {
@@ -137,7 +132,7 @@ public partial class MessagePage : ContentPage
                 }
                 else
                 {
-                    SystemAddMessage("Unsupported file extension");
+                    SystemAddMessage($"{pickedFile.FileName} Have unsupported file extension");
                 }
 
                 if(fileStream is not null) await fileStream.DisposeAsync();
@@ -176,9 +171,44 @@ public partial class MessagePage : ContentPage
         });
     }
 
+    private void AddClientMessage(string msg)
+    {
+        ChatMessage? lastMessage = GetLastMessage();
+
+        if (lastMessage is null)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Messages.Add(new ChatMessage(msg));
+            });
+        }
+        else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && lastMessage.IsText)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                lastMessage.TextContent += $"\n{msg}";
+            });
+        }
+        else
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Messages.Add(new ChatMessage(msg));
+            });
+        }
+    }
+
+    private void AddClientMessage(ImageSource img)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Messages.Add(new ChatMessage(img));
+        });
+    }
+
     public void RealTimeMessageCallback(object packet)
     {
-        MessagePacket[]? message = JsonConvert.DeserializeObject<MessagePacket[]>((string)packet);
+        MessagePacket? message = JsonConvert.DeserializeObject<MessagePacket>((string)packet);
 
         if (message is null)
         {
@@ -191,21 +221,21 @@ public partial class MessagePage : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                Messages.Add(new ChatMessage(message[0]));
+                Messages.Add(new ChatMessage(message));
             });
         }
         else if(lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && lastMessage.IsText)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                lastMessage.TextContent += $"\n{message[0].ContentString}";
+                lastMessage.TextContent += $"\n{message.ContentString}";
             });
         }
         else
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                Messages.Add(new ChatMessage(message[0]));
+                Messages.Add(new ChatMessage(message));
             });
         }
     }
@@ -252,7 +282,7 @@ public partial class MessagePage : ContentPage
                     {
                         messageView.Add(new ChatMessage(message, true, true));
                     }
-                    else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId)
+                    else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && !lastMessage.IsImage)
                     {
                         lastMessage.TextContent += $"\n{message.ContentString}";
                     }
@@ -289,7 +319,7 @@ public partial class MessagePage : ContentPage
 
         AddMessage(message);
 
-        input.Text = "";
+        input.Text = string.Empty;
     }
 
     public void GetMoreChatMessagesCallback(object packet)

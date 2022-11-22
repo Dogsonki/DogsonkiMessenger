@@ -53,13 +53,4 @@ public class UserImageRequestPacket
             Debug.Error(ex);
         }
     }
-
-    public static ImageSource GetImageSource(out byte[] buffer, string imageBuffer)
-    {
-        string avat = imageBuffer.Substring(2);
-        avat = avat.Substring(0, avat.Length - 1);
-        byte[] imgBuffer = Convert.FromBase64String(avat);
-        buffer = imgBuffer;
-        return ImageSource.FromStream(() => new MemoryStream(imgBuffer));
-    }
 }

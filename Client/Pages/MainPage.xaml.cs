@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 using Client.Pages.Settings;
-using Client.Models;
 
 namespace Client.Pages;
 
@@ -55,7 +54,6 @@ public partial class MainPage : ContentPage
 
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Debug.Write((string)packet);
             LastChatsPacket[]? lastChats = JsonConvert.DeserializeObject<LastChatsPacket[]>(Convert.ToString(packet));
 
             if (lastChats is null || lastChats?.Length == 0)

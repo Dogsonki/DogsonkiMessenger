@@ -5,16 +5,16 @@ namespace Client.Networking.Packets.Models;
 [Serializable]
 public class LastChatsPacket
 {
-    public readonly User BindedUser;
-    public readonly Group BindedGroup;
+    public readonly User? BindedUser;
+    public readonly Group? BindedGroup;
 
     public string Name{ get; set; }
     public double? LastMessageTime { get; set; }
-    public byte[] LastMessage { get; set; }
-    public string MessageType { get; set; }
+    public byte[]? LastMessage { get; set; }
+    public string? MessageType { get; set; }
     public int Id { get; set; }
-    public string Type { get; set; }
-    public string Sender { get; set; }
+    public string? Type { get; set; }
+    public string? Sender { get; set; }
 
     public bool isGroup => Type != "user";
 

@@ -38,7 +38,7 @@ public partial class GroupChatSettings : ContentPage
             Group group = Conversation.Current.GetCurrentGroupChat();
 
             GroupImageRequestPacket packet = new GroupImageRequestPacket(avatarBuffer, group.Id);
-
+            Debug.Write($"Sending avatar {avatarBuffer.Length}");
             SocketCore.Send(packet, Token.GROUP_AVATAR_SET, false);
 
             MainThread.BeginInvokeOnMainThread(() =>
