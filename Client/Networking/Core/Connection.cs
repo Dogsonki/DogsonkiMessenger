@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Security;
-using Client.Networking.Model;
-using Client.Utility;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using Client.Utility;
+using Client.Networking.Models;
 
 namespace Client.Networking.Core;
 
@@ -34,10 +34,10 @@ public class Connection
         try
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
-            
+
             Config = SocketConfig.ReadConfig();
 
-            if (Config is null) throw new Exception("SOCKET_CONFIG_READ_EXCEPTION");
+            if (Config is null) throw new FileNotFoundException("SOCKET_CONFIG_READ_EXCEPTION");
 
             Client = new TcpClient();
             
@@ -56,7 +56,7 @@ public class Connection
             }
         }
 
-        catch (Exception ex) //Logging this exception can expose ip and port to server :/
+        catch (Exception ex) /* Logging this exception can expose ip and port to server */
         {
             Debug.Write(ex); 
         }
@@ -66,7 +66,7 @@ public class Connection
     {
         if (Client is null || Stream is null || !Stream.IsAuthenticated|| !Client.Connected)
         {
-            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected} Auth: {Stream?.IsAuthenticated}", TraceType.Packet, LogLevel.Error);
+            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected} Auth: {Stream?.IsAuthenticated}", LogLevel.Error);
             return false;
         }
         return true;

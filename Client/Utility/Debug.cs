@@ -1,20 +1,27 @@
-﻿using System.Runtime.CompilerServices;
+﻿#undef USE_VS_DEBUGGER
 
-namespace Client;
+using System.Runtime.CompilerServices;
 
-internal class Debug
+namespace Client.Utility;
+
+public class Debug
 {
     public static void Error(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
     {
-#if DEBUG
-        Console.WriteLine("[ERROR]: " + path.Substring(49) + " at: " + lineNumber + " : " + Content);
+#if DEBUG && !USE_VS_DEBUGGER
+        Console.WriteLine("[ERROR]: " + path + " at: " + lineNumber + " : " + Content);
+#elif USE_VS_DEBUGGER
+        System.Diagnostics.Trace.WriteLine("[ERROR]: " + path + " at: " + lineNumber + " : " + Content);
 #endif
+
     }
 
     public static void Write(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
     {
-#if DEBUG
-        Console.WriteLine("[DEBUG]: " + path.Substring(49) + " at: " + lineNumber + " : " + Content);
+#if DEBUG && !USE_VS_DEBUGGER
+        Console.WriteLine("[DEBUG]: " + path + " at: " + lineNumber + " : " + Content);
+#elif USE_VS_DEBUGGER
+        System.Diagnostics.Trace.WriteLine("[DEBUG]: " + path + " at: " + lineNumber + " : " + Content);
 #endif
     }
 }

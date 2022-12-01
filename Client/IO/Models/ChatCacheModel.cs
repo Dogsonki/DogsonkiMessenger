@@ -5,9 +5,9 @@ namespace Client.IO.Models;
 [Serializable]
 public class ChatCacheModel
 {
-    [JsonProperty("messages")] 
+    [JsonProperty("messages")]
     public ChatMessageCacheModel[] Messages;
-    [JsonProperty("last_message_time")] 
+    [JsonProperty("last_message_time")]
     public double LastMessageTime;
 
     [JsonConstructor]

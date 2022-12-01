@@ -133,6 +133,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Platforms\Android\Services\" />
 	  <Folder Include="Resources\AppIcon\" />
 	  <Folder Include="Resources\Splash\" />
 	</ItemGroup>

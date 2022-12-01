@@ -1,4 +1,5 @@
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Pages.Helpers;
 
 namespace Client.Pages.PasswordForgot;

@@ -30,12 +30,12 @@ namespace Client.Pages.Helpers
 
             if (InfoLevel is null)
             {
-                Logger.Push("InfoLevel is null", TraceType.Func, LogLevel.Warning);
+                Logger.Push("InfoLevel is null", LogLevel.Warning);
             }
 
             if (ErrorLevel is null)
             {
-                Logger.Push("ErrorLevel is null", TraceType.Func, LogLevel.Warning);
+                Logger.Push("ErrorLevel is null", LogLevel.Warning);
             }
         }
 

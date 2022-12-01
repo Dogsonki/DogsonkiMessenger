@@ -1,7 +1,7 @@
-﻿using Client.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Client.IO;
 
-namespace Client.Networking.Model;
+namespace Client.Networking.Models;
 
 [Serializable]
 public class SocketConfig

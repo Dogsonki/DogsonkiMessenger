@@ -1,10 +1,11 @@
 ﻿#nullable enable
-
 using Client.Models.Bindable;
-using Client.Networking.Core;
-using Client.Networking.Packets.Models;
+using Client.Networking.Models;
 using Client.Pages;
+using Client.Utility;
 using Newtonsoft.Json;
+using Client.Networking.Packets.Models;
+using Client.Networking.Core;
 
 namespace Client.Models;
 

@@ -9,7 +9,7 @@ public static class Logger
     private static List<string> FuncLoggerStack = new List<string>();
     private static List<string> PacketLoggerStack = new List<string>();
 
-    public static void Push(object trace, TraceType type, LogLevel level)
+    public static void Push(object trace, LogLevel level, TraceType type = TraceType.Func)
     {
         Debug.Write(trace);
         switch (type)
@@ -17,7 +17,7 @@ public static class Logger
             case TraceType.Packet: PacketLoggerStack.Add(trace.ToString()); break;
             case TraceType.Func: FuncLoggerStack.Add(trace.ToString()); break;
         }
-         LoggerStack.Add(new LogTemplate(trace.ToString(), level));
+        LoggerStack.Add(new LogTemplate(trace.ToString(), level));
     }
 }
 
@@ -26,6 +26,12 @@ public enum LogLevel
     Error,
     Warning,
     Debug
+}
+
+public enum TraceType
+{
+    Packet = 0,
+    Func = 1,
 }
 
 public struct LogTemplate

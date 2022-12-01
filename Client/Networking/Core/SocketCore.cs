@@ -1,5 +1,5 @@
-﻿using Client.Commands;
-using Client.Networking.Model;
+﻿using Client.Networking.Commands;
+using Client.Networking.Models;
 using Client.Utility;
 using System.Text;
 
@@ -9,49 +9,50 @@ public class SocketCore : Connection
 {
     private static readonly Dictionary<Token, Action<object>> OnTokenReceived = new Dictionary<Token, Action<object>>();
 
-    public static async void Start() 
+    public static async void Start()
     {
         await Connect().ContinueWith((_) =>
         {
             if (!AbleToSend()) return;
             Task.Run(async () => await Receive());
             Task.Run(async () => await SendQueue());
-        });  
+        });
     }
-
-    private static void ReadRawBuffer(SocketPacket packet) => Tokens.Process(packet);
 
     private static string LongBuffer = string.Empty;
 
     private static void ProcessBuffer(string buffer)
     {
-        SocketPacket packet = null;
-        try
-        {
-            if (!SocketPacket.TryDeserialize(out packet, buffer))
-                return;
-        }
-        catch (Exception ex)
-        {
-            Logger.Push("Buffer: " + buffer + " ERROR", TraceType.Packet, LogLevel.Error);
-            Logger.Push(ex, TraceType.Packet, LogLevel.Error);
-        }
-
-        if (packet is null) return;
-
-        //Don't convert packet.Data to JObject
-        if (OnTokenReceived.ContainsKey((Token)packet.Token))
-        {
-            Logger.Push($"Invoking token action {packet.Token}", TraceType.Func, LogLevel.Debug);
-            OnTokenReceived[(Token)packet.Token].Invoke(Convert.ToString(packet.Data));
-            return;
-        }
-
         ThreadPool.QueueUserWorkItem((_) =>
         {
-            if (RequestedCallback.InvokeCallback(packet.Token, Convert.ToString(packet.Data))) return;
+            SocketPacket packet = null;
+            try
+            {
+                if (!SocketPacket.TryDeserialize(out packet, buffer))
+                    return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Push(ex, LogLevel.Error);
+            }
 
-            ReadRawBuffer(packet);
+            if (packet is null) return;
+
+            //Don't convert packet.Data to JObject
+            string? packetData = Convert.ToString(packet.Data);
+
+            if(packetData is null)
+            {
+                throw new InvalidCastException($"PacketData is not a string: {packet.Data}");
+            }
+
+            if (OnTokenReceived.ContainsKey((Token)packet.PacketToken))
+            {
+                OnTokenReceived[(Token)packet.PacketToken].Invoke(packetData);
+                return;
+            }
+
+            RequestedCallback.InvokeCallback(packet.PacketToken, packetData);
         });
     }
 
@@ -88,7 +89,7 @@ public class SocketCore : Connection
 
                         /* Visual studio have rate limit in console buffer, images longer than 1mb will crash your visual studio */
 #if DEBUG
-                        Logger.Push(buff, TraceType.Packet, LogLevel.Debug);
+                        Logger.Push(buff, LogLevel.Debug, TraceType.Packet);
 #endif
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
 
@@ -101,7 +102,7 @@ public class SocketCore : Connection
             }
             catch (Exception ex)
             {
-                Logger.Push(ex, TraceType.Packet, LogLevel.Error);
+                Logger.Push(ex, LogLevel.Error);
                 if (ex is InvalidCastException)
                 {
                     Debug.Error("Error when casting buffer into packet " + ex);
@@ -129,7 +130,7 @@ public class SocketCore : Connection
                 {
                     if (packet is null) throw new Exception("SEND_PACKET_NULL");
 
-                    Debug.Write($"Sending: {packet.Data} {packet.Token}");
+                    Debug.Write($"Sending: {packet.Data} {packet.PacketToken}");
 
                     byte[] buffer = packet.GetPacked();
 
@@ -139,7 +140,7 @@ public class SocketCore : Connection
                 }
                 catch (Exception ex)
                 {
-                    Logger.Push(ex, TraceType.Packet, LogLevel.Error);
+                    Logger.Push(ex, LogLevel.Error, TraceType.Packet);
                 }
 
                 SocketQueue.IsSending = false;
@@ -183,7 +184,7 @@ public class SocketCore : Connection
 
         return true;
     }
-    
+
     public static bool SendCommand(ICommand command)
     {
         if (!AbleToSend()) return false;
@@ -201,13 +202,12 @@ public class SocketCore : Connection
     {
         if (OnTokenReceived.ContainsKey(token))
         {
-            Logger.Push("Changing action on token received", TraceType.Func, LogLevel.Warning);
-
+            Logger.Push("Changing action on token received", LogLevel.Warning);
             OnTokenReceived[token] = callback;
         }
         else
         {
-            OnTokenReceived.Add(token,callback);
+            OnTokenReceived.Add(token, callback);
         }
     }
 }

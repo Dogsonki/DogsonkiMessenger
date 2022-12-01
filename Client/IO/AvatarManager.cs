@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Utility;
 
 namespace Client.IO;
 
@@ -16,11 +17,6 @@ public static class AvatarManager
     public static byte[] ReadGroupAvatar(int groupId)
     {
         byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("group_avatar" + groupId);
-
-        if (avatarCacheBuffer is null || avatarCacheBuffer.Length == 0)
-        {
-            Debug.Write($"User Id: {groupId} has null avatar");
-        }
 
         return avatarCacheBuffer;
     }
@@ -80,7 +76,7 @@ public static class AvatarManager
             if ((time = ReadUserAvatarInfo(user.UserId)) == -1)
             {
                 SaveUserAvatarInfo(newTime, user.UserId);
-                
+
                 user.SetAvatar(avatar);
             }
             else

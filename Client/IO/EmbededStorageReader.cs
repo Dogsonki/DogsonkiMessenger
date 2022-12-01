@@ -11,7 +11,7 @@ public static class EmbeddedStorage
     {
         try
         {
-            var assembly = IntrospectionExtensions.GetTypeInfo(type).Assembly;
+            var assembly = type.GetTypeInfo().Assembly;
             Stream? stream = assembly.GetManifestResourceStream(path);
 
             if (stream is null)
@@ -36,7 +36,7 @@ public static class EmbeddedStorage
         {
             if (ex.GetType() == typeof(NullReferenceException))
             {
-                Logger.Push(ex, TraceType.Func, LogLevel.Error);
+                Logger.Push(ex, LogLevel.Error);
             }
             return default;
         }

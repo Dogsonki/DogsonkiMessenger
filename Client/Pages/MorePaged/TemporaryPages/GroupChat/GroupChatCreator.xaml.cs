@@ -5,6 +5,7 @@ using Client.Networking.Packets;
 using Client.Networking.Packets.Models;
 using Client.Utility;
 using Newtonsoft.Json;
+using Client.Networking.Models;
 
 namespace Client.Pages.TemporaryPages.GroupChat;
 
@@ -34,7 +35,7 @@ public partial class GroupChatCreator : ContentPage
 
         if (groupPacket is null)
         {
-            Logger.Push("GroupCreatePacket_NULL", TraceType.Func, LogLevel.Error);
+            Logger.Push("GroupCreatePacket_NULL", LogLevel.Error);
             return;
         }
 
@@ -51,8 +52,6 @@ public partial class GroupChatCreator : ContentPage
         {
             SocketCore.Send(GroupAvatarBuffer, Token.GROUP_AVATAR_SET);
         }
-
-        BindableLastChat.AddLastChat(group);
     }
 
     private async void GroupImageChange(object? sender, EventArgs e)
@@ -79,7 +78,7 @@ public partial class GroupChatCreator : ContentPage
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 

@@ -3,14 +3,14 @@ using System.ComponentModel;
 using Client.IO;
 using Client.Networking.Packets;
 using Newtonsoft.Json;
+using Client.Utility;
+using Client.Networking.Models;
 
 namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
-public class Group : IBindableType, INotifyPropertyChanged
+public class Group : BindableObject
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public BindableType Type { get; set; }
 
     public static List<Group> Groups = new List<Group>();
@@ -30,8 +30,9 @@ public class Group : IBindableType, INotifyPropertyChanged
         }
         set
         {
+            Debug.Write("Avatar setted ?"+value.IsEmpty);
             avatar = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Avatar)));
+            OnPropertyChanged(nameof(Avatar));
         }
     }
 
@@ -42,18 +43,12 @@ public class Group : IBindableType, INotifyPropertyChanged
 
         byte[] avatarCacheBuffer = AvatarManager.ReadGroupAvatar(groupId);
 
-     
         if (!AvatarManager.SetGroupAvatar(this, avatarCacheBuffer))
         {
             SocketCore.SendCallback(groupId, Token.GROUP_AVATAR_REQUEST, (_) =>
             {
-                return;
                 GroupImageRequestPacket? image = JsonConvert.DeserializeObject<GroupImageRequestPacket>((string)_);
                 if (image is null) return;
-
-                LocalUser.UserRef.SetAvatar(image.ImageData);
-
-                Avatar = LocalUser.avatar;
 
                 SetAvatar(image.ImageData);
             });

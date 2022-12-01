@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Client.Networking.Core;
+using Newtonsoft.Json;
 using System.Text;
 
-namespace Client.Networking.Model;
+namespace Client.Networking.Models;
 
 public class SocketPacket
 {
@@ -9,16 +10,16 @@ public class SocketPacket
     public object Data { get; set; }
 
     [JsonProperty("token")]
-    public int Token { get; set; }
+    public int PacketToken { get; set; }
 
     [JsonIgnore]
     private const char EndOfPacket = '$';
 
     [JsonConstructor]
-    public SocketPacket(object data, Token token = Client.Token.EMPTY)
+    public SocketPacket(object data, Token token = Token.EMPTY)
     {
         Data = data;
-        Token = (int)token;
+        PacketToken = (int)token;
     }
 
     /// <summary>

@@ -1,8 +1,8 @@
 ﻿using Client.Models.Bindable;
 using Client.Networking.Core;
-using Client.Networking.Model;
 using Client.Utility;
 using Newtonsoft.Json;
+using Client.Networking.Models;
 using Client.IO;
 
 namespace Client.Networking.Packets;

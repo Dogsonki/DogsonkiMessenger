@@ -1,4 +1,5 @@
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Pages.Helpers;
 using System.Diagnostics;
 
@@ -16,9 +17,7 @@ public partial class ConfirmEmailCode : ContentPage
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
-
         message = new MessagePopPage(this);
-        CheckAttemps = 0;
         ResendCooldownTimer.Start();
         noteEmail.Text = $"We've sent a code to {email} and type code to window below";
     }
@@ -32,31 +31,14 @@ public partial class ConfirmEmailCode : ContentPage
         SocketCore.SendCallback(((Entry)sender).Text, Token.REGISTER, CodeSended,false);
     }
 
-    private Label ErrorText = new Label()
-    {
-        TextColor = Color.FromRgb(255, 0, 0)
-    };
-
-    private void ShowError(string error)
-    {
-        ErrorText.Text = error;
-        if (!ErrorLevel.Children.Contains(ErrorText))
-            ErrorLevel.Children.Add(ErrorText);
-    }
-    private void RemoveError()
-    {
-        if (ErrorLevel.Children.Contains(ErrorText))
-            ErrorLevel.Children.Remove(ErrorText);
-    }
-
     private void CodeSended(object rev)
     {
-        RToken token = Tokens.CharToRToken(rev);
+        RToken token = (RToken)rev;
 
         switch (token)
         {
             case RToken.WRONG_CODE:
-                ShowError($"Wrong code, left {MAX_CODE_ATTEMPS - CheckAttemps}");
+                message.ShowError($"Wrong code, left {MAX_CODE_ATTEMPS - CheckAttemps}");
                 CheckAttemps++;
                 break;
             case RToken.MAX_CODE_ATTEMPS:
@@ -75,7 +57,7 @@ public partial class ConfirmEmailCode : ContentPage
                 });
                 break;
             default:
-                ShowError($"Unknown error {(int)token}");
+                message.ShowError($"Unknown error {(int)token}");
                 break;
         }
     }
@@ -86,11 +68,11 @@ public partial class ConfirmEmailCode : ContentPage
         {
             SocketCore.Send("a", Token.REGISTER);
             ResendCooldownTimer.Reset();
-            RemoveError();
+            message.Clear();
         }
         else
         {
-            ShowError($"You have to wait {RESENDCOOLDOWN - ResendCooldownTimer.Elapsed.Seconds} to send code again");
+            message.ShowError($"You have to wait {RESENDCOOLDOWN - ResendCooldownTimer.Elapsed.Seconds} to send code again");
         }
     }
 

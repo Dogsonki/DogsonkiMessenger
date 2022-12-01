@@ -2,9 +2,10 @@
 using System.ComponentModel;
 using Client.Utility;
 using Client.Networking.Packets;
-using Client.IO;
-using Client.IO.Models;
 using System.Text;
+using Client.IO;
+using Client.Networking.Models;
+using Client.IO.Models;
 
 namespace Client.Models.Bindable;
 
@@ -137,12 +138,12 @@ public class ChatMessage : BindableObject
 
                 if (CacheBuffer is null || CacheBuffer.Length == 0)
                 {
-                    Logger.Push("Cache buffer is null", TraceType.Func, LogLevel.Warning);
+                    Logger.Push("Cache buffer is null", LogLevel.Warning);
                     Debug.Write($"Deserializing message {packet.MessageType} {Encoding.UTF8.GetString(packet.Content)}");
 
                     ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
                     SocketCore.SendCallback(imagePacket, Token.CHAT_IMAGE_REQUEST, GetImage);
-                    ImageRequestQueue.AddRequest(imagePacket, this);
+                    ImageRequestQueue.AddRequest(imagePacket, MessageId, GetImage);
                     return;
                 }
 
@@ -153,7 +154,7 @@ public class ChatMessage : BindableObject
             {
                 ChatImagePacket imagePacket = new ChatImagePacket(packet.ContentString, packet.MessageType);
                 SocketCore.SendCallback(imagePacket, Token.CHAT_IMAGE_REQUEST, GetImage);
-                ImageRequestQueue.AddRequest(imagePacket, this);
+                ImageRequestQueue.AddRequest(imagePacket, MessageId, GetImage);
             }
             else
             {
@@ -168,7 +169,7 @@ public class ChatMessage : BindableObject
 
     public void GetImage(object packet)
     {
-        ImageRequestQueue.RemoveRequest(this);
+        ImageRequestQueue.RemoveRequest(MessageId);
 
         byte[] buffer = Essential.GetImageBuffer((string)packet);
 

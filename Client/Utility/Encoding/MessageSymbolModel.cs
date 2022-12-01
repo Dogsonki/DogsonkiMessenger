@@ -1,4 +1,4 @@
-﻿namespace Client.MessageEncoding;
+﻿namespace Client.Utility.Encoding;
 
 public class MessageSymbolModel
 {

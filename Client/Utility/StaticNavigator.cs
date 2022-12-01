@@ -1,4 +1,4 @@
-﻿namespace Client
+﻿namespace Client.Utility
 {
     public class StaticNavigator //TODO: make it async
     {

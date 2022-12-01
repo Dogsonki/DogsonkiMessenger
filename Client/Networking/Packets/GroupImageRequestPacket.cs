@@ -22,7 +22,5 @@ internal class GroupImageRequestPacket
     {
         ImageData = Essential.GetImageBuffer(avatar);
         GroupId = group_id;
-
-        Debug.Write("bfcount"+ImageData.Length);
     }
 }

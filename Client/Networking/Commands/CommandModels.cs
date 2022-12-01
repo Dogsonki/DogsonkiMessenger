@@ -1,7 +1,6 @@
-﻿using Client.Models.Commands;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace Client.Commands;
+namespace Client.Networking.Commands;
 
 [Serializable]
 [CommandAlias("!mem")]
@@ -11,7 +10,7 @@ public class Mem : ICommand
     [CommandProperty(typeof(string))]
     public string Command { get; set; }
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public bool Sendable { get; set; } = true;
 
     public Mem(string command)
@@ -81,7 +80,7 @@ public class JackpotBuy : ICommand
     [CommandProperty(typeof(int))]
     public object Count { get; set; }
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public bool Sendable { get; set; } = true;
 
     public JackpotBuy(string command, object count)

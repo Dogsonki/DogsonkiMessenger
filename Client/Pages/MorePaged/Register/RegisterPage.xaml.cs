@@ -58,26 +58,26 @@ public partial class RegisterPage : ContentPage
 
     private void RegisterCallback(object rev)
     {
-        RToken token = Tokens.CharToRToken(rev);
+        int token = int.Parse((string)rev);
         switch (token)
         {
-            case RToken.EMAIL_SENT:
+            case 2:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
-            case RToken.USER_ALREADY_EXISTS:
+            case 3:
                 message.ShowError("User with given email already exists");
                 break;
-            case RToken.CANNOT_SEND_EMAIL:
+            case 4:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
-            case RToken.EMAIL_WAITING:
+            case 6:
                 MainThread.InvokeOnMainThreadAsync(() => Navigation.PushAsync(new ConfirmEmailCode(InputEmail.Text)));
                 break;
-            case RToken.NICKNAME_TAKEN:
+            case 7:
                 message.ShowError("User with given username already exists");
                 break;
             default:
-                message.ShowError($"Unknown error {(int)token}");
+                message.ShowError($"Unknown error {token}");
                 break;
         }
     }

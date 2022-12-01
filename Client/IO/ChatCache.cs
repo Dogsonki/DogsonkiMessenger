@@ -1,7 +1,8 @@
-﻿using Client.Models.Bindable;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Text;
+using Client.Utility;
 using Client.IO.Models;
+using Client.Models.Bindable;
 
 namespace Client.IO;
 
@@ -38,9 +39,9 @@ internal class ChatCache
 
             DateTime lastMessageTime = _messages[0].Time;
 
-            ChatCacheModel model = new ChatCacheModel(cacheMessages,lastMessageTime.Ticks);
+            ChatCacheModel model = new ChatCacheModel(cacheMessages, lastMessageTime.Ticks);
 
-            Cache.SaveToCache(JsonConvert.SerializeObject(cacheMessages),$"cache_chat_{user.UserId}");
+            Cache.SaveToCache(JsonConvert.SerializeObject(cacheMessages), $"cache_chat_{user.UserId}");
         });
     }
 

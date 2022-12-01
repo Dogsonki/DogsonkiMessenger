@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace Client;
+namespace Client.Platforms.Android;
 
 [Application(UsesCleartextTraffic = false)]
 public class MainApplication : MauiApplication

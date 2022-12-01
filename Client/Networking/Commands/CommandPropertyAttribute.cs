@@ -1,4 +1,4 @@
-﻿namespace Client.Commands;
+﻿namespace Client.Networking.Commands;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class CommandProperty : Attribute

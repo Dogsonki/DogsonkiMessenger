@@ -2,6 +2,7 @@ using System.Text;
 using Client.Models;
 using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Utility;
 using Newtonsoft.Json;
@@ -38,19 +39,15 @@ public partial class GroupChatSettings : ContentPage
             Group group = Conversation.Current.GetCurrentGroupChat();
 
             GroupImageRequestPacket packet = new GroupImageRequestPacket(avatarBuffer, group.Id);
-            Debug.Write($"Sending avatar {avatarBuffer.Length}");
             SocketCore.Send(packet, Token.GROUP_AVATAR_SET, false);
 
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                group.Avatar = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
-            });
+            group.SetAvatar(avatarBuffer);
 
             stream.Close();
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 }

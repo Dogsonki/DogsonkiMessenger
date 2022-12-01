@@ -1,5 +1,7 @@
 ﻿using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Pages;
+using Client.Utility;
 using System.ComponentModel;
 
 namespace Client.Models.Bindable;
@@ -115,8 +117,6 @@ public class LocalUser : BindableObject
         Current.ID = 0xffffffff.ToString();
         isLoggedIn = false;
         Current.Avatar = default;
-
-        MainPage.LastChats.Clear();
         Bindable.User.ClearUsers();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Client.Networking.Model;
+﻿using Client.Networking.Models;
 
 namespace Client.Networking.Core;
 

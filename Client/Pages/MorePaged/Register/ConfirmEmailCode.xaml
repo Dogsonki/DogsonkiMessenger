@@ -2,12 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.Register.ConfirmEmailCode"
-             Title="ConfirmEmailCode"
 			 BackgroundColor="#121212">
     <StackLayout>
 		<Label HorizontalOptions="Center" Text="Confirm your email." FontSize="30" Margin="0,0,0,10"/>
-		<Label WidthRequest="300" FontSize="16" HorizontalOptions="Center" x:Name="noteEmail"/>
-		<StackLayout Padding="25"/>
+		<Label WidthRequest="350" FontSize="16" HorizontalOptions="Center" x:Name="noteEmail"/>
+		<StackLayout Padding="10"/>
 		<StackLayout HorizontalOptions="Center">
 			<Frame BorderColor="White" HeightRequest="40" Background="#121212">
 				<Entry Completed="CheckCode" FontSize="20" WidthRequest="60" HeightRequest="100" Keyboard="Numeric" MaxLength="5" Placeholder="Code"></Entry>

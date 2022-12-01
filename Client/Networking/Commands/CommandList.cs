@@ -1,14 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace Client.Commands;
+namespace Client.Networking.Commands;
 
 public struct CommandModel
 {
     public string CommandName { get; set; }
     public string CommandDescription { get; set; }
 
-    public CommandModel(string commandName,string commandDescription)
+    public CommandModel(string commandName, string commandDescription)
     {
         CommandName = commandName;
         CommandDescription = commandDescription;

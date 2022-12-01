@@ -5,18 +5,19 @@ using System.Collections.ObjectModel;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
 using Client.Pages.Settings;
+using Client.Networking.Models;
 
 namespace Client.Pages;
 
 public partial class MainPage : ContentPage
 {
     public static MainPage Current;
-    public static ObservableCollection<BindableLastChat> LastChats { get; set; } = new ObservableCollection<BindableLastChat>();
+    public ObservableCollection<BindableLastChat> LastChats { get; set; } = new ObservableCollection<BindableLastChat>();
 
     public MainPage()
     {
         InitializeComponent();
-
+        BindableLayout.SetItemsSource(LastChatsView, LastChats);
         if (Current is null) Current = this;
 
         NavigationPage.SetHasNavigationBar(this, false);
@@ -24,31 +25,7 @@ public partial class MainPage : ContentPage
         SocketCore.SendCallback(" ", Token.LAST_CHATS, AddLastChatsCallback);
     }
 
-    public static void AddLastChat(User user)
-    {
-        /*
-        if (LastChats.Count > 0)
-        {
-            if(!LastChats.Any(x => x.Id == user.UserId && !x.IsGroup))
-            {
-                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new AnyListBindable(user, new Command(() => User.OpenChat(user)))));
-            }
-        }
-        */
-    }
-
-    public static void AddLastChat(Group group)
-    {
-        if (LastChats.Count > 0)
-        {
-            if (!LastChats.Any(x => x.Id == group.Id.ToString() && x.IsGroup))
-            {
-                MainThread.BeginInvokeOnMainThread(() => LastChats.Add(new BindableLastChat(group)));
-            }
-        }
-    }
-
-    public static void AddLastChatsCallback(object packet)
+    public void AddLastChatsCallback(object packet)
     {
         List<BindableLastChat> bindable = new List<BindableLastChat>();
 

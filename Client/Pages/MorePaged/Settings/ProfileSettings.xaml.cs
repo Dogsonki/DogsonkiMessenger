@@ -1,6 +1,7 @@
 using Client.IO;
 using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Utility;
 
 namespace Client.Pages.Settings;
@@ -49,7 +50,7 @@ public partial class ProfileSettings : ContentPage
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 }

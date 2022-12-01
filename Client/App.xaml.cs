@@ -21,7 +21,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Logger.Push(ex,TraceType.Func,LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
 #else
         MainPage = new NavigationPage(new LoginPage());

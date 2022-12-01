@@ -1,13 +1,14 @@
 using Client.Networking.Core;
 using Client.Utility;
 using System.Collections.ObjectModel;
-using Client.Commands;
 using Client.Models;
 using Client.Models.Bindable;
 using Client.Networking.Packets;
 using Client.Pages.Settings;
 using Newtonsoft.Json;
 using Client.IO;
+using Client.Networking.Commands;
+using Client.Networking.Models;
 
 namespace Client.Pages;
 
@@ -70,15 +71,6 @@ public partial class MessagePage : ContentPage
 
         SocketCore.Send(packet, Token.SEND_MESSAGE);
 
-        if (CurrentConversation.IsGroupConversation)
-        {
-            MainPage.AddLastChat(CurrentConversation.GetCurrentGroupChat());
-        }
-        else
-        {
-            MainPage.AddLastChat(CurrentConversation.GetCurrentUserChat());
-        }
-
         if (message.StartsWith("!"))
         {
             Current.ProcessCommands(message.Split(" "));
@@ -140,7 +132,7 @@ public partial class MessagePage : ContentPage
         }
         catch(Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 
@@ -252,13 +244,13 @@ public partial class MessagePage : ContentPage
             {
                 if (messages is null)
                 {
-                    Logger.Push($"Messages are null: {packet}", TraceType.Func, LogLevel.Error);
+                    Logger.Push($"Messages are null: {packet}", LogLevel.Error);
                     return;
                 }
 
                 if (messages.Count == 0)
                 {
-                    Logger.Push($"No messages: {packet}", TraceType.Func, LogLevel.Debug);
+                    Logger.Push($"No messages: {packet}", LogLevel.Debug);
                     return;
                 }
 

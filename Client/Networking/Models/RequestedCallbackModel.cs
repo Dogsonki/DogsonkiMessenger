@@ -1,7 +1,7 @@
 ﻿using Client.Utility;
 using System.Reflection;
 
-namespace Client.Networking.Model;
+namespace Client.Networking.Models;
 
 public class RequestedCallbackModel
 {
@@ -24,17 +24,14 @@ public class RequestedCallbackModel
     {
         if (CallbackAction != null)
         {
-            MainThread.BeginInvokeOnMainThread(() => 
+            try
             {
-                try
-                {
-                    CallbackAction.Invoke(Recived);
-                }
-                catch(TargetInvocationException exception)
-                {
-                    Logger.Push(exception, TraceType.Func, LogLevel.Error);
-                }
-            });
+                CallbackAction.Invoke(Recived);
+            }
+            catch (TargetInvocationException exception)
+            {
+                Logger.Push(exception, LogLevel.Error);
+            }
         }
     }
 }

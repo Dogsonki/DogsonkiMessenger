@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
+using Client.Utility;
 using Client.IO.Models;
 
 namespace Client.IO;

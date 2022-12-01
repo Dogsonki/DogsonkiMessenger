@@ -46,9 +46,6 @@ public class BindableLastChat : INotifyPropertyChanged
     private string MessageType { get; init; }
     public Command Input { get; init; }
 
-    public static void AddLastChat(Group group) => MainPage.AddLastChat(group);
-    public static void AddLastChat(User user) => MainPage.AddLastChat(user);
-
     public string FactoredLastMessage
     {
         get

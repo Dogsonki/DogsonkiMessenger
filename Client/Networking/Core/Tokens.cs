@@ -1,8 +1,4 @@
-﻿using Client.Networking.Model;
-using Client.Networking.Packets;
-using Newtonsoft.Json;
-
-namespace Client;
+﻿namespace Client.Networking.Core;
 
 public enum Token : int
 {
@@ -54,36 +50,4 @@ public enum RToken : int
     INCORRECT_PASSW_OR_LOGIN = 8,
     WRONG_CODE = 9,
     MAX_CODE_ATTEMPS = 10
-}
-
-public static class Tokens
-{
-    public static RToken CharToRToken(object rev) => (RToken)int.Parse(rev.ToString()); //Get string and get char but don't convert as special
-
-    private static JsonSerializerSettings JsonSettings;
-
-    static Tokens()
-    {
-        JsonSettings = new JsonSerializerSettings()
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = MissingMemberHandling.Ignore
-        };
-    }
-
-    public static void Process(SocketPacket packet)
-    {
-        switch ((Token)packet.Token)
-        {
-            case Token.ERROR:
-                Debug.Error(packet.Data + "TOKEN -2");
-                break;
-            case Token.USER_AVATAR_REQUEST:
-                UserImageRequestPacket.ProcessImage(packet);
-                break;
-            default:
-                Debug.Write($"TOKEN_UNRECOGNIZED: {packet.Token} {packet.Data}");
-                break;
-        }
-    }
 }

@@ -1,6 +1,7 @@
 ﻿using Client.IO.Interfaces;
 using Client.Models.Bindable;
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages;
 using Client.Utility;
@@ -27,7 +28,7 @@ public class Session : IStorage
     private static void OverwriteSession(object session)
     {
         Cache.SaveToCache(JsonConvert.SerializeObject(session), "session.json");
-        Logger.Push("Overwriting session to cache", TraceType.Func, LogLevel.Warning);
+        Logger.Push("Overwriting session to cache", LogLevel.Warning);
     }
 
     public static void Init()
@@ -44,7 +45,7 @@ public class Session : IStorage
 
         if (string.IsNullOrWhiteSpace(cache))
         {
-            Logger.Push("Session info was null", TraceType.Func, LogLevel.Warning);
+            Logger.Push("Session info was null", LogLevel.Warning);
             return;
         }
 

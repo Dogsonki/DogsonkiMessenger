@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using Client.Networking.Core;
+﻿using Client.Networking.Core;
+using System.Reflection;
 
-namespace Client.Commands;
+namespace Client.Networking.Commands;
 
 public interface ICommand
 {
@@ -20,7 +20,7 @@ public interface ICommand
     /// <summary>
     /// Checks if parameters from user has the same count as command properties
     /// </summary>
-    public static bool HasAgrs(Type command, int ProvidedArgs) => command.GetProperties().Length-1 == ProvidedArgs;
+    public static bool HasAgrs(Type command, int ProvidedArgs) => command.GetProperties().Length - 1 == ProvidedArgs;
 
     /// <summary>
     /// Checks if values of properties type have assigned types

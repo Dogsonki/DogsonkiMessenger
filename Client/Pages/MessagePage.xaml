@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MessagePage"
              xmlns:local="clr-namespace:Client.Pages"
-			 xmlns:CommandList="clr-namespace:Client.Commands"
+			 xmlns:CommandList="clr-namespace:Client.Networking.Commands"
 			 BackgroundColor="#121212">
 
 	<StackLayout>

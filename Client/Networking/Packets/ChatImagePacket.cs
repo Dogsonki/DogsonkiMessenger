@@ -11,7 +11,7 @@ public class ChatImagePacket
     public string FileFormat { get; set; }
 
     [JsonConstructor]
-    public ChatImagePacket(string path,string file_format)
+    public ChatImagePacket(string path, string file_format)
     {
         Path = path;
         FileFormat = file_format;

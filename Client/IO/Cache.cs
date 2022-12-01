@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Client.Utility;
 
-namespace Client.IO;    
+namespace Client.IO;
 
 internal class Cache
 {
@@ -21,7 +21,7 @@ internal class Cache
                 ControlCache();
             }
 
-            if (obj is null) { Logger.Push("Cannot cache null object", TraceType.Func, LogLevel.Error); return; }
+            if (obj is null) { Logger.Push("Cannot cache null object", LogLevel.Error); return; }
 
             Task.Run(async () =>
             {
@@ -40,9 +40,9 @@ internal class Cache
                     await File.WriteAllBytesAsync(CachePath + name, (byte[])obj);
                 });
             }
-            else if(obj.GetType() == typeof(string))
+            else if (obj.GetType() == typeof(string))
             {
-                Task.Run(async() =>
+                Task.Run(async () =>
                 {
                     byte[] encoded = Encoding.UTF8.GetBytes((string)obj);
                     await File.WriteAllBytesAsync(CachePath + name, encoded);
@@ -51,13 +51,13 @@ internal class Cache
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 
     public static void RemoveFromCache(string name)
     {
-        File.Delete(CachePath+name);
+        File.Delete(CachePath + name);
     }
 
     public static byte[] ReadFileBytesCache(string name)
@@ -71,16 +71,16 @@ internal class Cache
 
             if (!File.Exists(CachePath + name))
             {
-                Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
+                Logger.Push($"Cache file dose not exist {name}", LogLevel.Warning);
                 return null;
             }
-            Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
+            Logger.Push($"Cache file exist {name}", LogLevel.Warning);
 
             return File.ReadAllBytes(CachePath + name);
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
             return null;
         }
     }
@@ -96,16 +96,16 @@ internal class Cache
 
             if (!File.Exists(CachePath + name))
             {
-                Logger.Push($"Cache file dose not exist {name}", TraceType.Func, LogLevel.Warning);
+                Logger.Push($"Cache file dose not exist {name}", LogLevel.Warning);
                 return null;
             }
-            Logger.Push($"Cache file exist {name}", TraceType.Func, LogLevel.Warning);
+            Logger.Push($"Cache file exist {name}", LogLevel.Warning);
 
             return File.ReadAllText(CachePath + name);
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
             return null;
         }
     }
@@ -133,7 +133,7 @@ internal class Cache
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
 
         if (!CheckCacheSize())
@@ -171,15 +171,15 @@ internal class Cache
 
             foreach (var file in CacheFiles)
             {
-                Logger.Push($"Deleting {file} from cache", TraceType.Func, LogLevel.Warning);
+                Logger.Push($"Deleting {file} from cache", LogLevel.Warning);
                 File.Delete(file);
             }
 
-            Logger.Push($"DELETED {CacheFiles.Length} CACHE FILES", TraceType.Func, LogLevel.Warning);
+            Logger.Push($"DELETED {CacheFiles.Length} CACHE FILES", LogLevel.Warning);
         }
         catch (Exception ex)
         {
-            Logger.Push(ex, TraceType.Func, LogLevel.Error);
+            Logger.Push(ex, LogLevel.Error);
         }
     }
 }

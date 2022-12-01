@@ -1,6 +1,7 @@
 ﻿using Client.Networking.Core;
 using Client.IO;
 using System.ComponentModel;
+using Client.Networking.Models;
 
 namespace Client.Models.Bindable;
 
