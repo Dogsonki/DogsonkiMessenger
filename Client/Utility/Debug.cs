@@ -16,6 +16,26 @@ public class Debug
 
     }
 
+    public static void Assert(bool condition, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+    {
+#if DEBUG
+        if (condition)
+        {
+            throw new Exception($"Assert validated {path} at {lineNumber}");
+        }
+#endif
+    }
+
+    public static void ThrowIfNull(object? obj, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+    {
+#if DEBUG
+        if(obj == null)
+        {
+            throw new Exception($"Assert validated {path} at {lineNumber}");
+        }
+#endif
+    }
+
     public static void Write(object Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
     {
 #if DEBUG && !USE_VS_DEBUGGER

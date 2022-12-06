@@ -16,18 +16,18 @@
 		<StackLayout Orientation="Horizontal" Margin="0,0,0,20">
 			<Frame Padding="15" BorderColor="White" BackgroundColor="#121212" HorizontalOptions="Start"
 						   CornerRadius="40" HeightRequest="80" WidthRequest="80">
-				<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
+				<Image Source="{Binding CurrentLocalUser.Avatar}" Aspect="Fill" WidthRequest="80"
 							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
 			</Frame>
 			<StackLayout Padding="5" WidthRequest="270">
 				<StackLayout Spacing="0" Orientation="Horizontal">
-					<Label FontAttributes="Bold" FontSize="Medium" Text="{Binding User.Username}" />
+					<Label FontAttributes="Bold" FontSize="Medium" Text="{Binding CurrentLocalUser.Name}" />
 					<Label VerticalOptions="Center" FontSize="Small" Text="#" />
-					<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+					<Label VerticalOptions="Center" FontSize="Small" Text="{Binding CurrentLocalUser.Id}" />
 				</StackLayout>
 			</StackLayout>
 		</StackLayout>
-		
+
 		<StackLayout Spacing="15">
 			<Button Clicked="ChangeAvatar" WidthRequest="200" BackgroundColor="#252525" Text="Change Avatar"/>
 			<Button Clicked="ChangePassword" WidthRequest="200" BackgroundColor="#0047ab" Text="Change Password"/>

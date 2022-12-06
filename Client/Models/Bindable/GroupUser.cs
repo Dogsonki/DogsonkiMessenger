@@ -1,6 +1,6 @@
 ﻿namespace Client.Models.Bindable;
 
-public class GroupUser
+public partial class GroupUser
 {
     public bool IsAdmin { get; set; }
     public User UserRef;

@@ -8,57 +8,36 @@ using Client.Pages.Settings;
 using Newtonsoft.Json;
 using Client.IO;
 using Client.Networking.Commands;
-using Client.Networking.Models;
 
 namespace Client.Pages;
 
 public partial class MessagePage : ContentPage
 {
-    private static MessagePage Current { get; set; }
-
     public static ObservableCollection<ChatMessage> Messages { get; set; } = new ObservableCollection<ChatMessage>();
 
     //Contains ALL messages with their id 
     private static List<ChatMessage> _allMessages = new List<ChatMessage>();
 
-    public static Conversation CurrentConversation { get; set; }
-    private static bool isGroupChat { get; set; }
+    private readonly Conversation CurrentConversation;
+
     private const int MAX_IMAGE_SIZE = 4_000_000;
     
-    public MessagePage(User user)
+    public MessagePage(IViewBindable view)
     {
-        CurrentConversation = new Conversation(user);
+        CurrentConversation = new Conversation(view);
 
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
 
-        Current = this;
-
-        ChatUsername.Text = $"Chatting @{user.Username}";
-        MessageInput.Placeholder = $"Message @{user.Username}";
-    }
-
-    public MessagePage(Group group)
-    {
-        CurrentConversation = new Conversation(group);
-
-        InitializeComponent();
-        NavigationPage.SetHasNavigationBar(this, false);
-
-        Current = this;
-
-        ChatUsername.Text = $"Chatting group @{group.Name}";
-        MessageInput.Placeholder = $"Message @{group.Name}";
+        ChatUsername.Text = $"Chatting @{view.Name}";
+        MessageInput.Placeholder = $"Message @{view.Name}";
     }
 
     protected override bool OnBackButtonPressed()
     {
         SocketCore.Send(" ", Token.END_CHAT);
 
-        ChatCache cache = new ChatCache(Messages.ToArray(), Conversation.Current.GetCurrentUserChat());
-
-        CurrentConversation = null;
-        Messages.Clear();
+        CurrentConversation.ExitConversation();
 
         return base.OnBackButtonPressed();
     }
@@ -73,11 +52,9 @@ public partial class MessagePage : ContentPage
 
         if (message.StartsWith("!"))
         {
-            Current.ProcessCommands(message.Split(" "));
+            ProcessCommands(message.Split(" "));
         }
     }
-
-    private static bool IsLastMessageFromLocalUser => GetLastMessage()?.BindedUser.UserId == LocalUser.Id;
 
     private static ChatMessage? GetLastMessage()
     {
@@ -174,7 +151,7 @@ public partial class MessagePage : ContentPage
                 Messages.Add(new ChatMessage(msg));
             });
         }
-        else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && lastMessage.IsText)
+        else if (lastMessage.View.Id == lastMessage.View.Id && lastMessage.IsText)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -216,7 +193,7 @@ public partial class MessagePage : ContentPage
                 Messages.Add(new ChatMessage(message));
             });
         }
-        else if(lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && lastMessage.IsText)
+        else if(lastMessage.View.Id == lastMessage.View.Id && lastMessage.IsText)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -274,7 +251,7 @@ public partial class MessagePage : ContentPage
                     {
                         messageView.Add(new ChatMessage(message, true, true));
                     }
-                    else if (lastMessage.BindedUser.UserId == lastMessage.BindedUser.UserId && !lastMessage.IsImage)
+                    else if (lastMessage.View.Id == lastMessage.View.Id && !lastMessage.IsImage)
                     {
                         lastMessage.TextContent += $"\n{message.ContentString}";
                     }

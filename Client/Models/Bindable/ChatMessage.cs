@@ -4,7 +4,6 @@ using Client.Utility;
 using Client.Networking.Packets;
 using System.Text;
 using Client.IO;
-using Client.Networking.Models;
 using Client.IO.Models;
 
 namespace Client.Models.Bindable;
@@ -12,7 +11,7 @@ namespace Client.Models.Bindable;
 [Bindable(BindableSupport.Yes)]
 public class ChatMessage : BindableObject
 {
-    public User BindedUser { get; init; }
+    public IViewBindable View { get; init; }
     
     public DateTime Time { get; init; }
 
@@ -25,13 +24,7 @@ public class ChatMessage : BindableObject
         get => Time.Ticks;
     }
 
-    public ImageSource Avatar
-    {
-        get
-        {
-            return BindedUser.Avatar;
-        }
-    }
+    public ImageSource Avatar { get => View.Avatar; }
 
     private ImageSource? image;
 
@@ -45,7 +38,7 @@ public class ChatMessage : BindableObject
         }
     }
 
-    private string textContent;
+    private string? textContent;
     public string? TextContent
     {
         get => textContent;
@@ -70,20 +63,21 @@ public class ChatMessage : BindableObject
         }
     }
 
-    public ChatMessage(User user, string message)
+    public ChatMessage(IViewBindable user, string message)
     {
         TextContent = message;
-        BindedUser = user;
+        View = user;
         Time = DateTime.Now;
-
         IsText = true;
         IsImage = false;
     }
 
+    //Creates text message as LocalUser
     public ChatMessage(string message)
     {
+        View = LocalUser.Current;
+
         TextContent = message;
-        BindedUser = LocalUser.UserRef;
         Time = DateTime.Now;
 
         IsText = true;
@@ -93,7 +87,6 @@ public class ChatMessage : BindableObject
     public ChatMessage(ImageSource image)
     {
         Image = image;
-        BindedUser = LocalUser.UserRef;
         Time = DateTime.Now;
 
         IsText = false;
@@ -102,7 +95,7 @@ public class ChatMessage : BindableObject
 
     public ChatMessage(ChatMessageCacheModel cachedMessage)
     {
-        BindedUser = User.GetUser(cachedMessage.UserId);
+        View = User.GetUser(cachedMessage.UserId);
 
         if (cachedMessage.IsText)
         {
@@ -116,7 +109,7 @@ public class ChatMessage : BindableObject
 
     public ChatMessage(MessagePacket packet, bool checkCache = true, bool isNewMessage = false, bool isCacheAble = false)
     {
-        BindedUser = User.CreateOrGet(packet.Username,packet.UserId);
+        View = User.CreateOrGet(packet.Username, packet.UserId);
 
         if (packet.MessageType == "text") 
         {

@@ -9,5 +9,6 @@ internal static class SocketQueue
     public static void Add(SocketPacket packet) => Queue.Enqueue(packet);
 
     public static bool CanSend() => Queue.Count > 0 && !IsSending;
+
     public static bool IsSending = false;
 }

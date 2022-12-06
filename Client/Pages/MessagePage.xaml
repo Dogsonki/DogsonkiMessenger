@@ -30,14 +30,14 @@
 							<StackLayout VerticalOptions="Start"  Grid.Row="0" Grid.Column="0"  Orientation="Horizontal">
 								<Frame VerticalOptions="Start" Grid.Row="0" Grid.Column="0" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
 									<Image Grid.Row="0" Grid.Column="0" Aspect="AspectFill" WidthRequest="50" HeightRequest="50"
-										   Source="{Binding BindedUser.Avatar}">
+										   Source="{Binding View.Avatar}">
 									</Image>
 								</Frame>
 								<StackLayout HorizontalOptions="Start" Margin="5,0,0,0" Grid.Column="1" Orientation="Vertical">
 									<StackLayout Orientation="Horizontal" HorizontalOptions="Start">
 										<Label HorizontalOptions="StartAndExpand" FontAttributes="Bold" FontSize="19"
-											   VerticalOptions="Center" Text="{Binding BindedUser.Username}"/>
-										<StackLayout IsVisible="{Binding BindedUser.VisibleTag}">
+											   VerticalOptions="Center" Text="{Binding View.Name}"/>
+										<StackLayout IsVisible="false">
 											<Frame BorderColor="Transparent" Margin="5,0,0,0" BackgroundColor="Grey"
 												   HorizontalOptions="EndAndExpand" VerticalOptions="EndAndExpand" HeightRequest="20">
 												<Label HeightRequest="20" HorizontalOptions="CenterAndExpand"

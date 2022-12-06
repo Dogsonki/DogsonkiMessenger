@@ -2,18 +2,16 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.MainPage"
-			 xmlns:local="clr-namespace:Client.Pages"
-			 xmlns:user="clr-namespace:Client.Models.Bindable"
+			 xmlns:local="clr-namespace:Client.Models.Bindable"
 			 BackgroundColor="{StaticResource BgColor}">
-
+	
 	<ContentPage.BindingContext>
-		<user:LocalUser></user:LocalUser>
+		<local:LocalUser></local:LocalUser>
 	</ContentPage.BindingContext>
 
 	<ScrollView x:Name="view" HorizontalScrollBarVisibility="Never">
 
 		<StackLayout>
-
 			<StackLayout Margin="0,0,0,20">
 				<Frame x:Name="MessageInputFrame" BorderColor="#191919" BackgroundColor="#202020" Padding="0" CornerRadius="18" 
 			   HeightRequest="44" WidthRequest="300">
@@ -33,21 +31,21 @@
 						<TapGestureRecognizer Tapped="ProfileImageTapped"/>
 					</Frame.GestureRecognizers>
 
-					<Image Source="{Binding User.Avatar}" Aspect="Fill" WidthRequest="80"
+					<Image Source="{Binding CurrentLocalUser.Avatar}" Aspect="Fill" WidthRequest="80"
 							   HeightRequest="80" HorizontalOptions="Fill" VerticalOptions="Fill"/>
 				</Frame>
 
 				<StackLayout Padding="5" WidthRequest="270">
 
 					<StackLayout Spacing="0" Orientation="Horizontal">
-						<Label VerticalOptions="Center" FontAttributes="Bold" FontSize="Large" Text="{Binding User.Username}" />
+						<Label VerticalOptions="Center" FontAttributes="Bold" FontSize="Large" Text="{Binding CurrentLocalUser.Name}" />
 						<Label VerticalOptions="Center" FontSize="Small" Text="#" />
-						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding User.ID}" />
+						<Label VerticalOptions="Center" FontSize="Small" Text="{Binding CurrentLocalUser.Id}" />
 					</StackLayout>
 
 					<StackLayout>
-						<Label TextColor="LightGray" x:Name="DogeCoinsCount" Text="{Binding User.FactoredDogeCoinsCount}"/>
-						<Label TextColor="LightGray" x:Name="LegendaryDogeCoinsCount" Text="{Binding User.FactoredLegendaryDogeCoinsCount}"/>
+						<Label TextColor="LightGray" x:Name="DogeCoinsCount" Text="{Binding CurrentLocalUser.FactoredDogeCoinsCount}"/>
+						<Label TextColor="LightGray" x:Name="LegendaryDogeCoinsCount" Text="{Binding CurrentLocalUser.FactoredLegendaryDogeCoinsCount}"/>
 					</StackLayout>
 
 				</StackLayout>
@@ -90,7 +88,7 @@
 
 			<StackLayout Margin="0,0,0,10"></StackLayout>
 
-			<StackLayout x:Name="LastChatsView">
+			<StackLayout x:Name="LastChatsView" BindableLayout.ItemsSource="{Binding LastChats}">
 				<BindableLayout.ItemTemplate>
 					<DataTemplate>
 						<StackLayout Margin="0,0,0,10">

@@ -17,6 +17,7 @@ public partial class ConfirmEmailCode : ContentPage
     {
         InitializeComponent();
         NavigationPage.SetHasNavigationBar(this, false);
+
         message = new MessagePopPage(this);
         ResendCooldownTimer.Start();
         noteEmail.Text = $"We've sent a code to {email} and type code to window below";
@@ -26,39 +27,54 @@ public partial class ConfirmEmailCode : ContentPage
     {
         if (CheckAttemps == MAX_CODE_ATTEMPS)
         {
+            message.ShowError("You have used all attemps. \n Please try again later.");
             return;
         }
-        SocketCore.SendCallback(((Entry)sender).Text, Token.REGISTER, CodeSended,false);
+
+        if(int.TryParse(CodeInput.Text, out int code))
+        {
+            if(CodeInput.Text.Length != 5)
+            {
+                message.ShowError("Code is too short");
+            }
+            else
+            {
+                SocketCore.SendCallback(code, Token.REGISTER, CodeSended, false);
+            }
+        }
+
     }
 
     private void CodeSended(object rev)
     {
-        RToken token = (RToken)rev;
-
-        switch (token)
+        if(int.TryParse((string)rev, out int token))
         {
-            case RToken.WRONG_CODE:
-                message.ShowError($"Wrong code, left {MAX_CODE_ATTEMPS - CheckAttemps}");
-                CheckAttemps++;
-                break;
-            case RToken.MAX_CODE_ATTEMPS:
-                CheckAttemps = MAX_CODE_ATTEMPS;
-                MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    RegisterPage rg = new RegisterPage();
-                    rg.message.ShowError("Max attemps used. \n Please try again later!");
-                    Navigation.PushAsync(rg);
-                });
-                break;
-            case RToken.ACCEPT:
-                MainThread.InvokeOnMainThreadAsync(() =>
-                {
-                    Navigation.PushAsync(new LoginPage("Your accout has been activated. \n You can now login to your account"));
-                });
-                break;
-            default:
-                message.ShowError($"Unknown error {(int)token}");
-                break;
+
+            switch (token)
+            {
+                case 9:
+                    message.ShowError($"Wrong code, left {MAX_CODE_ATTEMPS - CheckAttemps}");
+                    CheckAttemps++;
+                    break;
+                case 10:
+                    CheckAttemps = MAX_CODE_ATTEMPS;
+                    MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        RegisterPage rg = new RegisterPage();
+                        rg.message.ShowError("Max attemps used. \n Please try again later!");
+                        Navigation.PushAsync(rg);
+                    });
+                    break;
+                case 0:
+                    MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        Navigation.PushAsync(new LoginPage("Your accout has been activated. \n You can now login to your account"));
+                    });
+                    break;
+                default:
+                    message.ShowError($"Unknown error {(int)token}");
+                    break;
+            }
         }
     }
 

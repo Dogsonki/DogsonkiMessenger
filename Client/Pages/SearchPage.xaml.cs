@@ -5,7 +5,6 @@ using Client.Models;
 using Client.Networking.Packets;
 using Client.Networking.Packets.Models;
 using Newtonsoft.Json;
-using Client.Networking.Models;
 
 namespace Client.Pages;
 

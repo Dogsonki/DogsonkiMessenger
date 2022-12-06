@@ -8,12 +8,12 @@ internal class GroupChatCreatePacket
     [JsonProperty("group_name")]
     public string GroupName { get; set; }
     [JsonProperty("creator")]
-    public int Creator { get; set; }
+    public uint Creator { get; set; }
     [JsonProperty("users")]
-    public int[] Users { get; set; }
+    public uint[] Users { get; set; }
 
     [JsonConstructor]
-    public GroupChatCreatePacket(string group_name, int creator, int[] users) 
+    public GroupChatCreatePacket(string group_name, uint creator, uint[] users) 
     {
         GroupName = group_name;
         Creator = creator;

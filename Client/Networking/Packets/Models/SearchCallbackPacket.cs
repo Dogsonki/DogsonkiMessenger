@@ -9,7 +9,7 @@ public class SearchModel
     [JsonProperty("login")]
     public string Username { get; set; }
     [JsonProperty("login_id")]
-    public int Id { get; set; }
+    public uint Id { get; set; }
     [JsonProperty("type")]
     public string Type { get; set; }
     [JsonProperty("last_message_time")]
@@ -18,7 +18,7 @@ public class SearchModel
     public bool isGroup => Type != "user";
 
     [JsonConstructor]
-    public SearchModel(string name, int id, string type, double last_message_time)
+    public SearchModel(string name, uint id, string type, double last_message_time)
     {
         Username = name;
         Id = id;

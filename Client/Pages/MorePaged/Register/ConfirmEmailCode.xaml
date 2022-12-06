@@ -3,17 +3,27 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Client.Pages.Register.ConfirmEmailCode"
 			 BackgroundColor="#121212">
+	
     <StackLayout>
 		<Label HorizontalOptions="Center" Text="Confirm your email." FontSize="30" Margin="0,0,0,10"/>
 		<Label WidthRequest="350" FontSize="16" HorizontalOptions="Center" x:Name="noteEmail"/>
+		
 		<StackLayout Padding="10"/>
+		
 		<StackLayout HorizontalOptions="Center">
 			<Frame BorderColor="White" HeightRequest="40" Background="#121212">
-				<Entry Completed="CheckCode" FontSize="20" WidthRequest="60" HeightRequest="100" Keyboard="Numeric" MaxLength="5" Placeholder="Code"></Entry>
+				<Entry x:Name="CodeInput" Completed="CheckCode" FontSize="20" WidthRequest="60" HeightRequest="100"
+					   Keyboard="Numeric" MaxLength="5" Placeholder="Code"/>
 			</Frame>
 		</StackLayout>
-		<StackLayout HorizontalOptions="Center" x:Name="ErrorLevel">
+
+		<StackLayout Margin="0,15,0,0" HorizontalOptions="Center" x:Name="ErrorLevel">
 		</StackLayout>
+		
+		<Button Margin="0,15,0,0" BackgroundColor="#FF252525" BorderWidth="0" 
+					WidthRequest="250" Clicked="CheckCode" Text="Confirm Code"
+					CornerRadius="15" FontFamily="OpenSansSemibold"/>
+		
 		<StackLayout Padding="15">
 			<Label FontSize="17" Text="Resend code">
 				<Label.GestureRecognizers>
@@ -21,5 +31,6 @@
 				</Label.GestureRecognizers>
 			</Label>
 		</StackLayout>
+
 	</StackLayout>
 </ContentPage>

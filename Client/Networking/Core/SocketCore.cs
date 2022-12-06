@@ -166,6 +166,18 @@ public class SocketCore : Connection
         return true;
     }
 
+    public static void SetGlobalOnToken(Token token, Action<object> callback)
+    {
+        if (!OnTokenReceived.ContainsKey(token))
+        {
+            OnTokenReceived.Add(token, callback);
+        }
+        else
+        {
+            throw new Exception($"Tried to add global token twice token:{token} callback: {callback.Method.Name}");
+        }
+    }
+
     public static bool Send(object data, Token token = Token.EMPTY, bool sendAbleOnce = false)
     {
         if (!AbleToSend()) return false;
@@ -202,7 +214,6 @@ public class SocketCore : Connection
     {
         if (OnTokenReceived.ContainsKey(token))
         {
-            Logger.Push("Changing action on token received", LogLevel.Warning);
             OnTokenReceived[token] = callback;
         }
         else

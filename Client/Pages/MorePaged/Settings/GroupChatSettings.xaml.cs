@@ -1,10 +1,54 @@
 using System.Text;
+using Client.IO;
 using Client.Models;
 using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Utility;
+
+/* Unmerged change from project 'Client (net6.0-windows10.0.19041.0)'
+Before:
+using Newtonsoft.Json;
+After:
+using Client.Utility.Logger;
+using Client.Utility.Logger.Logger;
+using Newtonsoft.Json;
+*/
+
+/* Unmerged change from project 'Client (net6.0-android)'
+Before:
+using Newtonsoft.Json;
+After:
+using Client.Utility.Logger;
+using Newtonsoft.Json;
+*/
+
+/* Unmerged change from project 'Client (net6.0-maccatalyst)'
+Before:
+using Newtonsoft.Json;
+After:
+using Client.Utility.Logger;
+using Client.Utility.Logger.Logger;
+using Client.Utility.Logger.Logger.Logger;
+using Newtonsoft.Json;
+*/
+
+/* Unmerged change from project 'Client (net6.0-android)'
+Before:
+using Client.Utility.Logger.Logger.Logger;
+using Client.Utility.Logger.Logger.Logger.Logger;
+After:
+using Client.Utility.Logger.Logger;
+using Client.Utility.Logger.Logger.Logger;
+*/
+
+/* Unmerged change from project 'Client (net6.0-maccatalyst)'
+Before:
+using Client.Utility.Logger.Logger.Logger.Logger;
+After:
+using Client.Utility.Logger.Logger;
+*/
 using Newtonsoft.Json;
 
 namespace Client.Pages.Settings;
@@ -19,7 +63,7 @@ public partial class GroupChatSettings : ContentPage
 
 	private void LeaveGroup()
 	{
-		SocketCore.Send($"{LocalUser.Id}", Token.GROUP_USER_KICK);
+		SocketCore.Send($"{LocalUser.Current.Id}", Token.GROUP_USER_KICK);
 	}
 
     private async void ChangeGroupAvatar(object? sender, EventArgs e)
@@ -34,14 +78,15 @@ public partial class GroupChatSettings : ContentPage
             if (image is null) return;
 
             Stream stream = await image.OpenReadAsync();
+
             byte[] avatarBuffer = stream.StreamToBuffer();
 
-            Group group = Conversation.Current.GetCurrentGroupChat();
+            IViewBindable group = Conversation.Current.GetCurrentConversation;
 
             GroupImageRequestPacket packet = new GroupImageRequestPacket(avatarBuffer, group.Id);
             SocketCore.Send(packet, Token.GROUP_AVATAR_SET, false);
 
-            group.SetAvatar(avatarBuffer);
+            AvatarManager.SetAvatar(group, avatarBuffer);
 
             stream.Close();
         }

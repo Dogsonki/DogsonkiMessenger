@@ -25,27 +25,36 @@
 			</StackLayout>
 		</VerticalStackLayout>
 
-		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None" ItemsSource="{Binding Source={x:Static local:SearchPage.UsersFound}}">
+		<ListView HasUnevenRows="True" SeparatorVisibility="None" SelectionMode="None"
+				  ItemsSource="{Binding Source={x:Static local:SearchPage.UsersFound}}">
 			<ListView.ItemTemplate>
 				<DataTemplate>
 					<ViewCell>
-						<StackLayout>
+						<StackLayout Margin="0,0,0,10">
 							<StackLayout.GestureRecognizers>
 								<TapGestureRecognizer Command="{Binding Input}" />
 							</StackLayout.GestureRecognizers>
 							<Grid>
 								<Grid.RowDefinitions>
-									<RowDefinition Height="*" />
+									<RowDefinition Height="auto" />
 								</Grid.RowDefinitions>
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*" />
 									<ColumnDefinition Width="Auto" />
 								</Grid.ColumnDefinitions>
 								<StackLayout Spacing="15" Orientation="Horizontal">
-									<Frame BackgroundColor="#121212" BorderColor="White" HorizontalOptions="Start" WidthRequest="50" HeightRequest="50" CornerRadius="25" >
-										<Image Aspect="AspectFill" WidthRequest="50" HeightRequest="50" HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding Avatar}"/>
+									<Frame BackgroundColor="#121212" BorderColor="White"
+										   HorizontalOptions="Start" WidthRequest="60" HeightRequest="60" CornerRadius="30" >
+										<Image Aspect="AspectFill" WidthRequest="60" HeightRequest="60"
+											   HorizontalOptions="Fill" VerticalOptions="Fill" Source="{Binding View.Avatar}"/>
 									</Frame>
-									<Label VerticalOptions="Center" Text="{Binding Username}"/>
+
+									<HorizontalStackLayout Spacing="0" >
+										<Label VerticalOptions="StartAndExpand" FontSize="Medium" Text="{Binding View.Name}"/>
+										<Label VerticalOptions="StartAndExpand" TextColor="LightGrey" FontSize="Medium" Text="#" />
+										<Label VerticalOptions="StartAndExpand" TextColor="LightGrey" FontSize="Medium" Text="{Binding View.Id}" />
+									</HorizontalStackLayout>
+
 								</StackLayout>
 							</Grid>
 						</StackLayout>

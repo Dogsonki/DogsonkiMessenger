@@ -3,7 +3,7 @@
 namespace Client.Networking.Packets.Models;
 
 [Serializable]
-public class LastChatsPacket
+partial class LastChatsPacket
 {
     public readonly User? BindedUser;
     public readonly Group? BindedGroup;
@@ -12,13 +12,13 @@ public class LastChatsPacket
     public double? LastMessageTime { get; set; }
     public byte[]? LastMessage { get; set; }
     public string? MessageType { get; set; }
-    public int Id { get; set; }
+    public uint Id { get; set; }
     public string? Type { get; set; }
     public string? Sender { get; set; }
 
     public bool isGroup => Type != "user";
 
-    public LastChatsPacket(string name, int id, double? last_message_time, string? type, string? message_type, byte[]? message, string? sender)
+    public LastChatsPacket(string name, uint id, double? last_message_time, string? type, string? message_type, byte[]? message, string? sender)
     {
         Name = name;
         if (last_message_time != null)

@@ -32,7 +32,7 @@ internal class ChatCache
 
             foreach (ChatMessage m in _messages)
             {
-                cacheMessages.Add(new ChatMessageCacheModel(m.BindedUser.UserId, m.TextContent, m.Time.Ticks, m.IsText));
+                cacheMessages.Add(new ChatMessageCacheModel(m.View.Id, m.TextContent, m.Time.Ticks, m.IsText));
             }
 
             _messages.ToList().Sort((x, y) => DateTime.Compare(x.Time, y.Time));
@@ -41,17 +41,17 @@ internal class ChatCache
 
             ChatCacheModel model = new ChatCacheModel(cacheMessages, lastMessageTime.Ticks);
 
-            Cache.SaveToCache(JsonConvert.SerializeObject(cacheMessages), $"cache_chat_{user.UserId}");
+            Cache.SaveToCache(JsonConvert.SerializeObject(cacheMessages), $"cache_chat_{user.Id}");
         });
     }
 
     public static ChatMessage[]? ReadCacheChat(User user)
-    {
-        byte[] cachedChat = Cache.ReadFileBytesCache($"cache_chat_{user.UserId}");
+    {       
+        byte[] cachedChat = Cache.ReadFileBytesCache($"cache_chat_{user.Id}");
 
         if (cachedChat is null || cachedChat.Length == 0)
         {
-            Debug.Write($"cache null {user.UserId}");
+            Debug.Write($"cache null {user.Id}");
             return null;
         }
 

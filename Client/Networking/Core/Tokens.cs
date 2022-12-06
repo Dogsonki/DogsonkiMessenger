@@ -7,7 +7,7 @@ public enum Token : int
     LOGOUT = 0,
     LOGIN = 1,
     REGISTER = 2,
-    INIT_CHAT = 3,
+    USER_INIT_CHAT = 3,
     SEARCH_USER = 4,
     CHAT_MESSAGE = 5, //Kind of realtime messages
     GET_MORE_MESSAGES = 6,

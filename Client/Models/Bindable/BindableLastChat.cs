@@ -9,8 +9,7 @@ public class BindableLastChat : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    private readonly User? BindedUser;
-    private readonly Group? BindedGroup;
+    public readonly IViewBindable view;
 
     public readonly bool IsGroup;
 
@@ -35,14 +34,12 @@ public class BindableLastChat : INotifyPropertyChanged
     public string FactoredTime { get; init; }
     public string Message { get; init; }
     public string Id { get; init; }
+
     public string Name
     {
-        get
-        {
-            if (IsGroup) return BindedGroup.Name;
-            else return BindedUser.Username;
-        }
+        get => view.Name;
     }
+
     private string MessageType { get; init; }
     public Command Input { get; init; }
 
@@ -62,7 +59,7 @@ public class BindableLastChat : INotifyPropertyChanged
         }
     }
 
-    public BindableLastChat(string name, string type, byte[] message, double? messageTime, string messageType, int id, string senderUsername)
+    public BindableLastChat(string name, string type, byte[] message, double? messageTime, string messageType, uint id, string senderUsername)
     {
         if(message != null)
         {
@@ -76,15 +73,14 @@ public class BindableLastChat : INotifyPropertyChanged
         if (type == "user")
         {
             IsGroup = false;
-            BindedUser = User.CreateOrGet(name, id);
-            Input = new Command(() => Conversation.OpenChat(BindedUser));
+            view = User.CreateOrGet(name, id);
+            Input = new Command(() => Conversation.OpenChat(view));
         }
         else
         {
             IsGroup = true;
-            BindedGroup = Group.CreateOrGet(name, id);
-            Input = new Command(() => Conversation.OpenChat(BindedGroup));
-            avatar = BindedGroup.Avatar;
+            view = Group.CreateOrGet(name, id);
+            Input = new Command(() => Conversation.OpenChat(view));
         }
 
         //Chat doesn't have any messages
@@ -99,24 +95,16 @@ public class BindableLastChat : INotifyPropertyChanged
             HasLastMessage = true;
         }
 
+        avatar = view.Avatar;
         MessageType = messageType;
         Id = id.ToString();
     }
 
-    public BindableLastChat(Group group)
+    public BindableLastChat(IViewBindable view)
     {
-        IsGroup = true;
-        BindedGroup = group;
-        Input = new Command(() => Conversation.OpenChat(group));
-        Id = group.Id.ToString();
-    }
-
-    public BindableLastChat(User user)
-    {
-        IsGroup = false;
-        BindedUser = user;
-        Input = new Command(() => Conversation.OpenChat(user));
-        Id = user.Id.ToString();
+        IsGroup = view.BindType == BindableType.Group;
+        Input = new Command(() => Conversation.OpenChat(view));
+        Id = view.Id.ToString();
     }
 
     private string GetMessage()

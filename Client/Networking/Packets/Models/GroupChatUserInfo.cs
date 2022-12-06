@@ -10,10 +10,10 @@ internal class GroupChatUserInfo
     [JsonProperty("nick")]
     public string UserName { get; set; }
     [JsonProperty("user_id")]
-    public int UserId { get; set; }
+    public uint UserId { get; set; }
 
     [JsonConstructor]
-    public GroupChatUserInfo(bool is_admin, string nick, int user_id)
+    public GroupChatUserInfo(bool is_admin, string nick, uint user_id)
     {
         IsAdmin = is_admin;
         UserName = nick;

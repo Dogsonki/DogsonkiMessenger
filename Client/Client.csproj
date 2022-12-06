@@ -63,6 +63,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
 	    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 
@@ -133,9 +134,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Platforms\Android\Services\" />
 	  <Folder Include="Resources\AppIcon\" />
+	  <Folder Include="Resources\Raw\" />
 	  <Folder Include="Resources\Splash\" />
+	  <Folder Include="Utility\Logger\" />
 	</ItemGroup>
 
 	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionClientHideInfoBar="True" XamarinHotReloadGenericExceptionInfoBarClientHideInfoBar="True" /></VisualStudio></ProjectExtensions>

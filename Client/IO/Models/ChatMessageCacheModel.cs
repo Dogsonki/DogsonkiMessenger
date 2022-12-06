@@ -6,7 +6,7 @@ namespace Client.IO.Models;
 public class ChatMessageCacheModel
 {
     [JsonProperty("userId")]
-    public int UserId { get; set; }
+    public uint UserId { get; set; }
     [JsonProperty("message")]
     public string Message { get; set; }
     [JsonProperty("date")]
@@ -15,7 +15,7 @@ public class ChatMessageCacheModel
     public bool IsText { get; set; }
 
     [JsonConstructor]
-    public ChatMessageCacheModel(int userId, string message, double date, bool isText)
+    public ChatMessageCacheModel(uint userId, string message, double date, bool isText)
     {
         UserId = userId;
         Message = message;

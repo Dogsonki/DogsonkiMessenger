@@ -1,7 +1,6 @@
 ﻿using Client.IO.Interfaces;
 using Client.Models.Bindable;
 using Client.Networking.Core;
-using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages;
 using Client.Utility;

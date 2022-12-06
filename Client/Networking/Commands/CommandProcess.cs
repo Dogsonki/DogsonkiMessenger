@@ -34,7 +34,6 @@ internal class CommandProcess
 
             if (instance is null)
             {
-                Logger.Push($"Something went wrong when creating instance of command: {command.Name} args: {args.Length}", LogLevel.Error);
                 error = "Something went wrong when creating instance of command";
                 return;
             }
@@ -61,6 +60,7 @@ internal class CommandProcess
             if (typeof(ICommand).IsAssignableFrom(com))
             {
                 CommandAliasAttribute? alias = com.GetCustomAttribute<CommandAliasAttribute>();
+
                 if (alias is null) continue;
 
                 Commands.Add(alias.Alias, com);

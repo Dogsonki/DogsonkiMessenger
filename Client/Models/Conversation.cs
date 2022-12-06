@@ -11,51 +11,34 @@ namespace Client.Models;
 
 public class Conversation
 {
-    public static Conversation Current;
+    public static Conversation? Current { get; private set; }
 
     public int Id { get; set; }
-    public bool IsGroupConversation { get; set; }
 
-    private readonly User? _user;
-    private readonly Group? _group;
+    public bool IsGroupConversation => _view.BindType == BindableType.Group;
 
-    public Conversation(Group group)
+    private readonly IViewBindable _view;
+
+    public IViewBindable GetCurrentConversation => _view;
+
+    public Conversation(IViewBindable view)
     {
-        if (group is null)
-        {
-            throw new Exception("Group can't be null in group conversation");
-        }
+        Debug.ThrowIfNull(view);
 
-        _group = group;
-        IsGroupConversation = true;
-
+        _view = view;
         Current = this;
     }
 
-    public Conversation(User user)
+    public void ExitConversation()
     {
-        if (user is null)
-        {
-            throw new Exception("User can't be null in user conversation");
-        }
-
-        _user = user;
-        IsGroupConversation = false;
-
-        Current = this;
+        Current = null;
     }
-
-    public User GetCurrentUserChat() => _user;
-    public Group GetCurrentGroupChat() => _group;
 
     private void GroupChatInfoCallback(object data)
     {
         GroupChatUserInfo[]? users = JsonConvert.DeserializeObject<GroupChatUserInfo[]>((string)data);
 
-        if (users is null)
-        {
-            throw new Exception("GROUP_CHAT_USERS_INFO_NULL");
-        }
+        Debug.ThrowIfNull(users);
 
         foreach (var u in users)
         {
@@ -64,36 +47,24 @@ public class Conversation
 
             GroupUser groupUser = new GroupUser(u.IsAdmin, user);
 
-            _group.AddUser(groupUser);
+            (_view as Group).AddUser(groupUser);
         }
     }
 
-    public static void OpenChat(User user)
+    public static void OpenChat(IViewBindable view)
     {
-        SocketCore.Send(user.Username, Token.INIT_CHAT);
-
         MessagePage.Messages.Clear();
 
-        MessagePage chatPage = new MessagePage(user);
-
-        SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.RealTimeMessageCallback);
-        SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);
-
-        SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, chatPage.GetChatMessagesCallback, false);
-
-        MainThread.BeginInvokeOnMainThread(() =>
+        if (view.BindType == BindableType.Group)
         {
-            StaticNavigator.Push(chatPage);
-        });
-    }
-
-    public static void OpenChat(Group group)
-    {
-        SocketCore.Send(group.Id, Token.GROUP_CHAT_INIT);
-
-        MessagePage.Messages.Clear();
-
-        MessagePage chatPage = new MessagePage(group);
+            SocketCore.Send(view.Name, Token.USER_INIT_CHAT);
+        }
+        else
+        {
+            SocketCore.Send(view.Id, Token.GROUP_CHAT_INIT);
+        }
+    
+        MessagePage chatPage = new MessagePage(view);
 
         SocketCore.OnToken(Token.CHAT_MESSAGE, chatPage.RealTimeMessageCallback);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, chatPage.GetMoreChatMessagesCallback);

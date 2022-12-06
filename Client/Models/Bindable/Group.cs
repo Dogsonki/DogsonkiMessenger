@@ -4,21 +4,20 @@ using Client.IO;
 using Client.Networking.Packets;
 using Newtonsoft.Json;
 using Client.Utility;
-using Client.Networking.Models;
 
 namespace Client.Models.Bindable;
 
 [Bindable(BindableSupport.Yes)]
-public class Group : BindableObject
+public class Group : BindableObject, IViewBindable
 {
-    public BindableType Type { get; set; }
+    public BindableType BindType { get; set; }
 
     public static List<Group> Groups = new List<Group>();
 
     public List<GroupUser> Users = new List<GroupUser>();
 
     public string Name { get; set; }
-    public int Id { get; set; }
+    public uint Id { get; set; }
 
     private ImageSource avatar;
 
@@ -36,14 +35,12 @@ public class Group : BindableObject
         }
     }
 
-    public Group(string groupName, int groupId)
+    public Group(string groupName, uint groupId)
     {
         Name = groupName;
         Id = groupId;
 
-        byte[] avatarCacheBuffer = AvatarManager.ReadGroupAvatar(groupId);
-
-        if (!AvatarManager.SetGroupAvatar(this, avatarCacheBuffer))
+        if (!AvatarManager.SetAvatar(this))
         {
             SocketCore.SendCallback(groupId, Token.GROUP_AVATAR_REQUEST, (_) =>
             {
@@ -67,7 +64,7 @@ public class Group : BindableObject
         });
     }
 
-    public static Group CreateOrGet(string name, int id)
+    public static Group CreateOrGet(string name, uint id)
     {
         Group group;
         if ((group = Groups.Find(x => x.Id == id)) != null)

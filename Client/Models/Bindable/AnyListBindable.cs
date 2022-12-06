@@ -6,39 +6,17 @@ namespace Client.Models.Bindable;
 /// <summary>
 /// Object used to be used as BindableObject in ObservableCollection T with onPropertyChanged
 /// </summary>
-public class AnyListBindable : BindableObject
+public partial class AnyListBindable : BindableObject
 {
-    public User? BindedUser { get; set; }
-    public Group? BindedGroup { get; set; }
+    public IViewBindable View { get; }
+
     private readonly bool UseUserInput;
     private readonly bool UseGroupInput;
 
-    private readonly BindType type;
+    private readonly BindableType BindType;
 
-    public string Username
-    {
-        get
-        {
-            if(type == BindType.Group)
-            {
-                return BindedGroup.Name;
-            }
-
-            return BindedUser.Username;
-        }
-    }
-    public int Id 
-    {
-        get
-        {
-            if (type == BindType.Group)
-            {
-                return BindedGroup.Id;
-            }
-
-            return BindedUser.UserId;
-        }
-     }
+    public string Username { get => View.Name; }
+    public uint Id { get => View.Id; }
 
     private Command? input;
     public Command? Input
@@ -53,39 +31,14 @@ public class AnyListBindable : BindableObject
         }
     }
 
-    public ImageSource BindedAvatar
+    public ImageSource BindedAvatar { get => View.Avatar; }
+
+    public bool IsGroup => View.BindType == BindableType.Group;
+
+    public AnyListBindable(IViewBindable view, Command input = null)
     {
-        get
-        {
-            if(type == BindType.Group)
-            {
-                return BindedGroup.Avatar;
-            }
-            return BindedUser.Avatar;
-        }
-    }
-
-    public bool IsGroup => BindedGroup is not null;
-
-    public AnyListBindable(User user, Command input = null)
-    {
-        type = BindType.User;
-        BindedUser = user;
-
+        BindType = view.BindType;
+        View = view;
         Input = input;
     }
-
-    public AnyListBindable(Group group, Command input = null)
-    {
-        type = BindType.Group;
-        BindedGroup = group;
-
-        Input = input;
-    }
-}
-
-enum BindType
-{
-    User,
-    Group
 }

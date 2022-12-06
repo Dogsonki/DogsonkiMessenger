@@ -9,7 +9,7 @@ internal class AvatarCacheStorage
 {
     private const string AvatarCacheFileName = "avatarCacheStorage.json";
 
-    public static void SaveAvatarCache(double ticks, int userId)
+    public static void SaveAvatarCache(double ticks, uint userId)
     {
         byte[]? avatarCacheStorage = Cache.ReadFileBytesCache(AvatarCacheFileName);
 
@@ -18,6 +18,7 @@ internal class AvatarCacheStorage
             Debug.Error("AvatarCache is null or empty creating new cache file");
 
             List<AvatarCacheStorageModel> model = new List<AvatarCacheStorageModel>();
+
             model.Add(new AvatarCacheStorageModel(ticks, userId));
 
             string json = JsonConvert.SerializeObject(model);

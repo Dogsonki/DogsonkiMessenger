@@ -1,96 +1,39 @@
-﻿using Client.Networking.Core;
-using Client.IO;
-using System.ComponentModel;
-using Client.Networking.Models;
+﻿using Client.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Client.Models.Bindable;
 
-public class User : IBindableType, INotifyPropertyChanged
+public partial class User : ObservableObject, IViewBindable
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public static List<User> Users = new List<User>();
 
-    public BindableType Type { get; set; }
-    public string Name { get; set; }
-    public int Id { get; set; }
+    public BindableType BindType { get; set; }
 
-    /*WIP*/
+    [ObservableProperty]
+    public string name;
+
+    [ObservableProperty]
+    private ImageSource? avatar;
+
+    [ObservableProperty]
+    private int dogeCoins;
+
+    public uint Id { get; }
+
+    [ObservableProperty]
     private string? tag;
-    public string Tag
-    {
-        get { return "System"; }
-        set { tag = value; }
-    }
 
     public bool isBot { get; set; }
     public bool VisibleTag { get; set; } = false;
 
-    public static List<User> Users = new List<User>();
-
-    private ImageSource avatar;
-    public ImageSource Avatar
+    public User(string username, uint id, UserCreateFlags flags = UserCreateFlags.Default)
     {
-        get
-        {
-            if (IsLocalUser)
-            {
-                return LocalUser.Current.Avatar;
-            }
-            return avatar;
-        }
-        set
-        {
-            if (IsLocalUser)
-            {
-                LocalUser.Current.Avatar = value;
-            }
-            else
-            {
-                avatar = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Avatar)));
-            }
-        }
-    }
+        name = username;
+        Id = id;
+           
+        Users.Add(this);
 
-    private int dogeCoins;
-    public int DogeCoins
-    {
-        get
-        {
-            return dogeCoins;
-        }
-        set
-        {
-            dogeCoins = value;
-        }
-    }
-
-    /* As LocalUser have his own binding but User reuse it LocalUser have to be binding as LocalUser.<BindableObject> */
-    public bool IsLocalUser = false;
-
-    /* Username and ID will never change then don't make them as OnPropertyChanged */
-    public string Username { get; set; }
-    public int UserId { get; set; }
-
-    public User(string username, int id, bool isLocalUser = false, UserCreateFlags flags = UserCreateFlags.Default)
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            if (Users.Find(x => x.UserId == id) != null)
-                return;
-
-            Username = username;
-            UserId = id;
-            IsLocalUser = isLocalUser;
-
-            Users.Add(this);
-        });
-
-        byte[] avatarCacheBuffer = AvatarManager.ReadUserAvatar(id);
-
-        if (!AvatarManager.SetUserAvatar(this, avatarCacheBuffer))
-        {
-            SocketCore.Send(UserId, Token.USER_AVATAR_REQUEST);
-        }
+        AvatarManager.SetAvatar(this);
     }
 
     /// <summary>
@@ -102,9 +45,14 @@ public class User : IBindableType, INotifyPropertyChanged
     {
         ImageSource src = ImageSource.FromStream(() => new MemoryStream(buffer));
 
+        if (src.IsEmpty || src is null)
+        {
+            throw new ArgumentException($"Buffer was not a image buffer len? {buffer?.Length} is src null: {src is null}");
+        }
+
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            Avatar = src;
+            Avatar = ImageSource.FromStream(() => new MemoryStream(buffer));
         });
 
         return true;
@@ -112,19 +60,19 @@ public class User : IBindableType, INotifyPropertyChanged
 
     public static void ClearUsers() => Users.Clear();
 
-    public static User CreateOrGet(string username, int id, UserCreateFlags flags = UserCreateFlags.Default)
+    public static User CreateOrGet(string username, uint id, UserCreateFlags flags = UserCreateFlags.Default)
     {
         User? user;
-        if ((user = Users.Find(x => x.UserId == id)) != null)
+        if ((user = Users.Find(x => x.Id == id)) != null)
             return user;
 
-        return new User(username, id, false);
+        return new User(username, id);
     }
 
-    public static User CreateLocalUser(string username, int id)
+    public static User CreateLocalUser(string username, uint id)
     {
         CreateSystemBot();
-        return new User(username, id, true);
+        return new User(username, id);
     }
 
     /// <summary>
@@ -133,9 +81,9 @@ public class User : IBindableType, INotifyPropertyChanged
     public static User CreateSystemBot()
     {
         User? _;
-        if ((_ = GetUser(-100)) is not null) return _;
+        if ((_ = GetUser(0)) is not null) return _;
 
-        User systemBot = new User("System", -100, flags: UserCreateFlags.IsSystemUser)
+        User systemBot = new User("System", 0, flags: UserCreateFlags.IsSystemUser)
         {
             isBot = true,
             Tag = "System",
@@ -146,11 +94,11 @@ public class User : IBindableType, INotifyPropertyChanged
 
     public static User GetSystemBot()
     {
-        User? systemBot = GetUser(-100);
+        User? systemBot = GetUser(0);    
         return systemBot is not null ? systemBot : CreateSystemBot();
     }
 
-    public static User? GetUser(int id) => Users.Find(x => x.UserId == id);
+    public static User? GetUser(uint id) => Users.Find(x => x.Id == id);
 }
 
 [Flags]

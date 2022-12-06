@@ -19,10 +19,10 @@ public class MessagePacket
     public bool IsGroup;
 
     [JsonIgnore]
-    public int GroupId;
+    public uint GroupId;
 
     [JsonIgnore]
-    public int UserId;
+    public uint UserId;
 
     [JsonIgnore]
     public string Username;
@@ -34,7 +34,7 @@ public class MessagePacket
     public uint MessageId;
 
     [JsonConstructor]
-    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id, uint id)
+    public MessagePacket(string username, byte[] message, string message_type, double time, uint user_id, bool is_group, uint group_id, uint id)
     {
         ContentString = Encoding.UTF8.GetString(message);
         Content = message;

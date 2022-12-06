@@ -1,29 +1,68 @@
 ﻿using System.Text;
+using Client.Models;
 using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Utility;
+using Client.Networking.Packets;
+using Newtonsoft.Json;
 
 namespace Client.IO;
 
 public static class AvatarManager
 {
-    public static byte[] ReadUserAvatar(int userId)
+    static AvatarManager()
     {
-        byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("user_avatar" + userId);
-
-        return avatarCacheBuffer;
+        SocketCore.SetGlobalOnToken(Token.USER_AVATAR_REQUEST, ManageUserImagePacket);
     }
 
-    public static byte[] ReadGroupAvatar(int groupId)
+    private static string GetAvatarInfoPath(IViewBindable view)
     {
-        byte[] avatarCacheBuffer = Cache.ReadFileBytesCache("group_avatar" + groupId);
-
-        return avatarCacheBuffer;
+        if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
+           return "user_avatar_info" + view.Id;
+        else
+           return "group_avatar_info" + view.Id;
     }
 
-    private static int ReadUserAvatarInfo(int userId)
+    private static void ManageUserImagePacket(object packet)
     {
-        byte[] time = Cache.ReadFileBytesCache("user_avatar_info" + userId);
+        Task.Run(() =>
+        {
+            UserImageRequestPacket? img = JsonConvert.DeserializeObject<UserImageRequestPacket>(Convert.ToString(packet));
+
+            Debug.ThrowIfNull(img);
+
+            var user = User.GetUser(img.Id);
+
+            if (user is null)
+            {
+                SocketCore.Send("user image null");
+                return;
+            }
+
+            byte[] buffer = Essential.GetImageBuffer(img.ImageData);
+
+            Cache.SaveToCache(buffer, "user_avatar" + img.Id);
+
+            AvatarCacheStorage.SaveAvatarCache(DateTime.Now.Ticks, img.Id);
+
+            user.SetAvatar(buffer);
+        });
+    }
+
+    private static void SaveAvatarInfo(int time, IViewBindable view)
+    {
+        Debug.ThrowIfNull(view);
+
+        byte[] info = Encoding.UTF8.GetBytes(time.ToString());
+
+        Cache.SaveToCache(info, GetAvatarInfoPath(view));
+    }
+
+    private static int ReadAvatarTime(IViewBindable view)
+    {
+        string avatarTimePath = GetAvatarInfoPath(view);
+
+        byte[] time = Cache.ReadFileBytesCache(avatarTimePath);
 
         if (time is null || time.Length == 0)
         {
@@ -33,96 +72,101 @@ public static class AvatarManager
         return int.Parse(Encoding.UTF8.GetString(time));
     }
 
-    private static int ReadGroupAvatarInfo(int groupId)
+    private static byte[]? ReadAvatar(IViewBindable view)
     {
-        byte[] time = Cache.ReadFileBytesCache("user_avatar_info" + groupId);
-
-        if (time is null || time.Length == 0)
+        if(view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
         {
-            return -1;
+            return Cache.ReadFileBytesCache("user_avatar" + view.Id);
         }
-
-        return int.Parse(Encoding.UTF8.GetString(time));
-    }
-
-    private static bool SaveUserAvatarInfo(int time, int userId)
-    {
-        byte[] info = Encoding.ASCII.GetBytes(time.ToString());
-        Cache.SaveToCache(info, "user_avatar_info" + userId);
-        return true;
-    }
-
-    private static bool SaveGroupAvatarInfo(int time, int groupId)
-    {
-        byte[] info = Encoding.ASCII.GetBytes(time.ToString());
-        Cache.SaveToCache(info, "group_avatar_info" + groupId);
-        return true;
-    }
-
-    public static bool SetUserAvatar(User user, byte[] avatar)
-    {
-        if (avatar is null || avatar.Length == 0)
+        else
         {
-            return false;
+            return Cache.ReadFileBytesCache("group_avatar" + view.Id);
         }
+    }
 
-        user.SetAvatar(avatar);
-
-        SocketCore.SendCallback(user.UserId, Token.GET_USER_AVATAR_TIME, (object _) =>
+    public static bool SetAvatar(IViewBindable view)
+    {
+        Task.Run(() =>
         {
-            int time = -1;
-            int newTime = int.Parse((string)_);
+            byte[]? avatarBuffer = ReadAvatar(view);
 
-            if ((time = ReadUserAvatarInfo(user.UserId)) == -1)
+            if(avatarBuffer is not null &&  avatarBuffer.Length > 0)
             {
-                SaveUserAvatarInfo(newTime, user.UserId);
+                ImageSource avatarSource = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
+                SetAvatar(view, avatarSource);
+            }
 
-                user.SetAvatar(avatar);
+            if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
+            {
+                if(avatarBuffer is null || avatarBuffer.Length > 0)
+                {
+                    SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
+                    return;
+                }
+
+                SocketCore.SendCallback(view.Id, Token.GET_USER_AVATAR_TIME, (object avatarTimePacket) =>
+                {
+                    int time = -1;
+                    int newTime = int.Parse((string)avatarTimePacket);
+
+                    if ((time = ReadAvatarTime(view)) == -1)
+                    {
+                        SaveAvatarInfo(newTime, view);
+                    }
+                    else
+                    {
+                        if (newTime > time)
+                        {
+                            SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
+                        }
+                    }
+                });
             }
             else
             {
-                if (newTime > time)
+                SocketCore.SendCallback(view.Id, Token.GET_GROUP_AVATAR_TIME, (object avatarTimePacket) =>
                 {
-                    SocketCore.Send(user.UserId, Token.USER_AVATAR_REQUEST);
-                }
+                    int time = -1;
+                    int newTime = int.Parse((string)avatarTimePacket);
+
+                    if ((time = ReadAvatarTime(view)) == -1)
+                    {
+                        SaveAvatarInfo(newTime, view);
+                    }
+                    else
+                    {
+                        if (newTime > time)
+                        {
+                            SocketCore.Send(view.Id, Token.GROUP_AVATAR_REQUEST);
+                        }
+                    }
+                });
+
             }
         });
 
-        return true;
+        return false;
     }
 
-    public static bool SetGroupAvatar(Group group, byte[] avatar)
+    public static void SetAvatar(IViewBindable view, byte[] avatarBuffer)
     {
-        if (avatar is null || avatar.Length == 0)
+        Task.Run(() =>
         {
-            Debug.Error("Cannot set null avatar");
-            return false;
+            ImageSource source = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
+            SetAvatar(view, source);
+        });
+    }
+
+    private static void SetAvatar(IViewBindable view, ImageSource avatarSource)
+    {
+        if(avatarSource == null || avatarSource.IsEmpty)
+        {
+            return;
         }
 
-        SocketCore.SendCallback(group.Id, Token.GET_GROUP_AVATAR_TIME, (object _) =>
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            int time = -1;
-            int newTime = int.Parse((string)_);
-
-            if ((time = ReadGroupAvatarInfo(group.Id)) == -1)
-            {
-                SaveGroupAvatarInfo(newTime, group.Id);
-
-                group.SetAvatar(avatar);
-            }
-            else
-            {
-                if (newTime > time)
-                {
-                    SocketCore.Send(group.Id, Token.GROUP_AVATAR_REQUEST);
-                }
-                else
-                {
-                    group.SetAvatar(avatar);
-                }
-            }
+            view.Avatar = avatarSource;
         });
-
-        return true;
     }
 }

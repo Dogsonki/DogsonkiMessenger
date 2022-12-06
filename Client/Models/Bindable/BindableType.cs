@@ -3,5 +3,7 @@
 public enum BindableType
 {
     User,
-    Group
+    Group,
+    System,
+    LocalUser
 }
