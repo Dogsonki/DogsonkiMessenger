@@ -52,6 +52,7 @@ class MessageType(Enum):
     GET_LAST_GROUP_CHAT_MESSAGE_ID = 27
     GET_FIRST_MESSAGES = 28
     GET_LAST_TIME_ONLINE = 29
+    SELF_MESSAGE = 30
 
 
 @dataclass

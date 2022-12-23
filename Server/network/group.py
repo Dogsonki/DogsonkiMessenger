@@ -117,10 +117,11 @@ class GroupChatroom(functions.Chatroom):
                     "is_group": True, "group_id": self.group_id, "message_type": message_type}
             for i in self.group_members:
                 if i.nick == self.connection.nick:
-                    continue
-                receiver_connection = current_connections.get(i.nick)
-                if receiver_connection:
-                    receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
+                    self.connection.send_message(message_id, MessageType.SELF_MESSAGE)
+                else:
+                    receiver_connection = current_connections.get(i.nick)
+                    if receiver_connection:
+                        receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
     def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
         is_path = False if message_type == "text" else True
