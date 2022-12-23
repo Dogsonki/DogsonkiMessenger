@@ -27,7 +27,8 @@ class CreateDatabase:
                                    warnings INTEGER NOT NULL,
                                    is_banned BIT NOT NULL,
                                    avatar MEDIUMBLOB,
-                                   avatar_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                                   avatar_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                   last_online TIMESTAMP DEFAULT NULL
                                    );""")
 
     def create_users_link_table(self):

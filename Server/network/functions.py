@@ -21,6 +21,13 @@ def get_group_avatar_time(client: Client, data: int):
     client.send_message(datetime.timestamp(u_time), MessageType.GET_GROUP_AVATAR_TIME)
 
 
+def last_time_online(client: Client, data: int):
+    u_time = handling_sql.get_last_time_online(client, data)
+    if u_time is not None: 
+        u_time = datetime.timestamp(u_time)
+    client.send_message(u_time, MessageType.GET_LAST_TIME_ONLINE)
+
+
 class Chatroom(metaclass=abc.ABCMeta):
     connection: Client
     number_of_sent_last_messages: int
@@ -39,8 +46,12 @@ class Chatroom(metaclass=abc.ABCMeta):
             MessageType.GET_CHAT_FILE: self.send_image,
             MessageType.GET_USER_AVATAR_TIME: get_user_avatar_time,
             MessageType.GET_GROUP_AVATAR_TIME: get_group_avatar_time,
-            MessageType.GET_FIRST_MESSAGES: self.send_first_messages
+            MessageType.GET_FIRST_MESSAGES: self.send_first_messages,
+            MessageType.GET_LAST_TIME_ONLINE: self.last_time_online
         }
+
+    def last_time_online(self, data):
+        last_time_online(self.connection, data)
 
     def init_chatroom(self):
         self.receive_messages()

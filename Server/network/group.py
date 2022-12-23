@@ -24,9 +24,9 @@ def add_to_group(client: Client, data: dict):
     added_user_id = data["added_person_id"]
     if handling_sql.get_is_admin(client, client.login_id, group_id):
         handling_sql.add_to_group(client, added_user_id, group_id)
-        message = "0"  # 0 -> user has been added
+        message = 0  # 0 -> user has been added
     else:
-        message = "1"  # 1 -> adding person is not a group admin
+        message = 1  # 1 -> adding person is not a group admin
     client.send_message(message, MessageType.ADD_TO_GROUP)
 
 
@@ -35,9 +35,9 @@ def delete_from_group(client: Client, data: dict):
     removed_user_id = data["removed_person_id"]
     if handling_sql.get_is_admin(client, client.login_id, group_id):
         handling_sql.delete_from_group(client, removed_user_id, group_id)
-        message = "0"  # 0 -> user has been removed from group
+        message = 0  # 0 -> user has been removed from group
     else:
-        message = "1"  # 1 -> removing person is not a group admin
+        message = 1  # 1 -> removing person is not a group admin
     client.send_message(message, MessageType.DELETE_FROM_GROUP)
 
 

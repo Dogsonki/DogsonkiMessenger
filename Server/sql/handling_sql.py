@@ -18,10 +18,7 @@ def connection_checking(function):
         try:
             data = function(client.db_cursor, *args)
         except AttributeError:
-            if client.db_cursor is None:
-                client.db_cursor = sql_con.get_cursor()
-            else:
-                client.db_cursor.ping(reconnect=True)
+            client.db_cursor = sql_con.get_cursor()
             data = function(client.db_cursor, *args)
         return data
     return check_cursor_connection
@@ -105,8 +102,10 @@ def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
 class UserChats:
     u1_id: int
     u1_nick: str
+    u1_last_online: datetime
     u2_id: int
     u2_nick: str
+    u2_last_online: datetime
     last_message_time: datetime
     message: str
     message_type: str
@@ -114,7 +113,7 @@ class UserChats:
 
 @connection_checking
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserChats]]:
-    cursor.execute("""SELECT u1.id, u1.nick, u2.id, u2.nick, m.time, m.content, m.message_type, s.nick FROM ((((users_link_table
+    cursor.execute("""SELECT u1.id, u1.nick, u1.last_online, u2.id, u2.nick, u2.last_online, m.time, m.content, m.message_type, s.nick FROM ((((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id)
                       LEFT JOIN messages as m ON users_link_table.message_id = m.id)
@@ -427,3 +426,17 @@ def get_last_group_message_id(cursor: CMySQLCursor, group_id: int) -> int:
                       ORDER BY id DESC LIMIT 1;""", (group_id, ))
     sql_data = cursor.fetchone()
     return sql_data[0]
+
+
+@connection_checking
+def get_last_time_online(cursor: CMySQLCursor, user_id: int) -> datetime:
+    cursor.execute("""SELECT last_online FROM users
+                      WHERE id=%s""", (user_id,))
+    sql_data = cursor.fetchone()
+    return sql_data[0]
+
+
+@connection_checking
+def set_last_time_online(cursor: CMySQLCursor, user_id: int, date: datetime):
+    cursor.execute("""UPDATE users SET last_online=%s
+                      WHERE id=%s""", (date, user_id))

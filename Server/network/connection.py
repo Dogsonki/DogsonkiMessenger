@@ -5,6 +5,8 @@ import socket
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Union, Tuple
+from datetime import datetime
+import abc
 
 from mysql.connector.cursor_cext import CMySQLCursor
 from email_validator import validate_email, EmailNotValidError
@@ -49,6 +51,7 @@ class MessageType(Enum):
     GET_LAST_CHAT_MESSAGE_ID = 26
     GET_LAST_GROUP_CHAT_MESSAGE_ID = 27
     GET_FIRST_MESSAGES = 28
+    GET_LAST_TIME_ONLINE = 29
 
 
 @dataclass
@@ -132,11 +135,16 @@ class Connection:
                 self.close_connection()
 
     def close_connection(self):
+        self.set_last_time_online(datetime.now())
         self.db_cursor.close()
         if self.login:
             del current_connections[self.nick]
         print(f"Closing connection with {self.client}")
         sys.exit()  # close the thread that was responsible for the connection with the given client
+
+    @abc.abstractmethod
+    def set_last_time_online(self, date: datetime):
+        pass
 
 
 class Client(Connection):
@@ -166,6 +174,7 @@ class Client(Connection):
 
     def after_login(self):
         current_connections[self.nick] = self
+        self.set_last_time_online(None)
 
     def login_by_session(self, session_data) -> bool:
         """
@@ -231,30 +240,30 @@ class Client(Connection):
         self.login = register_data.data["email"]
         self.password = register_data.data["password"]
         if not self.validate_login_data():
-            self.send_message("8", MessageType.REGISTER)
+            self.send_message(8, MessageType.REGISTER)
             return
         if handling_sql.check_if_nick_exist(self, nick):
-            self.send_message("7", MessageType.REGISTER)
+            self.send_message(7, MessageType.REGISTER)
             return
         if handling_sql.check_if_login_exist(self, self.login):
-            self.send_message("3", MessageType.REGISTER)
+            self.send_message(3, MessageType.REGISTER)
 
         code = get_confirmation_code()
         created = handling_sql.create_confirmation_code(self, self.login, code)
         if created is not True:
             code = created
-            self.send_message("6", MessageType.REGISTER)
+            self.send_message(6, MessageType.REGISTER)
         else:
             if not self.send_confirmation_email(code):
-                self.send_message("4", MessageType.REGISTER)
+                self.send_message(4, MessageType.REGISTER)
                 return
-            self.send_message("2", MessageType.REGISTER)
+            self.send_message(2, MessageType.REGISTER)
         confirmed = self.confirm_email(code, MessageType.REGISTER)
 
         if not confirmed:
             return
         handling_sql.register_user(self, self.login, self.password, nick)
-        self.send_message("0", MessageType.REGISTER)
+        self.send_message(0, MessageType.REGISTER)
 
     def confirm_email(self, code: int, type_: MessageType) -> bool:
         while True:
@@ -270,10 +279,10 @@ class Client(Connection):
                 return True
             else:
                 if confirmed > 5:
-                    self.send_message("10", type_)
+                    self.send_message(10, type_)
                     return False
                 else:
-                    self.send_message("9", type_)
+                    self.send_message(9, type_)
 
     def send_confirmation_email(self, code: int) -> bool:
         message = smpt_connection.create_message(self.login, code)
@@ -294,7 +303,7 @@ class Client(Connection):
             10 - max attempts during writing code from email, try again
         """
         if not handling_sql.check_if_login_exist(self, login):
-            self.send_message("2", MessageType.FORGOT_PASSWORD)
+            self.send_message(2, MessageType.FORGOT_PASSWORD)
             return
 
         code = get_confirmation_code()
@@ -304,22 +313,22 @@ class Client(Connection):
             code = created
         else:
             if not self.send_confirmation_email(code):
-                self.send_message("1", MessageType.FORGOT_PASSWORD)
+                self.send_message(1, MessageType.FORGOT_PASSWORD)
                 return
 
-        self.send_message("4", MessageType.FORGOT_PASSWORD)
+        self.send_message(4, MessageType.FORGOT_PASSWORD)
         confirmed = self.confirm_email(code, MessageType.FORGOT_PASSWORD)
         if confirmed:
-            self.send_message("5", MessageType.FORGOT_PASSWORD)
+            self.send_message(5, MessageType.FORGOT_PASSWORD)
             while True:
                 new_password = self.receive_message().data
                 if 2 <= len(new_password) <= 50:
                     break
                 else:
-                    self.send_message("3", MessageType.FORGOT_PASSWORD)
+                    self.send_message(3, MessageType.FORGOT_PASSWORD)
             handling_sql.change_password(self, login, new_password)
             handling_sql.delete_session(self, self.login_id)
-            self.send_message("0", MessageType.FORGOT_PASSWORD)
+            self.send_message(0, MessageType.FORGOT_PASSWORD)
 
     def logout(self):
         del current_connections[self.nick]
@@ -360,3 +369,6 @@ class Client(Connection):
                 return False
             return True
         return False
+    
+    def set_last_time_online(self, date: datetime):
+        handling_sql.set_last_time_online(self, self.login_id, date)

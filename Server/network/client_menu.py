@@ -115,16 +115,22 @@ def send_last_chats(client: Client, data: str):
     if user_chats:
         for i in user_chats:
             if client.login_id == i.u2_id:
+                if i.u1_last_online is not None:
+                    i.u1_last_online = datetime.timestamp(i.u1_last_online)
                 chats.append({"name": i.u1_nick,
                               "id": i.u1_id,
+                              "last_online_time": i.u1_last_online,
                               "last_message_time": datetime.timestamp(i.last_message_time),
                               "type": "user",
                               "message_type": i.message_type,
                               "message": i.message,
                               "sender": i.sender})
             else:
+                if i.u2_last_online is not None:
+                    i.u2_last_online = datetime.timestamp(i.u2_last_online)
                 chats.append({"name": i.u2_nick,
                               "id": i.u2_id,
+                              "last_online_time": i.u2_last_online,
                               "last_message_time": datetime.timestamp(i.last_message_time),
                               "type": "user",
                               "message_type": i.message_type,
