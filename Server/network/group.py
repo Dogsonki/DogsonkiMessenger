@@ -117,7 +117,7 @@ class GroupChatroom(functions.Chatroom):
                     "is_group": True, "group_id": self.group_id, "message_type": message_type}
             for i in self.group_members:
                 if i.nick == self.connection.nick:
-                    self.connection.send_message(message_id, MessageType.SELF_MESSAGE)
+                    self.connection.send_message(message_id, MessageType.NEW_MESSAGE)
                 else:
                     receiver_connection = current_connections.get(i.nick)
                     if receiver_connection:
