@@ -26,10 +26,15 @@ public class Connection
 
     public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
     {
+        if(sslPolicyErrors != SslPolicyErrors.None)
+        {
+            Debug.Write(sslPolicyErrors.ToString());
+        }
+
         return true;
     }
 
-    public static async Task Connect()
+    protected static async Task Connect()
     {
         try
         {

@@ -1,0 +1,81 @@
+﻿@page "/RegisterPage";
+
+@inject NavigationManager navigation;
+
+@using Client.Networking.Core;
+@using Client.Networking.Packets;
+@using Client.Networking.Models;
+
+<div class="form-container">
+    <h1>Join to Dogsonki</h1>
+
+    <input @bind="usernameInput" type="text" placeholder="Username" />
+    <input @bind="emailInput" type="email" placeholder="Email" />
+    <input @bind="passwordInput" type="password" placeholder="Password" />
+
+    <button @onclick="TryRegister">Register</button>
+</div>
+
+<div style="text-align:center">
+    <span style="color:red">@errorMessage</span>
+    <p style="color:cornflowerblue"> <a href="/">Login</a> </p>
+</div>
+
+@code {
+    private readonly char[] IllegalCharacters = { '$', '{', '}', '@', ':' };
+
+
+    private string? usernameInput;
+    private string? emailInput;
+    private string? passwordInput;
+
+    private string? errorMessage;
+
+    private void TryRegister()
+    {
+        if (string.IsNullOrEmpty(usernameInput) || string.IsNullOrEmpty(emailInput) || string.IsNullOrEmpty(passwordInput))
+        {
+            errorMessage = "One of the fields was empty";
+            return;
+        }
+
+        int illegalCharacterIndex;
+        if ((illegalCharacterIndex = usernameInput.IndexOfAny(IllegalCharacters)) > 0)
+        {
+            errorMessage = ($"Username contains illegal character - {usernameInput[illegalCharacterIndex]}");
+            return;
+        }
+
+        navigation.NavigateTo("/CodeConfirmation/" + emailInput);
+
+        RegisterPacket packet = new RegisterPacket(usernameInput, passwordInput, emailInput);
+
+        if (!SocketCore.SendCallback(packet, Token.REGISTER, RegisterCallback, true))
+        {
+            errorMessage = "Unable to connect to the server";
+            return;
+        }
+    }
+
+    private void RegisterCallback(SocketPacket packet)
+    {
+        int token = packet.ToInt();
+
+        InvokeAsync(() =>
+        {
+            switch (token)
+            {
+                case 2:
+                    navigation.NavigateTo("/CodeConfirmation/" + emailInput);
+                    break;
+                case 7:
+                    errorMessage = "User with given username already exists";
+                    break;
+                default:
+                    errorMessage = $"Unhandled error {token}";
+                    break;
+            }
+            StateHasChanged();
+        });
+    }
+}

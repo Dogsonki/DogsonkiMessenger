@@ -1,0 +1,118 @@
+﻿@page "/"
+@page "/login/{info}"
+
+@inject NavigationManager navigation;
+
+@using Client.Models;
+@using Client.Networking.Core;
+@using Client.Networking.Packets;
+@using Client.Networking.Models;
+@using Client.IO;
+
+<div class="form-container">
+    <h1>Login to Dogsonki</h1>
+
+    <span style="color:white">@Info</span>
+
+    <input @bind="emailInput" type="email" placeholder="Email"/>
+    <input @bind="passwordInput" type="password" placeholder="Password" />
+
+    <button @onclick="TryLogin">Login</button>
+</div> 
+
+<div style="text-align:center">
+    <span style="color:red">@errorMessage</span>
+    <p style="color:cornflowerblue"> <a href="/MainPage"> Forgot Password? </a> </p>
+    <p style="color:cornflowerblue"> <a href="/RegisterPage">Sign up</a> </p>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string? Info{ get; set; }
+
+    private string? emailInput;
+    private string? passwordInput;
+    private bool rememberMeInput;
+
+    private string? errorMessage;
+
+    public LoginPage()
+    {
+        Session.Init(LoginAsSession);
+    }
+
+    protected override void OnInitialized()
+    {
+        if (LocalUser.IsLoggedIn)
+        {
+            navigation.NavigateTo("/MainPage");
+        }
+    }
+
+    private void LoginAsSession(SocketPacket packet)
+    {
+        LoginCallbackPacket? login = packet.Deserialize<LoginCallbackPacket?>();
+
+        if (login is null)
+            return;
+
+        if (login.Token == 1)
+        {
+            new LocalUser(login.Username, login.Id);
+            navigation.NavigateTo("/MainPage");
+        }
+    }
+
+    public void TryLogin()
+    {
+        if (string.IsNullOrEmpty(emailInput) || string.IsNullOrEmpty(passwordInput))
+        {
+            errorMessage = "Email or password was empty";
+            return;
+        }
+
+        Client.Utility.Debug.Write($"{emailInput} {passwordInput} {rememberMeInput}");
+
+        LoginPacket packet = new LoginPacket(emailInput, passwordInput, true);
+
+        if (!SocketCore.SendCallback(packet, Token.LOGIN, LoginCallback))
+            errorMessage = "Can't Connect to Server.";
+        else
+            errorMessage = "";
+    }
+
+    private void LoginCallback(SocketPacket callbackPacket)
+    {
+        LoginCallbackPacket? packet = callbackPacket.Deserialize<LoginCallbackPacket>();
+
+        if(packet is null)
+        {
+            errorMessage = callbackPacket.PacketError;
+            return;
+        }
+
+        InvokeAsync(() =>
+        {
+            switch (packet.Token)
+            {
+                case 0:
+                    errorMessage = "Wrong email or password";
+                    break;
+                case 1:
+                    new LocalUser(packet.Username, packet.Id);
+                    navigation.NavigateTo("/MainPage");
+                    break;
+                case -1:
+                    errorMessage = "User is banned";
+                    break;
+                default:
+                    errorMessage = $"Unhandled error {packet.Token}";
+                    break;
+            }
+
+            StateHasChanged();
+        });
+    }
+}

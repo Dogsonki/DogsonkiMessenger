@@ -5,13 +5,13 @@ namespace Client.Networking.Packets;
 public class SearchPacket
 {
     [JsonProperty("nick")]
-    public string Username { get; set; }
+    public string Name { get; set; }
     [JsonProperty("search_groups")]
     public bool SearchGroup { get; set; }
 
-    public SearchPacket(string username, bool searchGroup)
+    public SearchPacket(string name, bool searchGroup)
     {
-        Username = username;
+        Name = name;
         SearchGroup = searchGroup;
     }
 }

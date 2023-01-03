@@ -23,7 +23,7 @@ namespace Client.Networking.Core
             Callbacks.Remove(model);
         }
 
-        public static bool InvokeCallback(int token, object data)
+        public static bool InvokeCallback(int token, SocketPacket data)
         {
             foreach (var callback in Callbacks)
             {

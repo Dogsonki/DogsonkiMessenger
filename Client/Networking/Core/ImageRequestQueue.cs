@@ -7,7 +7,7 @@ public static class ImageRequestQueue
 {
     private static readonly List<ImageRequestModel> _queue = new List<ImageRequestModel>();
 
-    public static void AddRequest(ChatImagePacket packet, uint messageId, Action<object> callback)
+    public static void AddRequest(ChatImagePacket packet, int messageId, Action<object> callback)
     {
         ImageRequestModel request = new ImageRequestModel(packet, messageId, callback);
         _queue.Add(request);
@@ -15,7 +15,7 @@ public static class ImageRequestQueue
         RequestImageCallback(request,callback);
     }
 
-    public static void RemoveRequest(uint messageId)
+    public static void RemoveRequest(int messageId)
     {
         ImageRequestModel? model = _queue.Find(x => x.MessageId == messageId);
 

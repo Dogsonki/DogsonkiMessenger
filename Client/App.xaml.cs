@@ -1,30 +1,16 @@
 ﻿using Client.Networking.Core;
-using Client.Pages;
 using Client.IO;
-using Client.Utility;
 
 namespace Client;
 
 public partial class App : Application
 {
-    public App()
-    {
-        InitializeComponent();
+	public App()
+	{
+		Task.Run(SocketCore.Start);
 
-        Connection.AddOnConnection(Session.Init);
-      
-        Task.Run(SocketCore.Start);
-#if DEBUG   
-        try
-        {
-            MainPage = new NavigationPage(new LoginPage());
-        }
-        catch (Exception ex)
-        {
-            Logger.Push(ex, LogLevel.Error);
-        }
-#else
-        MainPage = new NavigationPage(new LoginPage());
-#endif
-    }
+		InitializeComponent();
+
+		MainPage = new MainPage();
+	}
 }

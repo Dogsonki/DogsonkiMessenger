@@ -1,0 +1,82 @@
+﻿@page "/Search/{SearchInput}"
+
+@using Client.Models;
+@using Client.Networking.Models;
+@using Client.Networking.Packets.Models;
+
+@inject NavigationManager naviagtion;
+
+<div id="search">
+    <form @onsubmit="SearchBarSubmit">
+        <input @bind="SearchInput" type="text" placeholder="Search" />
+    </form>
+</div>
+
+<div>
+    <ul>
+        @foreach (IViewBindable found in searchFound)
+        {
+            <li>
+                <div class="LocalUserDisplay" @onclick="() => OpenChat(found)">
+                    <img class="found-avatar" alt="local_user_avatar" src="@found.AvatarImageSource" />
+                    <div class="found-info">
+                        <p class="found-info">@found.Name<span style="color:dimgray">#@found.Id</span> </p>
+                    </div>
+                </div>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? SearchInput { get; set; }
+
+    private readonly List<IViewBindable> searchFound = new List<IViewBindable>();
+
+    protected override void OnParametersSet()
+    {
+        SendSearch(SearchInput);
+    }
+
+    private void SearchBarSubmit()
+    {
+        SendSearch(SearchInput);
+    }
+
+    private void SendSearch(string? searchInput)
+    {
+        if (!string.IsNullOrEmpty(searchInput))
+        {
+            SearchPacket packet = new SearchPacket(searchInput, true);
+            SocketCore.SendCallback(packet, Token.SEARCH_USER, ParseFound, false);
+        }
+    }
+
+    private void OpenChat(IViewBindable view)
+    {
+        Conversation.OpenChat(view, naviagtion);
+    }
+
+    private void ParseFound(SocketPacket packet)
+    {
+        searchFound.Clear();
+
+        SearchModel[]? founds = packet.Deserialize<SearchModel[]?>();
+
+        if(founds is null || founds.Length == 0)
+        {
+            return;
+        }
+
+        foreach(var found in founds)
+        {
+            IViewBindable createdFound = IViewBindable.CreateOrGet(found.Username, found.Id, found.isGroup);
+            createdFound.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
+            searchFound.Add(createdFound);
+        }
+
+        InvokeAsync(StateHasChanged);
+    }
+}

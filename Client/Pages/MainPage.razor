@@ -1,0 +1,44 @@
+﻿@page "/MainPage"
+
+@using Microsoft.AspNetCore.Components.WebAssembly.Services
+
+@inject NavigationManager navigation
+@inject IJSRuntime JSRuntime 
+
+<div>
+    <div id="search">
+        <form @onsubmit="SearchBarSubmit">
+            <input @bind="SearchInput" type="text" placeholder="Search" />
+        </form>
+    </div>
+
+    <div id="localuser-display">
+        <img @onclick="ChangeAvatar" class="avatar" alt="local_user_avatar" src="@currentUser.AvatarImageSource" />
+        <div class="userinfo" >
+            <p class="userinfo">@currentUser.Name<span style="color:dimgray">#@currentUser.Id</span> </p>
+        </div>
+    </div>
+
+    <h2 id="last-chats-header">Last Chats</h2>
+
+    <ul id="last-chats">
+        @foreach (LastChat lastChat in LastChats)
+        {
+            <div @onclick="() => Conversation.OpenChat(lastChat.BindedView, navigation)" class="chat-frame">
+                <div>
+                    <img class="chat-author-avatar" src="@lastChat.AvatarImageSource">
+                </div>
+                <div class="chat-content">
+                    <div class="chat-info">
+                        <span class="chat-author-name">@lastChat.Name</span>
+                        <span class="chat-timestamp">@lastChat.FactoredTime</span>
+                    </div>
+                    <div class="chat-body">
+                        <span>@lastChat.Message</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </ul>
+</div>
+

@@ -1,13 +1,10 @@
-﻿using Client.Models.Bindable;
+﻿#nullable enable
 
 namespace Client.Networking.Packets.Models;
 
 [Serializable]
 partial class LastChatsPacket
 {
-    public readonly User? BindedUser;
-    public readonly Group? BindedGroup;
-
     public string Name{ get; set; }
     public double? LastMessageTime { get; set; }
     public byte[]? LastMessage { get; set; }

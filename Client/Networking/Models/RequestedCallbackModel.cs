@@ -5,11 +5,11 @@ namespace Client.Networking.Models;
 
 public class RequestedCallbackModel
 {
-    private Action<object> CallbackAction;
+    private Action<SocketPacket> CallbackAction;
 
     private int CallbackToken { get; init; }
 
-    public RequestedCallbackModel(Action<object> callback, int pretoken)
+    public RequestedCallbackModel(Action<SocketPacket> callback, int pretoken)
     {
         CallbackToken = pretoken;
         CallbackAction = callback;
@@ -20,7 +20,7 @@ public class RequestedCallbackModel
     /// <summary>
     /// Invokes function and removes itself from list of callbacks
     /// </summary>
-    public void Invoke(object Recived)
+    public void Invoke(SocketPacket Recived)
     {
         if (CallbackAction != null)
         {

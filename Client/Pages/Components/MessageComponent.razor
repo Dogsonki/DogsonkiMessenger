@@ -1,0 +1,42 @@
+﻿@using Client.Pages.Exceptions;
+@using Client.Models.Chat;
+
+<li class="message-outer-frame">
+    <div class="message-frame">
+        <img src="@message.AuthorView.AvatarImageSource" alt="author-avatar" class="message-author-avatar">
+        <div class="message-body">
+            <div class="message-username">@message.AuthorView.Name</div>
+            <ul>
+                @foreach(ChatMessageBody body in message.ChatMessageBodies)
+                {
+                    @if (body.IsText)
+                    {
+                        <li>
+                            <p>@body.Content</p>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <img class="message-image" src="@body.Content" />
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</li>
+
+@code{
+
+    [Parameter]
+    public ChatMessage message { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if(message is null)
+        {
+            throw new NullParameterException("message");
+        }
+    }
+}

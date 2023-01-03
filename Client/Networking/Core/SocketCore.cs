@@ -1,21 +1,27 @@
-﻿using Client.Networking.Commands;
-using Client.Networking.Models;
+﻿using Client.Networking.Models;
 using Client.Utility;
 using System.Text;
+using Client.Networking.Commands;
 
 namespace Client.Networking.Core;
 
 public class SocketCore : Connection
 {
-    private static readonly Dictionary<Token, Action<object>> OnTokenReceived = new Dictionary<Token, Action<object>>();
+    private static readonly Dictionary<Token, Action<SocketPacket>> OnTokenReceived = new Dictionary<Token, Action<SocketPacket>>();
 
+    /// <summary>
+    /// Main function to start connection
+    /// </summary>
     public static async void Start()
     {
         await Connect().ContinueWith((_) =>
         {
             if (!AbleToSend()) return;
-            Task.Run(async () => await Receive());
-            Task.Run(async () => await SendQueue());
+
+            var ReceiveTask = Task.Run(Receive);
+            var SendQueueTask = Task.Run(SendQueue);
+
+            Task.WhenAll(ReceiveTask, SendQueueTask);
         });
     }
 
@@ -38,21 +44,13 @@ public class SocketCore : Connection
 
             if (packet is null) return;
 
-            //Don't convert packet.Data to JObject
-            string? packetData = Convert.ToString(packet.Data);
-
-            if(packetData is null)
-            {
-                throw new InvalidCastException($"PacketData is not a string: {packet.Data}");
-            }
-
             if (OnTokenReceived.ContainsKey((Token)packet.PacketToken))
             {
-                OnTokenReceived[(Token)packet.PacketToken].Invoke(packetData);
+                OnTokenReceived[(Token)packet.PacketToken].Invoke(packet);
                 return;
             }
 
-            RequestedCallback.InvokeCallback(packet.PacketToken, packetData);
+            RequestedCallback.InvokeCallback(packet.PacketToken, packet);
         });
     }
 
@@ -86,8 +84,6 @@ public class SocketCore : Connection
                             break;
 
                         buff = LongBuffer.Substring(0, indexDollar);
-
-                        /* Visual studio have rate limit in console buffer, images longer than 1mb will crash your visual studio */
 #if DEBUG
                         Logger.Push(buff, LogLevel.Debug, TraceType.Packet);
 #endif
@@ -149,7 +145,7 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool SendCallback(object sendingData, Token token, Action<object> callback, bool sendAbleOnce = true)
+    public static bool SendCallback(object sendingData, Token token, Action<SocketPacket> callback, bool sendAbleOnce = true)
     {
         if (!AbleToSend()) return false;
 
@@ -210,7 +206,7 @@ public class SocketCore : Connection
     /// <summary>
     /// Invokes function when client received specific token from server
     /// </summary>
-    public static void OnToken(Token token, Action<object> callback)
+    public static void OnToken(Token token, Action<SocketPacket> callback)
     {
         if (OnTokenReceived.ContainsKey(token))
         {

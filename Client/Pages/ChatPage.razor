@@ -1,0 +1,26 @@
+﻿@page "/ChatPage/{Id:int}/{IsGroup:bool}"
+
+@using Microsoft.JSInterop
+@using Microsoft.JSInterop.Implementation;
+@using Client.Pages.Components;
+
+@inject IJSRuntime JS
+@inject NavigationManager navigation;
+
+<ul id="message-box" tabindex="1" @ref="MessagesFrame">
+    @foreach (ChatMessage message in Messages)
+    {
+        <MessageComponent message="message"></MessageComponent>
+    }
+</ul>
+
+<form @onsubmit="MessageInputSubmit">
+    <div id="message-input-container">
+        <div id="message-input-inner">
+            <div id="message-input-toolset">
+                <img @onclick="AddFileMessage" src="Images/file_send.png" />
+                <input @bind="MessageInputContent" id="text-input" placeholder="@@@View.Name" />
+            </div>
+        </div>
+    </div>
+</form>

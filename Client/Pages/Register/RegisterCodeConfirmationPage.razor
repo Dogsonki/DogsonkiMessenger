@@ -1,0 +1,80 @@
+﻿@page "/CodeConfirmation/{email}"
+
+@inject NavigationManager navigation;
+
+@using Client.Networking.Core;
+@using Client.Networking.Packets;
+@using Client.Networking.Models;
+
+<div style="text-align:center">
+    <h1> Confirm your account </h1>
+
+    <span>We just sent you a confirmation code over to @Email</span>
+
+    <input maxlength="5" type="number" pattern="\d*" @bind="codeInput" placeholder="Code" />
+    <button @onclick="TrySendCode">Confirm</button>
+    <span style="color:red">@errorMessage</span>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Email { get; set; }
+
+    private const int MAX_CODE_ATTEMPTS = 5;
+
+    private string? codeInput;
+
+    private string? errorMessage;
+
+    private int checkAttempts = 0;
+
+    private void TrySendCode()
+    {
+        if (string.IsNullOrEmpty(codeInput))
+        {
+            errorMessage = "Code was empty";
+            return;
+        }
+
+        if(codeInput.Length != 5)
+        {
+            errorMessage = "Code length have to be 5";
+            return;
+        }
+
+        if (!SocketCore.SendCallback(int.Parse(codeInput), Token.REGISTER, CodeConfirmationCallback, true))
+        {
+            errorMessage = "Unable to connect to the server";
+            return;
+        }
+    }
+
+    private void CodeConfirmationCallback(SocketPacket packet)
+    {
+        checkAttempts++;
+
+        int token = packet.ToInt();
+        string info = string.Empty;
+
+        InvokeAsync(() =>
+        {
+            switch (token)
+            {
+                case 0:
+                    info = "Your accout has been activated. \n You can now login to your account";
+                    navigation.NavigateTo("/login/" + info);
+                    break;
+                case 9:
+                    errorMessage = $"Wrong code. Attempts left: {MAX_CODE_ATTEMPTS - checkAttempts}";
+                    break;
+                case 10:
+                    info = "You have used all attempts to confirm your account. \n Please try again later";
+                    navigation.NavigateTo("/login/" + info);
+                    break;
+            }
+            StateHasChanged();
+        });
+    }
+}

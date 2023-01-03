@@ -1,15 +1,18 @@
 ﻿using System.Text;
 using Client.Models;
-using Client.Models.Bindable;
 using Client.Networking.Core;
 using Client.Utility;
 using Client.Networking.Packets;
 using Newtonsoft.Json;
+using Client.Networking.Models;
+using Clinet.IO;
 
 namespace Client.IO;
 
 public static class AvatarManager
 {
+    public const string BlankAvatar = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
     static AvatarManager()
     {
         SocketCore.SetGlobalOnToken(Token.USER_AVATAR_REQUEST, ManageUserImagePacket);
@@ -43,13 +46,13 @@ public static class AvatarManager
 
             Cache.SaveToCache(buffer, "user_avatar" + img.Id);
 
-            AvatarCacheStorage.SaveAvatarCache(DateTime.Now.Ticks, img.Id);
+            SaveAvatarInfo((int)DateTime.Now.Ticks, user);
 
-            user.SetAvatar(buffer);
+            //user.SetAvatar(buffer);
         });
     }
 
-    private static void SaveAvatarInfo(int time, IViewBindable view)
+    public static void SaveAvatarInfo(int time, IViewBindable view)
     {
         Debug.ThrowIfNull(view);
 
@@ -84,32 +87,34 @@ public static class AvatarManager
         }
     }
 
-    public static bool SetAvatar(IViewBindable view)
+    public static void SetAvatar(IViewBindable view)
     {
         Task.Run(() =>
         {
             byte[]? avatarBuffer = ReadAvatar(view);
-
             if(avatarBuffer is not null &&  avatarBuffer.Length > 0)
             {
-                ImageSource avatarSource = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
-                SetAvatar(view, avatarSource);
+                view.AvatarImageSource = FileManager.ToJSImageSource(avatarBuffer);
+            }
+            else
+            {
+                view.AvatarImageSource = BlankAvatar;
             }
 
             if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
             {
-                if(avatarBuffer is null || avatarBuffer.Length > 0)
+                if(avatarBuffer is null || avatarBuffer.Length < 0)
                 {
                     SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
                     return;
                 }
 
-                SocketCore.SendCallback(view.Id, Token.GET_USER_AVATAR_TIME, (object avatarTimePacket) =>
+                SocketCore.SendCallback(view.Id, Token.GET_USER_AVATAR_TIME, (SocketPacket packet) =>
                 {
-                    int time = -1;
-                    int newTime = int.Parse((string)avatarTimePacket);
-
-                    if ((time = ReadAvatarTime(view)) == -1)
+                    int time = ReadAvatarTime(view);
+                    int newTime = packet.ToInt();
+                    
+                    if (time == -1)
                     {
                         SaveAvatarInfo(newTime, view);
                     }
@@ -124,10 +129,10 @@ public static class AvatarManager
             }
             else
             {
-                SocketCore.SendCallback(view.Id, Token.GET_GROUP_AVATAR_TIME, (object avatarTimePacket) =>
+                SocketCore.SendCallback(view.Id, Token.GET_GROUP_AVATAR_TIME, (SocketPacket packet) =>
                 {
                     int time = -1;
-                    int newTime = int.Parse((string)avatarTimePacket);
+                    int newTime = packet.ToInt();
 
                     if ((time = ReadAvatarTime(view)) == -1)
                     {
@@ -144,29 +149,28 @@ public static class AvatarManager
 
             }
         });
-
-        return false;
     }
 
+    /// <summary>
+    /// Decodes image buffer to JSImage and saves it to cache, dose not sends it to server
+    /// </summary>
     public static void SetAvatar(IViewBindable view, byte[] avatarBuffer)
     {
-        Task.Run(() =>
+        string jsBuffer = FileManager.ToJSImageSource(avatarBuffer);
+        view.AvatarImageSource = jsBuffer;
+
+        if(view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
         {
-            ImageSource source = ImageSource.FromStream(() => new MemoryStream(avatarBuffer));
-            SetAvatar(view, source);
-        });
+            Cache.SaveToCache(avatarBuffer, "user_avatar" + view.Id);
+        }
     }
 
-    private static void SetAvatar(IViewBindable view, ImageSource avatarSource)
+    public static async Task MediaPickerSet()
     {
-        if(avatarSource == null || avatarSource.IsEmpty)
-        {
-            return;
-        }
+        byte[] avatarData = await FileManager.FileFromSelectedFile();
 
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            view.Avatar = avatarSource;
-        });
+        SetAvatar(LocalUser.CurrentUser, avatarData);
+
+        SocketCore.Send(avatarData, Token.CHANGE_AVATAR);
     }
 }

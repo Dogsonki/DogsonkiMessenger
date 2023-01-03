@@ -1,0 +1,55 @@
+﻿#text-input {
+    font-size: 16px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 15px;
+    width: 100%;
+    background: #3b3e40;
+    color: white;
+    border: none;
+    outline: none;
+}
+
+.message-outer-frame{
+    list-style-type: none;
+    padding: 2px;
+    overflow-y: scroll;
+}
+
+#message-input-inner {
+    position: fixed;
+    width:100%;
+    bottom: 0;
+}
+
+#message-input-toolset{
+    display: flex;
+}
+
+    #message-input-toolset img {
+        width: 40px;
+        height: 43px;
+        background-color: #3b3e40;
+    }
+
+#message-file {
+    background-color: black;
+    width: 10px;
+    height: 10px;
+}
+
+#message-box {
+    position: absolute;
+    padding: 0px;
+    height: 60%;
+    margin-bottom: -20px;
+    padding-bottom: -20px;
+    margin: 0px;
+    width: 100%;
+}
+
+#main-box {
+    position: relative;
+    height: 50%;
+}

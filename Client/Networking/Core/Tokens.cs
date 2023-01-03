@@ -16,7 +16,7 @@ public enum Token : int
     SESSION_INFO = 9,
     LOGIN_SESSION = 10,
     USER_AVATAR_REQUEST = 11,
-    LAST_CHATS = 12,
+    GET_LAST_CHATS = 12,
     PASSWORD_FORGOT = 13,
     SEND_MESSAGE = 14,
     GROUP_CHAT_CREATE = 15,
@@ -32,7 +32,9 @@ public enum Token : int
     GET_GROUP_AVATAR_TIME = 25,
     GET_LAST_MESSAGE_ID = 26,
     GROUP_GET_LAST_MESSAGE_TIME = 27,
-    GET_INIT_MESSAGES = 28
+    GET_INIT_MESSAGES = 28,
+    GET_LAST_TIME_ONLINE = 29,
+    SET_MESSAGE_ID = 30
 }
 
 /// <summary>

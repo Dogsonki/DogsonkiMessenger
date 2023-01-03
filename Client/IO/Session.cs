@@ -1,9 +1,11 @@
 ﻿using Client.IO.Interfaces;
-using Client.Models.Bindable;
+using Client.Models;
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages;
 using Client.Utility;
+using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
 
 namespace Client.IO;
@@ -30,15 +32,15 @@ public class Session : IStorage
         Logger.Push("Overwriting session to cache", LogLevel.Warning);
     }
 
-    public static void Init()
+    public static void Init(Action<SocketPacket> loginCallback)
     {
         SocketCore.OnToken(Token.SESSION_INFO, GetSessionInfoCallback);
-        SocketCore.OnToken(Token.LOGIN_SESSION, LoginBySessionCallback);
+        SocketCore.OnToken(Token.LOGIN_SESSION, loginCallback);
 
-        ReadSession();
+        ReadSession(loginCallback);
     }
 
-    private static void ReadSession()
+    private static void ReadSession(Action<SocketPacket> callback)
     {
         string cache = Cache.ReadFileCache("session.json");
 
@@ -55,30 +57,13 @@ public class Session : IStorage
         SocketCore.Send(session, Token.SESSION_INFO);
     }
 
-    private static void GetSessionInfoCallback(object packet)
+    private static void GetSessionInfoCallback(SocketPacket packet)
     {
-        Session? session = JsonConvert.DeserializeObject<Session?>((string)packet);
+        Session? session = packet.Deserialize<Session>(); 
 
         if (session is null)
             return;
 
         OverwriteSession(session);
-    }
-
-    private static void LoginBySessionCallback(object packet)
-    {
-        LoginCallbackPacket? login = JsonConvert.DeserializeObject<LoginCallbackPacket>((string)packet);
-
-        if (login is null)
-            return;
-
-        if (login.Token == "1")
-        {
-            LocalUser.Login(login.Username, login.ID, login.Email);
-        }
-        else if (login.Token == "-1")
-        {
-            LoginPage.Current.message.ShowError("User is banned");
-        }
     }
 }

@@ -16,13 +16,22 @@ public class MessagePacket
     public string ContentString;
 
     [JsonIgnore]
+    public bool IsImage
+    {
+        get
+        {
+            return MessageType != "text";
+        }
+    }
+
+    [JsonIgnore]
     public bool IsGroup;
 
     [JsonIgnore]
-    public uint GroupId;
+    public int GroupId;
 
     [JsonIgnore]
-    public uint UserId;
+    public int UserId;
 
     [JsonIgnore]
     public string Username;
@@ -31,10 +40,10 @@ public class MessagePacket
     public DateTime Time;
 
     [JsonIgnore]
-    public uint MessageId;
+    public int MessageId;
 
     [JsonConstructor]
-    public MessagePacket(string username, byte[] message, string message_type, double time, uint user_id, bool is_group, uint group_id, uint id)
+    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id, int id)
     {
         ContentString = Encoding.UTF8.GetString(message);
         Content = message;

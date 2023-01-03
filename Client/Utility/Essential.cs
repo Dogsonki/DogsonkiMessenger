@@ -19,6 +19,7 @@ namespace Client.Utility
             }
         }
 
+        [Obsolete]
         public static T? ModelCast<T>(this object data)
         {
             T dest = default;
