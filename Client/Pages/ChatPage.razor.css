@@ -40,9 +40,9 @@
 }
 
 #message-box {
-    position: absolute;
     padding: 0px;
-    height: 60%;
+    height: 96vh;
+    overflow-y: scroll;
     margin-bottom: -20px;
     padding-bottom: -20px;
     margin: 0px;

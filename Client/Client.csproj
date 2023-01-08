@@ -30,6 +30,7 @@
         <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
         <Nullable>enable</Nullable>
+        <DefaultLanguage>pl-PL</DefaultLanguage>
     </PropertyGroup>
 
     <ItemGroup>
@@ -80,19 +81,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <MauiImage Include="wwwroot\Images\dotnet_bot.svg" BaseSize="168,208" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Include="wwwroot\Images\dotnet_bot.svg" />
       <None Include="wwwroot\js\JSElementsInterop.js" />
       <None Include="wwwroot\js\Navigation.js" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Content Update="wwwroot\Images\file_send.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
-
 </Project>

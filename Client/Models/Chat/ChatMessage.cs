@@ -1,7 +1,6 @@
 using Client.Models;
 using Client.Models.Chat;
 using Client.Models.Exceptions;
-using Client.Utility;
 
 public class ChatMessage
 {
