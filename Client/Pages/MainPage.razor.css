@@ -30,10 +30,10 @@ input {
 }
 
 #localuser-display{
-    padding: 8px;
+    padding-right: -8px;
 }
 
-#search input {
+#search-bar input {
     margin: auto;
     margin-top: 5px;
     display: block;

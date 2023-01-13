@@ -72,8 +72,6 @@ public partial class ChatPage
             return;
         }
 
-        initMessages.Reverse();
-
         foreach (MessagePacket initMessage in initMessages)
         {
             ChatMessage message = new ChatMessage(initMessage.ContentString, initMessage.IsImage,

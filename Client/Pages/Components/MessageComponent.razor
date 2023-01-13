@@ -7,21 +7,21 @@
         <div class="message-body">
             <div class="message-username">@message.AuthorView.Name</div>
             <ul>
-                @foreach(ChatMessageBody body in message.ChatMessageBodies)
+                @for (int i = message.ChatMessageBodies.Count - 1; i >= 0; i--)
                 {
-                    @if (body.IsText)
+                    @if(message.ChatMessageBodies[i].IsText)
                     {
                         <li>
-                            <p>@body.Content</p>
+                            <p>@message.ChatMessageBodies[i].Content</p>
                         </li>
                     }
                     else
                     {
                         <li>
-                            <img class="message-image" src="@body.Content" />
+                            <img class="message-image" src="@message.ChatMessageBodies[i].Content" />
                         </li>
                     }
-                }
+                } 
             </ul>
         </div>
     </div>

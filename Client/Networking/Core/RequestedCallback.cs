@@ -16,11 +16,16 @@ namespace Client.Networking.Core
         private static void RemoveCallback(int token)
         {
             RequestedCallbackModel? model = Callbacks.Find(x => x.GetToken() == token);
+
             if(model is null)
             {
                 return;
             }
-            Callbacks.Remove(model);
+
+            if(Callbacks.Count > 0)
+            {
+                Callbacks.Remove(model);
+            }
         }
 
         public static bool InvokeCallback(int token, SocketPacket data)

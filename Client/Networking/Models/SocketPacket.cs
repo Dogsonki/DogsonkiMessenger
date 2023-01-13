@@ -37,6 +37,8 @@ public class SocketPacket
     /// <returns>Prepared packet</returns>
     public byte[] GetPacked() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this) + EndOfPacket);
 
+    public string Serialize() => JsonConvert.SerializeObject(this);
+
     public static bool TryDeserialize(out SocketPacket packet, string buffer)
     {
         packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);

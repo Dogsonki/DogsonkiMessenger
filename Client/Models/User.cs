@@ -11,7 +11,7 @@ public partial class User : IViewBindable
 
     public event PropertyChangedEventHandler PropertyChanged;
 
-    public BindableType BindType { get; set; }
+    public BindableType BindType { get; } = BindableType.User;
 
     public uint Id { get; }
 
@@ -39,11 +39,16 @@ public partial class User : IViewBindable
     }
 
 
-    public User(string username, uint id)
+    public User(string username, uint id, bool isLocalUser = false)
     {
         Name = username;
         Id = id;
         AvatarManager.SetAvatar(this);
+
+        if (isLocalUser)
+        {
+            BindType = BindableType.LocalUser;
+        }
 
         Users.Add(this);
     }
@@ -56,15 +61,12 @@ public partial class User : IViewBindable
         if ((user = Users.Find(x => x.Id == id)) != null)
             return user;
 
-        Debug.Write($"Adding user to memory: {id}");
-
         return new User(username, id);
     }
 
     public static User CreateLocalUser(string username, uint id)
     {
-        //CreateSystemBot();
-        return new User(username, id);
+        return new User(username, id, true);
     }
 
     /// <summary>

@@ -28,7 +28,7 @@ public class Connection
     {
         if(sslPolicyErrors != SslPolicyErrors.None)
         {
-            Debug.Write(sslPolicyErrors.ToString());
+            Debug.Write("ssl errors: "+sslPolicyErrors.ToString());
         }
 
         return true;

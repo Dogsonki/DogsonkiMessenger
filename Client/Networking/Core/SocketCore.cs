@@ -124,13 +124,18 @@ public class SocketCore : Connection
 
                 try
                 {
-                    if (packet is null) throw new Exception("SEND_PACKET_NULL");
+                    if (packet is null)
+                    {
+#if DEBUG
+                        throw new Exception($"SEND_PACKET_NULL");
+#else
+                        Logger.PushException(new Exception("SEND_PACKET_NULL"));
+#endif
+                    }
 
                     Debug.Write($"Sending: {packet.Data} {packet.PacketToken}");
 
                     byte[] buffer = packet.GetPacked();
-
-                    Debug.Write(Encoding.UTF8.GetString(buffer));
 
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }
