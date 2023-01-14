@@ -20,7 +20,7 @@ public partial class ChatPage
     [Parameter]
     public bool IsGroup { get; set; }
 
-    private ElementReference MessagesFrame;
+    private ElementReference MessageFrame;
 
     private string ChatName { get; set; } = string.Empty;
 
@@ -151,6 +151,6 @@ public partial class ChatPage
     private void StateChanged()
     {
         InvokeAsync(StateHasChanged);
-        JS.InvokeVoidAsync("ScrollToBottom", new object[] { MessagesFrame });
+        JS.InvokeVoidAsync("ScrollToBottom", new object[] { MessageFrame });
     }
 }

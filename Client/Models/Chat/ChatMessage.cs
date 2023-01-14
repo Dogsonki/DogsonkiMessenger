@@ -54,18 +54,18 @@ public class ChatMessage
 
         if(AuthorView is null)
         {
-            throw new UserMemoryException("User is given id dose not exists in memory");
+            throw new UserMemoryException("User with given id dose not exists in memory");
         }
 
         ChatMessageBody body;
 
         if (isImage)
         {
-            body = new ChatMessageBody(this, content, true, messageId, true);
+            body = new ChatMessageBody(this, content, isImage:true, messageId, loadFromCache:true);
         }
         else
         {
-            body = new ChatMessageBody(this, content, false, messageId);
+            body = new ChatMessageBody(this, content, isImage:false, messageId);
         }
 
         ChatMessageBodies.Add(body);
@@ -76,7 +76,9 @@ public class ChatMessage
     public void Append(string content, bool isImage)
     {
         ChatMessageBody body = new ChatMessageBody(this, content, isImage, 0);
-        ChatMessageBodies.Add(body);
+
+        ChatMessageBodies.Insert(0, body);
+
         NotifyPropertyChanged();
     }
 

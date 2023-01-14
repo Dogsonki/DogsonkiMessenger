@@ -6,8 +6,8 @@
         <img src="@message.AuthorView.AvatarImageSource" alt="author-avatar" class="message-author-avatar">
         <div class="message-body">
             <div class="message-username">@message.AuthorView.Name</div>
-            <ul>
-                @for (int i = message.ChatMessageBodies.Count - 1; i >= 0; i--)
+            <ul class="message-body-frame">
+                @for (int i = 0; i < message.ChatMessageBodies.Count; i++)
                 {
                     @if(message.ChatMessageBodies[i].IsText)
                     {

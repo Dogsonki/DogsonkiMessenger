@@ -5,12 +5,15 @@
 @inject IJSRuntime JS
 @inject NavigationManager navigation;
 
-<ul id="message-box" tabindex="1" @ref="MessagesFrame">
-    @foreach (ChatMessage message in Messages)
-    {
-        <MessageComponent message="message"></MessageComponent>
-    }
-</ul>
+<div>
+    <ul @ref="MessageFrame" id="message-box">
+        @foreach (ChatMessage message in Messages)
+        {
+            <MessageComponent message="message"></MessageComponent>
+        }
+    </ul>
+
+</div>
 
 <form @onsubmit="MessageInputSubmit">
     <div id="message-input-container">
