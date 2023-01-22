@@ -1,1 +1,0 @@
-﻿namespace Client.IO.Interfaces;

@@ -72,6 +72,8 @@ public partial class ChatPage
             return;
         }
 
+        initMessages.Reverse();
+
         foreach (MessagePacket initMessage in initMessages)
         {
             ChatMessage message = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
@@ -143,7 +145,7 @@ public partial class ChatPage
 
         SocketCore.Send(messagePacket, Token.SEND_MESSAGE);
 
-        ChatMessage message = new ChatMessage(content, false, StateChanged);
+        ChatMessage message = new ChatMessage(content, isImage:false, StateChanged);
 
         AddMessage(message);
     }

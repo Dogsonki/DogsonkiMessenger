@@ -53,10 +53,20 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Client\wwwroot\Images\windows_splash_placeholder.scale-100.png" />
+      <None Remove="Client\wwwroot\Images\windows_splash_placeholder.scale-125.png" />
+      <None Remove="Client\wwwroot\Images\windows_splash_placeholder.scale-150.png" />
+      <None Remove="Client\wwwroot\Images\windows_splash_placeholder.scale-200.png" />
+      <None Remove="Client\wwwroot\Images\windows_splash_placeholder.scale-400.png" />
       <None Remove="Pages\ChatPage.razor.css" />
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="Client\wwwroot\Images\windows_splash_placeholder.scale-100.png" />
+      <Content Include="Client\wwwroot\Images\windows_splash_placeholder.scale-125.png" />
+      <Content Include="Client\wwwroot\Images\windows_splash_placeholder.scale-150.png" />
+      <Content Include="Client\wwwroot\Images\windows_splash_placeholder.scale-200.png" />
+      <Content Include="Client\wwwroot\Images\windows_splash_placeholder.scale-400.png" />
       <Content Include="Pages\ChatPage.razor.css" />
     </ItemGroup>
 

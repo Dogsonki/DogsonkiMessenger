@@ -36,7 +36,7 @@
             <uap:ShowOn Tile="square150x150Logo"/>
           </uap:ShowNameOnTiles>
         </uap:DefaultTile >
-        <uap:SplashScreen Image="$placeholder$.png" />
+        <uap:SplashScreen Image="Client\wwwroot\Images\windows_splash_placeholder.png" />
       </uap:VisualElements>
     </Application>
   </Applications>

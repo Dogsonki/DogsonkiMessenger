@@ -43,6 +43,7 @@ public partial class User : IViewBindable
     {
         Name = username;
         Id = id;
+
         AvatarManager.SetAvatar(this);
 
         if (isLocalUser)

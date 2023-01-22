@@ -7,6 +7,9 @@
     <SelectedPlatformGroup>PhysicalDevice</SelectedPlatformGroup>
     <DefaultDevice>pixel_5_-_api_31</DefaultDevice>
     <SelectedDevice>pixel_5_-_api_31</SelectedDevice>
+    <Source>C:\Users\Puzonn\source\repos\DogsonkiMessenger\Client\wwwroot\Images\windows_splash_placeholder.png</Source>
+    <SplashScreenSource>C:\Users\Puzonn\source\repos\DogsonkiMessenger\Client\wwwroot\Images\windows_splash_placeholder.png</SplashScreenSource>
+    <PackageLogoSource>C:\Users\Puzonn\source\repos\DogsonkiMessenger\Client\wwwroot\Images\windows_splash_placeholder.png</PackageLogoSource>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-android|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
