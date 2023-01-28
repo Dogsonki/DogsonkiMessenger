@@ -4,7 +4,6 @@ using Client.Networking.Models;
 using Client.Networking.Packets.Models;
 using Client.Networking.Packets;
 using Client.Networking.Core;
-using Client.Utility;
 using Microsoft.JSInterop;
 
 namespace Client.Pages;
@@ -14,10 +13,12 @@ public partial class SearchPage
     [Parameter]
     public string? SearchInput { get; set; }
 
+    public IViewBindable? SelectedContextView { get; set; }
+
     /* All search results that being found*/
     private List<IViewBindable> SearchResult { get; } = new List<IViewBindable>();
 
-    /* Results that being displayed on page after quering by SearchOption*/
+    /* Results that being displayed on page after querying by SearchOption*/
     private List<IViewBindable> SearchFound { get; } = new List<IViewBindable>();
 
     private SearchOption Option { get; set; }
@@ -43,6 +44,11 @@ public partial class SearchPage
 
     private void OpenChat(IViewBindable view)
     {
+        if(view is null)
+        {
+            return;
+        }
+
         Conversation.OpenChat(view, naviagtion);
     }
 
@@ -105,6 +111,18 @@ public partial class SearchPage
         }
 
         InvokeAsync(StateHasChanged);
+    }
+
+    public void SetContextMenu(IViewBindable view)
+    {
+        SelectedContextView = view;
+        JS.InvokeVoidAsync("ShowContextMenu", new object[] { true, "context-frame" });
+    }
+
+    public void CloseContextMenu()
+    {
+        SelectedContextView = null;
+        JS.InvokeVoidAsync("ShowContextMenu", new object[] { false, "context-frame" });
     }
 
     public enum SearchOption

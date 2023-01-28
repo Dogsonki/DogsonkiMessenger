@@ -15,12 +15,28 @@
     <span id="search-option-groups" @onclick="() => OnSearchOptionSelect(SearchOption.Groups)">Groups</span>
 </div>
 
+<div id="context-frame">
+    <div id="context-menu">
+        <ul>
+            <li>
+                <button @onclick="() => OpenChat(SelectedContextView)">Open Chat</button>
+            </li>
+            <li>
+                <button>Add as Friend</button>
+            </li>
+            <li>
+                <button @onclick="() => CloseContextMenu()">Close</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
 <div>
     <ul id="search-results">
         @foreach (IViewBindable found in SearchFound)
         {
             <li>
-                <div @onclick="() => OpenChat(found)" class="search-result-frame">
+                <div @onclick="() => SetContextMenu(found)" class="search-result-frame">
                     <div>
                         <img class="search-result-avatar" src="@found.AvatarImageSource">
                     </div>

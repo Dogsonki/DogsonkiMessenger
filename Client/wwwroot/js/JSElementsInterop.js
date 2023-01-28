@@ -20,3 +20,18 @@ function ScrollToBottom(element) {
 function ScrollToBottomByDiv(divElement) {
     divElement.scrollTop = divElement.scrollHeight;
 }
+
+function ShowContextMenu(show, elementName) {
+    const element = document.getElementById(elementName)
+
+    if (!element) {
+        return;
+    }
+
+    if (show) {
+        element.style.visibility = "visible"
+    }
+    else {
+        element.style.visibility = "hidden"    
+    }
+}
