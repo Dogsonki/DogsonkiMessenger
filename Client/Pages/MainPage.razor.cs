@@ -4,6 +4,7 @@ using Client.IO;
 using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets.Models;
+using Client.Pages.Components;
 
 namespace Client.Pages;
 
@@ -14,7 +15,11 @@ public partial class MainPage
 
     private static List<LastChat> LastChats { get; } = new List<LastChat>();
 
-    private string? LocalUserAvatar;
+    Dictionary<string, LoadingComponentController> LoadingEvents = new Dictionary<string, LoadingComponentController>()
+    {
+        ["LastChatsLoading"] = new LoadingComponentController(),
+        ["LocalUserLoading"] = new LoadingComponentController(),
+    };
 
     protected override void OnInitialized()
     {

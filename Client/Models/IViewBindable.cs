@@ -33,6 +33,10 @@ public interface IViewBindable
         }
         else
         {
+            if(LocalUser.CurrentUser.Id == id)
+            {
+                return LocalUser.CurrentUser;
+            }
             return User.GetUser(id);
         }
     }

@@ -52,10 +52,10 @@ public partial class ChatPage
 
         ChatName = View.Name;
 
-        navigation.LocationChanged += OnBackbuttonClicked;
+        navigation.LocationChanged += OnBackButtonClicked;
     }
 
-    private void OnBackbuttonClicked(object? sender, LocationChangedEventArgs e)
+    private void OnBackButtonClicked(object? sender, LocationChangedEventArgs e)
     {
         if(e.GetPageName() == "/MainPage")
         {

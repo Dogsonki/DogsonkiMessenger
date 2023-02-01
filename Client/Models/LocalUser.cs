@@ -33,6 +33,7 @@ public class LocalUser : IViewBindable
         }
         set
         {
+            Debug.Write("Local user avatar changed: "+value.Length);
             _avatarImageSource = value;
             NotifyPropertyChanged();
         }
@@ -42,9 +43,9 @@ public class LocalUser : IViewBindable
     {
         Name = username;
         Id = id;
+
         CurrentUser = this;
 
-        Debug.Write("Requesting local user avatar");
         AvatarManager.SetAvatar(this);
 
         User.CreateLocalUser(username, id);
