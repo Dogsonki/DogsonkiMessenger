@@ -89,6 +89,10 @@ ul {
     width: 60px;
     height: 60px;
     border-radius: 50%;
+    border: 3px #242627 solid;
+    background-size: cover;
+    position: relative;
+    background-position: center;
 }
 
 .chat-timestamp {
@@ -104,4 +108,14 @@ ul {
 #last-chats-header{
     padding-bottom: 4px;
     text-align:center;
+}
+
+.chat-author-status {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: relative;
+    left: 35px;
+    border: 3px solid #242627;
+    bottom: 20px;
 }

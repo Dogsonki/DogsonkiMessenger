@@ -42,7 +42,7 @@ public partial class SearchPage
         }
     }
 
-    private void OpenChat(IViewBindable view)
+    private void OpenChat(IViewBindable? view)
     {
         if(view is null)
         {

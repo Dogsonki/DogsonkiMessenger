@@ -9,6 +9,8 @@ internal class Cache
     public const long MAX_CACHE_SIZE = 200_000_000;
     public static string CachePath => FileSystem.Current.CacheDirectory + "/temp/";
 
+    public static string SessionCachePath => CachePath + "/session/";
+
     /// <summary>
     /// For now cache only work with avatars: (byte[] avatarCache, avatar+UserId)
     /// </summary>
@@ -60,8 +62,10 @@ internal class Cache
         File.Delete(CachePath + name);
     }
 
-    public static byte[] ReadFileBytesCache(string name)
+    public static byte[]? ReadFileBytesCache(string name)
     {
+        Logger.Push($"Reading cache: {name}", LogLevel.Debug);
+
         try
         {
             if (!Directory.Exists(CachePath))
@@ -71,12 +75,20 @@ internal class Cache
 
             if (!File.Exists(CachePath + name))
             {
-                Logger.Push($"Cache file dose not exist {name}", LogLevel.Warning);
+                Logger.Push($"Cache file {name} does not exist", LogLevel.Debug);
                 return null;
             }
-            Logger.Push($"Cache file exist {name}", LogLevel.Warning);
 
-            return File.ReadAllBytes(CachePath + name);
+            byte[] cacheFile = File.ReadAllBytes(CachePath + name);
+
+            if(cacheFile.Length == 0)
+            {
+                return null;
+            }
+
+            Logger.Push($"File loaded {name}", LogLevel.Debug);
+
+            return cacheFile;
         }
         catch (Exception ex)
         {

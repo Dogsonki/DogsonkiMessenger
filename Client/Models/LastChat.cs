@@ -19,6 +19,25 @@ public class LastChat : IViewBindable
 
     public string AvatarPath => BindedView.AvatarPath;
 
+    private UserStatus status;
+
+    public UserStatus Status
+    {
+        get
+        {
+            if(BindType == BindableType.User)
+            {
+                return status;
+            }
+
+            return UserStatus.None;
+        }
+        set
+        {
+            status = value;
+        }
+    }
+
     public string AvatarImageSource 
     {
         get
@@ -29,7 +48,6 @@ public class LastChat : IViewBindable
         }
         set
         {
-            //Impossible setter
             BindedView.AvatarImageSource = value;
         }
     }
@@ -40,9 +58,10 @@ public class LastChat : IViewBindable
 
     public string? FactoredTime { get; init; }
 
-    public LastChat(IViewBindable sender, string? messageType, byte[]? message, double? messageTime)
+    public LastChat(IViewBindable sender, string? messageType, byte[]? message, double? messageTime, UserStatus status)
     {
         BindedView = sender;
+        Status = status;
 
         if (message is not null)
         {
@@ -69,5 +88,17 @@ public class LastChat : IViewBindable
     public void SilentDispose()
     {
         PropertyChanged -= PropertyChanged;
+    }
+
+    public string GetStatusColor()
+    {
+        if(Status == UserStatus.Online)
+        {
+            return "red";
+        }
+        else //There will be more statuses
+        {
+            return "green";
+        }
     }
 }

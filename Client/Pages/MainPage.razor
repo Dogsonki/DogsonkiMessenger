@@ -28,6 +28,7 @@
                 <div @onclick="() => Conversation.OpenChat(lastChat.BindedView, navigation)" class="chat-frame">
                     <div>
                         <img class="chat-author-avatar" src="@lastChat.AvatarImageSource">
+                        <div style="background-color: @(lastChat.GetStatusColor())" class="chat-author-status"></div>
                     </div>
                     <div class="chat-content">
                         <div class="chat-info">

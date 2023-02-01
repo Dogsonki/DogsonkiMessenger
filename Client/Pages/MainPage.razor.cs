@@ -64,7 +64,20 @@ public partial class MainPage
             {
                 IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
 
-                LastChat chat = new LastChat(view, lastChat.MessageType, lastChat.LastMessage, lastChat.LastMessageTime);
+                UserStatus status = UserStatus.None;
+
+
+                if(lastChat.LastOnlineTime != null && Utility.Essential.UnixToDateTime((double)lastChat.LastOnlineTime) == DateTime.Now)
+                {
+                    status = UserStatus.Online;
+                }
+                else if(lastChat.LastOnlineTime != null)
+                {
+                    status = UserStatus.Offline;
+                }
+                
+
+                LastChat chat = new LastChat(view, lastChat.MessageType, lastChat.LastMessage, lastChat.LastMessageTime, status);
 
                 chat.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
 
