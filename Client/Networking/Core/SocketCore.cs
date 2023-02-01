@@ -99,6 +99,7 @@ public class SocketCore : Connection
             catch (Exception ex)
             {
                 Logger.Push(ex, LogLevel.Error);
+
                 if (ex is InvalidCastException)
                 {
                     Debug.Error("Error when casting buffer into packet " + ex);
@@ -109,7 +110,7 @@ public class SocketCore : Connection
                     Debug.Error("Connection stream is null");
                 }
             }
-            Thread.Sleep(5);
+            Thread.Sleep(3);
         }
     }
 
@@ -133,9 +134,9 @@ public class SocketCore : Connection
 #endif
                     }
 
-                    Debug.Write($"Sending: {packet.Data} {packet.PacketToken}");
-
                     byte[] buffer = packet.GetPacked();
+
+                    Debug.Write($"Socket Sending: {buffer.Length} UnPacked: {packet.Data}");
 
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }

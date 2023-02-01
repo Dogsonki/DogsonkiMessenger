@@ -1,4 +1,5 @@
 using Client.IO;
+using Client.Utility;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -43,6 +44,7 @@ public class LocalUser : IViewBindable
         Id = id;
         CurrentUser = this;
 
+        Debug.Write("Requesting local user avatar");
         AvatarManager.SetAvatar(this);
 
         User.CreateLocalUser(username, id);

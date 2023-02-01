@@ -43,11 +43,13 @@ public partial class User : IViewBindable
         Name = username;
         Id = id;
 
-        AvatarManager.SetAvatar(this);
-
         if (isLocalUser)
         {
             BindType = BindableType.LocalUser;
+        }
+        else
+        {
+            AvatarManager.SetAvatar(this);
         }
 
         Users.Add(this);

@@ -44,11 +44,17 @@ public static class AvatarManager
 
             byte[] buffer = Essential.GetImageBuffer(img.ImageData);
 
+            if(buffer.Length == 0)
+            {
+                Logger.Push($"Downloaded avatar {img.Id} was empty", LogLevel.Error);
+                return;
+            }
+
             Cache.SaveToCache(buffer, "user_avatar" + img.Id);
 
             SaveAvatarInfo((int)DateTime.Now.Ticks, user);
 
-            //user.SetAvatar(buffer);
+            SetAvatar(user, buffer);
         });
     }
 
@@ -65,7 +71,7 @@ public static class AvatarManager
     {
         string avatarTimePath = GetAvatarInfoPath(view);
 
-        byte[] time = Cache.ReadFileBytesCache(avatarTimePath);
+        byte[]? time = Cache.ReadFileBytesCache(avatarTimePath);
 
         if (time is null || time.Length == 0)
         {
@@ -81,10 +87,7 @@ public static class AvatarManager
         {
             return Cache.ReadFileBytesCache("user_avatar" + view.Id);
         }
-        else
-        {
-            return Cache.ReadFileBytesCache("group_avatar" + view.Id);
-        }
+        return Cache.ReadFileBytesCache("group_avatar" + view.Id);
     }
 
     public static void SetAvatar(IViewBindable view)
