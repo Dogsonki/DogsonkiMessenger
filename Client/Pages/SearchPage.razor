@@ -32,6 +32,11 @@
 </div>
 
 <div>
+    @if (SearchFound.Count == 0)
+    {
+        <h5 id="search-results-empty">We couldn’t find any results for "@SearchInput"</h5>
+    }
+
     <ul id="search-results">
         @foreach (IViewBindable found in SearchFound)
         {

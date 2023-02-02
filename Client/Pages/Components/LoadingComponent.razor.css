@@ -1,4 +1,8 @@
-﻿.lds-ring {
+﻿.lds-pos{
+    text-align: center;
+}
+
+.lds-ring {
     display: inline-block;
     position: relative;
     width: 80px;

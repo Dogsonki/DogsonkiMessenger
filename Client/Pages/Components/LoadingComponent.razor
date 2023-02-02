@@ -1,26 +1,53 @@
 ﻿@using System.ComponentModel;
 
-<div class="lds-ring">
-    <div>
-
+@if (IsLoading)
+{
+    <div class="lds-pos">
+        <div class="lds-ring">
+            <div>
+            </div>
+            <div>
+            </div>
+            <div>
+            </div>
+            <div>
+            </div>
+        </div>
     </div>
-    <div>
+}
 
-    </div>
-    <div>
-
-    </div>
-    <div>
-
-    </div>
-</div>
-    
 @code{
     [Parameter]
     public LoadingComponentController LoadingController { get; set; }
 
+    [Parameter]
+    public string Class { get; set; } = string.Empty;
+
+    private bool IsLoading = true;
+
     protected override void OnParametersSet()
     {
-        
+        if (LoadingController is null)
+        {
+            Logger.Push("Loading component has no controller", LogLevel.Error);
+            return;
+        }
+        else
+        {
+            LoadingController.ChangeLoadingState = StateChanged;
+        }
+
+        IsLoading = LoadingController.IsLoading;
+
+        if (!string.IsNullOrEmpty(Class))
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void StateChanged(bool state)
+    {
+        IsLoading = state;
+        InvokeAsync(StateHasChanged);
     }
 }

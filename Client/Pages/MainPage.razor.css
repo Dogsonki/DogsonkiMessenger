@@ -119,3 +119,8 @@ ul {
     border: 3px solid #242627;
     bottom: 20px;
 }
+
+.LastChatsLoading {
+    visibility: hidden;
+    text-align: center;
+}

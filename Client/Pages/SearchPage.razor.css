@@ -41,8 +41,16 @@
     flex-direction: row;
 }
 
+#search-results-empty {
+    position: absolute;
+    right: 0px;
+    width: 100%;
+    top: 20vh;
+    padding: 10px;
+}
+
 #search-options {
-    text-align:center;
+    text-align: center;
 }
 
     #search-options span {

@@ -2,7 +2,7 @@
 
 public class LoadingComponentController
 {
-    private bool _isLoading;
+    private bool _isLoading = true;
 
     public bool IsLoading
     {
@@ -13,5 +13,6 @@ public class LoadingComponentController
             ChangeLoadingState?.Invoke(value);
         }
     }
+
     public Action<bool>? ChangeLoadingState { get; set; } = null;
 }

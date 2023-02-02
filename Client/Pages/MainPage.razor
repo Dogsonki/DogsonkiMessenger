@@ -22,6 +22,8 @@
 
     <h2 id="last-chats-header">Last Chats</h2>
 
+    <LoadingComponent Class="LastChatsLoading" LoadingController=@LoadingEvents["LastChatsLoading"]></LoadingComponent>
+
     <ul id="last-chats">
         @foreach (LastChat lastChat in LastChats)
         {

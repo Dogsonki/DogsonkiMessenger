@@ -6,6 +6,7 @@ using Client.Networking.Models;
 using Client.Networking.Packets.Models;
 using Client.Pages.Components;
 
+
 namespace Client.Pages;
 
 public partial class MainPage
@@ -26,6 +27,10 @@ public partial class MainPage
         if(LastChats.Count == 0)
         {
             GetLastChats();
+        }
+        else
+        {
+            LoadingEvents["LastChatsLoading"].IsLoading = false;
         }
 
         currentUser.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
@@ -58,6 +63,8 @@ public partial class MainPage
     {
         SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, (SocketPacket packet) =>
         {
+            LoadingEvents["LastChatsLoading"].IsLoading = false;
+
             LastChatsPacket[]? lastChats = packet.ModelCast<LastChatsPacket[]>();
 
             if(lastChats is null || lastChats.Length == 0)
