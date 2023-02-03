@@ -21,12 +21,15 @@ public class Group : IViewBindable
 
     public string? AvatarImageSource { get; set; }
 
-    public Group(string groupName, uint groupId)
+    public Group(string groupName, uint groupId, bool setAvatar = true)
     {
         Name = groupName;
         Id = groupId;
 
-        AvatarManager.SetAvatar(this);
+        if (setAvatar)
+        {
+            AvatarManager.SetAvatar(this);
+        }
 
         Groups.Add(this);
     }

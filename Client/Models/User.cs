@@ -38,7 +38,7 @@ public partial class User : IViewBindable
     }
 
 
-    public User(string username, uint id, bool isLocalUser = false)
+    public User(string username, uint id, bool isLocalUser = false, bool setAvatar = true)
     {
         Name = username;
         Id = id;
@@ -49,7 +49,10 @@ public partial class User : IViewBindable
         }
         else
         {
-            AvatarManager.SetAvatar(this);
+            if (setAvatar)
+            {
+                AvatarManager.SetAvatar(this);
+            }
         }
 
         Users.Add(this);

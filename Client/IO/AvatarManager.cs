@@ -91,63 +91,67 @@ public static class AvatarManager
 
     public static void SetAvatar(IViewBindable view)
     {
-        byte[]? avatarBuffer = ReadAvatar(view);
-        if (avatarBuffer is not null && avatarBuffer.Length > 0)
+        Task.Run(() =>
         {
-            view.AvatarImageSource = FileManager.ToJSImageSource(avatarBuffer);
-        }
-        else
-        {
-            view.AvatarImageSource = BlankAvatar;
-        }
+            byte[]? avatarBuffer = ReadAvatar(view);
 
-        if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
-        {
-            if (avatarBuffer is null || avatarBuffer.Length < 0)
+            if (avatarBuffer is not null && avatarBuffer.Length > 0)
             {
-                SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
-                return;
+                view.AvatarImageSource = FileManager.ToJSImageSource(avatarBuffer);
+            }
+            else
+            {
+                view.AvatarImageSource = BlankAvatar;
             }
 
-            SocketCore.SendCallback(view.Id, Token.GET_USER_AVATAR_TIME, (SocketPacket packet) =>
+            if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)
             {
-                int time = ReadAvatarTime(view);
-                int newTime = packet.ToInt();
+                if (avatarBuffer is null || avatarBuffer.Length < 0)
+                {
+                    SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
+                    return;
+                }
 
-                if (time == -1)
+                SocketCore.SendCallback(view.Id, Token.GET_USER_AVATAR_TIME, (SocketPacket packet) =>
                 {
-                    SaveAvatarInfo(newTime, view);
-                }
-                else
-                {
-                    if (newTime > time)
+                    int time = ReadAvatarTime(view);
+                    int newTime = packet.ToInt();
+
+                    if (time == -1)
                     {
-                        SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
+                        SaveAvatarInfo(newTime, view);
                     }
-                }
-            });
-        }
-        else
-        {
-            SocketCore.SendCallback(view.Id, Token.GET_GROUP_AVATAR_TIME, (SocketPacket packet) =>
+                    else
+                    {
+                        if (newTime > time)
+                        {
+                            SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
+                        }
+                    }
+                });
+            }
+            else
             {
-                int time = -1;
-                int newTime = packet.ToInt();
+                SocketCore.SendCallback(view.Id, Token.GET_GROUP_AVATAR_TIME, (SocketPacket packet) =>
+                {
+                    int time = -1;
+                    int newTime = packet.ToInt();
 
-                if ((time = ReadAvatarTime(view)) == -1)
-                {
-                    SaveAvatarInfo(newTime, view);
-                }
-                else
-                {
-                    if (newTime > time)
+                    if ((time = ReadAvatarTime(view)) == -1)
                     {
-                        SocketCore.Send(view.Id, Token.GROUP_AVATAR_REQUEST);
+                        SaveAvatarInfo(newTime, view);
                     }
-                }
-            });
+                    else
+                    {
+                        if (newTime > time)
+                        {
+                            SocketCore.Send(view.Id, Token.GROUP_AVATAR_REQUEST);
+                        }
+                    }
+                });
 
-        }
+            }
+        });
     }
 
     /// <summary>

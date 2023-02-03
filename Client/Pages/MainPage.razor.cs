@@ -5,7 +5,7 @@ using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets.Models;
 using Client.Pages.Components;
-
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace Client.Pages;
 
@@ -16,7 +16,7 @@ public partial class MainPage
 
     private static List<LastChat> LastChats { get; } = new List<LastChat>();
 
-    Dictionary<string, LoadingComponentController> LoadingEvents = new Dictionary<string, LoadingComponentController>()
+    Dictionary<string, LoadingComponentController> LoadingEvents { get; } = new Dictionary<string, LoadingComponentController>()
     {
         ["LastChatsLoading"] = new LoadingComponentController(),
         ["LocalUserLoading"] = new LoadingComponentController(),
@@ -37,7 +37,7 @@ public partial class MainPage
         navigation.LocationChanged += PreventBack;
     }
 
-    private void PreventBack(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    private void PreventBack(object? sender, LocationChangedEventArgs e)
     {
         if(e.Location == "/")
         {
@@ -63,8 +63,6 @@ public partial class MainPage
     {
         SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, (SocketPacket packet) =>
         {
-            LoadingEvents["LastChatsLoading"].IsLoading = false;
-
             LastChatsPacket[]? lastChats = packet.ModelCast<LastChatsPacket[]>();
 
             if(lastChats is null || lastChats.Length == 0)
@@ -77,7 +75,6 @@ public partial class MainPage
                 IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
 
                 UserStatus status = UserStatus.None;
-
 
                 if(lastChat.LastOnlineTime != null && Utility.Essential.UnixToDateTime((double)lastChat.LastOnlineTime) == DateTime.Now)
                 {
@@ -95,6 +92,18 @@ public partial class MainPage
 
                 LastChats.Add(chat);
             }
+
+            for(int i = 0; i < 5; i++)
+            {
+                User Testuser = (User)IViewBindable.CreateTestView($"Test_User {i}", (uint)i + 100, false);
+                LastChat lastC = new LastChat(Testuser, "text", "Uwu", 2463781, UserStatus.Offline);
+
+                
+
+                LastChats.Add(lastC);
+            }
+
+            LoadingEvents["LastChatsLoading"].IsLoading = false;
 
             InvokeAsync(StateHasChanged);
         });

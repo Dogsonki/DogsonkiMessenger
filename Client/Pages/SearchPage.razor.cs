@@ -5,6 +5,8 @@ using Client.Networking.Packets.Models;
 using Client.Networking.Packets;
 using Client.Networking.Core;
 using Microsoft.JSInterop;
+using Client.Utility;
+using Client.Pages.Components;
 
 namespace Client.Pages;
 
@@ -12,6 +14,8 @@ public partial class SearchPage
 {
     [Parameter]
     public string? SearchInput { get; set; }
+
+    private bool ShouldShowResult { get; set; } = false;
 
     public IViewBindable? SelectedContextView { get; set; }
 
@@ -22,6 +26,8 @@ public partial class SearchPage
     private List<IViewBindable> SearchFound { get; } = new List<IViewBindable>();
 
     private SearchOption Option { get; set; }
+
+    private LoadingComponentController SearchLoadingComponent { get; } = new LoadingComponentController(); 
 
     protected override void OnParametersSet()
     {
@@ -37,6 +43,8 @@ public partial class SearchPage
     {
         if (!string.IsNullOrEmpty(searchInput))
         {
+            ShouldShowResult = false;
+
             SearchPacket packet = new SearchPacket(searchInput, true);
             SocketCore.SendCallback(packet, Token.SEARCH_USER, ParseFound, false);
         }
@@ -62,6 +70,9 @@ public partial class SearchPage
         if (founds is null || founds.Length == 0)
         {
             InvokeAsync(StateHasChanged);
+
+            ShouldShowResult = true;
+
             return;
         }
 
@@ -71,6 +82,8 @@ public partial class SearchPage
             createdFound.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
             SearchResult.Add(createdFound);
         }
+
+        ShouldShowResult = true;
 
         QuerySearchList();
 
@@ -85,6 +98,12 @@ public partial class SearchPage
         {
             QuerySearchList();
         }
+    }
+
+    private bool ShouldShowLoading()
+    {
+        Debug.Write($"Showing loading <> {ShouldShowResult} {SearchResult.Count}");
+        return !ShouldShowResult && SearchResult.Count == 0;
     }
 
     private void QuerySearchList()

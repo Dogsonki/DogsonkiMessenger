@@ -62,11 +62,21 @@ public class LastChat : IViewBindable
         BindedView = sender;
         Status = status;
 
-        if (message is not null)
+        Message = GetDecodedMessage(messageType, message);
+
+        FactoredTime = GetFactoredTime(messageTime);
+    }
+
+    public LastChat(IViewBindable sender, string? messageType, string? message, double? messageTime, UserStatus status)
+    {
+        BindedView = sender;
+        Status = status;
+        
+        if(messageType is not null && message is not null)
         {
             if (messageType == "text")
             {
-                Message = Encoding.UTF8.GetString(message);
+                Message = message;
             }
             else
             {
@@ -74,14 +84,38 @@ public class LastChat : IViewBindable
             }
         }
 
-        if (messageTime is not null)
-        {
-            DateTime time = Essential.UnixToDateTime((double)messageTime);
+        FactoredTime = GetFactoredTime(messageTime);
+    }
 
-            if (time.Day == DateTime.Now.Day) FactoredTime = $"{time.Hour}:{time.Minute}";
-            else if (time.Day == DateTime.Now.Day - 1) FactoredTime = $"Yesterday";
-            else FactoredTime = $"{time.Day}/{time.Month}/{time.Year}";
+    private string GetDecodedMessage(string? messageType, byte[]? message)
+    {
+        if(messageType is null || message is null)
+        {
+            return string.Empty;
         }
+
+        if (messageType == "text")
+        {
+            return Encoding.UTF8.GetString(message);
+        }
+        else
+        {
+            return "Image";
+        }
+    }
+
+    private string GetFactoredTime(double? messageTime)
+    {
+        if(messageTime is null)
+        {
+            return string.Empty;
+        }
+
+        DateTime time = Essential.UnixToDateTime((double)messageTime);
+
+        if (time.Day == DateTime.Now.Day) return $"{time.Hour}:{time.Minute}";
+        else if (time.Day == DateTime.Now.Day - 1) return $"Yesterday";
+        else return $"{time.Day}/{time.Month}/{time.Year}";
     }
 
     public void SilentDispose()

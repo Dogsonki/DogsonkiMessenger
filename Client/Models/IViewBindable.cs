@@ -21,6 +21,11 @@ public interface IViewBindable
         }
         else
         {
+            if (LocalUser.CurrentUser.Id == id)
+            {
+                return LocalUser.CurrentUser;
+            }
+
             return User.CreateOrGet(name, id);
         }
     }
@@ -38,6 +43,21 @@ public interface IViewBindable
                 return LocalUser.CurrentUser;
             }
             return User.GetUser(id);
+        }
+    }
+
+    public static IViewBindable CreateTestView(string name, uint id, bool isGroup)
+    {
+#if RELEASE
+        throw new Exception("Test view was created in release mode");
+#endif
+        if (!isGroup)
+        {
+            return new User(name, id, setAvatar: false);
+        }
+        else
+        {
+            return new Group(name, id, setAvatar: false);
         }
     }
 }
