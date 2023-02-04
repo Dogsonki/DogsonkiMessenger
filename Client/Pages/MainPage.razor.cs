@@ -86,7 +86,7 @@ public partial class MainPage
                 }
                 
 
-                LastChat chat = new LastChat(view, lastChat.MessageType, lastChat.LastMessage, lastChat.LastMessageTime, status);
+                LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.MessageType, lastChat.LastMessage, lastChat.LastMessageTime, status);
 
                 chat.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
 
@@ -95,12 +95,9 @@ public partial class MainPage
 
             for(int i = 0; i < 5; i++)
             {
-                User Testuser = (User)IViewBindable.CreateTestView($"Test_User {i}", (uint)i + 100, false);
-                LastChat lastC = new LastChat(Testuser, "text", "Uwu", 2463781, UserStatus.Offline);
-
-                
-
-                LastChats.Add(lastC);
+                IViewBindable bind = IViewBindable.CreateTestView($"Test {i}", (uint)i, false);
+                LastChat _ = new LastChat(bind,"Puzonne", "text", "uwu", 100000, UserStatus.Online);
+                LastChats.Add(_);
             }
 
             LoadingEvents["LastChatsLoading"].IsLoading = false;

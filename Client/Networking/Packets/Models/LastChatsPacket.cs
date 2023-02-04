@@ -11,7 +11,7 @@ partial class LastChatsPacket
     public string? MessageType { get; }
     public uint Id { get; }
     public string? Type { get; }
-    public string? Sender { get; }
+    public string? MessageSenderName { get; }
     public double? LastOnlineTime { get; }
 
     public bool isGroup => Type != "user";
@@ -31,6 +31,6 @@ partial class LastChatsPacket
         LastMessage = message;
         MessageType = message_type;
         Id = id;
-        Sender = sender;
+        MessageSenderName= sender;
     }
 }

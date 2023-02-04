@@ -57,5 +57,34 @@ namespace Client.Utility
         {
             return Convert.FromBase64String(imageBuffer); 
         }
+
+        public static string DateTimeToFactored(DateTime time)
+        {
+            DateTime currentTime = DateTime.Now;
+
+            if (currentTime.Year == time.Year && currentTime.Month == time.Month && currentTime.Day == time.Day)
+            {
+                return $"Today {time.ToString("h:mm tt")}";
+            }
+            else if(wasYesterday(time))
+            {
+                return $"Yesterday at {time.ToString("h:mm tt")}";
+            }
+            else if(currentTime.Year == time.Year && currentTime.Month == time.Month && currentTime.Day != time.Day && currentTime.Day != time.Day-1)
+            {
+                return $"{DateTime.Now.AddDays(-time.Day).Day} days ago at {time.ToString("h:mm tt")}";
+            }
+            else
+            {
+                return $"{time.Day}/{time.Month}/{time.Year} at {time.ToString("h:mm tt")}";
+            }
+
+            bool wasYesterday(DateTime time)
+            {
+                return DateTime.Now.ToString("MM/dd/yyy") == time.ToString("MM/dd/yyy");
+            }
+        }
+
+        public static string DateTimeToFactored(double time) => DateTimeToFactored(UnixToDateTime(time));
     }
 }

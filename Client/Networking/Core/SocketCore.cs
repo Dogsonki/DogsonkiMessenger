@@ -110,7 +110,7 @@ public class SocketCore : Connection
                     Debug.Error("Connection stream is null");
                 }
             }
-            Thread.Sleep(3);
+            await Task.Delay(3);
         }
     }
 
@@ -147,7 +147,7 @@ public class SocketCore : Connection
 
                 SocketQueue.IsSending = false;
             }
-            Thread.Sleep(3);
+            await Task.Delay(3);
         }
     }
 

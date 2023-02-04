@@ -72,6 +72,7 @@ ul {
     overflow-wrap: anywhere;
     padding-right: 40px;
     margin-right: 40px;
+    font-size: 13px;
 }
 
 .chat-frame {
@@ -102,7 +103,7 @@ ul {
     margin-left: 3px;
 }
 
-#last-chats{
+#last-chats {
     padding: 8px;
 }
 

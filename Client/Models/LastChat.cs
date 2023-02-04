@@ -10,6 +10,8 @@ public class LastChat : IViewBindable
 
     public IViewBindable View => this;
 
+    public string? MessageSenderName { get; } = null;
+
     public BindableType BindType => BindableType.Any;
 
     public string Name => BindedView.Name;
@@ -41,12 +43,12 @@ public class LastChat : IViewBindable
     {
         get
         {
-            PropertyChanged?.Invoke(this, null);
-
             return BindedView.AvatarImageSource;
         }
         set
         {
+            PropertyChanged?.Invoke(this, null);
+
             BindedView.AvatarImageSource = value;
         }
     }
@@ -57,9 +59,12 @@ public class LastChat : IViewBindable
 
     public string? FactoredTime { get; init; }
 
-    public LastChat(IViewBindable sender, string? messageType, byte[]? message, double? messageTime, UserStatus status)
+    public LastChat(IViewBindable view, string? messageSender, string? messageType, byte[]? message, double? messageTime, UserStatus status)
     {
-        BindedView = sender;
+        BindedView = view;
+
+        MessageSenderName = messageSender;
+
         Status = status;
 
         Message = GetDecodedMessage(messageType, message);
@@ -67,21 +72,21 @@ public class LastChat : IViewBindable
         FactoredTime = GetFactoredTime(messageTime);
     }
 
-    public LastChat(IViewBindable sender, string? messageType, string? message, double? messageTime, UserStatus status)
+    public LastChat(IViewBindable sender, string? messageSender, string? messageType, string? message, double? messageTime, UserStatus status)
     {
         BindedView = sender;
+
         Status = status;
-        
-        if(messageType is not null && message is not null)
+
+        MessageSenderName = messageSender;
+
+        if(messageType == "text")
         {
-            if (messageType == "text")
-            {
-                Message = message;
-            }
-            else
-            {
-                Message = "Image";
-            }
+            Message = message;
+        }
+        else
+        {
+            Message = "image";
         }
 
         FactoredTime = GetFactoredTime(messageTime);
@@ -111,11 +116,7 @@ public class LastChat : IViewBindable
             return string.Empty;
         }
 
-        DateTime time = Essential.UnixToDateTime((double)messageTime);
-
-        if (time.Day == DateTime.Now.Day) return $"{time.Hour}:{time.Minute}";
-        else if (time.Day == DateTime.Now.Day - 1) return $"Yesterday";
-        else return $"{time.Day}/{time.Month}/{time.Year}";
+        return Essential.DateTimeToFactored((double)messageTime);
     }
 
     public void SilentDispose()

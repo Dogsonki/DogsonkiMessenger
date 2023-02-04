@@ -102,7 +102,6 @@ public partial class SearchPage
 
     private bool ShouldShowLoading()
     {
-        Debug.Write($"Showing loading <> {ShouldShowResult} {SearchResult.Count}");
         return !ShouldShowResult && SearchResult.Count == 0;
     }
 
