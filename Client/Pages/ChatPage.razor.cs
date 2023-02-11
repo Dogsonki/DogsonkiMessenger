@@ -39,12 +39,6 @@ public partial class ChatPage
             throw new WrongParameterException("There is no pre-created view with given Id");
         }
 
-        SocketCore.SendCallback(View.Id, Token.GET_LAST_TIME_ONLINE, (SocketPacket packet) =>
-        {
-            Debug.Write(packet.Data);
-            Debug.Write(packet.Data == null);
-        });
-
         SocketCore.OnToken(Token.CHAT_MESSAGE, OnReceiveRealtimeMessage);
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, OnGetMoreMessages);
 
@@ -57,9 +51,10 @@ public partial class ChatPage
 
     private void OnBackButtonClicked(object? sender, LocationChangedEventArgs e)
     {
-        if(e.GetPageName() == "/MainPage")
+        if (e.GetPageName() == "/MainPage" && Conversation.IsLocalUserInChat)
         {
-            SocketCore.Send(" ", Token.END_CHAT);
+            Conversation.CloseChat();
+            SocketCore.SendCallback(" ", Token.END_CHAT, null, true);
         }
     }
 
@@ -78,9 +73,9 @@ public partial class ChatPage
         {
             ChatMessage message = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
                 initMessage.MessageId, StateChanged, initMessage.UserId, initMessage.Time);
-
             AddMessage(message);
         }
+        InvokeAsync(StateHasChanged);
     }
 
     private void OnGetMoreMessages(SocketPacket packet)
@@ -123,7 +118,7 @@ public partial class ChatPage
         {
             Messages.Add(message);
         }
-        else if (lastMessage.AuthorView.Id == LocalUser.CurrentUser.Id)
+        else if (lastMessage.AuthorView.Id == LocalUser.CurrentUser.Id || lastMessage.AuthorView.Id == message.AuthorView.Id)
         {
             lastMessage.Append(message.ChatMessageBodies[0].Content, message.ChatMessageBodies[0].IsText != true);
         }

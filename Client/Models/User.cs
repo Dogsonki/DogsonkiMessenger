@@ -8,7 +8,9 @@ public partial class User : IViewBindable
 {
     public static readonly List<User> Users = new List<User>();
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public UserPropertiesLocal UserProperties { get; set; } = new UserPropertiesLocal();
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public BindableType BindType { get; } = BindableType.User;
 
@@ -54,7 +56,6 @@ public partial class User : IViewBindable
                 AvatarManager.SetAvatar(this);
             }
         }
-
         Users.Add(this);
     }
 
@@ -94,7 +95,7 @@ public partial class User : IViewBindable
 
     public static User? GetUser(uint id) => Users.Find(x => x.Id == id);
 
-    private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }

@@ -2,6 +2,7 @@
 
 @using Microsoft.AspNetCore.Components.WebAssembly.Services
 @using Client.Pages.Components;
+@using Client.Models.LastChats;
 
 @inject NavigationManager navigation
 @inject IJSRuntime JSRuntime 
@@ -15,20 +16,25 @@
 
     <div id="localuser-display">
         <img @onclick="ChangeAvatar" class="avatar" alt="local_user_avatar" src="@currentUser.AvatarImageSource" />
-        <div class="userinfo" >
+        <div class="userinfo">
             <p class="userinfo">@currentUser.Name<span style="color:dimgray">#@currentUser.Id</span> </p>
         </div>
     </div>
 
-    <h2 id="last-chats-header">Last Chats</h2>
+    <div id="menu-header">
+        <span class="@(ShouldRenderLastChats ? "option-selected" : "")" @onclick="()=> ShouldRenderLastChats = true">Last Chats</span>
+        <span class="@(ShouldRenderLastChats ? "" : "option-selected")" @onclick="()=> ShouldRenderLastChats = false">Requests</span>
+    </div>
 
     <LoadingComponent Class="LastChatsLoading" LoadingController=@LoadingEvents["LastChatsLoading"]></LoadingComponent>
+    <MiniProfile Controller="@MiniProfileController"></MiniProfile>
 
-    <ul id="last-chats">
+    <!-- Temporary solution to hide and show list / use offscreen instead -->
+    <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "initial" : "none")">
         @foreach (LastChat lastChat in LastChats)
         {
             <li>
-                <div @onclick="() => Conversation.OpenChat(lastChat.BindedView, navigation)" class="chat-frame">
+                <div @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" class="chat-frame">
                     <div>
                         <img class="chat-author-avatar" src="@lastChat.AvatarImageSource">
                         <div style="background-color: @(lastChat.GetStatusColor())" class="chat-author-status"></div>
@@ -46,5 +52,26 @@
             </li>
         }
     </ul>
+
+    <!-- Temporary solution to hide and show list / use offscreen instead -->
+    <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "none" : "initial")">
+        @foreach (IViewBindable request in Requests)
+        {
+            <li>
+                <div class="chat-frame">
+                    <div>
+                        <img class="chat-author-avatar" src="@request.AvatarImageSource">
+                    </div>
+                    <div class="chat-content">
+                        <div class="chat-info">
+                            <span class="chat-author-name">@request.Name <span style="color: #72767d">#@request.Id</span> </span>
+                        </div>
+                    </div>
+                    <button @onclick="() => AcceptInviteRequest(request)" class="requests-accept-btn"> ACCEPT </button>
+                </div>
+            </li>
+        }
+    </ul>
+
 </div>
 

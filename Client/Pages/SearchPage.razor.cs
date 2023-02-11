@@ -19,7 +19,6 @@ public partial class SearchPage
 
     public IViewBindable? SelectedContextView { get; set; }
 
-    /* All search results that being found*/
     private List<IViewBindable> SearchResult { get; } = new List<IViewBindable>();
 
     /* Results that being displayed on page after querying by SearchOption*/
@@ -27,7 +26,7 @@ public partial class SearchPage
 
     private SearchOption Option { get; set; }
 
-    private LoadingComponentController SearchLoadingComponent { get; } = new LoadingComponentController(); 
+    private StateComponentController SearchLoadingComponent { get; } = new StateComponentController(); 
 
     protected override void OnParametersSet()
     {
@@ -46,7 +45,7 @@ public partial class SearchPage
             ShouldShowResult = false;
 
             SearchPacket packet = new SearchPacket(searchInput, true);
-            SocketCore.SendCallback(packet, Token.SEARCH_USER, ParseFound, false);
+            SocketCore.SendCallback(packet, Token.SEARCH_USER, (packet) => Task.Run(() => ParseFound(packet)), false);
         }
     }
 
@@ -60,6 +59,9 @@ public partial class SearchPage
         Conversation.OpenChat(view, naviagtion);
     }
 
+    /// <summary>
+    /// Parses all views from packet and adds them to SearchResult.
+    /// </summary>
     private void ParseFound(SocketPacket packet)
     {
         SearchResult.Clear();
@@ -85,9 +87,12 @@ public partial class SearchPage
 
         ShouldShowResult = true;
 
-        QuerySearchList();
+        if(SearchResult.Count > 0)
+        {
+            SearchFound.AddRange(SearchResult);
 
-        InvokeAsync(StateHasChanged);
+            QuerySearchList();
+        }
     }
 
     private void OnSearchOptionSelect(SearchOption option) 
@@ -105,6 +110,9 @@ public partial class SearchPage
         return !ShouldShowResult && SearchResult.Count == 0;
     }
 
+    /// <summary>
+    /// Queries SearchResult and displays SearchFound on the page. Invoke only after parse or when SearchResult has values.
+    /// </summary>
     private void QuerySearchList()
     {
         SearchFound.Clear();
@@ -131,16 +139,11 @@ public partial class SearchPage
         InvokeAsync(StateHasChanged);
     }
 
-    public void SetContextMenu(IViewBindable view)
+    public void DisplayContextMenu(bool display, IViewBindable? view)
     {
         SelectedContextView = view;
-        JS.InvokeVoidAsync("ShowContextMenu", new object[] { true, "context-frame" });
-    }
 
-    public void CloseContextMenu()
-    {
-        SelectedContextView = null;
-        JS.InvokeVoidAsync("ShowContextMenu", new object[] { false, "context-frame" });
+        JS.InvokeVoidAsync("ShowContextMenu", new object[] { display, "context-frame" });
     }
 
     public enum SearchOption

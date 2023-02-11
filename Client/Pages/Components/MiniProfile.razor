@@ -1,22 +1,31 @@
 ﻿@inject NavigationManager navigation;
 @inject IJSRuntime JSRuntime;
 
-<div id="context-frame">
-    <div id="context-menu">
-        <ul>
-            <li>
-                <button @onclick="() => OpenChat()">Open Chat</button>
-            </li>
-            @if (ShouldRenderInviteButton())
-            {
+<div style="visibility: @(Controller.State == null ? "hidden" : "visible")" class="profile-frame">
+    <div>
+        <div class="profile-menu">
+            <div>
+                <img class="avatar" src="@Controller.State?.AvatarImageSource" />
+                <div class="me">
+                    <strong>@Controller.State?.Name<span style="color: dimgray">#@Controller.State?.Id</span></strong>
+                </div>
+            </div>
+
+            <ul>
                 <li>
-                    <button @onclick="() => InviteFriend()">Add as Friend</button>
+                    <button @onclick=OpenChat>Open Chat</button>
                 </li>
-            }
-            <li>
-                <button @onclick="() => DisplayContextMenu(false)">Close</button>
-            </li>
-        </ul>
+                <li>
+                    @if(Controller.State is not null && ((User)Controller.State).UserProperties.IsFriend != FriendStatus.Friend)
+                    {
+                        <button @onclick=InviteFriend>Invite</button>
+                    }
+                </li>
+                <li>
+                    <button @onclick=Close>Close</button>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -45,9 +54,15 @@
         Conversation.OpenChat(Controller.State, navigation);
     }
 
+    private void Close()
+    {
+        Controller.State = null;
+        StateHasChanged();
+    }
+
     private void DisplayContextMenu(bool state)
     {
-        JSRuntime.InvokeVoidAsync("ShowContextMenu", new object[] { state, "context-frame" });
+        InvokeAsync(StateHasChanged);
     }
 
     private void InviteFriend()

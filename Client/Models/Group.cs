@@ -8,7 +8,7 @@ public class Group : IViewBindable
     public readonly static List<Group> Groups = new List<Group>();
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public BindableType BindType { get; set; }
+    public BindableType BindType { get; set; } = BindableType.Group;
 
     public readonly List<User> Users = new List<User>();
 

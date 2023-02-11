@@ -1,22 +1,30 @@
 using Client.Networking.Core;
-using Client.Utility;
 using Microsoft.AspNetCore.Components;
 
 namespace Client.Models;
 
 public class Conversation
 {
-    public static void OpenChat(IViewBindable view, NavigationManager navigation)
+    public static bool IsLocalUserInChat { get; set; }
+
+    public static void OpenChat(IViewBindable chat, NavigationManager navigation)
     {
-        if (view.BindType == BindableType.Group)
+        if (chat.BindType == BindableType.Group)
         {
-            SocketCore.Send(view.Id, Token.GROUP_CHAT_INIT);
+            SocketCore.Send(chat.Id, Token.GROUP_CHAT_INIT);
         }
         else
         {
-            SocketCore.Send(view.Name, Token.USER_INIT_CHAT);
+            SocketCore.Send(chat.Name, Token.USER_INIT_CHAT);
         }
 
-        navigation.NavigateTo($"/ChatPage/{view.Id}/{view.BindType == BindableType.Group}");
+        IsLocalUserInChat = true;
+
+        navigation.NavigateTo($"/ChatPage/{chat.Id}/{chat.BindType == BindableType.Group}");
+    }
+
+    public static void CloseChat()
+    {
+        IsLocalUserInChat = false;
     }
 }

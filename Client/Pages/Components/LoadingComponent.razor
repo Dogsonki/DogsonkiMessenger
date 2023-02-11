@@ -1,6 +1,6 @@
 ﻿@using System.ComponentModel;
 
-@if (IsLoading)
+@if (LoadingController.State)
 {
     <div class="lds-pos">
         <div class="lds-ring">
@@ -18,7 +18,7 @@
 
 @code{
     [Parameter]
-    public LoadingComponentController LoadingController { get; set; }
+    public StateComponentController LoadingController { get; set; }
 
     [Parameter]
     public string Class { get; set; } = string.Empty;
@@ -34,10 +34,10 @@
         }
         else
         {
-            LoadingController.ChangeLoadingState = StateChanged;
+            LoadingController.ChangeState = StateChanged;
         }
 
-        IsLoading = LoadingController.IsLoading;
+        IsLoading = LoadingController.State;
 
         if (!string.IsNullOrEmpty(Class))
         {

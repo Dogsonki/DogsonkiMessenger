@@ -27,7 +27,7 @@
                 <button>Add as Friend</button>
             </li>
             <li>
-                <button @onclick="() => CloseContextMenu()">Close</button>
+                <button @onclick="() => DisplayContextMenu(false, null)">Close</button>
             </li>
         </ul>
     </div>
@@ -48,7 +48,7 @@
         @foreach (IViewBindable found in SearchFound)
         {
             <li>
-                <div @onclick="() => SetContextMenu(found)" class="search-result-frame">
+                <div @onclick="() => DisplayContextMenu(true, found)" class="search-result-frame">
                     <div>
                         <img class="search-result-avatar" src="@found.AvatarImageSource">
                     </div>

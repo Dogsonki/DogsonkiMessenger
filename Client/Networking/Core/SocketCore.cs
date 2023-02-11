@@ -85,7 +85,7 @@ public class SocketCore : Connection
 
                         buff = LongBuffer.Substring(0, indexDollar);
 #if DEBUG
-                        Logger.Push(buff, LogLevel.Debug, TraceType.Packet);
+                        Debug.Write(buff);
 #endif
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
 

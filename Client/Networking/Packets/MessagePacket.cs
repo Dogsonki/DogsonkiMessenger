@@ -43,7 +43,7 @@ public class MessagePacket
     public int MessageId;
 
     [JsonConstructor]
-    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id, int id)
+    public MessagePacket(string username, byte[] message, string message_type, double time, int user_id, bool is_group, int group_id, int id, bool seen)
     {
         ContentString = Encoding.UTF8.GetString(message);
         Content = message;

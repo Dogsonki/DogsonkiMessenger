@@ -40,7 +40,10 @@
 
     public LoginPage()
     {
-        Session.Init(LoginAsSession);
+        if (!LocalUser.IsLoggedIn)
+        {
+            Session.Init(LoginAsSession);
+        }
     }
 
     protected override void OnInitialized()

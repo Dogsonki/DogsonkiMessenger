@@ -1,36 +1,57 @@
-﻿#context-frame {
+﻿.profile-frame {
     visibility: hidden;
     position: absolute;
     top: 50vw;
     left: 25vw;
-}
-
-#context-menu li, ul {
-    list-style-type: none;
-    margin: 10px 0;
-}
-
-#context-menu {
-    display: flex;
-    width: 50vw;
-    flex-direction: column;
-    background-color: #3d3e40;
+    background-color: #202225;
     border-radius: 10px;
-    box-shadow: 0 10px 20px rgb(64 64 64 / 5%);
-    padding: 10px 0;
+    width: 55vw;
+    height: 25vh;
 }
-
-    #context-menu button {
+    .profile-menu button {
         margin: 0 auto;
         text-align: center;
-        width: 80%;
-        height: 45px;
+        width: 25vw;
+        height: 40px;
+        font-size: 15px !important;
         background: #e0dede;
         background-color: #303132;
         padding: 10px;
         border: none;
+        border-radius: 10px;
         outline: none;
         color: white;
-        border-radius: 10px;
         caret-color: white;
     }
+
+.avatar {
+    padding: 10px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.me {
+    font-size: 20px;
+    position: absolute;
+    top: 8px;
+    left: 80px;
+}
+
+.info {
+    display: inline;
+}
+
+.profile-close{
+    text-align: center;
+    margin: 0 auto;
+}
+
+ul, li {
+    list-style-type: none;
+}
+
+li{
+    padding: 5px;
+    text-align: center;
+}

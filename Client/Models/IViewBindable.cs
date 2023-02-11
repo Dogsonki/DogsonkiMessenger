@@ -1,14 +1,38 @@
+using Client.Utility;
 using System.ComponentModel;
 
 namespace Client.Models;
 
 public interface IViewBindable
 {
+    /// <summary>
+    /// Returns view
+    /// </summary>
     public IViewBindable View { get; }
+
+    /// <summary>
+    /// Indicates if this view is group or user
+    /// </summary>
     public BindableType BindType { get; } 
+
+    /// <summary>
+    /// Name of this view
+    /// </summary>
     public string Name { get; }
+   
+    /// <summary>
+    /// Id of this view
+    /// </summary>
     public uint Id { get; }
+
+    /// <summary>
+    /// Indicates where from cache load avatar
+    /// </summary>
     public string AvatarPath { get; }
+
+    /// <summary>
+    /// JS type avatar 
+    /// </summary>
     public string AvatarImageSource { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -25,7 +49,6 @@ public interface IViewBindable
             {
                 return LocalUser.CurrentUser;
             }
-
             return User.CreateOrGet(name, id);
         }
     }
