@@ -53,6 +53,9 @@ class MessageType(Enum):
     GET_FIRST_MESSAGES = 28
     GET_LAST_TIME_ONLINE = 29
     SELF_MESSAGE = 30
+    SEND_INVITE = 31
+    ACCEPT_INVITE = 32
+    USER_INVITATIONS = 33
 
 
 @dataclass
@@ -333,6 +336,7 @@ class Client(Connection):
 
     def logout(self):
         del current_connections[self.nick]
+        self.set_last_time_online(datetime.now())
         self.login = ""
         self.password = ""
         handling_sql.delete_session(self, self.login_id)

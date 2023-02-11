@@ -16,6 +16,7 @@ class CreateDatabase:
         self.create_group_table()
         self.create_group_messages_table()
         self.create_group_user_link_table()
+        self.create_invites_table()
         self.cursor.close()
 
     def create_users_table(self):
@@ -32,10 +33,13 @@ class CreateDatabase:
                                    );""")
 
     def create_users_link_table(self):
+        # 0 - not friend
+        # 1 - invited
+        # 2 - friend
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS users_link_table (
                                   user1_id INTEGER NOT NULL,
                                   user2_id INTEGER NOT NULL,
-                                  is_friend BIT DEFAULT 0,
+                                  is_friend SMALLINT DEFAULT 0,
                                   message_id INTEGER DEFAULT NULL,
 
                                   FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -108,4 +112,14 @@ class CreateDatabase:
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   
+                                   );""")
+
+    def create_invites_table(self):
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS invites (
+                                   id INTEGER PRIMARY KEY AUTO_INCREMENT,
+                                   inviting_id INTEGER,
+                                   invited_id INTEGER,
+                                   
+                                   FOREIGN KEY (inviting_id) REFERENCES users(id) ON DELETE CASCADE,
+                                   FOREIGN KEY (invited_id) REFERENCES users(id) ON DELETE CASCADE
                                    );""")

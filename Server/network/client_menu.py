@@ -76,9 +76,14 @@ def search_users(client: Client, message_data: dict):
             if i.name.startswith(nick):
                 data.append({"name": i.name, "id": i.id, "type": "group"})
 
-    first_logins = handling_sql.search_by_nick(client, nick)
+    first_logins, friends = handling_sql.search_by_nick(client, nick, client.login_id)
     for i in first_logins:
-        data.append({"name": i[1], "id": i[0], "type": "user"})
+        is_friends = 0
+        for u1, u2, is_friend in friends:
+            if u1 or u2 == i[0]:
+                is_friends = is_friend
+                break
+        data.append({"name": i[1], "id": i[0], "type": "user", "is_friends": is_friends})
     client.send_message(data, MessageType.SEARCH_USERS)
 
 
@@ -125,7 +130,8 @@ def send_last_chats(client: Client, data: str):
                               "type": "user",
                               "message_type": i.message_type,
                               "message": i.message,
-                              "sender": i.sender})
+                              "sender": i.sender,
+                              "is_friend": i.is_friend})
             else:
                 if i.u2_last_online is not None:
                     i.u2_last_online = datetime.timestamp(i.u2_last_online)
@@ -136,7 +142,8 @@ def send_last_chats(client: Client, data: str):
                               "type": "user",
                               "message_type": i.message_type,
                               "message": i.message,
-                              "sender": i.sender})
+                              "sender": i.sender,
+                              "is_friend": i.is_friend})
 
     user_group_chats = handling_sql.get_user_groups(client, client.login_id)
     if user_group_chats:
@@ -156,6 +163,27 @@ def send_last_chats(client: Client, data: str):
     client.send_message(chats, MessageType.LAST_CHATS)
 
 
+def accept_invite(client: Client, data: str):
+    handling_sql.accept_invite(client, data, client.login_id)
+
+
+def send_invite(client: Client, data: str):
+    handling_sql.send_invite(client, data, client.login_id)
+
+
+def get_user_invitations(client: Client, data: str):
+    invitations = handling_sql.get_invitations(client, client.login_id)
+    invitations_list = []
+    if invitations:
+        for i in invitations:
+            invitations_list.append({
+                "nick": i[0],
+                "id": i[1],
+                "last_online": i[2]
+            })
+    client.send_message(invitations_list, MessageType.USER_INVITATIONS)
+
+
 class ClientMenu:
     client: Client
     actions: dict = {
@@ -171,7 +199,10 @@ class ClientMenu:
         MessageType.SET_GROUP_AVATAR: set_group_avatar,
         MessageType.LAST_CHATS: send_last_chats,
         MessageType.GET_USER_AVATAR_TIME: functions.get_user_avatar_time,
-        MessageType.GET_GROUP_AVATAR_TIME: functions.get_group_avatar_time
+        MessageType.GET_GROUP_AVATAR_TIME: functions.get_group_avatar_time,
+        MessageType.SEND_INVITE: send_invite,
+        MessageType.ACCEPT_INVITE: accept_invite,
+        MessageType.USER_INVITATIONS: get_user_invitations
     }
 
     def __init__(self, client: Client):

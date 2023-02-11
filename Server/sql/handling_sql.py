@@ -89,13 +89,17 @@ def check_session(cursor: CMySQLCursor, login_id: int, session_key: str) -> int:
 
 
 @connection_checking
-def search_by_nick(cursor: CMySQLCursor, nick: str) -> Union[bool, Tuple]:
+def search_by_nick(cursor: CMySQLCursor, nick: str, client_id: int) -> Union[bool, Tuple]:
     cursor.execute("""SELECT id, nick FROM users
                       WHERE nick LIKE %s;""", ("%" + nick + "%",))
     logins = cursor.fetchall()
     if logins is None:
         return False
-    return logins
+    cursor.execute("""SELECT user1_id, user2_id, is_friend FROM users_link_table
+                      WHERE user1_id = %s  OR user2_id = %s;""",
+                   (client_id, client_id))
+    friends = cursor.fetchall()
+    return logins, friends
 
 
 @dataclass
@@ -110,10 +114,11 @@ class UserChats:
     message: str
     message_type: str
     sender: str
+    is_friend: bool
 
 @connection_checking
 def get_user_chats(cursor: CMySQLCursor, login: str) -> Union[bool, List[UserChats]]:
-    cursor.execute("""SELECT u1.id, u1.nick, u1.last_online, u2.id, u2.nick, u2.last_online, m.time, m.content, m.message_type, s.nick FROM ((((users_link_table
+    cursor.execute("""SELECT u1.id, u1.nick, u1.last_online, u2.id, u2.nick, u2.last_online, m.time, m.content, m.message_type, s.nick, is_friend FROM ((((users_link_table
                       INNER JOIN users AS u1 ON users_link_table.user1_id = u1.id)
                       INNER JOIN users AS u2 ON users_link_table.user2_id = u2.id)
                       LEFT JOIN messages as m ON users_link_table.message_id = m.id)
@@ -440,3 +445,31 @@ def get_last_time_online(cursor: CMySQLCursor, user_id: int) -> datetime:
 def set_last_time_online(cursor: CMySQLCursor, user_id: int, date: datetime):
     cursor.execute("""UPDATE users SET last_online=%s
                       WHERE id=%s""", (date, user_id))
+
+
+@connection_checking
+def accept_invite(cursor: CMySQLCursor, user_id: int, accepting_user_id: int):
+    cursor.execute("""UPDATE users_link_table SET is_friend=2
+                      WHERE (user1_id = %s AND user2_id = %s) OR (user1_id = %s AND user2_id = %s);""",
+                   (user_id, accepting_user_id, accepting_user_id, user_id))
+    cursor.execute("""DELETE FROM invites
+                      WHERE inviting_id = %s AND invited_id = %s;""",
+                   (user_id, accepting_user_id))
+
+
+@connection_checking
+def send_invite(cursor: CMySQLCursor, user_id: int, invited_id: int):
+    cursor.execute("""INSERT INTO invites (inviting_id, invited_id)
+                      VALUES(%s, %s)""", (user_id, invited_id))
+    cursor.execute("""UPDATE users_link_table SET is_friend=1
+                      WHERE (user1_id = %s AND user2_id = %s) OR (user1_id = %s AND user2_id = %s);""",
+                   (user_id, invited_id, invited_id, user_id))
+
+
+@connection_checking
+def get_invitations(cursor: CMySQLCursor, user_id: int) -> List:
+    cursor.execute("""SELECT nick, inviting_id, last_online FROM invites
+                      INNER JOIN users ON invites.inviting_id = users.id
+                      WHERE invited_id=%s;""", (user_id,))
+    sql_data = cursor.fetchall()
+    return sql_data
