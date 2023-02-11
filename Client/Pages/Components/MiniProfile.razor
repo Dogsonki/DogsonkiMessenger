@@ -1,0 +1,80 @@
+﻿@inject NavigationManager navigation;
+@inject IJSRuntime JSRuntime;
+
+<div id="context-frame">
+    <div id="context-menu">
+        <ul>
+            <li>
+                <button @onclick="() => OpenChat()">Open Chat</button>
+            </li>
+            @if (ShouldRenderInviteButton())
+            {
+                <li>
+                    <button @onclick="() => InviteFriend()">Add as Friend</button>
+                </li>
+            }
+            <li>
+                <button @onclick="() => DisplayContextMenu(false)">Close</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public StateComponentController<IViewBindable> Controller { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Controller.ChangeState += StateChanged;
+    }
+
+    private void StateChanged(IViewBindable? view)
+    {
+        DisplayContextMenu(view != null);
+    }
+
+    private void OpenChat()
+    {
+        if(Controller.State is null)
+        {
+            DisplayContextMenu(false);
+            return;
+        }
+
+        Conversation.OpenChat(Controller.State, navigation);
+    }
+
+    private void DisplayContextMenu(bool state)
+    {
+        JSRuntime.InvokeVoidAsync("ShowContextMenu", new object[] { state, "context-frame" });
+    }
+
+    private void InviteFriend()
+    {
+        if(Controller.State is null || Controller.State?.BindType == BindableType.Group)
+        {
+            return;
+        }
+
+        SocketCore.Send($"{Controller.State.Id}", Token.SEND_USER_FRIEND_INVITE, true);
+
+        User user = (User)Controller.State;
+
+        user.UserProperties.IsFriend = FriendStatus.Invited;
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private bool ShouldRenderInviteButton()
+    {
+        if (Controller.State is null || Controller.State.BindType == BindableType.Group)
+        {
+            return false;
+        }
+
+        User user = (User)Controller.State;
+
+        return user.UserProperties.IsFriend == FriendStatus.None;
+    }
+}
