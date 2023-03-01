@@ -105,6 +105,7 @@ class Chatroom(metaclass=abc.ABCMeta):
         self.connection.send_message(image, MessageType.GET_CHAT_FILE)
 
     def stop_listening(self, *args):
+        self.connection.send_message("", MessageType.END_CHAT)
         self.listening = False
 
     def send_last_old_messages(self, *args):

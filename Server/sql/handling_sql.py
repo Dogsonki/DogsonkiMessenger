@@ -417,11 +417,11 @@ def get_group_avatar_time(cursor: CMySQLCursor, group_id: int) -> datetime:
 
 @connection_checking
 def get_last_message_id(cursor: CMySQLCursor, sender_id: int, receiver_id: int):
-    cursor.execute("""SELECT id FROM messages
+    cursor.execute("""SELECT id, seen, sender_id FROM messages
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
                       ORDER BY messages.id DESC LIMIT 1;""", (sender_id, receiver_id, receiver_id, sender_id))
     sql_data = cursor.fetchone()
-    return sql_data[0]
+    return sql_data
 
 
 @connection_checking
@@ -473,3 +473,9 @@ def get_invitations(cursor: CMySQLCursor, user_id: int) -> List:
                       WHERE invited_id=%s;""", (user_id,))
     sql_data = cursor.fetchall()
     return sql_data
+
+
+@connection_checking
+def set_message_as_seen(cursor: CMySQLCursor, message_id: int):
+    cursor.execute("""UPDATE messages SET seen=1
+                      WHERE id=%s;""", (message_id,))
