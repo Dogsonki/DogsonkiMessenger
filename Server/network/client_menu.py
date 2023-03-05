@@ -10,12 +10,10 @@ from . import group
 class NormalChatroom(functions.Chatroom):
     receiver: str
     receiver_id: int
-    friends: bool
 
     def __init__(self, connection: Client, receiver: str):
         super().__init__(connection)
         self.receiver = receiver
-        self.friends = True
         self.receiver_id = handling_sql.get_user_id(self.connection, self.receiver)
         self.is_group = False
         self.chat_actions.update({
@@ -23,9 +21,12 @@ class NormalChatroom(functions.Chatroom):
         })
 
     def get_last_message_id(self, message: str):
-        last_message_id = handling_sql.get_last_message_id(self.connection, self.connection.login_id,
-                                                           self.receiver_id)
-        self.connection.send_message(last_message_id, MessageType.GET_LAST_CHAT_MESSAGE_ID)
+        last_message_id, seen, sender_id = handling_sql.get_last_message_id(self.connection, self.connection.login_id,
+                                                                            self.receiver_id)
+        if sender_id == self.receiver_id:
+            handling_sql.set_message_as_seen(self.connection, last_message_id)
+        self.connection.send_message({"last_message_id": last_message_id, "seen": seen},
+                                     MessageType.GET_LAST_CHAT_MESSAGE_ID)
 
     def send_last_messages(self, old: bool = False):
         message_history = handling_sql.get_last_30_messages_from_chatroom(self.connection,
@@ -33,7 +34,7 @@ class NormalChatroom(functions.Chatroom):
                                                                           self.receiver_id,
                                                                           self.number_of_sent_last_messages)
         if not message_history and not old:
-            self.friends = False
+            handling_sql.create_users_link(self.connection, self.connection.login_id, self.receiver_id)
         else:
             self._send_last_messages(message_history, old, False)
 
@@ -57,9 +58,6 @@ class NormalChatroom(functions.Chatroom):
         handling_sql.save_message(self.connection, message, self.connection.login_id,
                                   self.receiver_id, message_type, is_path)
         message_id = self.connection.db_cursor.lastrowid
-        if not self.friends:
-            handling_sql.create_users_link(self.connection, self.connection.login_id, self.receiver_id)
-            self.friends = True
         handling_sql.update_last_time_message(self.connection, self.connection.login_id, self.receiver_id,
                                               message_id)
         return message_id
@@ -168,7 +166,7 @@ def accept_invite(client: Client, data: str):
 
 
 def send_invite(client: Client, data: str):
-    handling_sql.send_invite(client, data, client.login_id)
+    handling_sql.send_invite(client, client.login_id, data)
 
 
 def get_user_invitations(client: Client, data: str):
@@ -176,10 +174,14 @@ def get_user_invitations(client: Client, data: str):
     invitations_list = []
     if invitations:
         for i in invitations:
+            if i[2] is not None:
+                last_online = datetime.timestamp(i[2])
+            else:
+                last_online = None
             invitations_list.append({
                 "nick": i[0],
                 "id": i[1],
-                "last_online": i[2]
+                "last_online": last_online
             })
     client.send_message(invitations_list, MessageType.USER_INVITATIONS)
 
