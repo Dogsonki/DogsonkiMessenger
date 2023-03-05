@@ -1,4 +1,3 @@
-using Client.Utility;
 using System.ComponentModel;
 
 namespace Client.Models;
@@ -26,14 +25,9 @@ public interface IViewBindable
     public uint Id { get; }
 
     /// <summary>
-    /// Indicates where from cache load avatar
-    /// </summary>
-    public string AvatarPath { get; }
-
-    /// <summary>
     /// JS type avatar 
     /// </summary>
-    public string AvatarImageSource { get; set; }
+    public string? AvatarImageSource { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -76,11 +70,11 @@ public interface IViewBindable
 #endif
         if (!isGroup)
         {
-            return new User(name, id, setAvatar: false);
+            return new User(name, id, loadAvatar: false);
         }
         else
         {
-            return new Group(name, id, setAvatar: false);
+            return new Group(name, id,loadAvatar: false);
         }
     }
 }

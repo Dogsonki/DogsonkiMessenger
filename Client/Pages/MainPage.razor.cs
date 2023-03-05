@@ -15,10 +15,33 @@ public partial class MainPage
     [Parameter]
     public LocalUser currentUser { get; set; } = LocalUser.CurrentUser;
 
-    private static List<LastChat> LastChats { get; } = new List<LastChat>();
+    private LastChatService lastChatService { get; } = new LastChatService();
+    
     private static List<IViewBindable> Requests { get; } = new List<IViewBindable>();
 
     private StateComponentController<IViewBindable> MiniProfileController { get; set; } = new StateComponentController<IViewBindable>();
+
+    public MainPage()
+    {
+        currentUser.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (lastChatService.ChatsCount == 0)
+            {
+                GetLastChats();
+            }
+            else
+            {
+                LoadingEvents["LastChatsLoading"].State = false;
+            }
+
+        }
+        base.OnAfterRender(firstRender);
+    }
 
     private bool _shouldRenderLastChats = true;
     public bool ShouldRenderLastChats
@@ -42,22 +65,13 @@ public partial class MainPage
 
     protected override void OnInitialized()
     {
-        if(LastChats.Count == 0)
-        {
-            GetLastChats();
-        }
-        else
-        {
-            LoadingEvents["LastChatsLoading"].State = false;
-        }
-
         currentUser.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
         navigation.LocationChanged += PreventBack;
     }
 
     private void PreventBack(object? sender, LocationChangedEventArgs e)
     {
-        if(e.Location == "/")
+        if(e.Location == "/" && LocalUser.IsLoggedIn)
         {
             navigation.NavigateTo("/MainPage");
         }
@@ -72,11 +86,6 @@ public partial class MainPage
         }
     }
 
-    private async void ChangeAvatar()
-    {
-        await AvatarManager.MediaPickerSet();
-    }
-
     private void GetLastChats()
     {
         SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, (SocketPacket packet) =>
@@ -85,7 +94,7 @@ public partial class MainPage
 
             if(lastChats is null || lastChats.Length == 0)
             {
-                LoadingEvents["LastChatsLoading"].State = false;
+                LoadingEvents["LastChatsLoading"].State = false;    
                 return;
             }
 
@@ -94,7 +103,7 @@ public partial class MainPage
                 IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
                 UserStatus status = UserStatus.None;
 
-                if(lastChat.LastOnlineTime is null)
+                if(lastChat.LastOnlineTime is not null)
                 {
                     status = UserStatus.Online;
                 }
@@ -108,7 +117,7 @@ public partial class MainPage
 
                 chat.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
 
-                LastChats.Add(chat);
+                lastChatService.AddLastChat(chat);
             }
 
             LoadingEvents["LastChatsLoading"].State = false;
@@ -146,6 +155,11 @@ public partial class MainPage
     public void ShowMiniProfileMenu(IViewBindable view)
     {
         MiniProfileController.State = view;
+    }
+
+    public void OpenSettings()
+    {
+        navigation.NavigateTo("/ProfileSettings");
     }
 
     private void AcceptInviteRequest(IViewBindable view)

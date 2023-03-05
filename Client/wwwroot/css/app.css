@@ -10,6 +10,10 @@ h1:focus {
     outline: none;
 }
 
+button:active {
+    transform: scale(0.96);
+}
+
 a, .btn-link {
     color: #0071c1;
 }

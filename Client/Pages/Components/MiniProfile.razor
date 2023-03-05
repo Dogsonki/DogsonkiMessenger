@@ -16,7 +16,7 @@
                     <button @onclick=OpenChat>Open Chat</button>
                 </li>
                 <li>
-                    @if(Controller.State is not null && ((User)Controller.State).UserProperties.IsFriend != FriendStatus.Friend)
+                    @if(Controller.State is not null && ((User)Controller.State).UserProperties.IsFriend == FriendStatus.None)
                     {
                         <button @onclick=InviteFriend>Invite</button>
                     }
@@ -40,14 +40,14 @@
 
     private void StateChanged(IViewBindable? view)
     {
-        DisplayContextMenu(view != null);
+        RefreshContextMenu();
     }
 
     private void OpenChat()
     {
         if(Controller.State is null)
         {
-            DisplayContextMenu(false);
+            RefreshContextMenu();
             return;
         }
 
@@ -60,25 +60,20 @@
         StateHasChanged();
     }
 
-    private void DisplayContextMenu(bool state)
+    private void RefreshContextMenu()
     {
         InvokeAsync(StateHasChanged);
     }
 
     private void InviteFriend()
     {
-        if(Controller.State is null || Controller.State?.BindType == BindableType.Group)
+        if(Controller.State is not null)
         {
-            return;
+            User user = (User)Controller.State;
+            user.InviteAsFriend();
         }
 
-        SocketCore.Send($"{Controller.State.Id}", Token.SEND_USER_FRIEND_INVITE, true);
-
-        User user = (User)Controller.State;
-
-        user.UserProperties.IsFriend = FriendStatus.Invited;
-
-        InvokeAsync(StateHasChanged);
+        RefreshContextMenu();
     }
 
     private bool ShouldRenderInviteButton()

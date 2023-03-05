@@ -23,6 +23,14 @@ input {
     display: block;
 }
 
+.settings-btn {
+    position: absolute;
+    left: 90%;
+    top: 120px;
+    width: 30px;
+    height: 30px;
+}
+
 .avatar {
     margin-top: 40px;
     width: 80px;
@@ -35,7 +43,10 @@ input {
     display: inline;
 }
 
-.userinfo span, p{
+.settings-frame-btn {
+}
+
+.userinfo span, p {
     font-size: 16px;
 }
 
@@ -91,17 +102,6 @@ ul {
     padding: 8px;
 }
 
-#menu-header {
-    text-align: center;
-}
-
-#menu-header span {
-    font-size: 18px;
-    margin-top: 16px;
-    padding-left: 8px;
-    display: inline-block;
-}
-
 .chat-author-status {
     width: 20px;
     height: 20px;
@@ -117,22 +117,44 @@ ul {
     text-align: center;
 }
 
-.option-selected{
-    text-decoration: underline;
+.option-selected {
+    background-color: #303132;
+    border-radius: 5px;
+    height: 100%;
+    width: 30%;
+    text-align: center;
 }
 
 .requests-accept-btn {
-    width: 50%;
-    height: 40px;
-    padding-left: -50px;
-    left: 10px;
-    display: block;
-    color: #fff;
-    background: #573b8a;
     font-size: 1em;
     font-weight: bold;
-    margin-top: 20px;
     outline: none;
+    color: white;
     border: none;
     border-radius: 5px;
+    background-color: #303132;
+    margin: 15px;
+    padding: 5px 10px 5px 10px;
 }
+
+#menu-header {
+    text-align: center;
+    list-style-type: none;
+    margin: 0;
+    padding: 15px;
+}
+
+    #menu-header li {
+        height: 10px;
+        display: inline;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #menu-header span {
+        text-align: center;
+        padding: 10px 13px;
+        text-decoration: none;
+    }

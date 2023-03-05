@@ -5,7 +5,6 @@ using Client.Networking.Packets.Models;
 using Client.Networking.Packets;
 using Client.Networking.Core;
 using Microsoft.JSInterop;
-using Client.Utility;
 using Client.Pages.Components;
 
 namespace Client.Pages;
@@ -80,7 +79,7 @@ public partial class SearchPage
 
         foreach (var found in founds)
         {
-            IViewBindable createdFound = IViewBindable.CreateOrGet(found.Username, found.Id, found.isGroup);
+            IViewBindable createdFound = IViewBindable.CreateOrGet(found.Name, found.Id, found.isGroup);
             createdFound.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
             SearchResult.Add(createdFound);
         }
@@ -102,6 +101,27 @@ public partial class SearchPage
         if(SearchResult.Count > 0) 
         {
             QuerySearchList();
+        }
+    }
+
+    private bool ShouldShowInviteOption()
+    {
+        if(SelectedContextView is not null && SelectedContextView.BindType == BindableType.User)
+        {
+            User asUser = (User)SelectedContextView;
+            return asUser.UserProperties.IsFriend == FriendStatus.None;
+        }
+
+        return false;
+    }
+
+    private void TryInvite()
+    {
+        if(SelectedContextView is not null)
+        {
+            User asUser = (User)SelectedContextView;
+            asUser.InviteAsFriend();
+            StateHasChanged();
         }
     }
 

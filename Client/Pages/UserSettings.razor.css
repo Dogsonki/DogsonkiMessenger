@@ -1,0 +1,42 @@
+#localuser-display {
+    padding-left: 8px;
+}
+
+.avatar {
+    margin-top: 40px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.userinfo {
+    display: inline;
+}
+
+    .userinfo span, p {
+        font-size: 16px;
+    }
+
+#options {
+}
+
+button {
+    width: 60%;
+    height: 40px;
+    margin: 10px auto;
+    justify-content: center;
+    display: block;
+    color: #fff;
+    background: #303132;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 20px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+}
+
+    button:active {
+        transform: scale(0.96);
+    }

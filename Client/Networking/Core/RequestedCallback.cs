@@ -1,4 +1,5 @@
 ﻿using Client.Networking.Models;
+using Client.Utility;
 
 namespace Client.Networking.Core
 {
@@ -7,7 +8,12 @@ namespace Client.Networking.Core
     {
         public static List<RequestedCallbackModel> Callbacks { get; set; } = new List<RequestedCallbackModel>(5000);
 
-        public static bool IsAlreadyQueued(Token token) => Callbacks.Find(x => x.GetToken() == (int)token) is not null;
+        public static bool IsAlreadyQueued(Token token) 
+        {
+            RequestedCallbackModel? callback = Callbacks.Find(x => x?.GetToken() == (int)token);
+
+            return callback is not null;
+        }
 
         public static void AddCallback(RequestedCallbackModel callback) => Callbacks.Add(callback);
 
@@ -24,7 +30,14 @@ namespace Client.Networking.Core
 
             if(Callbacks.Count > 0)
             {
-                Callbacks.Remove(model);
+                try
+                {
+                    Callbacks.Remove(model);
+                }
+                catch(Exception e) 
+                {
+                    Logger.PushException(e);
+                }
             }
         }
 

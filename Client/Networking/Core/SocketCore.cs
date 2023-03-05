@@ -61,7 +61,7 @@ public class SocketCore : Connection
 
         while (true)
         {
-            if (!AbleToSend() || Stream is null) continue;
+            if (!AbleToSend()) continue;
             try
             {
                 while ((LenBuffer = await Stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
@@ -157,7 +157,6 @@ public class SocketCore : Connection
 
         if (sendAbleOnce && RequestedCallback.IsAlreadyQueued(token))
         {
-            Debug.Write($"Token AlreadyQueued {token}");
             return true;
         }
 

@@ -24,15 +24,4 @@ public class FileManager
 
         return data;
     }
-
-    public static string ToJSImageSource(byte[] source)
-    {
-        if(source is null)
-        {
-            throw new ArgumentNullException("source");
-        }
-
-        string base64 = Convert.ToBase64String(source);
-        return string.Format("data:image/gif;base64,{0}", base64);
-    }
 }

@@ -41,7 +41,7 @@ public enum Token : int
 }
 
 /// <summary>
-/// Tokens recived / Callbackable tokens
+/// Tokens received / Callbackable tokens
 /// </summary>
 public enum RToken : int
 {

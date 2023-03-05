@@ -7,7 +7,7 @@ namespace Client.Networking.Packets.Models;
 public class SearchModel
 {
     [JsonProperty("login")]
-    public string Username { get; set; }
+    public string Name { get; set; }
     [JsonProperty("login_id")]
     public uint Id { get; set; }
     [JsonProperty("type")]
@@ -20,7 +20,7 @@ public class SearchModel
     [JsonConstructor]
     public SearchModel(string name, uint id, string type, double last_message_time)
     {
-        Username = name;
+        Name = name;
         Id = id;
         Type = type;
         LastMessageTime = Essential.UnixToDateTime(last_message_time);

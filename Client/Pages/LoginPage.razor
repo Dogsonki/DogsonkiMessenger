@@ -18,12 +18,21 @@
     <input @bind="emailInput" type="email" placeholder="Email"/>
     <input @bind="passwordInput" type="password" placeholder="Password" />
 
+
+    <div class="container">
+        <div class="round">
+            <input type="checkbox" checked @onclick=CheckmarkClicked id="checkbox" />
+            <label for="checkbox"></label>
+            <span>Remember me</span>
+        </div>
+    </div>
+
     <button @onclick="TryLogin">Login</button>
-</div> 
+</div>
 
 <div style="text-align:center">
     <span style="color:red">@errorMessage</span>
-    <p style="color:cornflowerblue"> <a href="/MainPage"> Forgot Password? </a> </p>
+    <p style="color:cornflowerblue; padding-top: 10px"> <a href="/ForgotPassword"> Forgot Password? </a> </p>
     <p style="color:cornflowerblue"> <a href="/RegisterPage"> Sign up </a> </p>
 </div>
 
@@ -34,7 +43,7 @@
 
     private string? emailInput;
     private string? passwordInput;
-    private bool rememberMeInput;
+    private bool rememberMeInput = true;
 
     private string? errorMessage;
 
@@ -42,7 +51,7 @@
     {
         if (!LocalUser.IsLoggedIn)
         {
-            Session.Init(LoginAsSession);
+            Session.Init(LoginBySession);
         }
     }
 
@@ -54,7 +63,7 @@
         }
     }
 
-    private void LoginAsSession(SocketPacket packet)
+    private void LoginBySession(SocketPacket packet)
     {
         LoginCallbackPacket? login = packet.Deserialize<LoginCallbackPacket?>();
 
@@ -68,7 +77,7 @@
         }
     }
 
-    public void TryLogin()
+    private void TryLogin()
     {
         if (string.IsNullOrEmpty(emailInput) || string.IsNullOrEmpty(passwordInput))
         {
@@ -76,9 +85,7 @@
             return;
         }
 
-        Client.Utility.Debug.Write($"{emailInput} {passwordInput} {rememberMeInput}");
-
-        LoginPacket packet = new LoginPacket(emailInput, passwordInput, true);
+        LoginPacket packet = new LoginPacket(emailInput, passwordInput, rememberMeInput);
 
         if (!SocketCore.SendCallback(packet, Token.LOGIN, LoginCallback))
             errorMessage = "Can't Connect to Server.";
@@ -117,5 +124,13 @@
 
             StateHasChanged();
         });
+    }
+
+    private void CheckmarkClicked()
+    {
+        if (rememberMeInput)
+            rememberMeInput = false;
+        else
+            rememberMeInput = true;
     }
 }

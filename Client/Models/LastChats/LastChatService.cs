@@ -7,11 +7,13 @@ internal class LastChatService
 {
     private static readonly List<LastChat> lastChats = new List<LastChat>();
 
-    public static List<LastChat> GetLastChats() => lastChats;
+    public List<LastChat> GetLastChats() => lastChats;
+
+    public int ChatsCount => lastChats.Count;
 
     private static object padlock = new object();
 
-    public static void UpdateLastMessage(IViewBindable lastChat, IViewBindable lastMessageOwner, string newMessage, double time, MessageType messageType)
+    public void UpdateLastChatMessage(IViewBindable lastChat, IViewBindable lastMessageOwner, string newMessage, double time, MessageType messageType)
     {
         lock (padlock)
         {
@@ -24,7 +26,7 @@ internal class LastChatService
         }
     }
 
-    public static void AddLastMessage(IViewBindable lastChatBind, IViewBindable lastMessageOwner, string message, double time, MessageType messageType)
+    public void AddLastChat(IViewBindable lastChatBind, IViewBindable lastMessageOwner, string message, double time, MessageType messageType)
     {
         lock (padlock)
         {
@@ -34,6 +36,19 @@ internal class LastChatService
             }
 
             LastChat lastChat = new LastChat(lastChatBind, lastMessageOwner.Name, messageType, message, time, UserStatus.None);
+
+            lastChats.Add(lastChat);
+        }
+    }
+
+    public void AddLastChat(LastChat lastChat)
+    {
+        lock (padlock)
+        {
+            if (lastChats.Find(x => x.View.Id == lastChat.Id) is not null)
+            {
+                return;
+            }
 
             lastChats.Add(lastChat);
         }

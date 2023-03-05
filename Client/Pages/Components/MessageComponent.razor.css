@@ -11,8 +11,11 @@
     letter-spacing: 0.5px;
 }
 
-p{
-    line-height: 0.3;
+p {
+    width: 80%;
+    padding: 0px;
+    margin: 0px;
+    overflow: clip;
 }
 
 li {
@@ -43,6 +46,7 @@ ul{
 }
 
 .message-body {
+    margin-right: 10px;
     width: 100%;
     font-weight: normal;
 }
@@ -56,8 +60,7 @@ ul{
 }
 
 .message-outer-frame{
-    padding: 0px;
-    margin: 0px;
+    margin-bottom: -10px;
 }
 
 .message-content {
@@ -67,9 +70,9 @@ ul{
 
 .message-author-avatar {
     width: 70px;
-    height: 60px;
+    height: 55px;
     border-radius: 50%;
-    margin-right: 3px;
+    margin-right: 6px;
 }
 
 .message-username {

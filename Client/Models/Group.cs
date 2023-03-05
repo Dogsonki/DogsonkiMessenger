@@ -1,32 +1,16 @@
 using Client.IO;
-using System.ComponentModel;
 
 namespace Client.Models;
 
-public class Group : IViewBindable
+public class Group : ViewBindable
 {
     public readonly static List<Group> Groups = new List<Group>();
-    public event PropertyChangedEventHandler? PropertyChanged;
 
-    public BindableType BindType { get; set; } = BindableType.Group;
+    public readonly List<User> Members = new List<User>();
 
-    public readonly List<User> Users = new List<User>();
-
-    public string Name { get; set; }
-    public uint Id { get; }
-
-    public IViewBindable View => this;
-
-    public string AvatarPath => $"group_avatar{Id}";
-
-    public string? AvatarImageSource { get; set; }
-
-    public Group(string groupName, uint groupId, bool setAvatar = true)
+    public Group(string name, uint id, bool loadAvatar = true) : base(BindableType.Group, name, id)
     {
-        Name = groupName;
-        Id = groupId;
-
-        if (setAvatar)
+        if (loadAvatar)
         {
             AvatarManager.SetAvatar(this);
         }
@@ -50,6 +34,6 @@ public class Group : IViewBindable
 
     public void AddUser(User groupUser)
     {
-        Users.Add(groupUser);
+        Members.Add(groupUser);
     }
 }

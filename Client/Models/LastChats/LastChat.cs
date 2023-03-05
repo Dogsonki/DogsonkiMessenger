@@ -43,8 +43,6 @@ public class LastChat : IViewBindable
     /// </summary>
     public uint Id => BindedView.Id;
 
-    public string AvatarPath => BindedView.AvatarPath;
-
     private UserStatus status;
 
     /// <summary>

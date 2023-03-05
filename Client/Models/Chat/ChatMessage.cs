@@ -1,11 +1,10 @@
 using Client.Models;
 using Client.Models.Chat;
 using Client.Models.Exceptions;
+using Client.Utility;
 
 public class ChatMessage
 {
-    private bool _isBeingChanged { get; set; }
-
     public IViewBindable AuthorView { get; init; }
 
     public DateTime Time { get; init; }
@@ -19,15 +18,7 @@ public class ChatMessage
 
     private Action PropertyHasChanged { get; }
 
-    public string FactoredTime
-    {
-        get
-        {
-            if (Time.Day == DateTime.Now.Day) return $"Today at {Time.Hour}:{Time.Minute}";
-            else if (Time.Day == DateTime.Now.Day - 1) return $"Yesterday at {Time.Hour}:{Time.Minute}";
-            else return $"{Time.Day}/{Time.Month}/{Time.Year} at {Time.Hour}:{Time.Minute}";
-        }
-    }
+    public string FactoredTime => Essential.DateTimeToFactored(TimeInTicks);
 
     public ChatMessage(string content, bool isImage, Action StateChanged)
     {
@@ -44,15 +35,23 @@ public class ChatMessage
         Time = DateTime.Now;
     }
 
-    public ChatMessage(string content, bool isImage, int messageId, Action StateChanged, int userId, DateTime time)
+    public ChatMessage(string content, bool isImage, int messageId, Action StateChanged, 
+        int userId, DateTime time, bool bot_response = false)
     {
         ChatMessageBodies = new List<ChatMessageBody>();
 
         PropertyHasChanged = StateChanged;
 
-        AuthorView = User.GetUser((uint)userId);
+        if (!bot_response)
+        {
+            AuthorView = User.GetUser((uint)userId);
+        }
+        else 
+        {
+            AuthorView = User.SystemBot;
+        }
 
-        if(AuthorView is null)
+        if (AuthorView is null)
         {
             throw new UserMemoryException("User with given id dose not exists in memory");
         }

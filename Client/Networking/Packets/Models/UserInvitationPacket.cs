@@ -11,6 +11,6 @@ internal class UserInvitationPacket
     public UserInvitationPacket(string name, uint id)
     {
        InvitationSenderId = id;
-        InvitationSenderName = name;
+       InvitationSenderName = name;
     }
 }

@@ -14,16 +14,27 @@
         </form>
     </div>
 
-    <div id="localuser-display">
-        <img @onclick="ChangeAvatar" class="avatar" alt="local_user_avatar" src="@currentUser.AvatarImageSource" />
-        <div class="userinfo">
-            <p class="userinfo">@currentUser.Name<span style="color:dimgray">#@currentUser.Id</span> </p>
+    <div>
+        <div id="localuser-display">
+            <img class="avatar" alt="local_user_avatar" src="@currentUser.AvatarImageSource" />
+            <div class="userinfo">
+                <p class="userinfo">@currentUser.Name<span style="color:dimgray">#@currentUser.Id</span> </p>
+            </div>
+            <div class="settings-frame-btn">
+                <img @onclick=OpenSettings class="settings-btn" src="Images/settings.png" />
+            </div>
         </div>
     </div>
 
     <div id="menu-header">
-        <span class="@(ShouldRenderLastChats ? "option-selected" : "")" @onclick="()=> ShouldRenderLastChats = true">Last Chats</span>
-        <span class="@(ShouldRenderLastChats ? "" : "option-selected")" @onclick="()=> ShouldRenderLastChats = false">Requests</span>
+        <ul>
+            <li>
+                <span class="@(ShouldRenderLastChats ? "option-selected" : "")" @onclick="()=> ShouldRenderLastChats = true">Last Chats</span>
+            </li>
+            <li>
+                <span class="@(ShouldRenderLastChats ? "" : "option-selected")" @onclick="()=> ShouldRenderLastChats = false">Requests</span>
+            </li>
+        </ul>
     </div>
 
     <LoadingComponent Class="LastChatsLoading" LoadingController=@LoadingEvents["LastChatsLoading"]></LoadingComponent>
@@ -31,7 +42,7 @@
 
     <!-- Temporary solution to hide and show list / use offscreen instead -->
     <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "initial" : "none")">
-        @foreach (LastChat lastChat in LastChats)
+        @foreach (LastChat lastChat in lastChatService.GetLastChats())
         {
             <li>
                 <div @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" class="chat-frame">

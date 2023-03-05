@@ -1,5 +1,7 @@
+using Client.IO;
 using Client.Models;
 using Client.Models.Navigation;
+using Client.Networking.Commands;
 using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets;
@@ -75,6 +77,7 @@ public partial class ChatPage
                 initMessage.MessageId, StateChanged, initMessage.UserId, initMessage.Time);
             AddMessage(message);
         }
+
         InvokeAsync(StateHasChanged);
     }
 
@@ -85,7 +88,17 @@ public partial class ChatPage
 
     private void OnReceiveRealtimeMessage(SocketPacket packet)
     {
+        MessagePacket? message = packet.Deserialize<MessagePacket>();
 
+        if(message is null) 
+        {
+            return;
+        }
+
+        ChatMessage chatMessage = new ChatMessage(message.ContentString, message.IsImage, 
+            message.MessageId, StateChanged, message.UserId, message.Time, message.IsBot);
+
+        AddMessage(chatMessage);
     }
 
     private void MessageInputSubmit()
@@ -101,7 +114,7 @@ public partial class ChatPage
     {
         byte[] imageSelected = await FileManager.FileFromSelectedFile();
 
-        string jsSource = FileManager.ToJSImageSource(imageSelected);
+        string jsSource = AvatarManager.ToJSImageSource(imageSelected);
 
         ChatMessage message = new ChatMessage(jsSource, true, StateChanged);
 
@@ -118,7 +131,7 @@ public partial class ChatPage
         {
             Messages.Add(message);
         }
-        else if (lastMessage.AuthorView.Id == LocalUser.CurrentUser.Id || lastMessage.AuthorView.Id == message.AuthorView.Id)
+        else if (lastMessage.AuthorView.Id == message.AuthorView.Id)
         {
             lastMessage.Append(message.ChatMessageBodies[0].Content, message.ChatMessageBodies[0].IsText != true);
         }
@@ -136,13 +149,32 @@ public partial class ChatPage
 
     private void AddMessage(string content)
     {
-        MessagePacket messagePacket = new MessagePacket(content);
+        if (content.StartsWith("!")) 
+        {
+            string[] commandArguments = content.Split(' ');
+            string commandName = commandArguments[0];
 
-        SocketCore.Send(messagePacket, Token.SEND_MESSAGE);
+            if(!CommandProcess.Invoke(commandName, commandArguments, out string commandError))
+            {
+                ChatMessage message = new ChatMessage(commandError, false, null);
+                AddMessage(message);
+            }
+        }
+        else 
+        {
+            MessagePacket messagePacket = new MessagePacket(content);
 
-        ChatMessage message = new ChatMessage(content, isImage:false, StateChanged);
+            SocketCore.Send(messagePacket, Token.SEND_MESSAGE);
 
-        AddMessage(message);
+            ChatMessage message = new ChatMessage(content, isImage: false, StateChanged);
+
+            AddMessage(message);
+        }
+    }
+
+    private void ProcessCommand(string command) 
+    {
+        
     }
 
     private void StateChanged()

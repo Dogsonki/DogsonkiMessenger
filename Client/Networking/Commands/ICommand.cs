@@ -64,6 +64,7 @@ public interface ICommand
         {
             return SocketCore.SendCommand(command);
         }
+
         return false;
     }
 }

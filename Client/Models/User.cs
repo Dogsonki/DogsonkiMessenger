@@ -1,61 +1,26 @@
-﻿using Client.IO;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using Client.Networking.Core;
 
 namespace Client.Models;
 
-public partial class User : IViewBindable
+public partial class User : ViewBindable
 {
-    public static readonly List<User> Users = new List<User>();
-
     public UserPropertiesLocal UserProperties { get; set; } = new UserPropertiesLocal();
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public static readonly List<User> Users = new List<User>();
 
-    public BindableType BindType { get; } = BindableType.User;
+    public static readonly User SystemBot = new User("System", 0, false, false);
 
-    public uint Id { get; }
+    public bool IsLocalUser { get; }
 
-    IViewBindable IViewBindable.View => this;
-
-    public string Name { get; }
-
-    public string AvatarPath => $"user_avatar{Id}";
-
-    private string _avatarImageSource;
-
-    public string AvatarImageSource
+    public User(string name, uint id, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
     {
-        get
+        if (loadAvatar)
         {
-            if (_avatarImageSource is null)
-                return AvatarManager.BlankAvatar;
-            return _avatarImageSource;
+            LoadAvatar();
         }
-        set
-        {
-            _avatarImageSource = value;
-            NotifyPropertyChanged();
-        }
-    }
 
+        IsLocalUser = isLocalUser;
 
-    public User(string username, uint id, bool isLocalUser = false, bool setAvatar = true)
-    {
-        Name = username;
-        Id = id;
-
-        if (isLocalUser)
-        {
-            BindType = BindableType.LocalUser;
-        }
-        else
-        {
-            if (setAvatar)
-            {
-                AvatarManager.SetAvatar(this);
-            }
-        }
         Users.Add(this);
     }
 
@@ -95,9 +60,13 @@ public partial class User : IViewBindable
 
     public static User? GetUser(uint id) => Users.Find(x => x.Id == id);
 
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+    public void InviteAsFriend()
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        if(UserProperties.IsFriend != FriendStatus.Friend && UserProperties.IsFriend != FriendStatus.Invited)
+        {
+            UserProperties.IsFriend = FriendStatus.Invited;
+            SocketCore.Send(Id, Token.SEND_USER_FRIEND_INVITE, true);
+        }
     }
 }
 

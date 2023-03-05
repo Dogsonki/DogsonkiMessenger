@@ -1,0 +1,29 @@
+﻿@page "/ProfileSettings"
+
+@using Client.IO;
+
+@inject NavigationManager navigation;
+
+<div id="localuser-display">
+    <img @onclick="() => AvatarManager.MediaPickerSet(LocalUser.CurrentUser)" class="avatar" alt="local_user_avatar" src="@user.AvatarImageSource" />
+    <div class="userinfo">
+        <p class="userinfo">@user.Name<span style="color:dimgray">#@user.Id</span> </p>
+    </div>
+</div>
+
+<div id="options">
+    <button @onclick="() => AvatarManager.MediaPickerSet(LocalUser.CurrentUser)" id="option-logout">Change Avatar</button>
+
+    <button @onclick="() => RedirectGroupChatCreator()" style="color: red" id="option-logout">Create Group Chat</button>
+
+    <button @onclick="() => LocalUser.CurrentUser.Logout(navigation)" id="option-logout">Logout</button>
+</div>
+
+@code {
+    LocalUser user = LocalUser.CurrentUser;
+
+    private void RedirectGroupChatCreator()
+    {
+        navigation.NavigateTo("/GroupChatCreator");
+    }
+}

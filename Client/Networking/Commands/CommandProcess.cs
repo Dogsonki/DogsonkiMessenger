@@ -3,17 +3,20 @@ using System.Reflection;
 
 namespace Client.Networking.Commands;
 
-internal class CommandProcess
+internal static class CommandProcess
 {
     private static Dictionary<string, Type> Commands = new Dictionary<string, Type>();
 
-    public static void Invoke(string commandName, string[] args, out string error)
+    static CommandProcess() 
     {
-        if (Commands.Count == 0)
-        {
-            GetReflectionCommands();
-        }
+        GetReflectionCommands();
+    }
 
+    /// <summary>
+    /// Returns true if command is successfully prepared and sent
+    /// </summary>
+    public static bool Invoke(string commandName, string[] args, out string error)
+    {
         Commands.TryGetValue(commandName, out Type? command);
 
         try
@@ -21,13 +24,13 @@ internal class CommandProcess
             if (command is null)
             {
                 error = "Command dose not exists";
-                return;
+                return false;
             }
 
             if (!ICommand.HasAgrs(command, args.Length))
             {
                 error = "Count of provided arguments is wrong";
-                return;
+                return false;
             }
 
             object? instance = Activator.CreateInstance(command, args);
@@ -35,12 +38,12 @@ internal class CommandProcess
             if (instance is null)
             {
                 error = "Something went wrong when creating instance of command";
-                return;
+                return false;
             }
 
             if (((ICommand)instance).Sendable)
             {
-                ICommand.PrepareAndSend((ICommand)instance, out error);
+                return ICommand.PrepareAndSend((ICommand)instance, out error);
             }
         }
         catch (Exception ex)
@@ -49,11 +52,12 @@ internal class CommandProcess
         }
 
         error = string.Empty;
+        return false;
     }
 
-    public static void GetReflectionCommands()
+    private static void GetReflectionCommands()
     {
-        IEnumerable<Type> coms = from asm in Assembly.GetExecutingAssembly().GetTypes() where asm.Namespace == "Client.Commands" select asm;
+        IEnumerable<Type> coms = from asm in Assembly.GetExecutingAssembly().GetTypes() where asm.Namespace == "Client.Networking.Commands" select asm;
 
         foreach (Type com in coms)
         {

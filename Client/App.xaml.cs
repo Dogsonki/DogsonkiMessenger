@@ -1,5 +1,4 @@
 ﻿using Client.Networking.Core;
-using Client.IO;
 
 namespace Client;
 

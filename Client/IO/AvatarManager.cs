@@ -11,7 +11,8 @@ namespace Client.IO;
 
 public static class AvatarManager
 {
-    public const string BlankAvatar = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+    /* 1px of png image */
+    public const string BlankAvatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
 
     static AvatarManager()
     {
@@ -89,15 +90,26 @@ public static class AvatarManager
         return Cache.ReadFileBytesCache("group_avatar" + view.Id);
     }
 
+    public static string ToJSImageSource(byte[] source) {
+        if (source is null) {
+            throw new ArgumentNullException("source");
+        }
+
+        string base64 = Convert.ToBase64String(source);
+        return string.Format("data:image/gif;base64,{0}", base64);
+    }
+
     public static void SetAvatar(IViewBindable view)
     {
+        view.AvatarImageSource = BlankAvatar;
+
         Task.Run(() =>
         {
             byte[]? avatarBuffer = ReadAvatar(view);
 
             if (avatarBuffer is not null && avatarBuffer.Length > 0)
             {
-                view.AvatarImageSource = FileManager.ToJSImageSource(avatarBuffer);
+                view.AvatarImageSource = ToJSImageSource(avatarBuffer);
             }
             else
             {
@@ -159,7 +171,7 @@ public static class AvatarManager
     /// </summary>
     public static void SetAvatar(IViewBindable view, byte[] avatarBuffer)
     {
-        string jsBuffer = FileManager.ToJSImageSource(avatarBuffer);
+        string jsBuffer = ToJSImageSource(avatarBuffer);
 
         view.AvatarImageSource = jsBuffer;
 
@@ -173,12 +185,27 @@ public static class AvatarManager
         }
     }
 
-    public static async Task MediaPickerSet()
+    public static async Task MediaPickerSet(IViewBindable view)
     {
         byte[] avatarData = await FileManager.FileFromSelectedFile();
 
-        SetAvatar(LocalUser.CurrentUser, avatarData);
+        if(avatarData.Length == 0)
+        {
+            return;
+        }
 
-        SocketCore.Send(avatarData, Token.CHANGE_AVATAR);
+        SetAvatar(view, avatarData);
+
+        if(view.Id == LocalUser.CurrentUser.Id) 
+        {
+            SocketCore.Send(avatarData, Token.CHANGE_AVATAR);
+        }
+    }
+
+    public static async Task<byte[]> MediaPickerSet() 
+    {
+        byte[] avatarData = await FileManager.FileFromSelectedFile();
+
+        return avatarData;
     }
 }

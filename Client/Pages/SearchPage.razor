@@ -11,10 +11,19 @@
     </form>
 </div>
 
-<div id="search-options">
-    <span id="search-option-all" @onclick="() => OnSearchOptionSelect(SearchOption.All)">All</span>
-    <span id="search-option-users" @onclick="() => OnSearchOptionSelect(SearchOption.Users)">Users</span>
-    <span id="search-option-groups" @onclick="() => OnSearchOptionSelect(SearchOption.Groups)">Groups</span>
+<div>
+    <ul id="search-options">
+        <li>
+            <span id="search-option-all" @onclick="() => OnSearchOptionSelect(SearchOption.All)">All</span>
+        </li>
+        <li>
+            <span id="search-option-users" @onclick="() => OnSearchOptionSelect(SearchOption.Users)">Users</span>
+        </li>
+        <li>
+            <span id="search-option-groups" @onclick="() => OnSearchOptionSelect(SearchOption.Groups)">Groups</span>
+        </li>
+    </ul>
+
 </div>
 
 <div id="context-frame">
@@ -23,9 +32,12 @@
             <li>
                 <button @onclick="() => OpenChat(SelectedContextView)">Open Chat</button>
             </li>
-            <li>
-                <button>Add as Friend</button>
-            </li>
+            @if (ShouldShowInviteOption())
+            {
+                <li>
+                    <button @onclick="TryInvite">Add as Friend</button>
+                </li>
+            }
             <li>
                 <button @onclick="() => DisplayContextMenu(false, null)">Close</button>
             </li>
@@ -43,7 +55,6 @@
     {
         <LoadingComponent LoadingController="@SearchLoadingComponent"></LoadingComponent>
     }
-
     <ul id="search-results">
         @foreach (IViewBindable found in SearchFound)
         {

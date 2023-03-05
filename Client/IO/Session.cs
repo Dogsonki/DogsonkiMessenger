@@ -28,7 +28,7 @@ public class Session : IStorage
 
     private static void OverwriteSession(object session)
     {
-        Cache.SaveToCache(JsonConvert.SerializeObject(session), "session.json");
+        Cache.SaveToCache(JsonConvert.SerializeObject(session), FileName);
         Logger.Push("Overwriting session to cache", LogLevel.Warning);
     }
 
@@ -42,7 +42,7 @@ public class Session : IStorage
 
     private static void ReadSession(Action<SocketPacket> callback)
     {
-        string cache = Cache.ReadFileCache("session.json");
+        string cache = Cache.ReadFileCache(FileName);
 
         if (string.IsNullOrWhiteSpace(cache))
         {
@@ -55,6 +55,11 @@ public class Session : IStorage
         if (session is null || string.IsNullOrEmpty(session.SessionKey)) return;
 
         SocketCore.Send(session, Token.SESSION_INFO);
+    }
+
+    public static void DeleteSession()
+    {
+        Cache.RemoveFromCache(FileName);
     }
 
     private static void GetSessionInfoCallback(SocketPacket packet)

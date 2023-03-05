@@ -74,7 +74,7 @@ public class ChatMessageBody
         Cache.SaveToCache(buffer, Content.Substring(8));
 
         //Replace Content with image
-        Content = FileManager.ToJSImageSource(buffer);
+        Content = AvatarManager.ToJSImageSource(buffer);
     }
 
     private void NotifyPropertyChanged()
