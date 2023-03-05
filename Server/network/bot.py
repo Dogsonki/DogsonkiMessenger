@@ -16,11 +16,11 @@ COMMANDS: dict = {
 }
 
 
-def check_command(client: Client, data: dict) -> list[dict]:
+def check_command(client: Client, data: dict, is_group) -> dict:
     data["user_dogsonki_app_id"] = client.login_id
     response, message_type = COMMANDS[data["command"]](data)
     response = str(base64.b64encode(bytes(response, "UTF-8")))[2:-1]
-    data = [{"user": None, "message": response, "time": time.time(),
-             "user_id": None, "is_group": None, "group_id": None,
-             "message_type": message_type, "id": None}]
+    data = {"user": 0, "message": response, "time": time.time(),
+             "user_id": 0, "is_group": is_group, "group_id": 0,
+             "message_type": message_type, "id": 0, "is_bot": True}
     return data

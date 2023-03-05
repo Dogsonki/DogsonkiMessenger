@@ -33,12 +33,13 @@ class ChatMessage:
     sender_id: int
     message_type: str
     is_path: bool
+    is_bot: bool
 
 @connection_checking
 def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, receiver_id: int,
                                        number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT messages.id, content, u1.nick, time, sender_id, message_type, is_path FROM ((messages
+    cursor.execute("""SELECT messages.id, content, u1.nick, time, sender_id, message_type, is_path, is_bot FROM ((messages
                       INNER JOIN users AS u1 ON messages.sender_id = u1.id)
                       INNER JOIN users AS u2 ON messages.receiver_id = u2.id)
                       WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
@@ -55,7 +56,7 @@ def get_last_30_messages_from_chatroom(cursor: CMySQLCursor, sender_id: int, rec
 def get_last_30_messages_from_group_chatroom(cursor: CMySQLCursor, group_id: int,
                                              number_of_sent_last_messages: int) -> List[ChatMessage]:
 
-    cursor.execute("""SELECT groups_messages.id, content, u.nick, time, sender_id, message_type, is_path FROM ((groups_messages
+    cursor.execute("""SELECT groups_messages.id, content, u.nick, time, sender_id, message_type, is_path, is_bot FROM ((groups_messages
                       INNER JOIN users AS u ON groups_messages.sender_id = u.id)
                       INNER JOIN groups_ AS g ON groups_messages.group_id = g.id)
                       WHERE group_id = %s
@@ -250,15 +251,15 @@ def get_group_members(cursor: CMySQLCursor, group_id: int) -> List[GroupMember]:
 
 
 @connection_checking
-def save_message(cursor: CMySQLCursor, content: str, sender: int, receiver: int, message_type: str, is_path: bool):
-    cursor.execute("""INSERT INTO messages(content, sender_id, receiver_id, message_type, is_path)
-                      VALUES (%s, %s, %s, %s, %s);""", (content, sender, receiver, message_type, is_path))
+def save_message(cursor: CMySQLCursor, content: str, sender: int, receiver: int, message_type: str, is_path: bool, is_bot: bool = False):
+    cursor.execute("""INSERT INTO messages(content, sender_id, receiver_id, message_type, is_path, is_bot)
+                      VALUES (%s, %s, %s, %s, %s, %s);""", (content, sender, receiver, message_type, is_path, is_bot))
 
 
 @connection_checking
-def save_group_message(cursor: CMySQLCursor, content: str, sender: int, group_id: int, message_type: str, is_path: bool):
-    cursor.execute("""INSERT INTO groups_messages(content, sender_id, group_id, message_type, is_path)
-                      VALUES (%s, %s, %s, %s, %s);""", (content, sender, group_id, message_type, is_path))
+def save_group_message(cursor: CMySQLCursor, content: str, sender: int, group_id: int, message_type: str, is_path: bool, is_bot: bool = False):
+    cursor.execute("""INSERT INTO groups_messages(content, sender_id, group_id, message_type, is_path, is_bot)
+                      VALUES (%s, %s, %s, %s, %s, %s);""", (content, sender, group_id, message_type, is_path, is_bot))
 
 
 @connection_checking

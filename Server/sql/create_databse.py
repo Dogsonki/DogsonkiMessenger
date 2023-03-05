@@ -57,6 +57,7 @@ class CreateDatabase:
                                    message_type VARCHAR(5),
                                    is_path BIT NOT NULL,
                                    seen BOOL DEFAULT 0,
+                                   is_bot BOOL NOT NULL,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE SET NULL
@@ -110,6 +111,7 @@ class CreateDatabase:
                                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                    message_type VARCHAR(5),
                                    is_path BIT NOT NULL,
+                                   is_bot BIT NOT NULL,
                                    
                                    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
                                    FOREIGN KEY (group_id) REFERENCES groups_(id) ON DELETE SET NULL                   
