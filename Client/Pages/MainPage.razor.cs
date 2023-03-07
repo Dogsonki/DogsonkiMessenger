@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using Client.Models;
-using Client.IO;
 using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets.Models;

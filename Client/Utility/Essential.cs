@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace Client.Utility
 {
@@ -86,5 +87,15 @@ namespace Client.Utility
         }
 
         public static string DateTimeToFactored(double time) => DateTimeToFactored(UnixToDateTime(time));
+
+        public static int IndexOfEndPacket(this StringBuilder sb, int startIndex) 
+        {
+            for(int i = 0; i < sb.Length; i++) {
+                if (sb[i] == '$') {
+                    return i;
+                }
+            }
+            return -1;
+        }
     }
 }

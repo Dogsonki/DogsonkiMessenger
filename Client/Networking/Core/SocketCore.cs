@@ -5,6 +5,11 @@ using Client.Networking.Commands;
 
 namespace Client.Networking.Core;
 
+/* TODO:
+    Use StringBuilder as buffer
+    Find end of packet from last end of buffer
+*/
+
 public class SocketCore : Connection
 {
     private static readonly Dictionary<Token, Action<SocketPacket>> OnTokenReceived = new Dictionary<Token, Action<SocketPacket>>();
@@ -24,6 +29,9 @@ public class SocketCore : Connection
             Task.WhenAll(ReceiveTask, SendQueueTask);
         });
     }
+
+    /* Change MAX_BUFFER_SIZE to max accepted buffer by device*/
+    //private static StringBuilder LongBuffer = new StringBuilder(MAX_BUFFER_SIZE);
 
     private static string LongBuffer = string.Empty;
 
@@ -85,7 +93,7 @@ public class SocketCore : Connection
 
                         buff = LongBuffer.Substring(0, indexDollar);
 #if DEBUG
-                        Debug.Write(buff);
+                        Debug.Write($"Last buffer: {buff}", printPath: false);
 #endif
                         LongBuffer = LongBuffer.Substring(indexDollar + 1);
 
@@ -136,7 +144,7 @@ public class SocketCore : Connection
 
                     byte[] buffer = packet.GetPacked();
 
-                    Debug.Write($"Socket Sending: {buffer.Length} UnPacked: {packet.Data}");
+                    Debug.Write($"Socket Sending: {buffer.Length} UnPacked: {packet.Data}", false);
 
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }

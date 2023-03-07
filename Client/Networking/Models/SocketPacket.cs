@@ -57,7 +57,8 @@ public class SocketPacket
             return ((JObject)Data).ToObject<T>(jsonSerializer);
         }
 
-        T? model = JsonConvert.DeserializeObject<T>(Convert.ToString(Data));
+        T? model = JsonConvert.DeserializeObject<T>(Convert.ToString(Data),
+            new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
 
         if(model is null)
         {

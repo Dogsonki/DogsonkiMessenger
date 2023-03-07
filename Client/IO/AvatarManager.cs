@@ -99,6 +99,10 @@ public static class AvatarManager
         return string.Format("data:image/gif;base64,{0}", base64);
     }
 
+    /// <summary>
+    /// Changes avatar of view. If view is type of ViewBindable notifies ui.
+    /// </summary>
+    /// <param name="view"></param>
     public static void SetAvatar(IViewBindable view)
     {
         view.AvatarImageSource = BlankAvatar;
@@ -110,10 +114,6 @@ public static class AvatarManager
             if (avatarBuffer is not null && avatarBuffer.Length > 0)
             {
                 view.AvatarImageSource = ToJSImageSource(avatarBuffer);
-            }
-            else
-            {
-                view.AvatarImageSource = BlankAvatar;
             }
 
             if (view.BindType == BindableType.User || view.BindType == BindableType.LocalUser)

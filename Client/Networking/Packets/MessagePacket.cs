@@ -37,7 +37,7 @@ public class MessagePacket
     public int GroupId { get; }
 
     [JsonIgnore]
-    public int UserId { get; }
+    public int? UserId { get; }
 
     [JsonIgnore]
     public string Username { get; }

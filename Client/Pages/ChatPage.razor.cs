@@ -6,7 +6,6 @@ using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages.Exceptions;
-using Client.Utility;
 using Clinet.IO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -73,32 +72,49 @@ public partial class ChatPage
 
         foreach (MessagePacket initMessage in initMessages)
         {
-            ChatMessage message = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
-                initMessage.MessageId, StateChanged, initMessage.UserId, initMessage.Time);
-            AddMessage(message);
+            ChatMessage chatMessage = null;
+
+            if (initMessage.IsBot) {
+                chatMessage = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
+                initMessage.MessageId, StateChanged, 0, initMessage.Time, initMessage.IsBot);
+            }
+            else {
+                chatMessage = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
+                initMessage.MessageId, StateChanged, (int)initMessage.UserId, initMessage.Time, initMessage.IsBot);
+
+            }
+            AddMessage(chatMessage);
         }
 
         InvokeAsync(StateHasChanged);
     }
 
-    private void OnGetMoreMessages(SocketPacket packet)
-    {
+    private void OnGetMoreMessages(SocketPacket packet) {
 
     }
 
-    private void OnReceiveRealtimeMessage(SocketPacket packet)
-    {
+    private void OnReceiveRealtimeMessage(SocketPacket packet) {
         MessagePacket? message = packet.Deserialize<MessagePacket>();
 
-        if(message is null) 
-        {
+        if (message is null) {
             return;
         }
 
-        ChatMessage chatMessage = new ChatMessage(message.ContentString, message.IsImage, 
-            message.MessageId, StateChanged, message.UserId, message.Time, message.IsBot);
+        ChatMessage chatMessage = null;
+
+        if (message.IsBot) {
+            chatMessage = new ChatMessage(message.ContentString, message.IsImage,
+            message.MessageId, StateChanged, 0, message.Time, message.IsBot);
+        }
+        else {
+            chatMessage = new ChatMessage(message.ContentString, message.IsImage,
+            message.MessageId, StateChanged, (int)message.UserId, message.Time, message.IsBot );
+        }
+
 
         AddMessage(chatMessage);
+
+        InvokeAsync(StateHasChanged);
     }
 
     private void MessageInputSubmit()
@@ -170,11 +186,6 @@ public partial class ChatPage
 
             AddMessage(message);
         }
-    }
-
-    private void ProcessCommand(string command) 
-    {
-        
     }
 
     private void StateChanged()

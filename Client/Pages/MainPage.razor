@@ -64,6 +64,10 @@
         }
     </ul>
 
+    @if (lastChatService.ChatsCount == 0 && ShouldRenderLastChats) {
+        <h2 style="text-align: center">Looks like nothing here.</h2>
+    }
+
     <!-- Temporary solution to hide and show list / use offscreen instead -->
     <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "none" : "initial")">
         @foreach (IViewBindable request in Requests)

@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ObjectiveC;
 
 namespace Client.Utility;
 
@@ -38,17 +39,25 @@ public class Debug
 #endif
     }
 
-    public static void Write(object? Content, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)
+    public static void Write(object? Content, bool printPath = true, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = "")
     {
 #if DEBUG && !USE_VS_DEBUGGER
-        Console.WriteLine("[DEBUG]: " + path + " at: " + lineNumber + " : " + GetSerialized(Content));
+        if(printPath){
+            Console.WriteLine($"[DEBUG]: {path} at {lineNumber} {GetSerialized(Content)}");
+        }
+        else {
+            Console.WriteLine($"[DEBUG]: {GetSerialized(Content)}");
+        }
 #elif USE_VS_DEBUGGER
         System.Diagnostics.Trace.WriteLine("[DEBUG]: " + path + " at: " + lineNumber + " : " + Content);
 #endif
     }
 
-    private static string? GetSerialized(object content)
+    private static string? GetSerialized(object? content)
     {
+        if(content is null) {
+            return string.Empty;
+        }
         //Check if content is ready to serialize
         try
         {

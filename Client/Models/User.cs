@@ -8,16 +8,20 @@ public partial class User : ViewBindable
 
     public static readonly List<User> Users = new List<User>();
 
-    public static readonly User SystemBot = new User("System", 0, false, false);
+    public static readonly User SystemBot = new User("System", 0, isBot:true, false, false);
 
     public bool IsLocalUser { get; }
+    
+    public bool IsBot { get; }
 
-    public User(string name, uint id, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
+    public User(string name, uint id, bool isBot = false, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
     {
         if (loadAvatar)
         {
             LoadAvatar();
         }
+
+        IsBot = isBot;
 
         IsLocalUser = isLocalUser;
 
@@ -54,7 +58,7 @@ public partial class User : ViewBindable
 
     public static User GetSystemBot()
     {
-        User? systemBot = GetUser(0);    
+        User? systemBot = GetUser(0);
         return systemBot is not null ? systemBot : CreateSystemBot();
     }
 

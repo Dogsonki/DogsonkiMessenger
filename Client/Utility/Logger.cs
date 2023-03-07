@@ -12,6 +12,7 @@ public static class Logger
     public static void Push(object trace, LogLevel level, TraceType type = TraceType.Func)
     {
         Debug.Write(trace);
+
         switch (type)
         {
             case TraceType.Packet: PacketLoggerStack.Add(trace.ToString()); break;
