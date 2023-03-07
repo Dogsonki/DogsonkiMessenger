@@ -65,7 +65,7 @@ class Chatroom(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def save_message_in_database(self, message: str, message_type: str, save: bool):
+    def save_message_in_database(self, message: str, message_type: str, save: bool, bot: bool):
         pass
 
     def receive_messages(self):
@@ -74,9 +74,9 @@ class Chatroom(metaclass=abc.ABCMeta):
             self.chat_actions[message.token](message.data)
 
     def bot_command(self, message: dict):
-        message = bot.check_command(self.connection, message)
-        message_id = self.save_message_in_database(message[0]["message"], message[0]["message_type"], False)
-        message[0]["id"] = message_id
+        message = bot.check_command(self.connection, message, self.is_group)
+        message_id = self.save_message_in_database(message["message"], message["message_type"], False, True)
+        message["id"] = message_id
         if self.is_group:
             for i in self.group_members:
                 receiver_connection = current_connections.get(i.nick)
@@ -92,7 +92,7 @@ class Chatroom(metaclass=abc.ABCMeta):
             for i in message_history:
                 data = {"user": i.sender, "message": i.content, "time": datetime.timestamp(i.time),
                         "user_id": i.sender_id, "is_group": is_group, "group_id": group_id,
-                        "message_type": i.message_type, "id": i.id}
+                        "message_type": i.message_type, "id": i.id, "is_bot": i.is_bot}
                 message_list.append(data)
             self.send_message(message_list, old)
 

@@ -114,7 +114,7 @@ class GroupChatroom(functions.Chatroom):
             message_id = self.save_message_in_database(message_, message_type)
             data = {"user": self.connection.nick, "message": message_, "id": message_id,
                     "time": time.time(), "user_id": self.connection.login_id,
-                    "is_group": True, "group_id": self.group_id, "message_type": message_type}
+                    "is_group": True, "group_id": self.group_id, "message_type": message_type, "is_bot": False}
             for i in self.group_members:
                 if i.nick == self.connection.nick:
                     self.connection.send_message(message_id, MessageType.NEW_MESSAGE)
@@ -123,12 +123,12 @@ class GroupChatroom(functions.Chatroom):
                     if receiver_connection:
                         receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
-    def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
+    def save_message_in_database(self, message: str, message_type: str, save: bool = True, is_bot: bool = False) -> int:
         is_path = False if message_type == "text" else True
         if is_path and save:
             message = self._save_file(self.group_id, message)
         handling_sql.save_group_message(self.connection, message, self.connection.login_id,
-                                        int(self.group_id), message_type, is_path)
+                                        int(self.group_id), message_type, is_path, is_bot)
         message_id = self.connection.db_cursor.lastrowid
         handling_sql.update_last_time_message_group(self.connection, self.group_id, message_id)
         return message_id

@@ -48,15 +48,15 @@ class NormalChatroom(functions.Chatroom):
             if receiver_connection:
                 data = {"user": self.connection.nick, "message": message_, "id": message_id,
                         "time": time.time(), "user_id": self.connection.login_id,
-                        "is_group": False, "group_id": -1, "message_type": message_type}
+                        "is_group": False, "group_id": -1, "message_type": message_type, "is_bot": False}
                 receiver_connection.send_message(data, MessageType.CHAT_MESSAGE)
 
-    def save_message_in_database(self, message: str, message_type: str, save: bool = True) -> int:
+    def save_message_in_database(self, message: str, message_type: str, save: bool = True, is_bot: bool = False) -> int:
         is_path = False if message_type == "text" else True
         if is_path and save:
             message = self._save_file(self.receiver_id, message)
         handling_sql.save_message(self.connection, message, self.connection.login_id,
-                                  self.receiver_id, message_type, is_path)
+                                  self.receiver_id, message_type, is_path, is_bot)
         message_id = self.connection.db_cursor.lastrowid
         handling_sql.update_last_time_message(self.connection, self.connection.login_id, self.receiver_id,
                                               message_id)
@@ -121,10 +121,12 @@ def send_last_chats(client: Client, data: str):
             if client.login_id == i.u2_id:
                 if i.u1_last_online is not None:
                     i.u1_last_online = datetime.timestamp(i.u1_last_online)
+                if i.last_message_time is not None:
+                    i.last_message_time = datetime.timestamp(i.last_message_time)
                 chats.append({"name": i.u1_nick,
                               "id": i.u1_id,
                               "last_online_time": i.u1_last_online,
-                              "last_message_time": datetime.timestamp(i.last_message_time),
+                              "last_message_time": i.last_message_time,
                               "type": "user",
                               "message_type": i.message_type,
                               "message": i.message,
