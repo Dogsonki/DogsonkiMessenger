@@ -95,14 +95,19 @@ public partial class ChatPage
 
     }
 
-    private void OnReceiveRealtimeMessage(SocketPacket packet) {
+    private void OnReceiveRealtimeMessage(SocketPacket packet) 
+    {
         MessagePacket? message = packet.Deserialize<MessagePacket>();
 
         if (message is null) {
             return;
         }
 
-        ChatMessage chatMessage = null;
+        if (message.UserId == LocalUser.CurrentUser.Id) {
+            return;
+        }
+
+        ChatMessage chatMessage;
 
         if (message.IsBot) {
             chatMessage = new ChatMessage(message.ContentString, message.IsImage,

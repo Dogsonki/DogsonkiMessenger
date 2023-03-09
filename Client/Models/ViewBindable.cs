@@ -1,4 +1,5 @@
 ﻿using Client.IO;
+using Client.Utility;
 using System.ComponentModel;
 
 namespace Client.Models;
@@ -38,6 +39,7 @@ public abstract class ViewBindable : IViewBindable
 
     private void NotifyUI()
     {
+        Debug.Write($"NotifyUI invoked by {View.Name} was null? {PropertyChanged is null}");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
     }
 
@@ -50,5 +52,12 @@ public abstract class ViewBindable : IViewBindable
     public void LoadAvatar()
     {
         AvatarManager.SetAvatar(this);
+    }
+
+    public void SetPropertyChanged(Task task, bool silentNotify = false) {
+        PropertyChanged += async (sender, e) => { await task; };
+        if (silentNotify) {
+            NotifyUI();
+        }
     }
 }

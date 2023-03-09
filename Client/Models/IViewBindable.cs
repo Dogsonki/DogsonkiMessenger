@@ -31,6 +31,8 @@ public interface IViewBindable
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public abstract void SetPropertyChanged(Task task, bool silentNotify = false);
+
     public static IViewBindable CreateOrGet(string name, uint id, bool isGroup)
     {
         if(isGroup)

@@ -90,7 +90,6 @@ public class SocketCore : Connection
 
                         if (indexDollar == -1)
                             break;
-
                         buff = LongBuffer.Substring(0, indexDollar);
 #if DEBUG
                         Debug.Write($"Last buffer: {buff}", printPath: false);
@@ -143,9 +142,9 @@ public class SocketCore : Connection
                     }
 
                     byte[] buffer = packet.GetPacked();
-
-                    Debug.Write($"Socket Sending: token: {packet.PacketToken} buffer_length:{buffer.Length}", false);
-
+#if DEBUG
+                    Debug.Write($"Socket Sending: token: {packet.PacketToken} buffer_length:{buffer.Length} data: {packet.Serialize()}", false);
+#endif
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }
                 catch (Exception ex)
@@ -175,7 +174,7 @@ public class SocketCore : Connection
         return true;
     }
 
-    public static void SetGlobalOnToken(Token token, Action<object> callback)
+    public static void SetGlobalOnToken(Token token, Action<SocketPacket> callback)
     {
         if (!OnTokenReceived.ContainsKey(token))
         {

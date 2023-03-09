@@ -3,7 +3,6 @@ using Client.Models;
 using Client.Networking.Core;
 using Client.Utility;
 using Client.Networking.Packets;
-using Newtonsoft.Json;
 using Client.Networking.Models;
 using Clinet.IO;
 
@@ -27,13 +26,15 @@ public static class AvatarManager
            return "group_avatar_info" + view.Id;
     }
 
-    private static void ManageUserImagePacket(object packet)
+    private static void ManageUserImagePacket(SocketPacket packet)
     {
         Task.Run(() =>
         {
-            UserImageRequestPacket? img = JsonConvert.DeserializeObject<UserImageRequestPacket>(Convert.ToString(packet));
+            UserImageRequestPacket? img = packet.Deserialize<UserImageRequestPacket>(); 
 
-            Debug.ThrowIfNull(img);
+            if(img is null) {
+                return;
+            }
 
             var user = IViewBindable.Get(img.Id, false);
 
@@ -53,7 +54,6 @@ public static class AvatarManager
             Cache.SaveToCache(buffer, "user_avatar" + img.Id);
 
             SaveAvatarInfo((int)DateTime.Now.Ticks, user);
-
             SetAvatar(user, buffer);
         });
     }
@@ -137,6 +137,7 @@ public static class AvatarManager
                     {
                         if (newTime > time)
                         {
+                            Debug.Write($"Requesting new avatar because of time NewTime:{newTime} TimeFromCache:{time}");
                             SocketCore.Send(view.Id, Token.USER_AVATAR_REQUEST);
                         }
                     }

@@ -16,7 +16,7 @@
                     <button @onclick=OpenChat>Open Chat</button>
                 </li>
                 <li>
-                    @if(Controller.State is not null && ((User)Controller.State).UserProperties.IsFriend == FriendStatus.None)
+                    @if(ShouldRenderInviteButton())
                     {
                         <button @onclick=InviteFriend>Invite</button>
                     }
@@ -82,6 +82,12 @@
         {
             return false;
         }
+
+        if (Controller.State.BindType == BindableType.LocalUser) 
+        {
+            return false;
+        }
+
 
         User user = (User)Controller.State;
 

@@ -182,6 +182,10 @@ public class LastChat : IViewBindable
         MessageSenderName = messageOwner.Name;
         PropertyChanged?.Invoke(this, null);
     }
+
+    public void SetPropertyChanged(Task task, bool silentNotify = false) {
+        BindedView.SetPropertyChanged(task, silentNotify);
+    }
 }
 
 public enum MessageType

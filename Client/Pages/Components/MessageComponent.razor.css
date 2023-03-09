@@ -35,8 +35,8 @@ ul {
 }
 
 .message-body img{
-    max-height: 200px;
-    max-width: 200px;
+    max-height: 400px;
+    max-width: 80%;
     padding-bottom: 8px;
 }
 

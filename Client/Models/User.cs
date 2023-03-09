@@ -1,10 +1,11 @@
 ﻿using Client.Networking.Core;
+using Client.Utility;
 
 namespace Client.Models;
 
 public partial class User : ViewBindable
 {
-    public UserPropertiesLocal UserProperties { get; set; } = new UserPropertiesLocal();
+    public UserProperties UserProperties { get; set; } = new UserProperties();
 
     public static readonly List<User> Users = new List<User>();
 
@@ -16,7 +17,7 @@ public partial class User : ViewBindable
 
     public User(string name, uint id, bool isBot = false, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
     {
-        if (loadAvatar)
+        if (loadAvatar && !isLocalUser && !isBot)
         {
             LoadAvatar();
         }

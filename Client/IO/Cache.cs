@@ -40,6 +40,7 @@ internal class Cache
                 Task.Run(async () =>
                 {
                     await File.WriteAllBytesAsync(CachePath + name, (byte[])obj);
+                    Debug.Write($"I/O write byte[] | name: {name}");
                 });
             }
             else if (obj.GetType() == typeof(string))
@@ -48,6 +49,7 @@ internal class Cache
                 {
                     byte[] encoded = Encoding.UTF8.GetBytes((string)obj);
                     await File.WriteAllBytesAsync(CachePath + name, encoded);
+                    Debug.Write($"I/O write string | name: {name}");
                 });
             }
         }
@@ -194,4 +196,6 @@ internal class Cache
             Logger.Push(ex, LogLevel.Error);
         }
     }
+
+    public static IEnumerable<string> ReadAllFilesNames() => Directory.GetFiles(CachePath);
 }

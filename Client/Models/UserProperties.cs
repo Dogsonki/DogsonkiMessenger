@@ -3,7 +3,7 @@
 /// <summary>
 /// User properties with local user
 /// </summary>
-public class UserPropertiesLocal
+public class UserProperties
 {
     public FriendStatus IsFriend { get; set; } = FriendStatus.Unknown;
     public UserStatus Status { get; set; } = UserStatus.Offline;

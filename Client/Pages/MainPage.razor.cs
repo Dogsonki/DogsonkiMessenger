@@ -7,6 +7,7 @@ using Client.Pages.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Client.Models.LastChats;
 using Client.Utility;
+using System.Diagnostics;
 
 namespace Client.Pages;
 
@@ -22,16 +23,13 @@ public partial class MainPage
 
     private StateComponentController<IViewBindable> MiniProfileController { get; set; } = new StateComponentController<IViewBindable>();
 
-    public MainPage()
-    {
-        currentUser.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
-    }
-
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && !_wasInitialized)
         {
             _wasInitialized = true;
+
+            currentUser.SetPropertyChanged(InvokeAsync(StateHasChanged));
 
             currentUser.Build();
 
@@ -105,8 +103,10 @@ public partial class MainPage
             foreach(LastChatsPacket lastChat in lastChats)
             {
                 IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
-                UserStatus status = UserStatus.None;
+                view.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
 
+                UserStatus status = UserStatus.None;
+                
                 if(lastChat.LastOnlineTime is not null)
                 {
                     status = UserStatus.Online;
@@ -118,8 +118,6 @@ public partial class MainPage
 
                 LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.TypeOfMessage,
                     lastChat.LastMessage, lastChat.LastMessageTime, status, lastChat.IsFriend);
-
-                chat.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
 
                 lastChatService.AddLastChat(chat);
             }
@@ -146,9 +144,7 @@ public partial class MainPage
             foreach(UserInvitationPacket invitation in invitations)
             {
                 User invitationSender = (User)IViewBindable.CreateOrGet(invitation.InvitationSenderName, invitation.InvitationSenderId, false);
-
-                invitationSender.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
-
+                invitationSender.SetPropertyChanged(InvokeAsync(StateHasChanged));
                 Requests.Add(invitationSender);
             }
 
