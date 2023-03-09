@@ -19,20 +19,12 @@
     <input @bind="passwordInput" type="password" placeholder="Password" />
 
 
-    <div class="container">
-        <div class="round">
-            <input type="checkbox" checked @onclick=CheckmarkClicked id="checkbox" />
-            <label for="checkbox"></label>
-            <span>Remember me</span>
-        </div>
-    </div>
-
     <button @onclick="TryLogin">Login</button>
 </div>
 
 <div style="text-align:center">
     <span style="color:red">@errorMessage</span>
-    <p style="color:cornflowerblue; padding-top: 10px"> <a href="/ForgotPassword"> Forgot Password? </a> </p>
+    <p style="color:cornflowerblue; padding-top: 10px"> <a href="/ForgotPassword"> Forgot Your Password? </a> </p>
     <p style="color:cornflowerblue"> <a href="/RegisterPage"> Sign up </a> </p>
 </div>
 
@@ -85,7 +77,7 @@
             return;
         }
 
-        LoginPacket packet = new LoginPacket(emailInput, passwordInput, rememberMeInput);
+        LoginPacket packet = new LoginPacket(emailInput, passwordInput, true);
 
         if (!SocketCore.SendCallback(packet, Token.LOGIN, LoginCallback))
             errorMessage = "Can't Connect to Server.";

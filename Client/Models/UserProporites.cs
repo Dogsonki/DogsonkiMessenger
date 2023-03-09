@@ -6,6 +6,7 @@
 public class UserPropertiesLocal
 {
     public FriendStatus IsFriend { get; set; } = FriendStatus.Unknown;
+    public UserStatus Status { get; set; } = UserStatus.Offline;
 }
 
 public enum FriendStatus

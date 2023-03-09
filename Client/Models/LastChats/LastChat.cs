@@ -187,5 +187,5 @@ public class LastChat : IViewBindable
 public enum MessageType
 {
     Image,
-    Text
+    Text,
 }

@@ -41,6 +41,21 @@ internal class LastChatService
         }
     }
 
+    public void AddLastChat(IViewBindable view, IViewBindable messageAuthor, MessageType messageType, string? message) 
+    {
+        if(lastChats.Find(x=> x.Id == view.Id) == null) {
+
+            UserStatus status = UserStatus.None;    
+
+            if(view.BindType == BindableType.User){
+                status = ((User)view).UserProperties.Status;
+            }
+
+            LastChat lastChat = new LastChat(view, view.Name, messageType, message, DateTime.Now.Ticks, status);
+            lastChats.Add(lastChat);    
+        }
+    }
+
     public void AddLastChat(LastChat lastChat)
     {
         lock (padlock)

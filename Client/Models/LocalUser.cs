@@ -2,7 +2,6 @@ using Client.IO;
 using Client.Networking.Core;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace Client.Models;
 
@@ -15,18 +14,16 @@ public class LocalUser : ViewBindable
     public LocalUser(string name, uint id) : base(BindableType.LocalUser, name, id)
     {
         CurrentUser = this;
+    }
 
+    public void Build() 
+    {
         AvatarManager.SetAvatar(this);
 
-        User.CreateLocalUser(name, id);
+        User.CreateLocalUser(Name, Id);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 
     public void Logout(NavigationManager navigation)
     {

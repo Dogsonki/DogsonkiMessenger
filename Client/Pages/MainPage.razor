@@ -64,7 +64,7 @@
         }
     </ul>
 
-    @if (lastChatService.ChatsCount == 0 && ShouldRenderLastChats) {
+    @if (lastChatService.ChatsCount == 0 && !ShouldRenderLastChats) {
         <h2 style="text-align: center">Looks like nothing here.</h2>
     }
 

@@ -144,7 +144,7 @@ public class SocketCore : Connection
 
                     byte[] buffer = packet.GetPacked();
 
-                    Debug.Write($"Socket Sending: {buffer.Length} UnPacked: {packet.Data}", false);
+                    Debug.Write($"Socket Sending: token: {packet.PacketToken} buffer_length:{buffer.Length}", false);
 
                     await Stream.WriteAsync(buffer, 0, buffer.Length);
                 }

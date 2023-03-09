@@ -1,5 +1,6 @@
 using Client.IO;
 using Client.Models;
+using Client.Models.LastChats;
 using Client.Models.Navigation;
 using Client.Networking.Commands;
 using Client.Networking.Core;
@@ -28,6 +29,7 @@ public partial class ChatPage
     private IViewBindable View;
 
     private List<ChatMessage> Messages = new List<ChatMessage>();
+    private LastChatService lastChatService { get; set; } = new LastChatService();
 
     private string? MessageInputContent;
 
@@ -120,6 +122,8 @@ public partial class ChatPage
     private void MessageInputSubmit()
     {
         if (string.IsNullOrEmpty(MessageInputContent)) return;
+
+        lastChatService.AddLastChat(View, LocalUser.CurrentUser, MessageType.Text, MessageInputContent);
 
         AddMessage(MessageInputContent);
 

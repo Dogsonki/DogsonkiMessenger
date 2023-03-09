@@ -11,7 +11,7 @@ public static class Logger
 
     public static void Push(object trace, LogLevel level, TraceType type = TraceType.Func)
     {
-        Debug.Write(trace);
+        Debug.Write(trace, false);
 
         switch (type)
         {

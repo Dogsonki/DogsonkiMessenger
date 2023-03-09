@@ -6,6 +6,7 @@ using Client.Networking.Packets.Models;
 using Client.Pages.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Client.Models.LastChats;
+using Client.Utility;
 
 namespace Client.Pages;
 
@@ -17,6 +18,7 @@ public partial class MainPage
     private LastChatService lastChatService { get; } = new LastChatService();
     
     private static List<IViewBindable> Requests { get; } = new List<IViewBindable>();
+    private static bool _wasInitialized = false;
 
     private StateComponentController<IViewBindable> MiniProfileController { get; set; } = new StateComponentController<IViewBindable>();
 
@@ -27,18 +29,21 @@ public partial class MainPage
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && !_wasInitialized)
         {
-            if (lastChatService.ChatsCount == 0)
-            {
-                GetLastChats();
-            }
-            else
-            {
-                LoadingEvents["LastChatsLoading"].State = false;
-            }
+            _wasInitialized = true;
 
+            currentUser.Build();
+
+            GetLastChats();
         }
+
+        if (_wasInitialized) 
+        {
+            LoadingEvents["LastChatsLoading"].State = false;
+            LoadingEvents["LocalUserLoading"].State = false;
+        }
+
         base.OnAfterRender(firstRender);
     }
 

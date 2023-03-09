@@ -14,9 +14,11 @@
 <div id="options">
     <button @onclick="() => AvatarManager.MediaPickerSet(LocalUser.CurrentUser)" id="option-logout">Change Avatar</button>
 
-    <button @onclick="() => RedirectGroupChatCreator()" style="color: red" id="option-logout">Create Group Chat</button>
+    <button @onclick="() => RedirectGroupChatCreator()" style="color: #D22B2B" id="option-logout">Create Group Chat</button>
 
-    <button @onclick="() => LocalUser.CurrentUser.Logout(navigation)" id="option-logout">Logout</button>
+    <button @onclick="() => ClearCache()" style="color: #D22B2B" id="option-logout">Clear Cache</button>
+
+    <button @onclick="() =>  LocalUser.CurrentUser.Logout(navigation)" style="color: #D22B2B" id="option-logout">Logout</button>
 </div>
 
 @code {
@@ -25,5 +27,10 @@
     private void RedirectGroupChatCreator()
     {
         navigation.NavigateTo("/GroupChatCreator");
+    }
+
+    private void ClearCache() 
+    {
+        Cache.ClearAbsoluteCache();
     }
 }

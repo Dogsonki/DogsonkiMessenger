@@ -37,55 +37,15 @@
         text-decoration: none;
     }
 
-.round {
-    position: relative;
-    margin: 25px;
+.menu-under {
+    text-align: initial;
+    display: flex;
 }
 
-    .round label {
-        background-color: #303132;
-        border: 1px solid #303132;
-        border-radius: 50%;
-        cursor: pointer;
-        height: 32px;
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 32px;
-    }
-
-        .round label:after {
-            border: 2px solid #fff;
-            border-top: none;
-            border-right: none;
-            content: "";
-            height: 6px;
-            left: 10px;
-            opacity: 0;
-            position: absolute;
-            top: 10px;
-            transform: rotate(-45deg);
-            width: 12px;
-        }
-
-    .round input[type="checkbox"] {
-        visibility: hidden;
-    }
-
-        .round input[type="checkbox"]:checked + label {
-            background-color: #303132;
-            border-color: #e0dede;
-        }
-
-            .round input[type="checkbox"]:checked + label:after {
-                opacity: 1;
-            }
-            
-            .round span{
-                position: absolute;
-                top: 5px;
-                left: 40px;
-            }
+.rememer-me{
+    text-align: initial;
+    padding-right: 20%;
+}
 
 .container {
     margin-right: 40px;
