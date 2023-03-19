@@ -5,7 +5,7 @@ namespace Client.Models;
 
 public partial class User : ViewBindable
 {
-    public UserProperties UserProperties { get; set; } = new UserProperties();
+    public UserProperties UserProperties { get; } = new UserProperties();
 
     public static readonly List<User> Users = new List<User>();
 

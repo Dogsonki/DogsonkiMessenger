@@ -5,9 +5,12 @@
 @inject NavigationManager naviagtion;
 @inject IJSRuntime JS;
 
-<div id="search-bar">
-    <form @onsubmit="SearchBarSubmit">
+<div>
+    <form id="search-bar" @onsubmit="SearchBarSubmit">
         <input @bind="SearchInput" type="text" placeholder="Search" />
+        <button type="submit" id="search-bar-btn">
+            <img src="./Images/search.png" />
+        </button>
     </form>
 </div>
 
@@ -26,25 +29,6 @@
 
 </div>
 
-<div id="context-frame">
-    <div id="context-menu">
-        <ul>
-            <li>
-                <button @onclick="() => OpenChat(SelectedContextView)">Open Chat</button>
-            </li>
-            @if (ShouldShowInviteOption())
-            {
-                <li>
-                    <button @onclick="TryInvite">Add as Friend</button>
-                </li>
-            }
-            <li>
-                <button @onclick="() => DisplayContextMenu(false, null)">Close</button>
-            </li>
-        </ul>
-    </div>
-</div>
-
 <div>
     @if (ShouldShowResult && SearchFound.Count == 0)
     {
@@ -55,17 +39,26 @@
     {
         <LoadingComponent LoadingController="@SearchLoadingComponent"></LoadingComponent>
     }
+
     <ul id="search-results">
         @foreach (IViewBindable found in SearchFound)
         {
             <li>
-                <div @onclick="() => DisplayContextMenu(true, found)" class="search-result-frame">
-                    <div>
+                <div class="search-result-frame">
+                    <div @onclick="() => FoundClicked(found)">
                         <img class="search-result-avatar" src="@found.AvatarImageSource">
                     </div>
-                    <div class="search-result-name">
+                    <div @onclick="() => FoundClicked(found)" class="search-result-name">
                         <span class="chat-author-name">@found.Name</span>
                     </div>
+                    @if (ShouldRenderInvite(found)) 
+                    {
+                        <button @onclick="() => InviteUser(found)" class="search-result-add-btn">Add Friend</button>
+                    }
+                    else if (ShouldRenderCancelInvite(found)) 
+                    {
+                        <button @onclick="() => InviteUser(found)" class="search-result-add-btn">Cancel Invitation</button>
+                    }
                 </div>
             </li>
         }

@@ -39,7 +39,7 @@ public class ChatMessage
         int userId, DateTime time, bool bot_response = false)
     {
         ChatMessageBodies = new List<ChatMessageBody>();
-
+        
         PropertyHasChanged = StateChanged;
 
         if (!bot_response)
@@ -72,9 +72,9 @@ public class ChatMessage
         Time = time;
     }
 
-    public void Append(string content, bool isImage)
+    public void Append(string content, bool isImage, int messageId)
     {
-        ChatMessageBody body = new ChatMessageBody(this, content, isImage, 0);
+        ChatMessageBody body = new ChatMessageBody(this, content, isImage, messageId);
 
         ChatMessageBodies.Insert(0, body);
 

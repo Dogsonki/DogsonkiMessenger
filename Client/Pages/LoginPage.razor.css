@@ -8,7 +8,7 @@
         justify-content: center;
         display: flex;
         margin: 20px auto;
-        background-color: #303132;
+        background-color: #363636;
         padding: 10px;
         border: none;
         outline: none;
@@ -17,14 +17,18 @@
         caret-color: white;
     }
 
+    .form-container input::placeholder {
+        color: #9e9e9e;
+    }
+
     .form-container button {
         width: 60%;
         height: 40px;
         margin: 10px auto;
         justify-content: center;
         display: block;
-        color: #fff;
-        background: #573b8a;
+        color: white;
+        background: #272727;
         font-size: 1em;
         font-weight: bold;
         margin-top: 20px;

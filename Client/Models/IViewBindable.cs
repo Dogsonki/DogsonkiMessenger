@@ -79,6 +79,8 @@ public interface IViewBindable
             return new Group(name, id,loadAvatar: false);
         }
     }
+
+    public bool IsUser() => BindType == BindableType.User;
 }
 
 public enum BindableType

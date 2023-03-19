@@ -11,7 +11,7 @@ internal class ImageRequestModel
     public ImageRequestModel(ChatImagePacket packet, int messageId, Action<object> callback)
     {
         Packet = packet;
-        MessageId = MessageId;
+        MessageId = messageId;
         Callback = callback;
     }
 }

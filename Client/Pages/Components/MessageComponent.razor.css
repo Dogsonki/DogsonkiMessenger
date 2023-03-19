@@ -69,9 +69,9 @@ ul{
 }
 
 .message-author-avatar {
-    width: 70px;
-    height: 55px;
-    border-radius: 50%;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50px;
     margin-right: 6px;
 }
 

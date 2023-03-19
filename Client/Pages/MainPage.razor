@@ -8,9 +8,12 @@
 @inject IJSRuntime JSRuntime 
 
 <div>
-    <div id="search-bar">
-        <form @onsubmit="SearchBarSubmit">
+    <div>
+        <form id="search-bar" @onsubmit="SearchBarSubmit">
             <input @bind="SearchInput" type="text" placeholder="Search" />
+            <button type="submit" id="search-bar-btn">
+                <img src="./Images/search.png"/>
+            </button>
         </form>
     </div>
 
@@ -87,6 +90,4 @@
             </li>
         }
     </ul>
-
 </div>
-

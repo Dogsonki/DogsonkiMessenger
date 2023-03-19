@@ -1,6 +1,8 @@
 using Client.IO;
 using Client.Networking.Core;
+using Client.Networking.Models;
 using Client.Networking.Packets;
+using Client.Utility;
 using Clinet.IO;
 using System.Diagnostics.CodeAnalysis;
 
@@ -49,7 +51,7 @@ public class ChatMessageBody
     private void LoadImage()
     {
         string fileName = Content.Substring(8);
-        byte[] imageBuffer = Cache.ReadFileBytesCache(fileName);
+        byte[]? imageBuffer = Cache.ReadFileBytesCache(fileName);
 
         if (imageBuffer is null)
         {
@@ -64,16 +66,13 @@ public class ChatMessageBody
         }
     }
 
-    private void LoadImageCallback(object packet)
+    public void LoadImageCallback(object packet)
     {
-        ImageRequestQueue.RemoveRequest(MessageId);
-
         byte[] buffer = Convert.FromBase64String(Convert.ToString(packet));
 
         //Content contains file name as for now
         Cache.SaveToCache(buffer, Content.Substring(8));
 
-        //Replace Content with image
         Content = AvatarManager.ToJSImageSource(buffer);
     }
 

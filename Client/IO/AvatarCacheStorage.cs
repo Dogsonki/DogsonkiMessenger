@@ -17,9 +17,9 @@ internal class AvatarCacheStorage
         {
             Debug.Error("AvatarCache is null or empty creating new cache file");
 
-            List<AvatarCacheStorageModel> model = new List<AvatarCacheStorageModel>();
-
-            model.Add(new AvatarCacheStorageModel(ticks, userId));
+            List<AvatarCacheStorageModel> model = new List<AvatarCacheStorageModel> {
+                new AvatarCacheStorageModel(ticks, userId)
+            };
 
             string json = JsonConvert.SerializeObject(model);
 

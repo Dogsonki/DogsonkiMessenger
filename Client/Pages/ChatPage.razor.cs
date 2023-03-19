@@ -7,6 +7,7 @@ using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages.Exceptions;
+using Client.Utility;
 using Clinet.IO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -28,17 +29,29 @@ public partial class ChatPage
 
     private IViewBindable View;
 
-    private List<ChatMessage> Messages = new List<ChatMessage>();
+    public static List<ChatMessage> Messages = new List<ChatMessage>();
     private LastChatService lastChatService { get; set; } = new LastChatService();
 
     private string? MessageInputContent;
 
+    protected override void OnAfterRender(bool firstRender) {
+        if(firstRender) {
+            LocalUser.CurrentUser.SetPropertyChanged(InvokeAsync(StateHasChanged), true);
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+
     protected override void OnParametersSet()
+    {
+        InitChat();
+    }
+
+    private void InitChat() 
     {
         View = IViewBindable.Get((uint)Id, IsGroup);
 
-        if(View is null)
-        {
+        if (View is null) {
             throw new WrongParameterException("There is no pre-created view with given Id");
         }
 
@@ -46,6 +59,8 @@ public partial class ChatPage
         SocketCore.OnToken(Token.GET_MORE_MESSAGES, OnGetMoreMessages);
 
         SocketCore.SendCallback(" ", Token.GET_INIT_MESSAGES, InitMessages, false);
+
+        LocalUser.CurrentUser.UserProperties.IsChatting = true;
 
         ChatName = View.Name;
 
@@ -57,7 +72,7 @@ public partial class ChatPage
         if (e.GetPageName() == "/MainPage" && Conversation.IsLocalUserInChat)
         {
             Conversation.CloseChat();
-            SocketCore.SendCallback(" ", Token.END_CHAT, null, true);
+            SocketCore.SendCallback(" ", Token.END_CHAT, null, false);
         }
     }
 
@@ -85,7 +100,8 @@ public partial class ChatPage
                 initMessage.MessageId, StateChanged, (int)initMessage.UserId, initMessage.Time, initMessage.IsBot);
 
             }
-            AddMessage(chatMessage);
+
+            AddMessage(chatMessage, initMessage.MessageId);
         }
 
         InvokeAsync(StateHasChanged);
@@ -148,7 +164,7 @@ public partial class ChatPage
         SendImage(imageSelected, "jpeg");
     }
 
-    private void AddMessage(ChatMessage message)
+    private void AddMessage(ChatMessage message, int messageId = 0)
     {
         ChatMessage? lastMessage = Messages.LastOrDefault();
 
@@ -158,7 +174,7 @@ public partial class ChatPage
         }
         else if (lastMessage.AuthorView.Id == message.AuthorView.Id)
         {
-            lastMessage.Append(message.ChatMessageBodies[0].Content, message.ChatMessageBodies[0].IsText != true);
+            lastMessage.Append(message.ChatMessageBodies[0].Content, message.ChatMessageBodies[0].IsText != true, messageId);
         }
         else
         {

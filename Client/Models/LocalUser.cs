@@ -11,6 +11,8 @@ public class LocalUser : ViewBindable
 
     public static bool IsLoggedIn { get => CurrentUser != null; }
 
+    public readonly LocalUserProperties UserProperties = new LocalUserProperties();
+
     public LocalUser(string name, uint id) : base(BindableType.LocalUser, name, id)
     {
         CurrentUser = this;

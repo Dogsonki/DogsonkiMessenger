@@ -16,14 +16,12 @@ public partial class SearchPage
 
     private bool ShouldShowResult { get; set; } = false;
 
-    public IViewBindable? SelectedContextView { get; set; }
-
     private List<IViewBindable> SearchResult { get; } = new List<IViewBindable>();
 
     /* Results that being displayed on page after querying by SearchOption*/
     private List<IViewBindable> SearchFound { get; } = new List<IViewBindable>();
 
-    private SearchOption Option { get; set; }
+    private SearchOption SearchFilterOption { get; set; }
 
     private StateComponentController SearchLoadingComponent { get; } = new StateComponentController(); 
 
@@ -46,16 +44,6 @@ public partial class SearchPage
             SearchPacket packet = new SearchPacket(searchInput, true);
             SocketCore.SendCallback(packet, Token.SEARCH_USER, (packet) => Task.Run(() => ParseFound(packet)), false);
         }
-    }
-
-    private void OpenChat(IViewBindable? view)
-    {
-        if(view is null)
-        {
-            return;
-        }
-
-        Conversation.OpenChat(view, naviagtion);
     }
 
     /// <summary>
@@ -94,34 +82,13 @@ public partial class SearchPage
         }
     }
 
-    private void OnSearchOptionSelect(SearchOption option) 
+    private void OnSearchOptionSelect(SearchOption filterOption) 
     {
-        Option = option;
+        SearchFilterOption = filterOption;
 
         if(SearchResult.Count > 0) 
         {
             QuerySearchList();
-        }
-    }
-
-    private bool ShouldShowInviteOption()
-    {
-        if(SelectedContextView is not null && SelectedContextView.BindType == BindableType.User)
-        {
-            User asUser = (User)SelectedContextView;
-            return asUser.UserProperties.IsFriend == FriendStatus.None;
-        }
-
-        return false;
-    }
-
-    private void TryInvite()
-    {
-        if(SelectedContextView is not null)
-        {
-            User asUser = (User)SelectedContextView;
-            asUser.InviteAsFriend();
-            StateHasChanged();
         }
     }
 
@@ -137,13 +104,13 @@ public partial class SearchPage
     {
         SearchFound.Clear();
 
-        if (Option == SearchOption.All)
+        if (SearchFilterOption == SearchOption.All)
         {
             JS.InvokeVoidAsync("SearchPageOptionSelector", new object[] { "search-option-all" });
 
             SearchFound.AddRange(SearchResult);
         }
-        else if (Option == SearchOption.Users)
+        else if (SearchFilterOption == SearchOption.Users)
         {
             JS.InvokeVoidAsync("SearchPageOptionSelector", new object[] { "search-option-users" });
 
@@ -159,11 +126,35 @@ public partial class SearchPage
         InvokeAsync(StateHasChanged);
     }
 
-    public void DisplayContextMenu(bool display, IViewBindable? view)
+    public void InviteUser(IViewBindable view) 
     {
-        SelectedContextView = view;
+        ((User)view).InviteAsFriend();
+        StateHasChanged();
+    }
 
-        JS.InvokeVoidAsync("ShowContextMenu", new object[] { display, "context-frame" });
+    private bool ShouldRenderInvite(IViewBindable view) 
+    {
+        if (view.IsUser()) {
+            UserProperties properties = ((User)view).UserProperties;
+
+            return properties.IsFriend != FriendStatus.Friend && properties.IsFriend != FriendStatus.Invited;
+        }
+
+        return false;
+    }
+
+    private bool ShouldRenderCancelInvite(IViewBindable view) 
+    {
+        if (view.IsUser()) {
+            return ((User)view).UserProperties.IsFriend == FriendStatus.Invited;
+        }
+
+        return false;
+    }
+
+    private void FoundClicked(IViewBindable view) 
+    {
+        Conversation.OpenChat(view, naviagtion);
     }
 
     public enum SearchOption
