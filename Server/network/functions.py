@@ -122,8 +122,8 @@ class Chatroom(metaclass=abc.ABCMeta):
 
 
 def save_file(name: str, image_data: str):
-    if (len(image_data)*3) / 4 - image_data.count("=", -2) < 4000000:  # todo test, file can have max 4mb
-        image = Image.open(BytesIO(base64.b64decode(image_data)))
+    if (len(image_data)*3) / 4 - image_data.count("=", -2) < 4000000:
+        image = Image.open(BytesIO(base64.b64decode(image_data))).convert("RGB")
         image.save(f"./media/{name}.webp", format="webp")
 
 
