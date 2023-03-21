@@ -9,16 +9,16 @@ namespace Client.Networking.Core;
 
 public class Connection
 {
-    public static TcpClient Client { get; set; }
-    public static SslStream Stream { get; set; }
-    public static SocketConfig Config { get; set; }
+    protected static TcpClient Client { get; set; }
+    protected static SslStream Stream { get; set; }
+    protected static SocketConfig Config { get; set; }
 
-    public static bool IsConnected { get; private set; }
-    public static bool IsInitialized { get; private set; } = false;
+    protected static bool IsConnected { get; private set; }
+    protected static bool IsInitialized { get; private set; } = false;
 
-    public const int MAX_BUFFER_SIZE = 1024 * 48;
+    protected const int MAX_BUFFER_SIZE = 1024 * 48;
 
-    public static bool IsConnecting { get; protected set; }
+    protected static bool IsConnecting { get; set; }
 
     private static List<Action> OnConnectionActions = new List<Action>();
 

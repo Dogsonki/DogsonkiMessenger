@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using Client.Models;
 using Client.Networking.Core;
 using Client.Networking.Models;
@@ -6,17 +5,12 @@ using Client.Networking.Packets.Models;
 using Client.Pages.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Client.Models.LastChats;
-using Client.Utility;
-using System.Diagnostics;
 
 namespace Client.Pages;
 
 public partial class MainPage
 {
-    [Parameter]
     public LocalUser currentUser { get; set; } = LocalUser.CurrentUser;
-
-    private LastChatService lastChatService { get; } = new LastChatService();
     
     private static List<IViewBindable> Requests { get; } = new List<IViewBindable>();
     private static bool _wasInitialized = false;

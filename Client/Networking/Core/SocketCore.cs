@@ -5,11 +5,6 @@ using Client.Networking.Commands;
 
 namespace Client.Networking.Core;
 
-/* TODO:
-    Use StringBuilder as buffer
-    Find end of packet from last end of buffer
-*/
-
 public class SocketCore : Connection
 {
     private static readonly Dictionary<Token, Action<SocketPacket>> OnTokenReceived = new Dictionary<Token, Action<SocketPacket>>();
@@ -211,7 +206,7 @@ public class SocketCore : Connection
 
         SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
         SocketQueue.Add(packet);
-
+        Debug.Write(command);
         return true;
     }
 

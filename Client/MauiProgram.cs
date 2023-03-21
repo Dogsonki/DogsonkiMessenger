@@ -1,4 +1,5 @@
-﻿using Client.Models.Navigation;
+﻿using Client.Models.LastChats;
+using Client.Models.Navigation;
 
 namespace Client;
 
@@ -22,6 +23,7 @@ public static class MauiProgram
 #endif
 
 		builder.Services.AddTransient<GlobalNavigation>();
+		builder.Services.AddSingleton<LastChatService>();
 
 		return builder.Build();
 	}

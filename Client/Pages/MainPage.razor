@@ -6,6 +6,7 @@
 
 @inject NavigationManager navigation
 @inject IJSRuntime JSRuntime 
+@inject LastChatService lastChatService
 
 <div>
     <div>
@@ -42,13 +43,13 @@
 
     <LoadingComponent Class="LastChatsLoading" LoadingController=@LoadingEvents["LastChatsLoading"]></LoadingComponent>
     <MiniProfile Controller="@MiniProfileController"></MiniProfile>
-
+    <!-- @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" -->
     <!-- Temporary solution to hide and show list / use offscreen instead -->
     <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "initial" : "none")">
         @foreach (LastChat lastChat in lastChatService.GetLastChats())
         {
             <li>
-                <div @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" class="chat-frame">
+                <div class="chat-frame">
                     <div>
                         <img class="chat-author-avatar" src="@lastChat.AvatarImageSource">
                         <div style="background-color: @(lastChat.GetStatusColor())" class="chat-author-status"></div>

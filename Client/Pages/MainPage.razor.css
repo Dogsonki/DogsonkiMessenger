@@ -99,6 +99,11 @@ ul {
     flex-direction: row;
 }
 
+    .chat-frame:active {
+        margin: 1px 1px 0;
+        box-shadow: -1px -1px 1px #000;
+    }
+
 .chat-content {
     padding: 4px;
     width: 100%;

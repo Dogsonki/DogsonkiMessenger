@@ -31,6 +31,7 @@ public static class CommandList
         new CommandModel("!invite","Usage: !invite {User Id}"),
         new CommandModel("!remove","Usage: !remove {User Id}"),
         new CommandModel("!mem","Sends funny meme to chat"),
+        new CommandModel("!tvpis","Sends funny meme to chat"),
     };
 }
 

@@ -153,3 +153,26 @@ public class Slots : ICommand
 
     public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Slots), ProvidedArgs);
 }
+
+[Serializable]
+[CommandAlias("!tvpis")]
+public class Tvpis : ICommand 
+{
+    [JsonProperty("command")]
+    [CommandProperty(typeof(string))]
+    public string Command { get; set; }
+
+    [JsonProperty("text")]
+    public object Text { get; set; }    
+
+    [JsonIgnore]
+    public bool Sendable { get; set; } = true;
+
+    public Tvpis(string command, object text) 
+    {
+        Command = command;
+        Text = text;
+    }
+
+    public static bool HasArgs(int ProvidedArgs) => ICommand.HasAgrs(typeof(Tvpis), ProvidedArgs);
+}

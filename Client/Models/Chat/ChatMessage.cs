@@ -44,7 +44,12 @@ public class ChatMessage
 
         if (!bot_response)
         {
-            AuthorView = User.GetUser((uint)userId);
+            if(userId == LocalUser.CurrentUser.Id) {
+                AuthorView = LocalUser.CurrentUser; 
+            }
+            else {
+                AuthorView = User.GetUser((uint)userId);
+            }
         }
         else 
         {
@@ -53,7 +58,7 @@ public class ChatMessage
 
         if (AuthorView is null)
         {
-            throw new UserMemoryException("User with given id dose not exists in memory");
+            throw new ArgumentException("User with given id dose not exist");
         }
 
         ChatMessageBody body;

@@ -4,17 +4,12 @@ using System.Text;
 
 namespace Client.Models.LastChats;
 
-public class LastChat : IViewBindable
+public class LastChat : ViewBindable
 {
     /// <summary>
     /// Returns view of this group/user
     /// </summary>
     public IViewBindable BindedView { get; }
-
-    /// <summary>
-    /// Returns view of this last message
-    /// </summary>
-    public IViewBindable View => this;
 
     /// <summary>
     /// Name of user that sent last message
@@ -30,18 +25,6 @@ public class LastChat : IViewBindable
     /// FactoredTime of last message
     /// </summary>
     public string? FactoredTime { get; private set; }
-
-    public BindableType BindType => BindableType.Any;
-
-    /// <summary>
-    /// Name of this user/group
-    /// </summary>
-    public string Name => BindedView.Name;
-
-    /// <summary>
-    /// Id of this user/group
-    /// </summary>
-    public uint Id => BindedView.Id;
 
     private UserStatus status;
 
@@ -65,34 +48,12 @@ public class LastChat : IViewBindable
         }
     }
 
-    /// <summary>
-    /// Avatar of this user/group
-    /// </summary>
-    public string AvatarImageSource
-    {
-        get
-        {
-            return BindedView.AvatarImageSource;
-        }
-        set
-        {
-            PropertyChanged?.Invoke(this, null);
-
-            BindedView.AvatarImageSource = value;
-        }
-    }
-
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public LastChat(IViewBindable view, string? messageSender, MessageType? messageType, byte[]? message, double? messageTime, UserStatus status, 
-        FriendStatus friendStatus = FriendStatus.Unknown)
+        FriendStatus friendStatus = FriendStatus.Unknown) : base(BindableType.Any, view.Name, view.Id)
     {
         BindedView = view;
-
-        if (BindedView.BindType == BindableType.User)
-        {
-            ((User)BindedView.View).UserProperties.IsFriend = friendStatus;
-        }
 
         MessageSenderName = messageSender;
 
@@ -103,7 +64,8 @@ public class LastChat : IViewBindable
         FactoredTime = GetFactoredTime(messageTime);
     }
 
-    public LastChat(IViewBindable sender, string? messageSender, MessageType? messageType, string? message, double? messageTime, UserStatus status)
+    public LastChat(IViewBindable sender, string? messageSender, MessageType? messageType,
+        string? message, double? messageTime, UserStatus status) : base(BindableType.Any, sender.Name, sender.Id)
     {
         BindedView = sender;
 
@@ -181,10 +143,6 @@ public class LastChat : IViewBindable
         FactoredTime = Essential.DateTimeToFactored(time);
         MessageSenderName = messageOwner.Name;
         PropertyChanged?.Invoke(this, null);
-    }
-
-    public void SetPropertyChanged(Task task, bool silentNotify = false) {
-        BindedView.SetPropertyChanged(task, silentNotify);
     }
 }
 

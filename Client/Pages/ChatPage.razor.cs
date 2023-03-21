@@ -7,7 +7,6 @@ using Client.Networking.Core;
 using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Pages.Exceptions;
-using Client.Utility;
 using Clinet.IO;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -98,7 +97,6 @@ public partial class ChatPage
             else {
                 chatMessage = new ChatMessage(initMessage.ContentString, initMessage.IsImage,
                 initMessage.MessageId, StateChanged, (int)initMessage.UserId, initMessage.Time, initMessage.IsBot);
-
             }
 
             AddMessage(chatMessage, initMessage.MessageId);

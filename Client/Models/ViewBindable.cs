@@ -39,7 +39,6 @@ public abstract class ViewBindable : IViewBindable
 
     private void NotifyUI()
     {
-        Debug.Write($"NotifyUI invoked by {View.Name} was null? {PropertyChanged is null}");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
     }
 

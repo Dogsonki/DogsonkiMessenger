@@ -14,7 +14,6 @@ public class Debug
 #elif USE_VS_DEBUGGER
         System.Diagnostics.Trace.WriteLine("[ERROR]: " + path + " at: " + lineNumber + " : " + Content);
 #endif
-
     }
 
     public static void Assert(bool condition, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string path = null)

@@ -1,4 +1,6 @@
-﻿namespace Client.Models.LastChats;
+﻿using Client.Networking.Core;
+
+namespace Client.Models.LastChats;
 
 /// <summary>
 /// Singelton service for last chats
@@ -11,7 +13,7 @@ internal class LastChatService
 
     public int ChatsCount => lastChats.Count;
 
-    private static object padlock = new object();
+    private readonly object padlock = new object();
 
     public void UpdateLastChatMessage(IViewBindable lastChat, IViewBindable lastMessageOwner, string newMessage, double time, MessageType messageType)
     {
@@ -43,16 +45,19 @@ internal class LastChatService
 
     public void AddLastChat(IViewBindable view, IViewBindable messageAuthor, MessageType messageType, string? message) 
     {
-        if(lastChats.Find(x=> x.Id == view.Id) == null) {
+        lock(padlock) 
+        {
+            if (lastChats.Find(x => x.Id == view.Id) == null) {
 
-            UserStatus status = UserStatus.None;    
+                UserStatus status = UserStatus.None;
 
-            if(view.BindType == BindableType.User){
-                status = ((User)view).UserProperties.Status;
+                if (view.BindType == BindableType.User) {
+                    status = ((User)view).UserProperties.Status;
+                }
+
+                LastChat lastChat = new LastChat(view, view.Name, messageType, message, DateTime.Now.Ticks, status);
+                lastChats.Add(lastChat);
             }
-
-            LastChat lastChat = new LastChat(view, view.Name, messageType, message, DateTime.Now.Ticks, status);
-            lastChats.Add(lastChat);    
         }
     }
 

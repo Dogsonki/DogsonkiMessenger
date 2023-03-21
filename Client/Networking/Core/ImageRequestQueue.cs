@@ -44,11 +44,12 @@ public static class ImageRequestQueue
     {
         ImageRequestModel model = _queue.First();
         
-        foreach(var chatMessage in ChatPage.Messages) 
+        foreach(var chatMessage in ChatPage.Messages.ToArray()) 
         {
             var body = chatMessage.ChatMessageBodies.Find(x => x.MessageId == model.MessageId);
             
-            if(body is not null) {
+            if(body is not null)
+            {
                 body.LoadImageCallback(image);
                 break;
             }
@@ -57,4 +58,3 @@ public static class ImageRequestQueue
         RemoveRequest(model.MessageId);
     }
 }
-

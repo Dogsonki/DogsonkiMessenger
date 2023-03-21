@@ -21,7 +21,7 @@ public class LocalUser : ViewBindable
     public void Build() 
     {
         AvatarManager.SetAvatar(this);
-
+        
         User.CreateLocalUser(Name, Id);
     }
 
