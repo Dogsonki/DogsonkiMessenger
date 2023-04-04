@@ -33,11 +33,11 @@ public interface IViewBindable
 
     public abstract void SetPropertyChanged(Task task, bool silentNotify = false);
 
-    public static IViewBindable CreateOrGet(string name, uint id, bool isGroup)
+    public static IViewBindable CreateOrGet(string name, uint id, bool isGroup, bool loadAvatar = true)
     {
         if(isGroup)
         {
-            return Group.CreateOrGet(name, id);
+            return Group.CreateOrGet(name, id, loadAvatar);
         }
         else
         {
@@ -45,7 +45,7 @@ public interface IViewBindable
             {
                 return LocalUser.CurrentUser;
             }
-            return User.CreateOrGet(name, id);
+            return User.CreateOrGet(name, id, loadAvatar);
         }
     }
 

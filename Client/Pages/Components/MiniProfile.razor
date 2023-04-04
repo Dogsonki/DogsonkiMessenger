@@ -2,15 +2,12 @@
 @inject IJSRuntime JSRuntime;
 
 <div style="visibility: @(Controller.State == null ? "hidden" : "visible")" class="profile-frame">
-    <div>
+    <div class="profile-position">
         <div class="profile-menu">
-            <div>
-                <img class="avatar" src="@Controller.State?.AvatarImageSource" />
-                <div class="me">
-                    <strong>@Controller.State?.Name<span style="color: dimgray">#@Controller.State?.Id</span></strong>
-                </div>
+            <div class="profile-avatar">
+                <img src="@Controller.State?.AvatarImageSource" />
+                <h3>@Controller.State?.Name <span style ="color:dimgray">#@Controller.State?.Id</span></h3>
             </div>
-
             <ul>
                 <li>
                     <button @onclick=OpenChat>Open Chat</button>
@@ -18,7 +15,11 @@
                 <li>
                     @if(ShouldRenderInviteButton())
                     {
-                        <button @onclick=InviteFriend>Invite</button>
+                        <button @onclick=InviteFriend>Send Friend Request</button>
+                    }
+                    else if(ShouldRenderCancelInviteButton()) 
+                    {
+                        <button @onclick=InviteFriend>Cancel Invitation</button>
                     }
                 </li>
                 <li>
@@ -29,7 +30,7 @@
     </div>
 </div>
 
-@code{
+    @code{
     [Parameter]
     public StateComponentController<IViewBindable> Controller { get; set; }
 
@@ -57,7 +58,6 @@
     private void Close()
     {
         Controller.State = null;
-        StateHasChanged();
     }
 
     private void RefreshContextMenu()
@@ -78,19 +78,26 @@
 
     private bool ShouldRenderInviteButton()
     {
-        if (Controller.State is null || Controller.State.BindType == BindableType.Group)
-        {
+        if (Controller.State is null || Controller.State.BindType == BindableType.Group 
+            || Controller.State.BindType == BindableType.LocalUser)
+            {
             return false;
         }
 
-        if (Controller.State.BindType == BindableType.LocalUser) 
-        {
+        FriendStatus friendStatus = ((User)Controller.State).UserProperties.IsFriend;
+
+        return friendStatus != FriendStatus.Friend && friendStatus != FriendStatus.Invited;
+    }
+
+    private bool ShouldRenderCancelInviteButton() 
+    {
+        if (Controller.State is null || Controller.State.BindType == BindableType.Group
+            || Controller.State.BindType == BindableType.LocalUser) {
             return false;
         }
 
+        FriendStatus friendStatus = ((User)Controller.State).UserProperties.IsFriend;
 
-        User user = (User)Controller.State;
-
-        return user.UserProperties.IsFriend == FriendStatus.None;
+        return friendStatus == FriendStatus.Invited;
     }
 }

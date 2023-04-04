@@ -17,8 +17,10 @@ public partial class User : ViewBindable
 
     public User(string name, uint id, bool isBot = false, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
     {
+        Debug.Write($"Creating user <{name} isBot: {isBot} loadAvatar: {loadAvatar} isLocalUser: {isLocalUser}> ");
         if (loadAvatar && !isLocalUser && !isBot)
         {
+            Debug.Write($"Loading avatar {name}");
             LoadAvatar();
         }
 
@@ -31,36 +33,18 @@ public partial class User : ViewBindable
 
     public static void ClearUsers() => Users.Clear();
 
-    public static User CreateOrGet(string username, uint id, UserCreateFlags flags = UserCreateFlags.Default)
+    public static User CreateOrGet(string username, uint id, bool loadAvatar)
     {
         User? user;
         if ((user = Users.Find(x => x.Id == id)) != null)
             return user;
 
-        return new User(username, id);
+        return new User(username, id, loadAvatar: loadAvatar);
     }
 
     public static User CreateLocalUser(string username, uint id)
     {
         return new User(username, id, true);
-    }
-
-    /// <summary>
-    /// User "bot" that is visible only for client, sends messages with errors and warnings to client
-    /// </summary>
-    public static User CreateSystemBot()
-    {
-        User? _;
-        if ((_ = GetUser(0)) is not null) return _;
-
-        User systemBot = new User("System", 0);
-        return systemBot;
-    }
-
-    public static User GetSystemBot()
-    {
-        User? systemBot = GetUser(0);
-        return systemBot is not null ? systemBot : CreateSystemBot();
     }
 
     public static User? GetUser(uint id) => Users.Find(x => x.Id == id);

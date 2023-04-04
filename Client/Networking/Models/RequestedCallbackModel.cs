@@ -9,6 +9,8 @@ public class RequestedCallbackModel
 
     private int CallbackToken { get; init; }
 
+    public bool isAsyncCallback = false;
+
     public RequestedCallbackModel(Action<SocketPacket> callback, int pretoken)
     {
         CallbackToken = pretoken;

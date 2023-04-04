@@ -8,6 +8,7 @@ namespace Client.Networking.Core;
 public class SocketCore : Connection
 {
     private static readonly Dictionary<Token, Action<SocketPacket>> OnTokenReceived = new Dictionary<Token, Action<SocketPacket>>();
+    private static readonly Queue<AsyncRequestedCallbackModel> asyncRequestedCallbackModels = new Queue<AsyncRequestedCallbackModel>();
 
     /// <summary>
     /// Main function to start connection
@@ -85,6 +86,7 @@ public class SocketCore : Connection
 
                         if (indexDollar == -1)
                             break;
+
                         buff = LongBuffer.Substring(0, indexDollar);
 #if DEBUG
                         Debug.Write($"Last buffer: {buff}", printPath: false);
@@ -206,7 +208,7 @@ public class SocketCore : Connection
 
         SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
         SocketQueue.Add(packet);
-        Debug.Write(command);
+
         return true;
     }
 

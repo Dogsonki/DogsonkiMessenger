@@ -1,10 +1,9 @@
 using Client.Models;
 using Client.Networking.Core;
-using Client.Networking.Models;
-using Client.Networking.Packets.Models;
 using Client.Pages.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Client.Models.LastChats;
+using Client.Models.Invitations;
 
 namespace Client.Pages;
 
@@ -13,9 +12,26 @@ public partial class MainPage
     public LocalUser currentUser { get; set; } = LocalUser.CurrentUser;
     
     private static List<IViewBindable> Requests { get; } = new List<IViewBindable>();
+
     private static bool _wasInitialized = false;
 
     private StateComponentController<IViewBindable> MiniProfileController { get; set; } = new StateComponentController<IViewBindable>();
+
+    private bool _shouldRenderLastChats = true;
+    public bool ShouldRenderLastChats {
+        get => _shouldRenderLastChats;
+        set {
+            if (value != _shouldRenderLastChats) {
+                _shouldRenderLastChats = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    Dictionary<string, StateComponentController> LoadingEvents { get; } = new Dictionary<string, StateComponentController>() {
+        ["LastChatsLoading"] = new StateComponentController(),
+        ["LocalUserLoading"] = new StateComponentController(),
+    };
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -38,26 +54,6 @@ public partial class MainPage
 
         base.OnAfterRender(firstRender);
     }
-
-    private bool _shouldRenderLastChats = true;
-    public bool ShouldRenderLastChats
-    {
-        get => _shouldRenderLastChats;
-        set
-        {
-            if(value != _shouldRenderLastChats)
-            {
-                _shouldRenderLastChats = value;
-                StateHasChanged();
-            }
-        }
-    }
-
-    Dictionary<string, StateComponentController> LoadingEvents { get; } = new Dictionary<string, StateComponentController>()
-    {
-        ["LastChatsLoading"] = new StateComponentController(),
-        ["LocalUserLoading"] = new StateComponentController(),
-    };
 
     protected override void OnInitialized()
     {
@@ -84,65 +80,34 @@ public partial class MainPage
 
     private void GetLastChats()
     {
-        SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, (SocketPacket packet) =>
+        lastChatService.FetchLastChats((lastChats) => 
         {
-            LastChatsPacket[]? lastChats = packet.ModelCast<LastChatsPacket[]>();
-
-            if(lastChats is null || lastChats.Length == 0)
-            {
-                LoadingEvents["LastChatsLoading"].State = false;    
-                return;
-            }
-
-            foreach(LastChatsPacket lastChat in lastChats)
-            {
-                IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
-                view.PropertyChanged += async (sender, e) => await InvokeAsync(StateHasChanged);
-
-                UserStatus status = UserStatus.None;
-                
-                if(lastChat.LastOnlineTime is not null)
-                {
-                    status = UserStatus.Online;
-                }
-                else
-                {
-                    status = UserStatus.Offline;
-                }
-
-                LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.TypeOfMessage,
-                    lastChat.LastMessage, lastChat.LastMessageTime, status, lastChat.IsFriend);
-
-                lastChatService.AddLastChat(chat);
-            }
-
             LoadingEvents["LastChatsLoading"].State = false;
 
-            InvokeAsync(StateHasChanged);
+            foreach (LastChat lastChat in lastChats) 
+            {
+                lastChat.BindedView.PropertyChanged += (_, _) =>
+                {
+                    InvokeAsync(StateHasChanged);
+                };
+            }
 
             GetInvitesList();
+
+            InvokeAsync(StateHasChanged);
         });
     }
 
     private void GetInvitesList()
     {
-        SocketCore.SendCallback(" ", Token.USER_INVITATIONS, (packet) =>
+        invitationService.FetchInvitation(invitations => 
         {
-            UserInvitationPacket[]? invitations = packet.Deserialize<UserInvitationPacket[]>();  
-
-            if(invitations is null)
+            foreach (Invitation lastChat in invitations) 
             {
-                return;
+                lastChat.BindedView.PropertyChanged += (_, _) => {
+                    InvokeAsync(StateHasChanged);
+                };
             }
-
-            foreach(UserInvitationPacket invitation in invitations)
-            {
-                User invitationSender = (User)IViewBindable.CreateOrGet(invitation.InvitationSenderName, invitation.InvitationSenderId, false);
-                invitationSender.SetPropertyChanged(InvokeAsync(StateHasChanged));
-                Requests.Add(invitationSender);
-            }
-
-            InvokeAsync(StateHasChanged);
         });
     }
 

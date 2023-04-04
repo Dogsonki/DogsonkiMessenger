@@ -14,5 +14,5 @@ public enum FriendStatus
     None = 0,
     Invited = 1,
     Friend = 2,
-    Unknown
+    Unknown = 3
 }

@@ -1,4 +1,5 @@
 ﻿using Client.Networking.Core;
+using Client.Networking.Packets.Models;
 
 namespace Client.Models.LastChats;
 
@@ -7,9 +8,9 @@ namespace Client.Models.LastChats;
 /// </summary>
 internal class LastChatService
 {
-    private static readonly List<LastChat> lastChats = new List<LastChat>();
+    private readonly List<LastChat> lastChats = new List<LastChat>();
 
-    public List<LastChat> GetLastChats() => lastChats;
+    public IEnumerable<LastChat> GetLastChats() => lastChats;
 
     public int ChatsCount => lastChats.Count;
 
@@ -51,11 +52,12 @@ internal class LastChatService
 
                 UserStatus status = UserStatus.None;
 
-                if (view.BindType == BindableType.User) {
+                if (view.BindType == BindableType.User) 
+                {
                     status = ((User)view).UserProperties.Status;
                 }
 
-                LastChat lastChat = new LastChat(view, view.Name, messageType, message, DateTime.Now.Ticks, status);
+                LastChat lastChat = new LastChat(view, view.Name, messageType, message, 0, status);
                 lastChats.Add(lastChat);
             }
         }
@@ -72,5 +74,44 @@ internal class LastChatService
 
             lastChats.Add(lastChat);
         }
+    }
+
+    public void FetchLastChats(Action<IEnumerable<LastChat>> lastChatsCallback) 
+    {
+        SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, packet => 
+        {
+            LastChatsPacket[]? fetchedLastChats = packet.Deserialize<LastChatsPacket[]>();
+
+            if(fetchedLastChats is null || fetchedLastChats.Length == 0) 
+            {
+                lastChatsCallback(new LastChat[0]);
+                return;
+            }
+
+            foreach (LastChatsPacket lastChat in fetchedLastChats) {
+                IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
+
+                if (view.IsUser()) 
+                {
+                    ((User)view).UserProperties.IsFriend = lastChat.IsFriend;
+                }
+
+                UserStatus status = UserStatus.None;
+
+                if (lastChat.LastOnlineTime is not null) {
+                    status = UserStatus.Online;
+                }
+                else {
+                    status = UserStatus.Offline;
+                }
+
+                LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.TypeOfMessage,
+                    lastChat.LastMessage, lastChat.LastMessageTime, status, lastChat.IsFriend);
+
+                AddLastChat(chat);
+            }
+
+            lastChatsCallback(lastChats);
+        });
     }
 }

@@ -1,5 +1,7 @@
-﻿using Client.Models.LastChats;
+﻿using Client.Models.Invitations;
+using Client.Models.LastChats;
 using Client.Models.Navigation;
+using Client.Models.JavaScriptServices;
 
 namespace Client;
 
@@ -23,7 +25,9 @@ public static class MauiProgram
 #endif
 
 		builder.Services.AddTransient<GlobalNavigation>();
+		builder.Services.AddTransient<BackButtonService>();
 		builder.Services.AddSingleton<LastChatService>();
+		builder.Services.AddSingleton<InvitationService>();	
 
 		return builder.Build();
 	}

@@ -14,7 +14,7 @@ using Microsoft.JSInterop;
 
 namespace Client.Pages;
 
-public partial class ChatPage
+public partial class ChatPage 
 {
     [Parameter]
     public int Id { get; set; }
@@ -28,10 +28,14 @@ public partial class ChatPage
 
     private IViewBindable View;
 
-    public static List<ChatMessage> Messages = new List<ChatMessage>();
+    public readonly static List<ChatMessage> Messages = new List<ChatMessage>();
     private LastChatService lastChatService { get; set; } = new LastChatService();
 
     private string? MessageInputContent;
+
+    public ChatPage() {
+        Messages.Clear();
+    }
 
     protected override void OnAfterRender(bool firstRender) {
         if(firstRender) {
@@ -113,11 +117,8 @@ public partial class ChatPage
     {
         MessagePacket? message = packet.Deserialize<MessagePacket>();
 
-        if (message is null) {
-            return;
-        }
-
-        if (message.UserId == LocalUser.CurrentUser.Id) {
+        if (message is null || message.UserId == LocalUser.CurrentUser.Id) 
+        {
             return;
         }
 
@@ -131,7 +132,6 @@ public partial class ChatPage
             chatMessage = new ChatMessage(message.ContentString, message.IsImage,
             message.MessageId, StateChanged, (int)message.UserId, message.Time, message.IsBot );
         }
-
 
         AddMessage(chatMessage);
 

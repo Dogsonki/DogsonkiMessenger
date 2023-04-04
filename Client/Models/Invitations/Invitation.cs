@@ -1,27 +1,11 @@
-﻿using System.ComponentModel;
+﻿namespace Client.Models.Invitations;
 
-namespace Client.Models.Invitations;
-
-internal class Invitation : IViewBindable 
+internal class Invitation : ViewBindable 
 {
-    public IViewBindable View => throw new NotImplementedException();
+    public IViewBindable BindedView { get; }
 
-    public BindableType BindType => throw new NotImplementedException();
-
-    public string Name => throw new NotImplementedException();
-
-    public uint Id => throw new NotImplementedException();
-
-    public string? AvatarImageSource { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public void SetPropertyChanged(Task task, bool silentNotify = false) {
-        throw new NotImplementedException();
-    }
-
-    public Invitation() : base()
+    public Invitation(IViewBindable view) : base(BindableType.Any, view.Name, view.Id)
     {
-        
+        BindedView = view;
     }
 }

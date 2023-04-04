@@ -154,7 +154,7 @@ public partial class SearchPage
 
     private void FoundClicked(IViewBindable view) 
     {
-        Conversation.OpenChat(view, naviagtion);
+        Conversation.OpenChat(view, navigation);
     }
 
     public enum SearchOption

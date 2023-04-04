@@ -1,12 +1,17 @@
 ﻿@page "/Search/{SearchInput}"
 
 @using Client.Pages.Components;
+@using Client.Models.JavaScriptServices;
 
-@inject NavigationManager naviagtion;
+@inject NavigationManager navigation;
 @inject IJSRuntime JS;
+@inject BackButtonService backButton;
 
 <div>
     <form id="search-bar" @onsubmit="SearchBarSubmit">
+        <button type="button" @onclick="() => backButton.GoBack()" id="search-bar-btn">
+            <img src="./Images/back_arrow.png" />
+        </button>
         <input @bind="SearchInput" type="text" placeholder="Search" />
         <button type="submit" id="search-bar-btn">
             <img src="./Images/search.png" />

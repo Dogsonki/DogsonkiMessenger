@@ -3,10 +3,12 @@
 @using Microsoft.AspNetCore.Components.WebAssembly.Services
 @using Client.Pages.Components;
 @using Client.Models.LastChats;
+@using Client.Models.Invitations;
 
 @inject NavigationManager navigation
 @inject IJSRuntime JSRuntime 
 @inject LastChatService lastChatService
+@inject InvitationService invitationService;
 
 <div>
     <div>
@@ -43,50 +45,46 @@
 
     <LoadingComponent Class="LastChatsLoading" LoadingController=@LoadingEvents["LastChatsLoading"]></LoadingComponent>
     <MiniProfile Controller="@MiniProfileController"></MiniProfile>
-    <!-- @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" -->
-    <!-- Temporary solution to hide and show list / use offscreen instead -->
-    <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "initial" : "none")">
-        @foreach (LastChat lastChat in lastChatService.GetLastChats())
-        {
-            <li>
-                <div class="chat-frame">
-                    <div>
-                        <img class="chat-author-avatar" src="@lastChat.AvatarImageSource">
-                        <div style="background-color: @(lastChat.GetStatusColor())" class="chat-author-status"></div>
-                    </div>
-                    <div class="chat-content">
-                        <div class="chat-info">
-                            <span class="chat-author-name">@lastChat.Name</span>
-                            <span class="chat-timestamp">@lastChat.FactoredTime</span>
-                        </div>
-                        <div class="chat-body">
-                            <span>@lastChat.MessageSenderName: @lastChat.Message</span>
-                        </div>
-                    </div>
-                </div>
-            </li>
-        }
-    </ul>
 
-    @if (lastChatService.ChatsCount == 0 && !ShouldRenderLastChats) {
-        <h2 style="text-align: center">Looks like nothing here.</h2>
-    }
+    <div id="last-chats">
+        <ul style="display: @(ShouldRenderLastChats ? "initial" : "none")">
+            @foreach (LastChat lastChat in lastChatService.GetLastChats()) {
+                <li>
+                    <div @onclick="() => ShowMiniProfileMenu(lastChat.BindedView)" class="chat-frame">
+                        <div>
+                            <img class="chat-author-avatar" src="@lastChat.BindedView.AvatarImageSource">
+                            <div style="background-color: @(lastChat.GetStatusColor())" class="chat-author-status"></div>
+                        </div>
+                        <div class="chat-content">
+                            <div class="chat-info">
+                                <span class="chat-author-name">@lastChat.Name</span>
+                                <span class="chat-timestamp">@lastChat.FactoredTime</span>
+                            </div>
+                            <div class="chat-body">
+                                <span>@lastChat.MessageSenderName: @lastChat.Message</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    </div>
 
     <!-- Temporary solution to hide and show list / use offscreen instead -->
     <ul id="last-chats" style="display: @(ShouldRenderLastChats ? "none" : "initial")">
-        @foreach (IViewBindable request in Requests)
+        @foreach (Invitation invitation in invitationService.GetInvitations())
         {
             <li>
                 <div class="chat-frame">
                     <div>
-                        <img class="chat-author-avatar" src="@request.AvatarImageSource">
+                        <img class="chat-author-avatar" src="@invitation.BindedView.AvatarImageSource">
                     </div>
                     <div class="chat-content">
                         <div class="chat-info">
-                            <span class="chat-author-name">@request.Name <span style="color: #72767d">#@request.Id</span> </span>
+                            <span class="chat-author-name">@invitation.Name <span style="color: #72767d">#@invitation.Id</span> </span>
                         </div>
                     </div>
-                    <button @onclick="() => AcceptInviteRequest(request)" class="requests-accept-btn"> ACCEPT </button>
+                    <button @onclick="() => AcceptInviteRequest(invitation)" class="requests-accept-btn"> ACCEPT </button>
                 </div>
             </li>
         }

@@ -114,10 +114,8 @@ ul {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 3px #242627 solid;
     background-size: cover;
     position: relative;
-    background-position: center;
 }
 
 .chat-timestamp {
@@ -126,18 +124,19 @@ ul {
     margin-left: 3px;
 }
 
-#last-chats {
-    padding: 8px;
+#last-chats li {
+    padding-left: 5px;
 }
 
 .chat-author-status {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
+    background-color: rgb(128, 132, 142);
     position: relative;
-    left: 35px;
-    border: 3px solid #242627;
-    bottom: 20px;
+    left: 40px;
+    border: 3px solid #121212;
+    bottom: 15px;
 }
 
 .LastChatsLoading {

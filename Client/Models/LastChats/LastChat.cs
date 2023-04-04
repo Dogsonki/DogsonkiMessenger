@@ -48,8 +48,6 @@ public class LastChat : ViewBindable
         }
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public LastChat(IViewBindable view, string? messageSender, MessageType? messageType, byte[]? message, double? messageTime, UserStatus status, 
         FriendStatus friendStatus = FriendStatus.Unknown) : base(BindableType.Any, view.Name, view.Id)
     {
@@ -62,6 +60,11 @@ public class LastChat : ViewBindable
         Message = GetDecodedMessage(messageType, message);
 
         FactoredTime = GetFactoredTime(messageTime);
+
+        if (view.IsUser())
+        {
+            ((User)view).UserProperties.IsFriend = friendStatus;    
+        }
     }
 
     public LastChat(IViewBindable sender, string? messageSender, MessageType? messageType,
@@ -112,20 +115,15 @@ public class LastChat : ViewBindable
         return Essential.DateTimeToFactored((double)messageTime);
     }
 
-    public void SilentDispose()
-    {
-        PropertyChanged -= PropertyChanged;
-    }
-
     public string GetStatusColor()
     {
-        if (Status == UserStatus.Online)
+        if (Status == UserStatus.Offline)
         {
-            return "red";
+            return "#80848E";
         }
-        else //There will be more statuses
+        else
         {
-            return "green";
+            return "#23A55A";
         }
     }
 
@@ -142,7 +140,6 @@ public class LastChat : ViewBindable
 
         FactoredTime = Essential.DateTimeToFactored(time);
         MessageSenderName = messageOwner.Name;
-        PropertyChanged?.Invoke(this, null);
     }
 }
 

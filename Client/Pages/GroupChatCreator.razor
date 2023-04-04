@@ -88,7 +88,7 @@
         //TODO: Refactor this mess
         LastChatService lastChatService = new LastChatService();
         GroupAvatar = string.Empty;
-        List<LastChat> lastChats = lastChatService.GetLastChats().FindAll((user) => user.BindedView.BindType == BindableType.User);
+        List<LastChat> lastChats = lastChatService.GetLastChats().ToList().FindAll((user) => user.BindedView.BindType == BindableType.User);
         CachedLastChatsUsers = new List<User>();
         lastChats.ForEach((lastChat) => CachedLastChatsUsers.Add((User)lastChat.BindedView));
     }

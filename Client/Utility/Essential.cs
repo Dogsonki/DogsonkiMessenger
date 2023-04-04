@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Text;
+﻿using System.Text;
 
 namespace Client.Utility
 {
@@ -18,33 +16,6 @@ namespace Client.Utility
                 }
                 return ms.ToArray();
             }
-        }
-
-        [Obsolete]
-        public static T? ModelCast<T>(this object data)
-        {
-            T dest = default;
-            Type dataType = data.GetType();
-            try
-            {
-                if (dataType == typeof(JObject))
-                {
-                    dest = ((JObject)data).ToObject<T>();
-                }
-                else if (dataType == typeof(JArray))
-                {
-                    dest = ((JArray)data).ToObject<T>();
-                }
-                else if(dataType == typeof(string))
-                {
-                    data = JsonConvert.DeserializeObject<T>((string)data);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Push(ex, LogLevel.Error);
-            }
-            return dest;
         }
 
         public static DateTime UnixToDateTime(double unixTimeStamp)
