@@ -1,5 +1,4 @@
 ﻿using Client.Networking.Core;
-using Client.Utility;
 
 namespace Client.Models;
 
@@ -17,10 +16,8 @@ public partial class User : ViewBindable
 
     public User(string name, uint id, bool isBot = false, bool loadAvatar = true, bool isLocalUser = false) : base(BindableType.User, name, id)
     {
-        Debug.Write($"Creating user <{name} isBot: {isBot} loadAvatar: {loadAvatar} isLocalUser: {isLocalUser}> ");
         if (loadAvatar && !isLocalUser && !isBot)
         {
-            Debug.Write($"Loading avatar {name}");
             LoadAvatar();
         }
 

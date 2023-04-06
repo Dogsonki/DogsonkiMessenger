@@ -27,7 +27,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<GlobalNavigation>();
 		builder.Services.AddTransient<BackButtonService>();
 		builder.Services.AddSingleton<LastChatService>();
-		builder.Services.AddSingleton<InvitationService>();	
+		builder.Services.AddSingleton<InvitationService>();
 
 		return builder.Build();
 	}

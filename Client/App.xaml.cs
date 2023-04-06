@@ -6,9 +6,9 @@ public partial class App : Application
 {
 	public App()
 	{
-		Task.Run(SocketCore.Start);
+        Task.Run(SocketCore.Start);
 
-		InitializeComponent();
+        InitializeComponent();
 
 		MainPage = new MainPage();
 	}

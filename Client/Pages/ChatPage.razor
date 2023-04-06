@@ -1,8 +1,18 @@
 ﻿@page "/ChatPage/{Id:int}/{IsGroup:bool}"
 
+@using Client.Pages.Components;
+@using Client.Models.JavaScriptServices;
+
 @inject IJSRuntime JS
 @inject NavigationManager navigation;
-@using Client.Pages.Components;
+@inject BackButtonService backButtonService;
+
+<div id="navigation-bar">
+    <button @onclick="() => backButtonService.GoBack()" type="submit" id="search-bar-btn">
+        <img src="./Images/back_arrow.png" />
+    </button>
+    <h3 id="chat-name">@View.Name</h3>
+</div>
 
 <div>
     <ul @ref="MessageFrame" id="message-box">
@@ -18,7 +28,7 @@
         <div id="message-input-inner">
             <div id="message-input-toolset">
                 <img @onclick="AddFileMessage" src="Images/file_send.png" />
-                <input @bind="MessageInputContent" id="text-input" placeholder="@@@View.Name" />
+                <input @bind="MessageInputContent" id="text-input" placeholder="@@View.Name" />
             </div>
         </div>
     </div>

@@ -1,25 +1,27 @@
-using Microsoft.AspNetCore.Components;
 using Client.Utility;
+using Microsoft.AspNetCore.Components;
 
 namespace Client.Models.Navigation;
 
 public class GlobalNavigation : ComponentBase
 {
-    [Inject]
-    public NavigationManager _navigation { get; set; }
+    private static NavigationManager? Navigation { get; set; }
 
     public GlobalNavigation(NavigationManager navigation)
     {
-        _navigation = navigation;
+        if (navigation is null)
+        {
+            Navigation = navigation;
+        }
     }
 
-    public async void NavigateTo(string pageName)
+    public static void NavigateTo(string pageName)
     {
-        if (_navigation is null)
+        if (Navigation is null)
         {
-            Debug.Error("Global navigation was null");
             return;
         }
-        await Task.Run(() => { _navigation.NavigateTo(pageName); });
+
+        Navigation.NavigateTo(pageName);
     }
 }

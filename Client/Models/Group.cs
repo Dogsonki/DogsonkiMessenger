@@ -20,7 +20,8 @@ public class Group : ViewBindable
 
     public static Group CreateOrGet(string name, uint id, bool loadAvatar)
     {
-        Group group;
+        Group? group;
+
         if ((group = Groups.Find(x => x.Id == id)) != null)
             return group;
 

@@ -1,7 +1,6 @@
 using Client.IO;
 using Client.Networking.Core;
 using Microsoft.AspNetCore.Components;
-using System.ComponentModel;
 
 namespace Client.Models;
 
@@ -24,8 +23,6 @@ public class LocalUser : ViewBindable
         
         User.CreateLocalUser(Name, Id);
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Logout(NavigationManager navigation)
     {

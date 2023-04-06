@@ -153,6 +153,11 @@ public partial class ChatPage
     {
         byte[] imageSelected = await FileManager.FileFromSelectedFile();
 
+        if(imageSelected.Length == 0)
+        {
+            return;
+        }
+
         string jsSource = AvatarManager.ToJSImageSource(imageSelected);
 
         ChatMessage message = new ChatMessage(jsSource, true, StateChanged);

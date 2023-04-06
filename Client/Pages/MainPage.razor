@@ -4,11 +4,13 @@
 @using Client.Pages.Components;
 @using Client.Models.LastChats;
 @using Client.Models.Invitations;
+@using Client.Models.Navigation;
 
 @inject NavigationManager navigation
 @inject IJSRuntime JSRuntime 
 @inject LastChatService lastChatService
 @inject InvitationService invitationService;
+@inject GlobalNavigation globalNavigation;
 
 <div>
     <div>
@@ -19,7 +21,7 @@
             </button>
         </form>
     </div>
-
+    
     <div>
         <div id="localuser-display">
             <img class="avatar" alt="local_user_avatar" src="@currentUser.AvatarImageSource" />
