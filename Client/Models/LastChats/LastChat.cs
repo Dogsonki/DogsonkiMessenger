@@ -1,5 +1,5 @@
+using Client.IO.Models.Offline;
 using Client.Utility;
-using System.ComponentModel;
 using System.Text;
 
 namespace Client.Models.LastChats;
@@ -48,6 +48,12 @@ public class LastChat : ViewBindable
         }
     }
 
+    /// <summary>
+    /// Time of last message in timestamp
+    /// </summary>
+    public double? LastMessageTimestamp { get; private set; }   
+
+
     public LastChat(IViewBindable view, string? messageSender, MessageType? messageType, byte[]? message, double? messageTime, UserStatus status, 
         FriendStatus friendStatus = FriendStatus.Unknown) : base(BindableType.Any, view.Name, view.Id)
     {
@@ -60,6 +66,8 @@ public class LastChat : ViewBindable
         Message = GetDecodedMessage(messageType, message);
 
         FactoredTime = GetFactoredTime(messageTime);
+
+        LastMessageTimestamp = messageTime;
 
         if (view.IsUser())
         {
@@ -76,6 +84,8 @@ public class LastChat : ViewBindable
 
         MessageSenderName = messageSender;
 
+        LastMessageTimestamp = messageTime;
+
         if (messageType == MessageType.Text)
         {
             Message = message;
@@ -86,6 +96,16 @@ public class LastChat : ViewBindable
         }
 
         FactoredTime = GetFactoredTime(messageTime);
+    }
+
+    public LastChat(LastChatCache cachedLastChat) : base(BindableType.Any, cachedLastChat.ChatName, cachedLastChat.ChatId)
+    {
+        BindedView = IViewBindable.CreateOrGet(cachedLastChat.ChatName, cachedLastChat.ChatId, false);
+        Status = UserStatus.Offline;
+        MessageSenderName = cachedLastChat.LastMessageAuthorName;
+        FactoredTime = GetFactoredTime(cachedLastChat.LastMessageTime);
+        Message = cachedLastChat.LastMessage;
+
     }
 
     private string GetDecodedMessage(MessageType? messageType, byte[]? message)

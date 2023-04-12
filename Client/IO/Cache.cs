@@ -99,7 +99,7 @@ internal class Cache
         }
     }
 
-    public static string ReadFileCache(string name)
+    public static string? ReadFileCache(string name)
     {
         try
         {
@@ -113,6 +113,7 @@ internal class Cache
                 Logger.Push($"Cache file dose not exist {name}", LogLevel.Warning);
                 return null;
             }
+
             Logger.Push($"Cache file exist {name}", LogLevel.Warning);
 
             return File.ReadAllText(CachePath + name);
@@ -124,7 +125,6 @@ internal class Cache
         }
     }
 
-    //Clears half of cache files
     private static void ControlCache()
     {
         try

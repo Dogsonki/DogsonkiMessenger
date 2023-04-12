@@ -1,5 +1,10 @@
-﻿using Client.Networking.Core;
+﻿using Client.IO;
+using Client.IO.Models.Offline;
+using Client.Networking.Core;
 using Client.Networking.Packets.Models;
+using Client.Utility;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace Client.Models.LastChats;
 
@@ -78,40 +83,86 @@ internal class LastChatService
 
     public void FetchLastChats(Action<IEnumerable<LastChat>> lastChatsCallback) 
     {
-        SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, packet => 
+        if(Connectivity.NetworkAccess == NetworkAccess.None || Connectivity.NetworkAccess == NetworkAccess.Unknown)
         {
-            LastChatsPacket[]? fetchedLastChats = packet.Deserialize<LastChatsPacket[]>();
+            string? cachedLastChats = Cache.ReadFileCache("CachedLastChats");
 
-            if(fetchedLastChats is null || fetchedLastChats.Length == 0) 
+            if (cachedLastChats is not null && cachedLastChats.Length > 0)
             {
-                lastChatsCallback(new LastChat[0]);
-                return;
-            }
+                LastChatCache[]? lastChatCaches = JsonConvert.DeserializeObject<LastChatCache[]>(cachedLastChats);
 
-            foreach (LastChatsPacket lastChat in fetchedLastChats) {
-                IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
-
-                if (view.IsUser()) 
+                if (lastChatCaches != null)
                 {
-                    ((User)view).UserProperties.IsFriend = lastChat.IsFriend;
+                    foreach (LastChatCache lastChatCache in lastChatCaches)
+                    {
+                        lastChats.Add(new LastChat(lastChatCache));
+                    }
                 }
-
-                UserStatus status = UserStatus.None;
-
-                if (lastChat.LastOnlineTime is not null) {
-                    status = UserStatus.Online;
-                }
-                else {
-                    status = UserStatus.Offline;
-                }
-
-                LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.TypeOfMessage,
-                    lastChat.LastMessage, lastChat.LastMessageTime, status, lastChat.IsFriend);
-
-                AddLastChat(chat);
             }
 
             lastChatsCallback(lastChats);
-        });
+        }
+        else
+        {
+            SocketCore.SendCallback(" ", Token.GET_LAST_CHATS, packet =>
+            {
+                LastChatsPacket[]? fetchedLastChats = packet.Deserialize<LastChatsPacket[]>();
+
+                if (fetchedLastChats is null || fetchedLastChats.Length == 0)
+                {
+                    lastChatsCallback(new LastChat[0]);
+                    return;
+                }
+
+                foreach (LastChatsPacket lastChat in fetchedLastChats)
+                {
+                    IViewBindable view = IViewBindable.CreateOrGet(lastChat.Name, lastChat.Id, lastChat.isGroup);
+
+                    if (view.IsUser())
+                    {
+                        ((User)view).UserProperties.IsFriend = lastChat.IsFriend;
+                    }
+
+                    UserStatus status = UserStatus.None;
+
+                    if (lastChat.LastOnlineTime is not null)
+                    {
+                        status = UserStatus.Online;
+                    }
+                    else
+                    {
+                        status = UserStatus.Offline;
+                    }
+
+                    LastChat chat = new LastChat(view, lastChat.MessageSenderName, lastChat.TypeOfMessage,
+                        lastChat.LastMessage, lastChat.LastMessageTime, status, lastChat.IsFriend);
+
+                    AddLastChat(chat);
+                }
+
+                SaveLastChatsToCache();
+
+                lastChatsCallback(lastChats);
+            });
+        }
+    }
+
+    private void SaveLastChatsToCache()
+    {
+        if(lastChats.Count == 0)
+        {
+            return;
+        }
+
+        List<LastChatCache> cachedLastChats = new List<LastChatCache>();
+
+        foreach(LastChat lastChat in lastChats)
+        {
+            cachedLastChats.Add(new LastChatCache(lastChat));    
+        }
+
+        Cache.SaveToCache(JsonConvert.SerializeObject(cachedLastChats), "CachedLastChats");
+
+        Debug.Write("LastChats saved to disk cache");
     }
 }

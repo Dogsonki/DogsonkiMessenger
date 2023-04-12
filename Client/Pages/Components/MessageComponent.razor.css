@@ -6,7 +6,7 @@
 
 .message-author-name {
     color: #fff;
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: 500;
     letter-spacing: 0.5px;
 }
@@ -28,7 +28,6 @@ ul {
 }
 
 .message-info {
-    margin-bottom: 5px;
     font-weight: bold;
     font-size: 14px;
     line-height: 1.5;
@@ -46,7 +45,6 @@ ul{
 }
 
 .message-body {
-    margin-right: 10px;
     width: 100%;
     font-weight: normal;
 }
@@ -65,19 +63,18 @@ ul{
 
 .message-content {
     width: 100%;
-    margin-right: 4px;
 }
 
 .message-author-avatar {
-    width: 60px !important;
-    height: 60px !important;
+    width: 45px !important;
+    height: 45px !important;
     border-radius: 50px;
-    margin-right: 6px;
+    margin-right: 8px;
 }
 
 .message-username {
     font-weight: bold;
     font-size: 16px;
     line-height: 1.5;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
