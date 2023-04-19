@@ -7,35 +7,37 @@ namespace Client.Networking.Core;
 
 public class SocketCore : Connection
 {
+    private static SocketCore instance { get; } = new SocketCore();
+
     private static readonly Dictionary<Token, Action<SocketPacket>> OnTokenReceived = new Dictionary<Token, Action<SocketPacket>>();
-    private static readonly Queue<AsyncRequestedCallbackModel> asyncRequestedCallbackModels = new Queue<AsyncRequestedCallbackModel>();
+
+    private string LongBuffer = string.Empty;
+
+    public SocketCore() : base()
+    {
+
+    }
 
     /// <summary>
     /// Main function to start connection
     /// </summary>
     public static async void Start()
     {
-        await Connect().ContinueWith((_) =>
+        if (await instance.Connect())
         {
-            if (!AbleToSend()) return;
+            var ReceiveTask = Task.Run(instance.Receive);
+            var SendQueueTask = Task.Run(instance.SendQueue);
 
-            var ReceiveTask = Task.Run(Receive);
-            var SendQueueTask = Task.Run(SendQueue);
-
-            Task.WhenAll(ReceiveTask, SendQueueTask);
-        });
+            await Task.WhenAll(ReceiveTask, SendQueueTask);
+        }
     }
 
-    /* Change MAX_BUFFER_SIZE to max accepted buffer by device*/
-    //private static StringBuilder LongBuffer = new StringBuilder(MAX_BUFFER_SIZE);
-
-    private static string LongBuffer = string.Empty;
-
-    private static void ProcessBuffer(string buffer)
+    private void ProcessBuffer(string buffer)
     {
         ThreadPool.QueueUserWorkItem((_) =>
         {
-            SocketPacket packet = null;
+            SocketPacket? packet = null;
+
             try
             {
                 if (!SocketPacket.TryDeserialize(out packet, buffer))
@@ -47,10 +49,12 @@ public class SocketCore : Connection
             }
 
             if (packet is null) return;
+            
+            Token token = (Token)packet.PacketToken;
 
-            if (OnTokenReceived.ContainsKey((Token)packet.PacketToken))
+            if (OnTokenReceived.ContainsKey(token))
             {
-                OnTokenReceived[(Token)packet.PacketToken].Invoke(packet);
+                OnTokenReceived[token].Invoke(packet);
                 return;
             }
 
@@ -58,17 +62,16 @@ public class SocketCore : Connection
         });
     }
 
-    private static async Task Receive()
+    private async Task Receive()
     {
         byte[] buffer = new byte[MAX_BUFFER_SIZE];
         int LenBuffer;
 
-        while (true)
+        while (AbleToSend())
         {
-            if (!AbleToSend()) continue;
             try
             {
-                while ((LenBuffer = await Stream.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                while ((LenBuffer = await ConnectionStream!.ReadAsync(buffer, 0, buffer.Length)) != 0)
                 {
                     string DecodedString = Encoding.UTF8.GetString(buffer, 0, LenBuffer);
 
@@ -96,7 +99,7 @@ public class SocketCore : Connection
                         ProcessBuffer(buff);
                     }
 
-                    Stream.Flush();
+                    ConnectionStream.Flush();
                     buffer = new byte[MAX_BUFFER_SIZE];
                 }
             }
@@ -108,9 +111,8 @@ public class SocketCore : Connection
                 {
                     Debug.Error("Error when casting buffer into packet " + ex);
                 }
-                else if (Stream == null)
+                else if (ConnectionStream == null)
                 {
-                    await Connect();
                     Debug.Error("Connection stream is null");
                 }
             }
@@ -118,11 +120,11 @@ public class SocketCore : Connection
         }
     }
 
-    private static async Task SendQueue()
+    private async Task SendQueue()
     {
         while (true)
         {
-            if (Stream.CanWrite && SocketQueue.CanSend() && AbleToSend())
+            if (ConnectionStream!.CanWrite && SocketQueue.CanSend() && AbleToSend())
             {
                 SocketQueue.IsSending = true;
                 SocketPacket packet = SocketQueue.Queue.Dequeue();
@@ -142,7 +144,7 @@ public class SocketCore : Connection
 #if DEBUG
                     Debug.Write($"Socket Sending: token: {packet.PacketToken} buffer_length:{buffer.Length} data: {packet.Serialize()}", false);
 #endif
-                    await Stream.WriteAsync(buffer, 0, buffer.Length);
+                    await ConnectionStream.WriteAsync(buffer, 0, buffer.Length);
                 }
                 catch (Exception ex)
                 {
@@ -155,11 +157,11 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool SendCallback(object sendingData, Token token, Action<SocketPacket> callback, bool sendAbleOnce = true)
+    public static bool SendCallback(object sendingData, Token token, Action<SocketPacket> callback, bool waitForResponse = true)
     {
-        if (!AbleToSend()) return false;
+        if (!instance.AbleToSend()) return false;
 
-        if (sendAbleOnce && RequestedCallback.IsAlreadyQueued(token))
+        if (waitForResponse && RequestedCallback.IsAlreadyQueued(token))
         {
             return true;
         }
@@ -183,16 +185,17 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool Send(object data, Token token = Token.EMPTY, bool sendAbleOnce = false)
+    public static void OnConnectionConnected(Action<bool> action) => instance.AddOnConnection(action);
+
+    public static bool Send(object data, Token token = Token.EMPTY, bool waitForResponse = false)
     {
-        if (!AbleToSend()) return false;
+        if (!instance.AbleToSend()) return false;
 
         if (token == Token.EMPTY)
             return true;
 
-        if (sendAbleOnce && RequestedCallback.IsAlreadyQueued(token))
+        if (waitForResponse && RequestedCallback.IsAlreadyQueued(token))
         {
-            Debug.Write($"Token AlreadyQueued {token}");
             return true;
         }
 
@@ -204,7 +207,7 @@ public class SocketCore : Connection
 
     public static bool SendCommand(ICommand command)
     {
-        if (!AbleToSend()) return false;
+        if (!instance.AbleToSend()) return false;
 
         SocketPacket packet = new SocketPacket(command, Token.BOT_COMMAND);
         SocketQueue.Add(packet);

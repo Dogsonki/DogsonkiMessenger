@@ -42,7 +42,7 @@ public class Session : IStorage
 
     private static void ReadSession(Action<SocketPacket> callback)
     {
-        string cache = Cache.ReadFileCache(FileName);
+        string? cache = Cache.ReadFileCache(FileName);
 
         if (string.IsNullOrWhiteSpace(cache))
         {

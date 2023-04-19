@@ -83,9 +83,9 @@ internal class LastChatService
 
     public void FetchLastChats(Action<IEnumerable<LastChat>> lastChatsCallback) 
     {
-        if(Connectivity.NetworkAccess == NetworkAccess.None || Connectivity.NetworkAccess == NetworkAccess.Unknown)
+        if(LocalUser.IsInOfflineMode)
         {
-            string? cachedLastChats = Cache.ReadFileCache("CachedLastChats");
+            string? cachedLastChats = Cache.ReadFileCache(nameof(LastChatCache));
 
             if (cachedLastChats is not null && cachedLastChats.Length > 0)
             {
@@ -161,7 +161,7 @@ internal class LastChatService
             cachedLastChats.Add(new LastChatCache(lastChat));    
         }
 
-        Cache.SaveToCache(JsonConvert.SerializeObject(cachedLastChats), "CachedLastChats");
+        Cache.SaveToCache(JsonConvert.SerializeObject(cachedLastChats), nameof(LastChatCache));
 
         Debug.Write("LastChats saved to disk cache");
     }

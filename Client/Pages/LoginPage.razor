@@ -3,12 +3,14 @@
 
 @inject NavigationManager navigation;
 
+@using Client.IO.Models.Offline;
 @using Client.Models;
 @using Client.Networking.Core;
 @using Client.Networking.Packets;
 @using Client.Networking.Models;
 @using Client.IO;
 @using Client.Pages.Components;
+@using Newtonsoft.Json;
 
 <div class="form-container">
     <h1>Login to Dogsonki</h1>
@@ -42,15 +44,44 @@
     {
         if (!LocalUser.IsLoggedIn)
         {
-            Session.Init(LoginBySession);
+            SocketCore.OnConnectionConnected((connected) =>
+            {
+                if (connected)
+                {
+                    Session.Init(LoginBySession);
+                }
+                else
+                {
+                    LoginWithOfflineMode();
+                }
+            });
         }
     }
 
     protected override void OnInitialized()
     {
-        if (LocalUser.IsLoggedIn)
+        if (LocalUser.IsLoggedIn || LocalUser.IsInOfflineMode)
         {
             navigation.NavigateTo("/MainPage");
+        }
+    }
+
+    private void LoginWithOfflineMode()
+    {
+        string? cachedLocalUser = Cache.ReadFileCache(nameof(LocalUserCache));
+
+        if (!string.IsNullOrEmpty(cachedLocalUser))
+        {
+            LocalUserCache? localUser = JsonConvert.DeserializeObject<LocalUserCache>(cachedLocalUser);
+
+            if(localUser is not null)
+            {
+                new LocalUser(localUser.UserName, localUser.UserId, true);
+            }
+            else
+            {
+                errorMessage = "Can't Connect To Server";
+            }
         }
     }
 
@@ -64,7 +95,7 @@
         if (login.Token == 1)
         {
             new LocalUser(login.Username, login.Id);
-            navigation.NavigateTo("/MainPage");
+            navigation.NavigateTo("/MainPage", false, true);
         }
     }
 
@@ -79,9 +110,11 @@
         LoginPacket packet = new LoginPacket(emailInput, passwordInput, true);
 
         if (!SocketCore.SendCallback(packet, Token.LOGIN, LoginCallback))
-            errorMessage = "Can't Connect to Server.";
+            errorMessage = "Can't Connect to Server";
         else
             errorMessage = "";
+
+        StateHasChanged();
     }
 
     private void LoginCallback(SocketPacket callbackPacket)

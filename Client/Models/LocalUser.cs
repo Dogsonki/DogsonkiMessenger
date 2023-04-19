@@ -1,6 +1,8 @@
 using Client.IO;
+using Client.IO.Models.Offline;
 using Client.Networking.Core;
 using Microsoft.AspNetCore.Components;
+using Newtonsoft.Json;
 
 namespace Client.Models;
 
@@ -8,13 +10,21 @@ public class LocalUser : ViewBindable
 {
     public static LocalUser CurrentUser { get; private set; }
 
-    public static bool IsLoggedIn { get => CurrentUser != null; }
+    private static bool _isLoggedIn = false;
+
+    public static bool IsLoggedIn { get => _isLoggedIn; private set => _isLoggedIn = value; }
+
+    public static bool IsInOfflineMode = false;
 
     public readonly LocalUserProperties UserProperties = new LocalUserProperties();
 
-    public LocalUser(string name, uint id) : base(BindableType.LocalUser, name, id)
+    public LocalUser(string name, uint id, bool enableOfflineMode = false) : base(BindableType.LocalUser, name, id)
     {
         CurrentUser = this;
+
+        IsInOfflineMode = enableOfflineMode;
+
+        IsLoggedIn = !enableOfflineMode;
     }
 
     public void Build() 
@@ -22,6 +32,15 @@ public class LocalUser : ViewBindable
         AvatarManager.SetAvatar(this);
         
         User.CreateLocalUser(Name, Id);
+
+        CacheLocalUser();
+    }
+
+    private void CacheLocalUser()
+    {
+        LocalUserCache localUserCache = new LocalUserCache(Name, Id);
+
+        Cache.SaveToCache(JsonConvert.SerializeObject(localUserCache), nameof(LocalUserCache));
     }
 
     public void Logout(NavigationManager navigation)
@@ -29,8 +48,9 @@ public class LocalUser : ViewBindable
         CurrentUser = null;
 
         SocketCore.Send(" ", Token.LOGOUT);
+
         Session.DeleteSession();
 
-        navigation.NavigateTo("/");
+        navigation.NavigateTo("/", true);
     }
 }

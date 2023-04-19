@@ -9,9 +9,10 @@ namespace Client.Networking.Core;
 
 public class Connection
 {
-    protected static TcpClient Client { get; set; }
-    protected static SslStream Stream { get; set; }
-    protected static SocketConfig Config { get; set; }
+    private TcpClient ConnectionClient { get; }
+    protected SocketConfig Config { get; } = new SocketConfig();
+
+    protected SslStream? ConnectionStream { get; set; }
 
     protected static bool IsConnected { get; private set; }
     protected static bool IsInitialized { get; private set; } = false;
@@ -20,11 +21,70 @@ public class Connection
 
     protected static bool IsConnecting { get; set; }
 
-    private static List<Action> OnConnectionActions = new List<Action>();
+    private static readonly List<Action<bool>> OnConnectionActions = new List<Action<bool>>();
 
-    public static void AddOnConnection(Action action) => OnConnectionActions.Add(action);
+    public Connection()
+    {
+        Config.ReadConfig();
 
-    public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
+
+        if (Config is null) throw new FileNotFoundException("SOCKET_CONFIG_READ_EXCEPTION");
+
+        ConnectionClient = new TcpClient()
+        {
+            NoDelay = true,
+            ReceiveBufferSize = 1024 * 8,
+            SendBufferSize = MAX_BUFFER_SIZE
+        };
+    }
+
+    /// <summary>
+    /// Invokes {action} when client try to connect
+    /// </summary>
+    /// <param name="action">If connected</param>
+    public void AddOnConnection(Action<bool> action)
+    {
+        OnConnectionActions.Add(action);
+
+        if (AbleToSend())
+        {
+            action.Invoke(true);    
+        }
+    }
+    
+    public async Task<bool> Connect()
+    {
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
+
+        if (Config is null) throw new FileNotFoundException("SOCKET_CONFIG_READ_EXCEPTION");
+
+        ConnectionClient.Connect(Config.Ip, Config.Port);
+
+        ConnectionStream = new SslStream(ConnectionClient.GetStream(), false, new RemoteCertificateValidationCallback(ValidateServerCertificate));
+
+        await ConnectionStream.AuthenticateAsClientAsync(Config.Ip);
+
+        if (ConnectionClient.Connected && ConnectionStream.IsAuthenticated)
+        {
+            foreach (var action in OnConnectionActions)
+            {
+                action.Invoke(true);
+            }
+        }
+
+        return ConnectionClient.Connected;
+    }
+
+    private static void InvokeOnConnectionActions(bool status)
+    {
+        foreach (var action in OnConnectionActions)
+        {
+            action.Invoke(status);
+        }
+    }
+
+    public static bool ValidateServerCertificate(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
     {
         if(sslPolicyErrors != SslPolicyErrors.None)
         {
@@ -34,46 +94,10 @@ public class Connection
         return true;
     }
 
-    protected static async Task Connect()
+    public bool AbleToSend()
     {
-        try
-        {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls13;
+        if(ConnectionStream is null || ConnectionClient is null) return false;
 
-            Config = SocketConfig.ReadConfig();
-
-            if (Config is null) throw new FileNotFoundException("SOCKET_CONFIG_READ_EXCEPTION");
-
-            Client = new TcpClient();
-            
-            await Client.ConnectAsync(Config.Ip,Config.Port);
-
-            Stream = new SslStream(Client.GetStream(), false, new RemoteCertificateValidationCallback(ValidateServerCertificate));
-
-            await Stream.AuthenticateAsClientAsync(Config.Ip);
-
-            if (Client.Connected && Stream.IsAuthenticated)
-            {
-                foreach (var action in OnConnectionActions)
-                {
-                    action.Invoke();
-                }
-            }
-        }
-
-        catch (Exception ex) /* Logging this exception can expose ip and port to server */
-        {
-            Debug.Write(ex); 
-        }
-    }
-
-    public static bool AbleToSend()
-    {
-        if (Client is null || Stream is null || !Stream.IsAuthenticated|| !Client.Connected)
-        {
-            Logger.Push($"Stream: {Stream is null} Client: {Client is null} Connected? {Client?.Connected} Auth: {Stream?.IsAuthenticated}", LogLevel.Error);
-            return false;
-        }
-        return true;
+        return ConnectionClient is not null || ConnectionStream is not null || ConnectionStream.IsAuthenticated || ConnectionClient.Connected;
     }
 }

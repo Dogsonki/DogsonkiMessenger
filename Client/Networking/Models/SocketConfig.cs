@@ -18,8 +18,22 @@ public class SocketConfig
         Port = port;
     }
 
-    public static SocketConfig ReadConfig()
+    public SocketConfig() 
     {
-        return EmbeddedStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
+        Ip = string.Empty;
+        Port = 0;
+    }
+
+    public void ReadConfig()
+    {
+        SocketConfig? config = EmbeddedStorage.Read<SocketConfig>(typeof(SocketConfig), "Client.Networking.SocketConfig.json");
+
+        if (config is null)
+        {
+            throw new Exception("Client.Networking.SocketConfig.json dose not exist");
+        }
+
+        Ip = config.Ip;
+        Port = config.Port;
     }
 }

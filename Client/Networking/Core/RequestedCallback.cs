@@ -1,18 +1,15 @@
 ﻿using Client.Networking.Models;
-using Client.Utility;
 
 namespace Client.Networking.Core
 {
     //Add lifetime to callbacks, can be used as memory leak where cannot be invoked 
     public class RequestedCallback
     {
-        public static List<RequestedCallbackModel> Callbacks { get; set; } = new List<RequestedCallbackModel>(5000);
+        public static List<RequestedCallbackModel> Callbacks { get; } = new List<RequestedCallbackModel>(5000);
 
         public static bool IsAlreadyQueued(Token token) 
         {
-            RequestedCallbackModel? callback = Callbacks.Find(x => x?.GetToken() == (int)token);
-
-            return callback is not null;
+            return Callbacks.Any(x => x.GetToken() == (int)token);
         }
 
         public static void AddCallback(RequestedCallbackModel callback) => Callbacks.Add(callback);
@@ -30,20 +27,13 @@ namespace Client.Networking.Core
 
             if(Callbacks.Count > 0)
             {
-                try
-                {
-                    Callbacks.Remove(model);
-                }
-                catch(Exception e) 
-                {
-                    Logger.PushException(e);
-                }
+                Callbacks.Remove(model);
             }
         }
 
         public static bool InvokeCallback(int token, SocketPacket data)
         {
-            foreach (var callback in Callbacks)
+            foreach(RequestedCallbackModel callback in Callbacks.ToList())
             {
                 if (callback.GetToken() == token)
                 {

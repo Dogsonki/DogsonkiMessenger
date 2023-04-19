@@ -7,7 +7,7 @@ namespace Client.IO;
 
 public static class EmbeddedStorage
 {
-    public static T Read<T>(Type type, string path)
+    public static T? Read<T>(Type type, string path)
     {
         try
         {
@@ -38,6 +38,7 @@ public static class EmbeddedStorage
             {
                 Logger.Push(ex, LogLevel.Error);
             }
+
             return default;
         }
     }

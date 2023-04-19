@@ -22,6 +22,10 @@ input {
     display: flex;
 }
 
+img {
+    image-rendering: optimizeQuality;
+}
+
 #search-bar input {
     margin: auto;
     margin-top: 5px;
