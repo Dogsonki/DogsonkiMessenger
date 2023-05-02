@@ -157,7 +157,7 @@ public class SocketCore : Connection
         }
     }
 
-    public static bool SendCallback(object sendingData, Token token, Action<SocketPacket> callback, bool waitForResponse = true)
+    public static bool SendCallback(object sendingData, Token token, Action<SocketPacket>? callback, bool waitForResponse = true)
     {
         if (!instance.AbleToSend()) return false;
 

@@ -29,7 +29,9 @@
                 <p class="userinfo">@currentUser.Name<span style="color:dimgray">#@currentUser.Id</span> </p>
             </div>
             <div class="settings-frame-btn">
-                <img @onclick=OpenSettings class="settings-btn" src="Images/settings.png" />
+                <div @onclick=OpenSettings class="settings-btn">
+                    <img src="Images/settings.png" />
+                </div>
             </div>
         </div>
     </div>

@@ -99,6 +99,17 @@ public static class AvatarManager
         return string.Format("data:image/gif;base64,{0}", base64);
     }
 
+    public static string ToJSVideoSource(byte[] source)
+    {
+        if (source is null)
+        {
+            throw new ArgumentNullException("source");
+        }
+
+        string base64 = Convert.ToBase64String(source);
+        return string.Format("data:video/mp4;base64,{0}", base64);
+    }
+
     /// <summary>
     /// Changes avatar of view. If view is type of ViewBindable notifies ui.
     /// </summary>

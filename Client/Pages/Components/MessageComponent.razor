@@ -9,16 +9,22 @@
             <ul class="message-body-frame">
                 @for (int i = message.ChatMessageBodies.Count - 1; i >= 0; i--)
                 {
-                    @if(message.ChatMessageBodies[i].IsText)
+                    @if(message.ChatMessageBodies[i].type == MessageType.Text)
                     {
                         <li>
                             <p>@message.ChatMessageBodies[i].Content</p>
                         </li>
                     }
-                    else
+                    else if (message.ChatMessageBodies[i].type == MessageType.Video)
                     {
                         <li>
-                            <img class="message-image" src="@message.ChatMessageBodies[i].Content" />
+                            <video class="message-image" src="@message.ChatMessageBodies[i].Content" />
+                        </li>
+                    }
+                    else if (message.ChatMessageBodies[i].type == MessageType.Image)
+                    {
+                        <li>
+                            <img src="@message.ChatMessageBodies[i].Content" />
                         </li>
                     }
                 } 

@@ -4,7 +4,6 @@ using Client.Pages.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Client.Models.LastChats;
 using Client.Models.Invitations;
-using Client.Utility;
 
 namespace Client.Pages;
 
@@ -58,7 +57,11 @@ public partial class MainPage
 
     protected override void OnInitialized()
     {
-        currentUser.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
+        if(currentUser is not null)
+        {
+            currentUser.PropertyChanged += async (sender, e) => { await InvokeAsync(StateHasChanged); };
+        }
+
         navigation.LocationChanged += PreventBack;
     }
 

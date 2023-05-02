@@ -4,14 +4,14 @@ using Client.Networking.Core;
 using Client.Networking.Packets.Models;
 using Client.Utility;
 using Newtonsoft.Json;
-using System.Text;
+using Client.Models.Chat;
 
 namespace Client.Models.LastChats;
 
 /// <summary>
 /// Singelton service for last chats
 /// </summary>
-internal class LastChatService
+public class LastChatService
 {
     private readonly List<LastChat> lastChats = new List<LastChat>();
 

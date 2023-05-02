@@ -1,6 +1,7 @@
 using Client.IO.Models.Offline;
 using Client.Utility;
 using System.Text;
+using Client.Models.Chat;
 
 namespace Client.Models.LastChats;
 
@@ -161,10 +162,4 @@ public class LastChat : ViewBindable
         FactoredTime = Essential.DateTimeToFactored(time);
         MessageSenderName = messageOwner.Name;
     }
-}
-
-public enum MessageType
-{
-    Image,
-    Text,
 }

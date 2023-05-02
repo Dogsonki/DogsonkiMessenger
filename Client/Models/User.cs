@@ -4,11 +4,11 @@ namespace Client.Models;
 
 public partial class User : ViewBindable
 {
-    public UserProperties UserProperties { get; } = new UserProperties();
-
     public static readonly List<User> Users = new List<User>();
 
     public static readonly User SystemBot = new User("System", 0, isBot:true, false, false);
+
+    public UserProperties UserProperties { get; } = new UserProperties();
 
     public bool IsLocalUser { get; }
     
@@ -44,7 +44,10 @@ public partial class User : ViewBindable
         return new User(username, id, true);
     }
 
-    public static User? GetUser(uint id) => Users.Find(x => x.Id == id);
+    public static User? GetUser(uint id)
+    {
+        return Users.Find(x => x.Id == id);
+    }
 
     public void InviteAsFriend()
     {

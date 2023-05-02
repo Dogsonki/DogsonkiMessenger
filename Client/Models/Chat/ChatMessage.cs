@@ -1,6 +1,6 @@
-using Client.Models;
-using Client.Models.Chat;
 using Client.Utility;
+
+namespace Client.Models.Chat;
 
 public class ChatMessage
 {
@@ -19,15 +19,15 @@ public class ChatMessage
 
     public string FactoredTime => Essential.DateTimeToFactored(TimeInTicks);
 
-    public ChatMessage(string content, bool isImage, Action StateChanged)
+    public ChatMessage(string content, MessageType type, Action stateChanged, string extension = "")
     {
         ChatMessageBodies = new List<ChatMessageBody>();
 
-        PropertyHasChanged = StateChanged;
+        PropertyHasChanged = stateChanged;
 
         AuthorView = LocalUser.CurrentUser;
 
-        ChatMessageBody body = new ChatMessageBody(this, content, isImage, 0);
+        ChatMessageBody body = new ChatMessageBody(this, content, type, 0, extension);
 
         ChatMessageBodies.Add(body);
 
@@ -64,11 +64,11 @@ public class ChatMessage
 
         if (isImage)
         {
-            body = new ChatMessageBody(this, content, isImage:true, messageId, loadFromCache:true);
+            body = new ChatMessageBody(this, content, MessageType.Image, messageId, loadFromCache:true);
         }
         else
         {
-            body = new ChatMessageBody(this, content, isImage:false, messageId);
+            body = new ChatMessageBody(this, content, MessageType.Text, messageId);
         }
 
         ChatMessageBodies.Add(body);
@@ -76,9 +76,9 @@ public class ChatMessage
         Time = time;
     }
 
-    public void Append(string content, bool isImage, int messageId)
+    public void Append(string content, MessageType type, int messageId)
     {
-        ChatMessageBody body = new ChatMessageBody(this, content, isImage, messageId);
+        ChatMessageBody body = new ChatMessageBody(this, content, type, messageId);
 
         ChatMessageBodies.Insert(0, body);
 
@@ -89,4 +89,12 @@ public class ChatMessage
     {
         PropertyHasChanged?.Invoke();
     }
+}
+
+public enum MessageType
+{
+    Image,
+    Video,
+    Text,
+    File
 }

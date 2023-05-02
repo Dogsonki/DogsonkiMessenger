@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Client.Networking.Models;
 
+[Serializable]
 public class SocketPacket
 {
     [JsonProperty("data")]
@@ -39,7 +40,7 @@ public class SocketPacket
 
     public string Serialize() => JsonConvert.SerializeObject(this);
 
-    public static bool TryDeserialize(out SocketPacket packet, string buffer)
+    public static bool TryDeserialize(out SocketPacket? packet, string buffer)
     {
         packet = JsonConvert.DeserializeObject<SocketPacket>(buffer);
         return packet is not null;

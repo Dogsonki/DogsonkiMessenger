@@ -8,7 +8,23 @@ namespace Client.Models;
 
 public class LocalUser : ViewBindable
 {
-    public static LocalUser CurrentUser { get; private set; }
+    private static LocalUser currentUser;
+    public static LocalUser CurrentUser
+    {
+        get
+        {
+            if(currentUser is null)
+            {
+                throw new Exception("LocalUser was used before initalization");
+            }
+
+            return currentUser;
+        }
+        private set
+        {
+            currentUser = value;
+        }
+    }
 
     private static bool _isLoggedIn = false;
 

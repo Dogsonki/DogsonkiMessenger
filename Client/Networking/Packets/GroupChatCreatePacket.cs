@@ -13,10 +13,10 @@ internal class GroupChatCreatePacket
     public uint[] Users { get; set; }
 
     [JsonConstructor]
-    public GroupChatCreatePacket(string group_name, uint creator, uint[] users) 
+    public GroupChatCreatePacket(string group_name, uint creator, IEnumerable<uint> users) 
     {
         GroupName = group_name;
         Creator = creator;
-        Users = users;
+        Users = users.ToArray();
     }
 }

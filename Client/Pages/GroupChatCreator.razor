@@ -7,54 +7,54 @@
 @using Client.Networking.Packets.Models;
 @using Client.Models.LastChats;
 
+<div id="group-frame">
+    <img @onclick=ChangeGroupAvatar src="@GroupAvatar" style="padding: 8px" id="group-avatar" />
+    <h4></h4>
+</div>
+
 <div>
-    <div id="group-frame">
-        <img @onclick=ChangeGroupAvatar src="@GroupAvatar" style="padding: 8px" id="group-avatar" />
-        <h4>@user.Name's Group Chat</h4>
-    </div>
+    <ul id="menu-header">
+        <li>
+            <span class="@(ShouldRenderMembers ? "option-selected" : "")" @onclick="()=> ShouldRenderMembers = true">Members</span>
+        </li>
+        <li>
+            <span class="@(ShouldRenderMembers ? "" : "option-selected")" @onclick="()=> ShouldRenderMembers = false">Invite</span>
+        </li>
+    </ul>
+</div>
 
-    <div>
-        <ul id ="menu-header">
-            <li> 
-                <span class="@(ShouldRenderMembers ? "option-selected" : "")" @onclick="()=> ShouldRenderMembers = true">Members</span>
-            </li>
+@if (ShouldRenderMembers)
+{
+    <ul id="search-results">
+        @foreach (IViewBindable member in Members)
+        {
             <li>
-                <span class="@(ShouldRenderMembers ? "" : "option-selected")" @onclick="()=> ShouldRenderMembers = false">Invite</span>
+                <div class="search-result-frame">
+                    <div>
+                        <img class="search-result-avatar" src="@member.AvatarImageSource">
+                    </div>
+                    <div class="search-result-name">
+                        <span class="chat-author-name">@member.Name</span>
+                    </div>
+                    @if (member.BindType != BindableType.LocalUser)
+                    {
+                        <button @onclick="() => RemoveFromGroup(member)" class="result-action-btn">Remove</button>
+                    }
+                </div>
             </li>
-        </ul>       
+        }
+    </ul>
+}
+else
+{
+    <div id="group-search">
+        <form @onsubmit="SearchInviteBarSubmit">
+            <input @bind="SearchInput" type="text" placeholder="Search" />
+        </form>
     </div>
 
-    @if (ShouldRenderMembers)
+    @if (SearchFound.Count > 0)
     {
-        <ul id="search-results">
-            @foreach (IViewBindable member in Members)
-            {
-                <li>
-                    <div class="search-result-frame">
-                        <div>
-                            <img class="search-result-avatar" src="@member.AvatarImageSource">
-                        </div>
-                        <div class="search-result-name">
-                            <span class="chat-author-name">@member.Name</span>
-                            <div class="group-creator-tag">Creator</div>
-                        </div>
-                        @if(member.BindType != BindableType.LocalUser)
-                        {
-                            <button @onclick="() => RemoveFromGroup(member)" class="result-action-btn">Remove</button>
-                        }
-                    </div>
-                </li>
-            }
-        </ul>
-    }
-    else
-    {
-        <div id="group-search">
-            <form @onsubmit="SearchInviteBarSubmit">
-                <input @bind="SearchInput" type="text" placeholder="Search" />
-            </form>
-        </div>
-
         <ul id="search-results">
             @foreach (IViewBindable found in SearchFound)
             {
@@ -72,25 +72,43 @@
             }
         </ul>
     }
-</div>
+    else if(HasSearched && SearchFound.Count == 0)
+    {
+        <h5 style="text-align: center" id="search-results-empty">We couldn’t find any results for "@SearchInput"</h5>
+    }
+}
+
+@if (ShouldRenderMembers)
+{
+    <div id="submit-btn">
+        <button @onclick=OnCreateClicked>Create Group</button>
+    </div>
+}
 
 @code {
-    LocalUser user = LocalUser.CurrentUser;
+    private readonly LocalUser user = LocalUser.CurrentUser;
 
-    private List<IViewBindable> SearchFound { get; } = new();
-    private List<IViewBindable> Members { get; } = new();
+    private readonly List<IViewBindable> SearchFound = new();
+    private readonly List<IViewBindable> Members = new();
 
-    private List<User> CachedLastChatsUsers { get; init; }
+    private readonly List<User> CachedLastChatsUsers = new();
 
-    private string GroupAvatar { get; set; }
+    private string GroupAvatar { get; set; } = string.Empty;
+    private string GroupName { get; set; } = $"{LocalUser.CurrentUser.Name}'s Group Chat";
+    private bool HasSearched = false;
 
     public GroupChatCreator()
     {
-        //TODO: Refactor this mess
+        AppendFromLastChats();
+    }
+
+    private void AppendFromLastChats()
+    {
         LastChatService lastChatService = new LastChatService();
         GroupAvatar = string.Empty;
+
         List<LastChat> lastChats = lastChatService.GetLastChats().ToList().FindAll((user) => user.BindedView.BindType == BindableType.User);
-        CachedLastChatsUsers = new List<User>();
+
         lastChats.ForEach((lastChat) => CachedLastChatsUsers.Add((User)lastChat.BindedView));
     }
 
@@ -107,6 +125,7 @@
         {
             /* Restart input when changing view cuz of confusion*/
             SearchInput = string.Empty;
+            HasSearched = false;
             _shouldRenderMembers = value;
             InvokeAsync(StateHasChanged);
         }
@@ -148,10 +167,9 @@
         {
             SearchPacket packet = new SearchPacket(SearchInput, false);
             SocketCore.SendCallback(packet, Token.SEARCH_USER, (packet) => Task.Run(() => ParseFound(packet)), false);
+            HasSearched = true;
         }
     }
-
-
 
     /// <summary>
     /// Parses all views from packet and adds them to SearchResult.
@@ -171,7 +189,7 @@
 
         foreach (var found in founds)
         {
-            if (SearchFound.Find(x => x.Id == found.Id) is not null)
+            if (SearchFound.Find(x => x.Id == found.Id) is not null || found.Id == LocalUser.CurrentUser.Id)
             {
                 continue;
             }
@@ -196,6 +214,7 @@
     private void RemoveFromGroup(IViewBindable view) 
     {
         Members.Remove(view);
+
         StateHasChanged();
     }
 
@@ -205,9 +224,32 @@
 
         if(buffer is not null) 
         {
-            GroupAvatar = AvatarManager.ToJSImageSource(buffer); 
+            GroupAvatar = AvatarManager.ToJSImageSource(buffer);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void OnCreateClicked()
+    {
+        if (string.IsNullOrEmpty(GroupName))
+        {
+            return;
         }
 
-        await InvokeAsync(StateHasChanged);
+        IEnumerable<uint> userIds = Members.Where(x => x.Id != user.Id).Select(x => x.Id);
+
+        SocketCore.SendCallback(new GroupChatCreatePacket(GroupName, user.Id, userIds), Token.GROUP_CHAT_CREATE, OnGroupCreated, true);
+    }
+
+    private void OnGroupCreated(SocketPacket packet)
+    {
+        GroupChatCreateCallbackPacket? group = packet.Deserialize<GroupChatCreateCallbackPacket>();
+
+        if(group is null)
+        {
+            return;
+        }
+
+        Group.CreateOrGet(group.GroupName, group.GroupId, true);
     }
 }

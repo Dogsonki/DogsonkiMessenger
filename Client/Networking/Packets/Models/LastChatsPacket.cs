@@ -1,7 +1,7 @@
 ﻿#nullable enable
 
 using Client.Models;
-using Client.Models.LastChats;
+using Client.Models.Chat;
 
 namespace Client.Networking.Packets.Models;
 

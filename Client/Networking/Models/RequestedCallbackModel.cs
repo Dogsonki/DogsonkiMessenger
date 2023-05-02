@@ -5,13 +5,13 @@ namespace Client.Networking.Models;
 
 public class RequestedCallbackModel
 {
-    private Action<SocketPacket> CallbackAction;
+    private Action<SocketPacket>? CallbackAction;
 
     private int CallbackToken { get; init; }
 
     public bool isAsyncCallback = false;
 
-    public RequestedCallbackModel(Action<SocketPacket> callback, int pretoken)
+    public RequestedCallbackModel(Action<SocketPacket>? callback, int pretoken)
     {
         CallbackToken = pretoken;
         CallbackAction = callback;

@@ -26,5 +26,6 @@ public class Conversation
     public static void CloseChat()
     {
         IsLocalUserInChat = false;
+        SocketCore.SendCallback(" ", Token.END_CHAT, null, false);
     }
 }

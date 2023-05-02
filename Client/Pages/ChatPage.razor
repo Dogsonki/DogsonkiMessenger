@@ -2,10 +2,13 @@
 
 @using Client.Pages.Components;
 @using Client.Models.JavaScriptServices;
+@using Client.Models.LastChats;
+@using Client.Models.Chat;
 
 @inject IJSRuntime JS
 @inject NavigationManager navigation;
 @inject BackButtonService backButtonService;
+@inject LastChatService lastChatService;
 
 <div id="navigation-bar">
     <button @onclick="() => backButtonService.GoBack()" type="submit" id="search-bar-btn">
@@ -30,7 +33,7 @@
         <div id="message-input-inner">
             <div id="message-input-toolset">
                 <img @onclick="AddFileMessage" src="Images/file_send.png" />
-                <input @bind="MessageInputContent" id="text-input" placeholder="@@View.Name" />
+                <input @bind="MessageInputContent" id="text-input" placeholder="@View.Name" />
             </div>
         </div>
     </div>

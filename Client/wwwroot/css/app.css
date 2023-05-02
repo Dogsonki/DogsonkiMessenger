@@ -1,17 +1,35 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+:root {
+    --background: #121316;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #121212;
+    background-color: var(--background);
     color: white;
+}
+
+* {
+    user-select: none;
 }
 
 h1:focus {
     outline: none;
 }
 
+button {
+    background-color: #ffffff08;
+    font-size: 1em;
+    font-weight: bold;
+}
+
 button:active {
     transform: scale(0.96);
+}
+
+input {
+    background-color: #ffffff0d;
 }
 
 a, .btn-link {

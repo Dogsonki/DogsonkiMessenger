@@ -4,11 +4,9 @@
     .form-container input[type=email], input[type=password] {
         width: 80%;
         height: 45px;
-        background: #e0dede;
         justify-content: center;
         display: flex;
         margin: 20px auto;
-        background-color: #363636;
         padding: 10px;
         border: none;
         outline: none;
@@ -28,9 +26,6 @@
         justify-content: center;
         display: block;
         color: white;
-        background: #272727;
-        font-size: 1em;
-        font-weight: bold;
         margin-top: 20px;
         outline: none;
         border: none;

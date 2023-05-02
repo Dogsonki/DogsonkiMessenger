@@ -6,9 +6,11 @@ public class FileManager
 {
     public static async Task<byte[]> FileFromSelectedFile()
     {
-        var image = await MediaPicker.PickPhotoAsync(new MediaPickerOptions
+
+        var image = await MediaPicker.CapturePhotoAsync(new MediaPickerOptions
         {
-            Title = "Pick image"
+            Title = "Pick image",
+            
         });
 
         if (image is null)

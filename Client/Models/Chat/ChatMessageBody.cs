@@ -1,9 +1,7 @@
 using Client.IO;
 using Client.Networking.Core;
-using Client.Networking.Models;
 using Client.Networking.Packets;
 using Client.Utility;
-using Clinet.IO;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Client.Models.Chat;
@@ -13,9 +11,10 @@ public class ChatMessageBody
     [NotNull]
     public ChatMessage Parent { get; }
 
-    public bool IsText { get; }
-
+    public MessageType type { get; }
     private string _content;
+
+    public string FileExtension = string.Empty;
 
     public int MessageId { get; private set; } = -1;
 
@@ -25,28 +24,27 @@ public class ChatMessageBody
         set { _content = value; NotifyPropertyChanged(); }
     }
 
-    public ChatMessageBody(ChatMessage parent, string content, bool isImage, int messageId, bool loadFromCache = false)
+    public ChatMessageBody(ChatMessage parent, string content, MessageType type, int messageId, string extension = "", bool loadFromCache = false)
     {
-        IsText = isImage != true;
-
+        this.type = type;
         _content = content;
         MessageId = messageId;
-
         Parent = parent;
+        FileExtension = extension;
+
+        if(type == MessageType.Image && loadFromCache)
+        {
+            LoadImage();
+        }
+        else
+        {
+            NotifyPropertyChanged();
+        }
 
         //Images have to be loaded by doom. Won't be rendered by itself
-        if (isImage)
-        {
-            if (loadFromCache)
-            {
-                LoadImage();
-            }
-            else
-            {
-                NotifyPropertyChanged();
-            }
-        }
+        NotifyPropertyChanged();
     }
+
 
     private void LoadImage()
     {

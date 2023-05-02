@@ -1,8 +1,16 @@
 ﻿@page "/ProfileSettings"
 
 @using Client.IO;
+@using Client.Models.JavaScriptServices;
 
 @inject NavigationManager navigation;
+@inject BackButtonService backButton;
+
+<div id="search-bar">
+    <button type="button" @onclick="() => backButton.GoBack()" id="search-bar-btn">
+        <img src="./Images/back_arrow.png" />
+    </button>
+</div>
 
 <div id="localuser-display">
     <img @onclick="() => AvatarManager.MediaPickerSet(LocalUser.CurrentUser)" class="avatar" alt="local_user_avatar" src="@user.AvatarImageSource" />

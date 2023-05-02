@@ -10,6 +10,30 @@
     object-fit: cover;
 }
 
+#search-bar {
+    display: flex;
+}
+
+#search-bar-btn {
+    width: 45px;
+    height: 45px;
+    background-color: #ffffff0d;
+    position: relative;
+    border-radius: 10px;
+    margin: 5px;
+    padding: 0px;
+    border: none;
+}
+
+    #search-bar-btn img {
+        width: 30px;
+        height: 30px;
+        margin: 0;
+        position: absolute;
+        top: 15%;
+        left: 17%;
+    }
+
 .userinfo {
     display: inline;
 }
